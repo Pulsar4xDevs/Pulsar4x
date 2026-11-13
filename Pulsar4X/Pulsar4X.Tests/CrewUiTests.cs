@@ -116,7 +116,7 @@ public class CrewUiTests
         var crew = CrewBars.CrewByComponentRows(ship);
         Assert.That(crew.Select(r => r.Value), Is.EqualTo(new[] { "10", "18" }));
         Assert.That(crew.Select(r => r.Percent), Is.EqualTo(new[] { "36%", "64%" }));
-        Assert.That(crew[0].Trailing, Is.EqualTo("5 x 2"));
+        Assert.That(crew[0].Tooltip, Is.EqualTo("Laser: 5 crew x 2 = 10."));
         var berths = CrewBars.BerthsByComponentRows(ship).Single();
         Assert.That(berths.Value, Is.EqualTo("10"));
         Assert.That(berths.Percent, Is.EqualTo("100%"));

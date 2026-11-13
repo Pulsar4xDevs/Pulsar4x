@@ -487,7 +487,11 @@ namespace Pulsar4X.Client
             bool under = shipView.CrewTracked && shipView.UnderCrewed;
             if (under)
             {
+                // Same line when it fits; this column is narrow, so otherwise the badge goes just below.
+                float badgeW = ImGui.CalcTextSize("Under-crewed").X + 10f;
                 ImGui.SameLine();
+                if (ImGui.GetContentRegionAvail().X < badgeW)
+                    ImGui.NewLine();
                 CrewBars.Badge("Under-crewed", CrewBars.ShortColour);
             }
             ImGui.EndGroup();
@@ -512,7 +516,7 @@ namespace Pulsar4X.Client
         private static void DisplayCrewTab(ShipView shipView)
         {
             var size = ImGui.GetContentRegionAvail();
-            var left = new Vector2(size.X * 0.4f, size.Y);
+            var left = new Vector2(size.X * 0.35f, size.Y);
             if (ImGui.BeginChild("ShipCrewSummary", left, ImGuiChildFlags.Borders))
             {
                 ImGui.TextUnformatted(CrewBars.RequiredVsBerths(shipView.CrewRequired, shipView.CrewBerths));
@@ -540,12 +544,12 @@ namespace Pulsar4X.Client
                 DisplayHelpers.Header("Crew by part");
                 if (shipView.CrewByComponent.Count == 0)
                     ImGui.TextDisabled("No part needs crew.");
-                PowerBars.Rows("##crewByPart", CrewBars.CrewByComponentRows(shipView), 56f);
+                PowerBars.Rows("##crewByPart", CrewBars.CrewByComponentRows(shipView), 30f);
                 ImGui.Spacing();
                 DisplayHelpers.Header("Berths by part");
                 if (shipView.BerthsByComponent.Count == 0)
                     ImGui.TextDisabled("No crew quarters or bridge berths.");
-                PowerBars.Rows("##berthsByPart", CrewBars.BerthsByComponentRows(shipView), 56f);
+                PowerBars.Rows("##berthsByPart", CrewBars.BerthsByComponentRows(shipView), 30f);
             }
             ImGui.EndChild();
         }

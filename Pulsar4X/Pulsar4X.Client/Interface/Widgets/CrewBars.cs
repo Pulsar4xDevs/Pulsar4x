@@ -62,7 +62,7 @@ public static class CrewBars
             Percent = PowerBars.Percent(r.Crew, ship.CrewRequired),
             Fill = ship.CrewRequired > 0 ? Fill(r.Crew, ship.CrewRequired) : 0f,
             FillColour = PowerBars.GroupColour(i),
-            Trailing = r.CrewPerCopy.ToString("N0") + " x " + r.Count.ToString("N0"),
+            Tooltip = r.Name + ": " + r.CrewPerCopy.ToString("N0") + " crew x " + r.Count.ToString("N0") + " = " + r.Crew.ToString("N0") + ".",
         }).ToList();
 
     /// <summary>Crew tab detail: one row per design that gives berths, its share of the berths.</summary>
@@ -76,7 +76,7 @@ public static class CrewBars
             Percent = PowerBars.Percent(r.Berths, ship.CrewBerths),
             Fill = ship.CrewBerths > 0 ? Fill(r.Berths, ship.CrewBerths) : 0f,
             FillColour = PowerBars.GroupColour(i),
-            Trailing = r.BerthsPerCopy.ToString("N0") + " x " + r.Count.ToString("N0"),
+            Tooltip = r.Name + ": " + r.BerthsPerCopy.ToString("N0") + " berths x " + r.Count.ToString("N0") + " = " + r.Berths.ToString("N0") + ".",
         }).ToList();
 
     /// <summary>
