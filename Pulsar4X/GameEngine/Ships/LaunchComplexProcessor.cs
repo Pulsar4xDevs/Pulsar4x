@@ -172,37 +172,55 @@ namespace Pulsar4X.Ships
             return true;
         }
 
+        /// <summary>
+        /// Takes launch propellant from the colony's fuel store. Nothing is taken unless the whole
+        /// amount is there. A power plant fuel only gives what sits above the plants' runway reserve
+        /// (<see cref="ColonyPowerProcessor.FuelReserveUnits"/>, the hold the market and the refinery
+        /// planner also keep), and is drawn after every other fuel.
+        /// </summary>
         private static bool TryDeductFuel(Entity colonyEntity, double fuelMassNeeded)
         {
             if (!colonyEntity.TryGetDataBlob<CargoStorageDB>(out var storage))
                 return false;
-
-            if (!storage.TypeStores.ContainsKey("fuel-storage"))
-                return false;
-
-            var fuelStore = storage.TypeStores["fuel-storage"];
-            var cargoLib = colonyEntity.GetFactionCargoDefinitions();
-            if (cargoLib == null)
+            var fuels = LaunchFuels(colonyEntity, storage);
+            if (fuels.Sum(f => f.Mass) + 1e-9 < fuelMassNeeded)
                 return false;
 
             double remaining = fuelMassNeeded;
-
-            foreach (var kvp in fuelStore.Cargoables.ToArray())
+            foreach (var (fuelItem, available) in fuels)
             {
                 if (remaining <= 0)
                     break;
-
-                var fuelItem = kvp.Value;
-                double storedMass = storage.GetMassStored(fuelItem, false);
-                if (storedMass <= 0)
+                double toDeduct = Math.Min(remaining, available);
+                if (toDeduct <= 0)
                     continue;
-
-                double toDeduct = Math.Min(remaining, storedMass);
                 CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, fuelItem, -toDeduct);
                 remaining -= toDeduct;
             }
 
-            return remaining <= 0;
+            return remaining <= 1e-9;
+        }
+
+        /// <summary>
+        /// Each fuel in the colony's fuel store with the mass a launch may burn: everything for a
+        /// plain propellant, only what is above the runway reserve for a power plant fuel. Plain
+        /// propellants come first.
+        /// </summary>
+        static List<(ICargoable Fuel, double Mass)> LaunchFuels(Entity colony, CargoStorageDB storage)
+        {
+            var fuels = new List<(ICargoable Fuel, double Mass, bool PlantFuel)>();
+            if (!storage.TypeStores.TryGetValue("fuel-storage", out var fuelStore))
+                return new List<(ICargoable, double)>();
+            foreach (var fuelItem in fuelStore.Cargoables.Values.ToArray())
+            {
+                double stored = storage.GetMassStored(fuelItem, false);
+                if (stored <= 0)
+                    continue;
+                long reserveUnits = ColonyPowerProcessor.FuelReserveUnits(colony, fuelItem.UniqueID);
+                double available = Math.Max(0, stored - reserveUnits * fuelItem.MassPerUnit);
+                fuels.Add((fuelItem, available, reserveUnits > 0));
+            }
+            return fuels.OrderBy(f => f.PlantFuel).Select(f => (f.Fuel, f.Mass)).ToList();
         }
 
         /// <summary>
@@ -295,13 +313,7 @@ namespace Pulsar4X.Ships
         {
             if (!colony.TryGetDataBlob<CargoStorageDB>(out var storage))
                 return 0;
-            if (!storage.TypeStores.ContainsKey("fuel-storage"))
-                return 0;
-
-            double mass = 0;
-            foreach (var item in storage.TypeStores["fuel-storage"].GetCargoables().Values)
-                mass += storage.GetMassStored(item, false);
-            return mass;
+            return LaunchFuels(colony, storage).Sum(f => f.Mass);
         }
     }
 }
