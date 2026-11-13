@@ -475,5 +475,337 @@
         }
       ]
     }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "thermal-plant",
+      "Name": "Thermal Power Plant",
+      "Formulas": {
+        "Description": "Burns hydrocarbons with oxygen from the air. Needs an oxygen atmosphere.",
+        "Mass": "PropertyValue('Size') * 5000.0",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "Max(10, PropertyValue('Size') * 0.5)",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass] * 0.1",
+        "BuildPointCost": "[Mass] * 0.2"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.4",
+        "stainless-steel": "[Mass] * 0.4",
+        "copper": "[Mass] * 0.2"
+      },
+      "ComponentType": "Energy Generator",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Size",
+          "Units": "MW",
+          "DescriptionFormula": "'Nameplate electric output'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "2000",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "10"
+        },
+        {
+          "Name": "Efficiency",
+          "Units": "",
+          "DescriptionFormula": "'Fuel heat to electricity'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.33"
+        },
+        {
+          "Name": "Fuel Heating Value",
+          "Units": "MJ/kg",
+          "DescriptionFormula": "'Lower heating value of the fuel'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "42"
+        },
+        {
+          "Name": "Fuel Use",
+          "Units": "kg/day",
+          "DescriptionFormula": "'Fuel burnt per day at full output: output / (efficiency x heating value)'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 1000 / (PropertyValue('Efficiency') * PropertyValue('Fuel Heating Value') * 1000) * 86400"
+        },
+        {
+          "Name": "DBargsPlant",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs('hydrocarbons', PropertyValue('Fuel Heating Value'), PropertyValue('Efficiency'), PropertyValue('Size'), 1)",
+          "AttributeType": "Pulsar4X.Energy.PowerPlantAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "oxidiser-turbine",
+      "Name": "Methalox Turbine",
+      "Formulas": {
+        "Description": "Burns methalox, which carries its own oxidiser, so it works anywhere. Expensive to run.",
+        "Mass": "PropertyValue('Size') * 2000.0",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "Max(5, PropertyValue('Size') * 0.5)",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass] * 0.1",
+        "BuildPointCost": "[Mass] * 0.2"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 0.6",
+        "aluminium": "[Mass] * 0.2",
+        "copper": "[Mass] * 0.2"
+      },
+      "ComponentType": "Energy Generator",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Size",
+          "Units": "MW",
+          "DescriptionFormula": "'Nameplate electric output'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "500",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "5"
+        },
+        {
+          "Name": "Efficiency",
+          "Units": "",
+          "DescriptionFormula": "'Fuel heat to electricity'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.35"
+        },
+        {
+          "Name": "Fuel Heating Value",
+          "Units": "MJ/kg",
+          "DescriptionFormula": "'Lower heating value of the fuel'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "10"
+        },
+        {
+          "Name": "Fuel Use",
+          "Units": "kg/day",
+          "DescriptionFormula": "'Fuel burnt per day at full output: output / (efficiency x heating value)'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 1000 / (PropertyValue('Efficiency') * PropertyValue('Fuel Heating Value') * 1000) * 86400"
+        },
+        {
+          "Name": "DBargsPlant",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs('methalox', PropertyValue('Fuel Heating Value'), PropertyValue('Efficiency'), PropertyValue('Size'), 0)",
+          "AttributeType": "Pulsar4X.Energy.PowerPlantAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "fission-plant",
+      "Name": "Fission Power Plant",
+      "Formulas": {
+        "Description": "A fission reactor and turbine hall. The fuel lasts a very long time.",
+        "Mass": "PropertyValue('Size') * 20000.0",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "Max(20, PropertyValue('Size') * 0.5)",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass] * 0.1",
+        "BuildPointCost": "[Mass] * 0.2"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 0.5",
+        "iron": "[Mass] * 0.3",
+        "copper": "[Mass] * 0.2"
+      },
+      "ComponentType": "Energy Generator",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Size",
+          "Units": "MW",
+          "DescriptionFormula": "'Nameplate electric output'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "2000",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "50"
+        },
+        {
+          "Name": "Efficiency",
+          "Units": "",
+          "DescriptionFormula": "'Fuel heat to electricity'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.33"
+        },
+        {
+          "Name": "Fuel Heating Value",
+          "Units": "MJ/kg",
+          "DescriptionFormula": "'Lower heating value of the fuel'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "40000000"
+        },
+        {
+          "Name": "Fuel Use",
+          "Units": "kg/day",
+          "DescriptionFormula": "'Fuel burnt per day at full output: output / (efficiency x heating value)'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 1000 / (PropertyValue('Efficiency') * PropertyValue('Fuel Heating Value') * 1000) * 86400"
+        },
+        {
+          "Name": "DBargsPlant",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs('fissile-fuels', PropertyValue('Fuel Heating Value'), PropertyValue('Efficiency'), PropertyValue('Size'), 0)",
+          "AttributeType": "Pulsar4X.Energy.PowerPlantAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "solar-farm",
+      "Name": "Solar Farm",
+      "Formulas": {
+        "Description": "Ground-mounted panels for a colony grid. Gives half a day of sun on average, less through an atmosphere.",
+        "Mass": "PropertyValue('Area') * TechData('tech-panel-density') * 1.5",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "Max(1, PropertyValue('Area') * 0.0001)",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass] * 0.5"
+      },
+      "ResourceCost": {
+        "aluminium": "[Mass] * 0.4",
+        "silicon": "[Mass] * 0.3",
+        "copper": "[Mass] * 0.1",
+        "plastic": "[Mass] * 0.2"
+      },
+      "ComponentType": "Energy Generator",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Area",
+          "Units": "m^2",
+          "DescriptionFormula": "'Panel area'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "10000000",
+          "MinFormula": "1000",
+          "StepFormula": "1000",
+          "PropertyFormula": "100000"
+        },
+        {
+          "Name": "Ideal Absorption Wavelength",
+          "Units": "nm",
+          "DescriptionFormula": "'Peak wavelength for optimal absorption'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "2000",
+          "MinFormula": "300",
+          "StepFormula": "1",
+          "PropertyFormula": "550"
+        },
+        {
+          "Name": "Bandwidth",
+          "Units": "nm",
+          "DescriptionFormula": "'Range around peak; wider reduces peak efficiency but increases versatility'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "TechData('tech-panel-bandwidth')",
+          "MinFormula": "TechData('tech-panel-bandwidth') * 0.5",
+          "StepFormula": "50",
+          "PropertyFormula": "300"
+        },
+        {
+          "Name": "Best Efficiency",
+          "Units": "%",
+          "DescriptionFormula": "'Absorption efficiency at peak wavelength'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "TechData('tech-panel-efficiency') * ((TechData('tech-panel-bandwidth') * 0.5) / PropertyValue('Bandwidth'))"
+        },
+        {
+          "Name": "Worst Efficiency",
+          "Units": "%",
+          "DescriptionFormula": "'Absorption efficiency at bandwidth edges'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Best Efficiency') * 0.5"
+        },
+        {
+          "Name": "DB",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Ideal Absorption Wavelength'), PropertyValue('Bandwidth'), PropertyValue('Best Efficiency'), PropertyValue('Worst Efficiency'), PropertyValue('Area'))",
+          "AttributeType": "Pulsar4X.Energy.EnergySolarGenerationAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "grid-battery",
+      "Name": "Grid Battery",
+      "Formulas": {
+        "Description": "Stores power for a colony grid. Not charged or drawn yet.",
+        "Mass": "PropertyValue('Mass')",
+        "Volume": "[Mass] / 2896.6",
+        "HTK": "0.5",
+        "CrewReq": "2",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass] * 0.5"
+      },
+      "ResourceCost": {
+        "plastic": "[Mass] * 0.2",
+        "copper": "[Mass] * 0.2",
+        "lithium": "[Mass] * 0.4",
+        "graphite": "[Mass] * 0.1",
+        "aluminium": "[Mass] * 0.1"
+      },
+      "ComponentType": "Energy Storage",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the battery'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "10000000",
+          "MinFormula": "10000",
+          "StepFormula": "10000",
+          "PropertyFormula": "100000"
+        },
+        {
+          "Name": "Energy Storage",
+          "Units": "KJ",
+          "DescriptionFormula": "'Energy capacity'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Mass') * 500 * TechData('tech-battery-capacity')"
+        },
+        {
+          "Name": "DB",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs('electricity', PropertyValue('Energy Storage'))",
+          "AttributeType": "Pulsar4X.Energy.EnergyStoreAtb"
+        }
+      ]
+    }
   }
 ]

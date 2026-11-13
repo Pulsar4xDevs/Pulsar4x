@@ -26,6 +26,20 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'0.1 W per cubic metre (automated, low light).'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Storage Volume') * 0.0001"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 3)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Storage Volume",
           "DescriptionFormula": "'Larger cargo holds store more goods'",
           "GuiHint": "GuiSelectionMaxMinInt",
@@ -77,6 +91,20 @@
       "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'0.1 W per cubic metre (automated, low light).'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Storage Volume') * 0.0001"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 3)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Storage Volume",
           "DescriptionFormula": "'Larger cargo holds store more goods'",
@@ -225,6 +253,20 @@
       "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'Port cranes and transfer handling, 0.75 W per unit of size.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 0.00075"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 2)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Size",
           "DescriptionFormula": "'(Volume) - Larger facility transports more goods'",

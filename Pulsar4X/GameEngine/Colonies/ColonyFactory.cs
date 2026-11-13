@@ -109,6 +109,7 @@ namespace Pulsar4X.Colonies
             blobs.Add(new TeamsHousedDB());
             blobs.Add(new ComponentInstancesDB()); //installations get added to the componentInstancesDB
             blobs.Add(new InfrastructureDB()); //capacity gets summed from installations as they're added
+            blobs.Add(new Pulsar4X.Energy.ColonyPowerDB()); //the grid gets summed from installations as they're added
 
             Entity colonyEntity = Entity.Create();
             colonyEntity.FactionOwnerID = faction.Id;
@@ -385,6 +386,7 @@ namespace Pulsar4X.Colonies
             blobs.Add(new TeamsHousedDB());
             blobs.Add(new ComponentInstancesDB()); //installations get added to the componentInstancesDB
             blobs.Add(new InfrastructureDB()); //capacity gets summed from installations as they're added
+            blobs.Add(new Pulsar4X.Energy.ColonyPowerDB()); //the grid gets summed from installations as they're added
 
             Entity colonyEntity = Entity.Create();
             colonyEntity.FactionOwnerID = factionEntity.Id;
@@ -398,6 +400,9 @@ namespace Pulsar4X.Colonies
             {
                 mineralsDB.GrantFactionAccess(factionInfo.FactionMask);
             }
+
+            // Sum the grid once now: a colony with people and no installations still has life support.
+            Pulsar4X.Energy.ColonyPowerProcessor.Recalc(colonyEntity);
 
             return colonyEntity;
         }

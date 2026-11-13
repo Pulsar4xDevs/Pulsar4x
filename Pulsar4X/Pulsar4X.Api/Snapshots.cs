@@ -355,6 +355,41 @@ public sealed record InfrastructureView(
     /// disabled by environment tolerances) — the colony counts as established.</summary>
     bool HasInstalledInfrastructure = false) : IComponentView;
 
+/// <summary>
+/// A colony's power grid (advisory: nothing is enforced yet). Power in kW, storage in kJ,
+/// the same units as ship energy. Delivered = generation × grid efficiency.
+/// </summary>
+public sealed record ColonyPowerView(
+    string EnergyTypeId,
+    double Demand_kW,
+    double Generation_kW,
+    double Delivered_kW,
+    double GridEfficiency,
+    double StoreMax_kJ,
+    double LifeSupport_kW,
+    long LifeSupportColonists,
+    IReadOnlyList<ColonyPowerConsumerRow> Consumers,
+    IReadOnlyList<ColonyPowerPlantRow> Plants,
+    IReadOnlyList<ColonyPowerTierRow> Tiers,
+    IReadOnlyList<ColonyPowerFuelRow> Fuel) : IComponentView
+{
+    public double Balance_kW => Delivered_kW - Demand_kW;
+}
+
+/// <summary>One consumer line. Tier is the display name; TierRank 1 is served first.</summary>
+public sealed record ColonyPowerConsumerRow(string DesignId, string Name, string Tier, int TierRank, int Count, double Draw_kW);
+
+/// <summary>One generation or storage line. Kind is "Fuel", "Solar" or "Battery".</summary>
+public sealed record ColonyPowerPlantRow(
+    string DesignId, string Name, string Kind, int Count, double Output_kW, double Nameplate_kW,
+    string? FuelName, double FuelAtFull_kgPerDay, double Store_kJ, string? Note);
+
+/// <summary>Demand in one priority tier, and the share it would get if power ran short.</summary>
+public sealed record ColonyPowerTierRow(string Tier, int TierRank, double Demand_kW, double Satisfaction);
+
+/// <summary>Fuel the colony's plants would burn per day at their current output (not burnt in phase 1).</summary>
+public sealed record ColonyPowerFuelRow(string FuelId, string FuelName, double kgPerDay);
+
 /// <summary>The installations on a colony (or components on a ship), grouped by design.</summary>
 public sealed record InstallationsView(IReadOnlyList<InstallationGroup> Installations) : IComponentView;
 

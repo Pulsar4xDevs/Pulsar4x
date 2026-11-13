@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json;
+using Pulsar4X.Colonies;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
@@ -43,6 +44,10 @@ public class EnergySolarGenerationAtb : IComponentDesignAttribute
 
     public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
+        // A colony's panels feed its grid; ColonyPowerProcessor reads the installed designs.
+        if (parentEntity.HasDataBlob<ColonyInfoDB>())
+            return;
+
         string resourceID = EnergyTypeID;
         ICargoable? energyCargoable = EnergyGenAbilityDB.FindEnergyType(parentEntity, resourceID);
         EnergyGenAbilityDB genDB;
@@ -55,7 +60,7 @@ public class EnergySolarGenerationAtb : IComponentDesignAttribute
         else
         {
             genDB = parentEntity.GetDataBlob<EnergyGenAbilityDB>();
-
+            EnergyGenProcessor.CatchUp(parentEntity, genDB);
 
             if (genDB.EnergyType == null)
                 genDB.EnergyType = energyCargoable;
@@ -65,18 +70,19 @@ public class EnergySolarGenerationAtb : IComponentDesignAttribute
         }
         
         genDB.SolarPanels.Add(this); 
-        
+        EnergyGenHotloopProcessor.RefreshSolar(parentEntity, genDB);
     }
 
     public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
+        if (parentEntity.HasDataBlob<ColonyInfoDB>())
+            return;
         if (!parentEntity.TryGetDataBlob<EnergyGenAbilityDB>(out var genDB))
             return;
         EnergyGenProcessor.CatchUp(parentEntity, genDB);
         genDB.SolarPanels.Remove(this);
-        // The hourly solar pass sets MaxOutputFromSolar. With no panels left there is nothing to wait for.
-        if (genDB.SolarPanels.Count == 0)
-            genDB.MaxOutputFromSolar = 0;
+        // Recompute from the panels left now rather than at the next hourly pass.
+        EnergyGenHotloopProcessor.RefreshSolar(parentEntity, genDB);
     }
 
     public string AtbName()

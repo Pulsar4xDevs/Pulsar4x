@@ -755,6 +755,7 @@
           "steam-turbine-reactor",
           "rtg",
           "fissile-fuels",
+          "fission-plant",
           "scntr-engine",
           "ntp",
           "tech-early-directed-energy",

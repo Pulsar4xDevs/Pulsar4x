@@ -278,6 +278,7 @@ namespace Pulsar4X.Engine.Api
                 ? new InfrastructureView(inf.CapacityProvided, inf.CapacityRequired, inf.CapacityAvailable, inf.Efficiency,
                     HasInstalledInfrastructure(e))
                 : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Energy.ColonyPowerDB>(out var power) ? ToColonyPowerView(power, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ComponentInstancesDB>(out var ci) ? ToInstallationsView(ci, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyInfoDB>(out var col) ? ToColonyMiningView(col, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<NavalAcademyDB>(out var na) ? ToNavalAcademyView(na, e) : null,
@@ -466,6 +467,40 @@ namespace Pulsar4X.Engine.Api
             var hash = value.GetHashCode();
             var factor = (hash % 41 - 20) / 100.0;
             return (long)(value * (1 + factor));
+        }
+
+        private static ColonyPowerView ToColonyPowerView(Pulsar4X.Energy.ColonyPowerDB power, Entity e)
+        {
+            string FuelName(string? id)
+            {
+                if (string.IsNullOrEmpty(id)) return "";
+                return e.GetFactionOwner.TryGetDataBlob<FactionInfoDB>(out var fi) && fi.Data.CargoGoods.GetAny(id) is { } good
+                    ? good.Name : id;
+            }
+            string TierName(Pulsar4X.Energy.PowerTier t) => t switch
+            {
+                Pulsar4X.Energy.PowerTier.LifeSupport => "Life support",
+                _ => t.ToString(),
+            };
+            var consumers = power.Consumers
+                .Select(c => new ColonyPowerConsumerRow(c.DesignId, c.Name, TierName(c.Tier), (int)c.Tier, c.Count, c.Draw_kW))
+                .ToList();
+            var plants = power.Plants
+                .Select(p => new ColonyPowerPlantRow(p.DesignId, p.Name, p.Kind.ToString(), p.Count, p.Output_kW, p.Nameplate_kW,
+                    p.FuelId == null ? null : FuelName(p.FuelId), p.FuelAtFull_kgPerDay, p.Store_kJ, p.Note))
+                .ToList();
+            var tiers = Enum.GetValues(typeof(Pulsar4X.Energy.PowerTier)).Cast<Pulsar4X.Energy.PowerTier>()
+                .Select(t => new ColonyPowerTierRow(TierName(t), (int)t,
+                    power.DemandByTier.TryGetValue(t, out var d) ? d : 0,
+                    power.TierSatisfaction.TryGetValue(t, out var s) ? s : 1))
+                .ToList();
+            var fuel = power.FuelAtFull_kgPerDay
+                .OrderBy(kv => kv.Key, StringComparer.Ordinal)
+                .Select(kv => new ColonyPowerFuelRow(kv.Key, FuelName(kv.Key), kv.Value))
+                .ToList();
+            return new ColonyPowerView(power.EnergyTypeID, power.Demand_kW, power.Generation_kW, power.Delivered_kW,
+                power.GridEfficiency, power.StoreMax_kJ, power.LifeSupport_kW, power.LifeSupportColonists,
+                consumers, plants, tiers, fuel);
         }
 
         private static bool HasInstalledInfrastructure(Entity colony)

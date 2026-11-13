@@ -1,3 +1,4 @@
+using Pulsar4X.Colonies;
 using System;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine;
@@ -30,6 +31,9 @@ namespace Pulsar4X.Energy
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
+            // A colony's generators belong to its grid; ColonyPowerProcessor reads the installed designs.
+            if (parentEntity.HasDataBlob<ColonyInfoDB>())
+                return;
             string resourceID = EnergyTypeID;
             ICargoable? energyCargoable = EnergyGenAbilityDB.FindEnergyType(parentEntity, resourceID);
             EnergyGenAbilityDB genDB;
@@ -42,7 +46,7 @@ namespace Pulsar4X.Energy
             else
             {
                 genDB = parentEntity.GetDataBlob<EnergyGenAbilityDB>();
-
+                EnergyGenProcessor.CatchUp(parentEntity, genDB);
 
                 if (genDB.EnergyType == null)
                     genDB.EnergyType = energyCargoable;
@@ -80,6 +84,8 @@ namespace Pulsar4X.Energy
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
+            if (parentEntity.HasDataBlob<ColonyInfoDB>())
+                return;
             if (!parentEntity.TryGetDataBlob<EnergyGenAbilityDB>(out var genDB))
                 return;
             EnergyGenProcessor.CatchUp(parentEntity, genDB);

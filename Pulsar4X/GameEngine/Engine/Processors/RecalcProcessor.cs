@@ -21,6 +21,8 @@ namespace Pulsar4X.Engine
                 { typeof(ComponentInstancesDB), new Action<ComponentInstancesDB>(processor =>
                     {
                         InfrastructureProcessor.RecalcCapacity(CurrentEntity);
+                        // The colony power grid is summed from the same installations.
+                        Pulsar4X.Energy.ColonyPowerProcessor.Recalc(CurrentEntity);
                         // Installations change through this blob. Refresh the life-support ceiling
                         // from the same pass so a colony can accept people. Ships have no colony blobs.
                         if (CurrentEntity != null

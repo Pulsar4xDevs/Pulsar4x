@@ -29,6 +29,20 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'Extraction only: 0.05 kWh per kg across the 15 minerals, at full accessibility. Refining energy belongs to the refinery.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('MiningAmount') * 15 * 0.05 / 24"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 5)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Area",
           "DescriptionFormula": "'Area covered by this mining operation in square meters'",
           "GuiHint": "GuiSelectionMaxMinInt",
@@ -99,6 +113,20 @@
       "CargoTypeID": "general-storage",
       "IndustryTypeID": "installation-construction",
       "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'Extraction only: 0.05 kWh per kg across the 15 minerals, at full accessibility.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('MiningAmount') * 15 * 0.05 / 24"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 5)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Size",
           "DescriptionFormula": "'Size (volume) of this installation'",
@@ -222,6 +250,20 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'About 3 kW per researcher, compute included.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "250"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 7)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Research Points",
           "DescriptionFormula": "'Research points produced per day'",
           "GuiHint": "GuiTextDisplay",
@@ -278,6 +320,20 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'7 kWh per refining point (a recipe average).'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Refinery Points') * 7 / 24"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 4)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Size",
           "DescriptionFormula": "'Size of this installation'",
           "GuiHint": "GuiSelectionMaxMin",
@@ -331,6 +387,20 @@
       "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'7 kWh per refining point (a recipe average).'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Refinery Points') * 7 / 24"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 4)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Size",
           "DescriptionFormula": "'Size of this installation'",
@@ -386,6 +456,20 @@
       "CargoTypeID": "general-storage",
       "IndustryTypeID": "installation-construction",
       "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'10 kWh per construction point.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "(PropertyValue('Component Construction Points') + PropertyValue('Installation Construction Points') + PropertyValue('Fighter Construction Points') + PropertyValue('Ordnance Construction Points')) * 10 / 24"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 4)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Size",
           "DescriptionFormula": "'Mass of the factory in kilograms. Larger factories produce more construction points'",
@@ -458,6 +542,20 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'10 kWh per construction point.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "(PropertyValue('Component Construction Points') + PropertyValue('Installation Construction Points') + PropertyValue('Fighter Construction Points') + PropertyValue('Ordnance Construction Points')) * 10 / 24"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 4)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Size",
           "DescriptionFormula": "'Mass of the factory in kilograms. Larger factories produce more construction points'",
           "GuiHint": "GuiSelectionMaxMinInt",
@@ -529,6 +627,20 @@
       "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'10 kWh per component point, 5 kWh per assembly point, plus 50 kW yard hotel load. Refits share the yard and add nothing.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "(PropertyValue('Component Construction Points') * 10 + PropertyValue('Ship Assembly Points') * 5) / 24 + 50"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 4)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Component Construction Points",
           "GuiHint": "GuiTextDisplay",
@@ -611,6 +723,20 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'0.5 kW per crew.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.5 * 2"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 2)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Logistic Capacity",
           "DescriptionFormula": "'How many different items this office can handle'",
           "GuiHint": "GuiSelectionMaxMin",
@@ -655,6 +781,20 @@
       "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'0.5 kW per crew.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.5 * 40"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 2)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Logistic Capacity",
           "DescriptionFormula": "'How many different items this office can handle'",
@@ -813,6 +953,20 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'0.5 kW per crew.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.5 * (40 + PropertyValue('Class Size'))"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 2)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Class Size",
           "DescriptionFormula": "'How many students can be in class at once. Each recruit or officer uses one seat.'",
           "GuiHint": "GuiSelectionMaxMinInt",
@@ -865,6 +1019,20 @@
       "CargoTypeID": "general-storage",
       "IndustryTypeID": "installation-construction",
       "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'0.5 kW per crew.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.5 * 2"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 2)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Cargo Transfer Rate",
           "DescriptionFormula": "'How much cargo can be transfered per second in kg.'",
@@ -1166,6 +1334,20 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'0.5 kW per crew.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.5 * PropertyValue('Office Space') * 0.25"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 2)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Admin Level",
           "DescriptionFormula": "'Area of influence this  office covers'",
           "GuiHint": "GuiEnumSelectionList",
@@ -1220,6 +1402,20 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'10 kWh per installation point.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Level') * 5 * 10 / 24"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 4)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Level",
           "DescriptionFormula": "'Level of construction services provided, each level provides additional construction points per day.'",
           "GuiHint": "GuiSelectionMaxMinInt",
@@ -1266,6 +1462,20 @@
       "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'10 kWh per installation point.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Level') * 8 * 10 / 24"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 4)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Level",
           "DescriptionFormula": "'Level of construction services provided, each level provides additional construction points per day.'",
@@ -1315,6 +1525,20 @@
       "IndustryTypeID": "component-construction",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'10 kWh per installation point.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 5 * 10 / 24"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 4)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Size",
           "DescriptionFormula": "'Larger modules install faster and need more crew.'",
           "GuiHint": "GuiSelectionMaxMinInt",
@@ -1362,6 +1586,20 @@
       "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'0.5 kW per crew.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.5 * 50"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 2)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Max Tonnage",
           "DescriptionFormula": "'Maximum ship mass this launch pad can handle (kg)'",

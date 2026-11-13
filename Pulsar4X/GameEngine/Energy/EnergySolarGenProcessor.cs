@@ -51,20 +51,42 @@ public class EnergyGenHotloopProcessor : IHotloopProcessor
     
     private static double ComputeSolarMax(Entity entity)
     {
-        double totalSolar = 0;
         var genDB = entity.GetDataBlob<EnergyGenAbilityDB>();
-
         var position = entity.GetDataBlob<PositionDB>();
-        var emitters = entity.Manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
+        return SolarAt(entity.Manager, position.AbsolutePosition, genDB.SolarPanels);
+    }
 
-        foreach (var panelAtb in genDB.SolarPanels)
+    /// <summary>
+    /// Sets MaxOutputFromSolar from the panels installed now, when the entity has a position.
+    /// Used after a panel is installed or removed, so output does not wait for the hourly pass.
+    /// </summary>
+    internal static void RefreshSolar(Entity entity, EnergyGenAbilityDB genDB)
+    {
+        if (genDB.SolarPanels.Count == 0)
+        {
+            genDB.MaxOutputFromSolar = 0;
+            return;
+        }
+        if (entity.Manager != null && entity.TryGetDataBlob<PositionDB>(out var position))
+            genDB.MaxOutputFromSolar = SolarAt(entity.Manager, position.AbsolutePosition, genDB.SolarPanels);
+    }
+
+    /// <summary>
+    /// Total kW the panels absorb at this position from every emitter in the manager.
+    /// </summary>
+    internal static double SolarAt(EntityManager manager, Vector3 absolutePosition, IEnumerable<EnergySolarGenerationAtb> panels)
+    {
+        double totalSolar = 0;
+        var emitters = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
+
+        foreach (var panelAtb in panels)
         {
             double panelAbsorbed = 0;
             foreach (var star in emitters)
             {
                 var starProfile = star.GetDataBlob<SensorProfileDB>();
                 var starPos = star.GetDataBlob<PositionDB>();
-                double distance = Vector3.Distance(position.AbsolutePosition, starPos.AbsolutePosition);
+                double distance = Vector3.Distance(absolutePosition, starPos.AbsolutePosition);
                 if (distance <= 0) continue;
 
                 var attenuated = SensorTools.AttenuatedForDistanceList(starProfile, distance, 0.1);

@@ -26,6 +26,20 @@
       "CargoTypeID": "general-storage",
       "Properties": [
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'0.01 kW per square metre of antenna (cooled detectors and processing). Colony grid only.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Antenna Size') * 0.01"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 2)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Antenna Size",
           "Units": "m^2",
           "DescriptionFormula": "'Gives an effective area of:  '",

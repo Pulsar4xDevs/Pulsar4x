@@ -246,12 +246,14 @@ namespace Pulsar4X.Tests
                 Colony(1, OwnerRelation.Owned, 1, 9, "Earth"),
                 new ColonyMiningView(2),
                 new NavalAcademyView(Array.Empty<NavalAcademyClassView>(), 1000, 10000),
-                new RecruitmentView(Array.Empty<CandidateView>(), null, Array.Empty<CandidateView>()));
+                new RecruitmentView(Array.Empty<CandidateView>(), null, Array.Empty<CandidateView>()),
+                EmptyPower());
             Assert.AreEqual(
                 ownedBase
                 | ForeignEntities.ColonyTabs.Mining
                 | ForeignEntities.ColonyTabs.NavalAcademy
-                | ForeignEntities.ColonyTabs.Recruitment,
+                | ForeignEntities.ColonyTabs.Recruitment
+                | ForeignEntities.ColonyTabs.Power,
                 ForeignEntities.ColonyTabsFor(ownedFull));
 
             var foreignFull = With(
@@ -260,7 +262,8 @@ namespace Pulsar4X.Tests
                 new NavalAcademyView(Array.Empty<NavalAcademyClassView>(), 1000, 10000),
                 new RecruitmentView(Array.Empty<CandidateView>(), null, Array.Empty<CandidateView>()),
                 new IndustryView(Array.Empty<ProductionLineView>()),
-                new ConstructionView(0));
+                new ConstructionView(0),
+                EmptyPower());
             Assert.AreEqual(foreignTabs, ForeignEntities.ColonyTabsFor(foreignFull));
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Production));
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Construction));
@@ -268,10 +271,15 @@ namespace Pulsar4X.Tests
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.NavalAcademy));
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Recruitment));
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Log));
+            Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Power));
 
             Assert.AreEqual(foreignTabs, ForeignEntities.ColonyTabsFor(Colony(8, OwnerRelation.Neutral, 8, 6, "Luna Concord")));
             Assert.AreEqual(foreignTabs, ForeignEntities.ColonyTabsFor(Colony(9, OwnerRelation.Hostile, 3, 3, "Raid Camp")));
         }
+
+        static ColonyPowerView EmptyPower() => new ColonyPowerView("electricity", 0, 0, 0, 0.92, 0, 0, 0,
+            Array.Empty<ColonyPowerConsumerRow>(), Array.Empty<ColonyPowerPlantRow>(),
+            Array.Empty<ColonyPowerTierRow>(), Array.Empty<ColonyPowerFuelRow>());
 
         [Test]
         public void IsReadOnly_IsTrueWhenTheFactionDoesNotOwnIt()

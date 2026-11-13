@@ -172,11 +172,12 @@ namespace Pulsar4X.Client
             NavalAcademy = 64,
             Recruitment = 128,
             Log = 256,
+            Power = 512,
         }
 
         /// <summary>
         /// Owned: Summary|Production|Construction|Market|Shipping|Log, plus Mining when ColonyMiningView is present,
-        /// NavalAcademy when NavalAcademyView is present, Recruitment when RecruitmentView is present (exactly today's conditions).
+        /// NavalAcademy when NavalAcademyView is present, Recruitment when RecruitmentView is present, Power when ColonyPowerView is present.
         /// Not owned: Summary|Market|Shipping only.
         /// </summary>
         public static ColonyTabs ColonyTabsFor(EntitySnapshot colony)
@@ -192,6 +193,8 @@ namespace Pulsar4X.Client
                 tabs |= ColonyTabs.NavalAcademy;
             if (colony.HasView<RecruitmentView>())
                 tabs |= ColonyTabs.Recruitment;
+            if (colony.HasView<ColonyPowerView>())
+                tabs |= ColonyTabs.Power;
             return tabs;
         }
 

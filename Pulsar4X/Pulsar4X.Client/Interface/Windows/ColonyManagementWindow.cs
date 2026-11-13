@@ -262,6 +262,12 @@ namespace Pulsar4X.Client
                     DisplayRecruitment(selectedColony.Id, recruitment);
                     ImGui.EndTabItem();
                 }
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Power)
+                    && selectedColony.GetView<ColonyPowerView>() is { } power && ImGui.BeginTabItem("Power"))
+                {
+                    DisplayPower(power);
+                    ImGui.EndTabItem();
+                }
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Log))
                 {
                     if (ImGui.BeginTabItem("Log"))
@@ -281,6 +287,110 @@ namespace Pulsar4X.Client
                 ImGui.EndTabBar();
             }
             ImGui.EndChild();
+        }
+
+        /// <summary>The colony power grid: demand by facility against generation. Advisory only.</summary>
+        private static void DisplayPower(ColonyPowerView power)
+        {
+            ImGui.TextWrapped("Advisory: the grid is not enforced yet. Nothing is slowed by a shortfall, no fuel is burnt and batteries are not charged.");
+            ImGui.Separator();
+
+            if (ImGui.BeginTable("PowerSummary", 2, ImGuiTableFlags.SizingFixedFit))
+            {
+                DisplayHelpers.PrintRow("Demand", Stringify.Power(power.Demand_kW));
+                DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW));
+                DisplayHelpers.PrintRow("Delivered", Stringify.Power(power.Delivered_kW),
+                    tooltipTwo: $"After {(1 - power.GridEfficiency) * 100:0.#}% grid loss");
+                DisplayHelpers.PrintRow("Balance", (power.Balance_kW < 0 ? "-" : "+") + Stringify.Power(Math.Abs(power.Balance_kW)));
+                if (power.StoreMax_kJ > 0)
+                    DisplayHelpers.PrintRow("Grid storage", Stringify.Energy(power.StoreMax_kJ));
+                ImGui.EndTable();
+            }
+            if (power.Balance_kW < 0)
+                ImGui.TextColored(new Vector4(1f, 0.6f, 0.2f, 1f), "Generation does not cover demand. Lower tiers would go short first.");
+
+            ImGui.SeparatorText("Demand by facility");
+            if (ImGui.BeginTable("PowerConsumers", 4, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+            {
+                ImGui.TableSetupColumn("Facility");
+                ImGui.TableSetupColumn("Tier");
+                ImGui.TableSetupColumn("Count");
+                ImGui.TableSetupColumn("Draw");
+                ImGui.TableHeadersRow();
+                foreach (var c in power.Consumers)
+                {
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.Text(c.Name);
+                    if (c.DesignId == "life-support" && ImGui.IsItemHovered())
+                        ImGui.SetTooltip($"{power.LifeSupportColonists:N0} colonists: a base draw per person, more on hostile worlds");
+                    ImGui.TableNextColumn();
+                    ImGui.Text(c.Tier);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(c.DesignId == "life-support" ? "" : c.Count.ToString());
+                    ImGui.TableNextColumn();
+                    ImGui.Text(Stringify.Power(c.Draw_kW));
+                }
+                ImGui.EndTable();
+            }
+
+            ImGui.SeparatorText("Generation and storage");
+            if (power.Plants.Count == 0)
+                ImGui.TextDisabled("No power plants.");
+            else if (ImGui.BeginTable("PowerPlants", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+            {
+                ImGui.TableSetupColumn("Plant");
+                ImGui.TableSetupColumn("Kind");
+                ImGui.TableSetupColumn("Count");
+                ImGui.TableSetupColumn("Output");
+                ImGui.TableSetupColumn("Fuel");
+                ImGui.TableHeadersRow();
+                foreach (var p in power.Plants)
+                {
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.Text(p.Name);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(p.Kind);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(p.Count.ToString());
+                    ImGui.TableNextColumn();
+                    if (p.Kind == "Battery")
+                        ImGui.Text(Stringify.Energy(p.Store_kJ));
+                    else
+                        ImGui.Text($"{Stringify.Power(p.Output_kW)} / {Stringify.Power(p.Nameplate_kW)}");
+                    if (p.Note != null)
+                    {
+                        ImGui.SameLine();
+                        ImGui.TextColored(new Vector4(1f, 0.6f, 0.2f, 1f), "(!)");
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip(p.Note);
+                    }
+                    ImGui.TableNextColumn();
+                    ImGui.Text(p.FuelName == null ? "" : $"{p.FuelName}, {Stringify.Mass(p.FuelAtFull_kgPerDay)}/day");
+                }
+                ImGui.EndTable();
+            }
+
+            ImGui.SeparatorText("If power ran short");
+            if (ImGui.BeginTable("PowerTiers", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+            {
+                ImGui.TableSetupColumn("Tier (served in order)");
+                ImGui.TableSetupColumn("Demand");
+                ImGui.TableSetupColumn("Would get");
+                ImGui.TableHeadersRow();
+                foreach (var t in power.Tiers.Where(t => t.Demand_kW > 0))
+                {
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.Text(t.Tier);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(Stringify.Power(t.Demand_kW));
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{t.Satisfaction * 100:0.#}%");
+                }
+                ImGui.EndTable();
+            }
         }
 
         private void DisplaySummary(EntitySnapshot colony, IClientSystem system)
