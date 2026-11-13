@@ -74,26 +74,26 @@ public class FacilityIdleStateTests
     [Test]
     public void Labs_DrawTwentyPercent_WithNoProject_AndRefreshOnEachOrder()
     {
-        Assert.That(Labs.Count, Is.EqualTo(2));
-        Assert.That(Labs.Nameplate_kW, Is.EqualTo(2 * Lab_kW).Within(1e-9));
-        Assert.That(Labs.Draw_kW, Is.EqualTo(2 * Lab_kW * LabIdle).Within(1e-9), "no project at the start");
+        Assert.That(Labs.Count, Is.EqualTo(1));
+        Assert.That(Labs.Nameplate_kW, Is.EqualTo(Lab_kW).Within(1e-9));
+        Assert.That(Labs.Draw_kW, Is.EqualTo(Lab_kW * LabIdle).Within(1e-9), "no project at the start");
         Assert.That(ColonyPowerProcessor.ResearchIdleShare, Is.EqualTo(LabIdle));
 
         var (lab, researcher) = LabEntities().First();
         string tech = AResearchableTech();
         AddTechToQueueOrder.Create(lab, tech).Execute(_earth.StarSysDateTime);
         Assert.That(researcher.TechQueue.Count, Is.EqualTo(1));
-        Assert.That(Labs.Draw_kW, Is.EqualTo(Lab_kW + Lab_kW * LabIdle).Within(1e-9), "one lab working, the same tick");
+        Assert.That(Labs.Draw_kW, Is.EqualTo(Lab_kW).Within(1e-9), "the only lab is working, the same tick");
         Assert.That(Power.Demand_kW, Is.EqualTo(Power.Consumers.Sum(c => c.Draw_kW)).Within(1e-6));
 
         FundingChangedOrder.Create(lab, 0).Execute(_earth.StarSysDateTime);
-        Assert.That(Labs.Draw_kW, Is.EqualTo(2 * Lab_kW * LabIdle).Within(1e-9), "unfunded is idle");
+        Assert.That(Labs.Draw_kW, Is.EqualTo(Lab_kW * LabIdle).Within(1e-9), "unfunded is idle");
         FundingChangedOrder.Create(lab, 1).Execute(_earth.StarSysDateTime);
-        Assert.That(Labs.Draw_kW, Is.EqualTo(Lab_kW + Lab_kW * LabIdle).Within(1e-9));
+        Assert.That(Labs.Draw_kW, Is.EqualTo(Lab_kW).Within(1e-9));
 
         RemoveTechFromQueueOrder.Create(lab, tech).Execute(_earth.StarSysDateTime);
         Assert.That(researcher.TechQueue.Count, Is.EqualTo(0));
-        Assert.That(Labs.Draw_kW, Is.EqualTo(2 * Lab_kW * LabIdle).Within(1e-9), "back to idle, the same tick");
+        Assert.That(Labs.Draw_kW, Is.EqualTo(Lab_kW * LabIdle).Within(1e-9), "back to idle, the same tick");
     }
 
     [Test]
@@ -104,7 +104,7 @@ public class FacilityIdleStateTests
         Assert.That(techs, Has.Count.EqualTo(2));
         AddTechToQueueOrder.Create(lab, techs[0].UniqueID).Execute(_earth.StarSysDateTime);
         AddTechToQueueOrder.Create(lab, techs[1].UniqueID).Execute(_earth.StarSysDateTime);
-        Assert.That(Labs.Draw_kW, Is.EqualTo(Lab_kW + Lab_kW * LabIdle).Within(1e-9));
+        Assert.That(Labs.Draw_kW, Is.EqualTo(Lab_kW).Within(1e-9));
 
         // The head drops out of the queue (no longer researchable) but the next project takes over:
         // the lab is still working, so the pass does not recalc (the sentinel survives).
@@ -118,7 +118,7 @@ public class FacilityIdleStateTests
         techs[1].Level = techs[1].MaxLevel;
         new ResearchProcessor().DoResearch(lab);
         Assert.That(researcher.TechQueue.Count, Is.EqualTo(0));
-        Assert.That(Labs.Draw_kW, Is.EqualTo(2 * Lab_kW * LabIdle).Within(1e-9));
+        Assert.That(Labs.Draw_kW, Is.EqualTo(Lab_kW * LabIdle).Within(1e-9));
         Assert.That(Power.Demand_kW, Is.EqualTo(Power.Consumers.Sum(c => c.Draw_kW)).Within(1e-6));
     }
 

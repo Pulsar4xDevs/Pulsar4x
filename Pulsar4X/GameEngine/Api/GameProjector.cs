@@ -24,6 +24,7 @@ using Pulsar4X.Logistics;
 using Pulsar4X.Names;
 using Pulsar4X.Orbits;
 using Pulsar4X.People;
+using Pulsar4X.Sensors;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 using Pulsar4X.Technology;
@@ -544,6 +545,11 @@ namespace Pulsar4X.Engine.Api
         /// so both groups get the same share. Miners draw per dig (ShipPower.DrawEnergy) and keep no kW
         /// load, so their state comes from the running mining order's report.
         /// </summary>
+        private static bool IsSensorLoad(ComponentDesign design)
+            => design.HasAttribute<SensorReceiverAtb>()
+               || design.HasAttribute<GeoSurveyAtb>()
+               || design.HasAttribute<GravSurveyAtb>();
+
         private static IReadOnlyList<ShipPowerLoadGroup> ShipPowerLoadGroups(Entity ship, double demand, double lifeSupport, double lifeSupportShare,
             double generation, double aux, double auxServed, double charging)
         {
@@ -583,7 +589,7 @@ namespace Pulsar4X.Engine.Api
                     ? "Runs on spare output once the batteries are full, after warp and charging" : null;
             foreach (var (kind, sensors) in new[] { ("Sensors", true), ("Other loads", false) })
             {
-                var mine = consumers.Where(c => c.design.HasAttribute<Pulsar4X.Sensors.SensorReceiverAtb>() == sensors).ToList();
+                var mine = consumers.Where(c => IsSensorLoad(c.design) == sensors).ToList();
                 if (mine.Count == 0)
                     continue;
                 double kw = mine.Sum(c => c.atb.Draw_kW * c.count);
@@ -848,6 +854,7 @@ namespace Pulsar4X.Engine.Api
                    s.LuminosityClass.ToDescription())
             {
                 SpectralTypeIndex = (int)s.SpectralType,
+                PeakWavelengthNm = SensorTools.StarPeakWavelengthNm(s.Temperature),
             };
 
         private static ShipView ToShipView(ShipInfoDB shipInfo, Entity ship, int factionId)
@@ -1738,6 +1745,25 @@ namespace Pulsar4X.Engine.Api
                         reason = "This colony has no installation points.";
 
                     bool overSlip = design is ShipDesign ship && ship.MassPerUnit > line.MaxVolume;
+                    ComponentMountFlags mountFlags = 0;
+                    string componentType = "";
+                    bool isShipDesign = false;
+                    bool isMaterial = false;
+                    if (design is Pulsar4X.Components.ComponentDesign component)
+                    {
+                        mountFlags = (ComponentMountFlags)(int)component.ComponentMountType;
+                        componentType = component.ComponentType ?? "";
+                    }
+                    else if (design is ShipDesign)
+                    {
+                        isShipDesign = true;
+                        componentType = "Ship";
+                    }
+                    else if (design is ProcessedMaterial)
+                    {
+                        isMaterial = true;
+                        componentType = "Material";
+                    }
                     constructibles.Add(new ConstructibleItemView(
                         design.UniqueID, design.Name, design.IndustryPointCosts, design.OutputAmount,
                         isColonyInstallation && hasInstallationRate)
@@ -1755,6 +1781,10 @@ namespace Pulsar4X.Engine.Api
                         },
                         CrewBerths = design is ShipDesign withBerths ? withBerths.CrewBerths : 0,
                         CrewWarning = design is ShipDesign warned ? string.Join("; ", ShipCrew.DesignCrewWarnings(warned.Components)) : "",
+                        MountFlags = mountFlags,
+                        ComponentType = componentType,
+                        IsShipDesign = isShipDesign,
+                        IsMaterial = isMaterial,
                     });
                 }
 
@@ -2370,7 +2400,10 @@ namespace Pulsar4X.Engine.Api
             if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return null;
 
             var templates = info.Data.ComponentTemplates.Values
-                .Select(t => new ComponentTemplateSummary(t.UniqueID, t.Name, t.ComponentType ?? "", TemplateDescription(t)))
+                .Select(t => new ComponentTemplateSummary(t.UniqueID, t.Name, t.ComponentType ?? "", TemplateDescription(t))
+                {
+                    MountFlags = (ComponentMountFlags)(int)t.MountType,
+                })
                 .OrderBy(t => t.Name)
                 .ToList();
 
@@ -2398,6 +2431,13 @@ namespace Pulsar4X.Engine.Api
                     Infrastructure = InfrastructureSuitability.WindowOf(design),
                     CrewRequired = design.CrewReq,
                     Berths = ShipCrew.Berths(new[] { (design, 1) }),
+                    MassPerUnit = design.MassPerUnit,
+                    VolumePerUnit = design.VolumePerUnit,
+                    CreditCost = design.CreditCost,
+                    ResearchCost = design.ResearchCostValue,
+                    IndustryPoints = design.IndustryPointCosts,
+                    EnergyCost = design.EnergyCost,
+                    DisplayStats = design.DisplayProperties,
                 });
             }
 
