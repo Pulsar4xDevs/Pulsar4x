@@ -65,6 +65,7 @@ public class QueueShipRefitOrder : EntityAction
         var job = new ShipRefitJob(_ship.Id, _lineId, _remove, _mount);
         job.TargetDesignId = _targetDesignId;
         construction.RefitQueue.Enqueue(job);
+        Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(_yard);
         string shipName = _ship.TryGetDataBlob<NameDB>(out var name)
             ? name.GetName(_yard.FactionOwnerID)
             : _ship.Id.ToString();

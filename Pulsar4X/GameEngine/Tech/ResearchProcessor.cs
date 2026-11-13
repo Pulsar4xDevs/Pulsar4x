@@ -83,6 +83,7 @@ namespace Pulsar4X.Technology
                 // If it isn't, dequeue the tech and return
                 researcherDB.TechQueue.TryDequeue(out var result);
                 PublishQueueChanged(entity);
+                Pulsar4X.Energy.ColonyPowerProcessor.RefreshLab(entity, onlyIfIdleStateChanged: true);
                 return;
             }
 
@@ -137,6 +138,8 @@ namespace Pulsar4X.Technology
                         entity.Id));
 
                 PublishQueueChanged(entity);
+                // The queue ran dry: the lab goes idle.
+                Pulsar4X.Energy.ColonyPowerProcessor.RefreshLab(entity, onlyIfIdleStateChanged: true);
             }
         }
 

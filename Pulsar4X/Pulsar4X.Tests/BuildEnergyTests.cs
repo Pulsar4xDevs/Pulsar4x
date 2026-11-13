@@ -313,7 +313,8 @@ public class BuildEnergyTests
         var lab = view.Consumers.Single(c => c.DesignId == "default-design-research-lab");
         Assert.That(refinery.Nameplate_kW, Is.GreaterThanOrEqualTo(refinery.Draw_kW));
         Assert.That(refinery.Nameplate_kW, Is.EqualTo(500 * 7 / 24.0).Within(1e-6));
-        Assert.That(lab.Nameplate_kW, Is.EqualTo(lab.Draw_kW));
+        Assert.That(lab.Nameplate_kW, Is.EqualTo(2 * 3000).Within(1e-6), "two 3 MW labs");
+        Assert.That(lab.Draw_kW, Is.EqualTo(0.2 * lab.Nameplate_kW).Within(1e-6), "no project: 20 % of the nameplate");
     }
 
     // ---- scrapping ----
