@@ -47,6 +47,10 @@ namespace Pulsar4X.Components
             ResearchCostFormula = new ChainedExpression(componentSD.Formulas["ResearchCost"], this, factionDataStore, factionTech);
             BuildCostFormula = new ChainedExpression(componentSD.Formulas["BuildPointCost"], this, factionDataStore, factionTech);
             CreditCostFormula = new ChainedExpression(componentSD.Formulas["CreditCost"], this, factionDataStore, factionTech);
+            // Optional: templates without an EnergyCost formula get IP x EnergyPerPoint of their type.
+            _factionDataStore = factionDataStore;
+            if (componentSD.Formulas.TryGetValue("EnergyCost", out var energyFormula) && !string.IsNullOrWhiteSpace(energyFormula))
+                EnergyCostFormula = new ChainedExpression(energyFormula, this, factionDataStore, factionTech);
             ComponentMountType = componentSD.MountType;
             IndustryType = componentSD.IndustryTypeID;
             CargoTypeID = componentSD.CargoTypeID;
@@ -228,6 +232,7 @@ namespace Pulsar4X.Components
             SetHTK();
             SetResearchCost();
             SetBuildCost();
+            SetEnergyCost();
             SetResourceCosts();
 
         }
@@ -318,6 +323,33 @@ namespace Pulsar4X.Components
         {
             BuildCostFormula.Evaluate();
             _design.IndustryPointCosts = BuildCostFormula.LongResult;
+        }
+
+        readonly FactionDataStore _factionDataStore;
+
+        /// <summary>Build energy of one unit, kWh (energy economy phase 3).</summary>
+        public double EnergyCostValue => _design.EnergyCost;
+
+        /// <summary>The template's optional "EnergyCost" formula (kWh per unit). Null when the default applies.</summary>
+        internal ChainedExpression? EnergyCostFormula { get; set; }
+
+        /// <summary>
+        /// Build energy, kWh per unit: the template's EnergyCost formula, or by default
+        /// IndustryPointCosts x the industry type's EnergyPerPoint. Run after <see cref="SetBuildCost"/>.
+        /// </summary>
+        public void SetEnergyCost()
+        {
+            double kWh;
+            if (EnergyCostFormula != null)
+            {
+                EnergyCostFormula.Evaluate();
+                kWh = EnergyCostFormula.DResult;
+            }
+            else
+            {
+                kWh = _design.IndustryPointCosts * (_factionDataStore?.EnergyPerPoint(_design.IndustryTypeID) ?? 0);
+            }
+            _design.EnergyCost = double.IsFinite(kWh) ? Math.Max(0, kWh) : 0;
         }
 
         public Dictionary<string, long> ResourceCostValues => _design.ResourceCosts;

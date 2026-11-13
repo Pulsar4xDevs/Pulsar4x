@@ -111,16 +111,12 @@
       ],
       "Cargo": [
         {
-          "Id": "hydrocarbons",
-          "Amount": 341298701
-        },
-        {
           "Id": "iron",
           "Amount": 500000
         },
         {
           "Id": "hydrocarbons",
-          "Amount": 50000
+          "Amount": 341348702
         },
         {
           "Id": "stainless-steel",

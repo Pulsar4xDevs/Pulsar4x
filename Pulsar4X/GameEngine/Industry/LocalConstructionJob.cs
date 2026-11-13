@@ -49,6 +49,24 @@ public class LocalConstructionJob
     /// </summary>
     public string? UpgradeLineId { get; set; }
 
+    /// <summary>
+    /// Energy to scrap the site-built facility this upgrade takes off, kWh
+    /// (<see cref="FacilityUpgrade.ScrapEnergyFraction"/> of its build energy). Spent on the colony
+    /// grid in step with the job's points. 0 for a plain job or a crate that comes off whole.
+    /// </summary>
+    public double ScrapEnergy { get; set; }
+
+    /// <summary>Scrap energy spent so far, kWh.</summary>
+    public double ScrapEnergyUsed { get; set; }
+
+    /// <summary>Charges the scrap energy for points just applied.</summary>
+    internal void ChargeScrap(long points)
+    {
+        if (points <= 0 || ScrapEnergy <= 0 || PointCost <= 0)
+            return;
+        ScrapEnergyUsed = Math.Min(ScrapEnergy, ScrapEnergyUsed + ScrapEnergy * points / PointCost);
+    }
+
     /// <summary>Mount or Assemble. An upgrade is "Upgrade (Mount)" or "Upgrade (Assemble)".</summary>
     public string Kind
     {

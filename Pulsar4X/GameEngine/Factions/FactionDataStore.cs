@@ -81,6 +81,14 @@ namespace Pulsar4X.Factions
 
             LockedCargoGoods = new CargoDefinitionsLibrary(modDataStore.Minerals.Values.ToList(), modDataStore.ProcessedMaterials.Values.ToList(), new List<ICargoable>());
             CargoGoods = new CargoDefinitionsLibrary();
+
+            // A recipe without its own EnergyCost falls back to IP x its type's EnergyPerPoint.
+            foreach (var material in modDataStore.ProcessedMaterials.Values)
+            {
+                double perPoint = material.IndustryTypeID != null
+                    && modDataStore.IndustryTypes.TryGetValue(material.IndustryTypeID, out var type) ? type.EnergyPerPoint : 0;
+                material.FallbackEnergyCost = material.IndustryPointCosts * perPoint;
+            }
         }
         public FactionDataStore(FactionDataStore other)
         {
@@ -153,6 +161,20 @@ namespace Pulsar4X.Factions
                     CargoGoods.Add(thing);
                 }
             }
+        }
+
+        /// <summary>
+        /// Build energy in kWh per industry point of the type, locked or not. 0 for an unknown type.
+        /// </summary>
+        public double EnergyPerPoint(string? industryTypeId)
+        {
+            if (string.IsNullOrEmpty(industryTypeId))
+                return 0;
+            if (IndustryTypes.TryGetValue(industryTypeId, out var open) && open != null)
+                return open.EnergyPerPoint;
+            if (LockedIndustryTypes.TryGetValue(industryTypeId, out var locked) && locked != null)
+                return locked.EnergyPerPoint;
+            return 0;
         }
 
         public string GetName(string id)

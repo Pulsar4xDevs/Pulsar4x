@@ -29,6 +29,25 @@ public static class FacilityUpgrade
     public const string CrateQueued = "That crate is already in the construction queue.";
     public const string NotInstallation = "That design is not a colony installation.";
 
+    /// <summary>
+    /// Scrapping a site-built facility costs this share of its build energy, as a grid load while
+    /// the upgrade job runs (Jon, decision 5). Cutting, unbolting and sorting for the half recipe that
+    /// comes back is far less work than forming and machining the parts, and recycling scrap metal
+    /// takes roughly a fifth of making it new, so a fifth. Build energy itself is never refunded.
+    /// </summary>
+    public const double ScrapEnergyFraction = 0.2;
+
+    /// <summary>
+    /// Energy to scrap the facility behind <paramref name="lineId"/>, kWh. A crate comes off whole
+    /// and goes back to the warehouse, so only a site-only facility is scrapped. 0 when there is none.
+    /// </summary>
+    public static double ScrapEnergy(Entity colony, string lineId)
+    {
+        if (!TryFindFacility(colony, lineId, out var old) || !LocalConstructionJob.IsSiteOnly(old.Design))
+            return 0;
+        return ScrapEnergyFraction * Math.Max(0, old.Design.EnergyCost);
+    }
+
     public static bool TryFindFacility(Entity colony, string lineId, out ComponentInstance facility)
     {
         facility = null!;

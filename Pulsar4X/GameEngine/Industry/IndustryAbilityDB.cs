@@ -24,6 +24,8 @@ namespace Pulsar4X.Industry
             public Dictionary<string, int> IndustryTypeRates = new ();
             public List<IndustryJob> Jobs = new ();
             public List<YardHull> Hulls = new ();
+            /// <summary>Build energy the line spent in its last daily pass, kWh (energy economy phase 3).</summary>
+            public double EnergyUsedLastDay;
         }
 
         public Dictionary<string, ProductionLine> ProductionLines { get; } = new ();

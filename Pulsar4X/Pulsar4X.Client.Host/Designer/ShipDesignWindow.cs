@@ -65,6 +65,8 @@ namespace Pulsar4X.Client
 
         //mass
         private double _massDry;
+        private double _buildEnergy;
+        private double _assemblyEnergy;
         private double _massWet;
         private double _grossTonnage;
         //warp
@@ -706,6 +708,13 @@ namespace Pulsar4X.Client
                 }
 
                 ImGui.TableNextColumn();
+                ImGui.Text("Build energy");
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Assembly " + Stringify.EnergyKwh(_assemblyEnergy) + " plus the components' build energy.\nDrawn from the colony grid while the jobs run.");
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.EnergyKwh(_buildEnergy));
+
+                ImGui.TableNextColumn();
                 ImGui.Text("Total Thrust");
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Thrust(_tn));
@@ -982,6 +991,8 @@ namespace Pulsar4X.Client
 
             _grossTonnage = volume * K; // GT = V * K from: https://en.wikipedia.org/wiki/Gross_tonnage
             _massDry = mass;
+            _assemblyEnergy = ShipDesign.AssemblyEnergy(_factionInfoDB.Data, (long)mass);
+            _buildEnergy = _assemblyEnergy + ShipDesign.ComponentBuildEnergy(SelectedComponents);
             _tn = tn;
             _ttwr = (tn / mass) * 0.01;
             _wcc = wcc;

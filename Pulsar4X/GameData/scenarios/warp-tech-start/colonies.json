@@ -292,7 +292,7 @@
       "OwnerAbbreviation": "LC",
       "Stance": "Friendly",
       "Installations": [
-        { "Id": "default-design-infrastructure-luna", "Amount": 21 },
+        { "Id": "default-design-infrastructure-luna", "Amount": 15 },
         { "Id": "default-design-auto-mine", "Amount": 2 },
         { "Id": "default-design-warehouse-prefab", "Amount": 1 },
         { "Id": "default-design-planetary-spaceport-crate", "Amount": 1 },

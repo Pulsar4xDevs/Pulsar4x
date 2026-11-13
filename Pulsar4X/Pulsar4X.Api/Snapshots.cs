@@ -379,8 +379,12 @@ public sealed record ColonyPowerView(
     public double Balance_kW => Delivered_kW - Demand_kW;
 }
 
-/// <summary>One consumer line. Tier is the display name; TierRank 1 is served first.</summary>
-public sealed record ColonyPowerConsumerRow(string DesignId, string Name, string Tier, int TierRank, int Count, double Draw_kW);
+/// <summary>
+/// One consumer line. Tier is the display name; TierRank 1 is served first. A production facility
+/// draws what its jobs' build energy needs, up to Nameplate_kW; other lines draw their nameplate.
+/// </summary>
+public sealed record ColonyPowerConsumerRow(string DesignId, string Name, string Tier, int TierRank, int Count, double Draw_kW,
+    double Nameplate_kW = 0);
 
 /// <summary>One generation or storage line. Kind is "Fuel", "Solar" or "Battery".</summary>
 public sealed record ColonyPowerPlantRow(

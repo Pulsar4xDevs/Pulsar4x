@@ -49,6 +49,10 @@ namespace Pulsar4X.Weapons
         public int CrewReq;
         public long IndustryPointCosts { get; }
 
+        /// <summary>Build energy of one round, kWh: IP x ordnance-construction EnergyPerPoint.</summary>
+        [JsonProperty]
+        public double EnergyCost { get; private set; }
+
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ordinance Construction"
         public string IndustryTypeID { get; } = "ordnance-construction"; //new Guid("5ADBF620-3740-4FD7-98BE-E8670D58945F");
@@ -128,6 +132,7 @@ namespace Pulsar4X.Weapons
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             IndustryPointCosts = (int)mass;
+            EnergyCost = IndustryPointCosts * faction.Data.EnergyPerPoint(IndustryTypeID);
             MassPerUnit = (int)WetMass;
             VolumePerUnit = vol;
 

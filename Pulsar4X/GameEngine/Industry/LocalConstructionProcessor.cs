@@ -48,8 +48,10 @@ public class LocalConstructionProcessor : IHotloopProcessor
             var job = constructionDB.BuildQueue.Peek();
             if (!TryResolveTarget(entity, job, out var target))
                 break;
+            long before = job.PointsAccumulated;
             if (!TryAdvance(entity, storage, job, ref pointsLeft))
                 break;
+            job.ChargeScrap(job.PointsAccumulated - before);
 
             if (!job.IsComplete)
                 continue;

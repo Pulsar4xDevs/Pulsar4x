@@ -122,6 +122,12 @@ namespace Pulsar4X.Industry
                 foreach (var rate in prodLine.IndustryTypeRates)
                     industryPointsRemaining[rate.Key] = (int)(rate.Value * infraEfficiency * powerEfficiency);
 
+                // Build energy: each point spends its job's kWh per point. A line draws at most its
+                // facility's nameplate for the day (scaled by the power share), so a recipe hungrier
+                // than the nameplate runs slower instead of drawing more.
+                double energyBudget = LineEnergyBudget_kWh(industryEntity, prodLineID, powerEfficiency);
+                double energyUsed = 0;
+
                 foreach(var batchJob in prodLine.Jobs.ToArray())
                 {
                     IConstructableDesign designInfo = factionInfo.IndustryDesigns[batchJob.ItemGuid];
@@ -179,6 +185,18 @@ namespace Pulsar4X.Industry
                             pointsToUse = (int)Math.Floor(industryPointsToUse);
                         }
 
+                        double energyPerPoint = batchJob.EnergyPerPoint;
+                        if (energyPerPoint > 0 && pointsToUse > 0)
+                        {
+                            double affordable = Math.Floor((energyBudget - energyUsed) / energyPerPoint + 1e-9);
+                            if (affordable < pointsToUse)
+                                pointsToUse = (int)Math.Max(0, affordable);
+                            if (pointsToUse <= 0)
+                                break; // the line's energy for today is spent
+                        }
+                        energyUsed += pointsToUse * energyPerPoint;
+                        batchJob.EnergyUsed += pointsToUse * energyPerPoint;
+
                         //construct only enough for the amount of resources we have.
                         batchJob.ProductionPointsLeft -= pointsToUse;
                         industryPointsRemaining[designInfo.IndustryTypeID] -= pointsToUse;
@@ -201,7 +219,31 @@ namespace Pulsar4X.Industry
                         }
                     }
                 }
+                prodLine.EnergyUsedLastDay = energyUsed;
             }
+        }
+
+        /// <summary>
+        /// One line's nameplate draw, kW: its facility's <see cref="Pulsar4X.Energy.PowerConsumerAtb"/>
+        /// x health. Null when the facility has no draw (it builds without an energy cap).
+        /// </summary>
+        internal static double? LineNameplate_kW(Entity industryEntity, string lineId)
+        {
+            if (!industryEntity.TryGetDataBlob<ComponentInstancesDB>(out var instances)
+                || !instances.AllComponents.TryGetValue(lineId, out var facility)
+                || facility?.Design == null
+                || !facility.Design.TryGetAttribute<Pulsar4X.Energy.PowerConsumerAtb>(out var consumer))
+                return null;
+            return consumer.Draw_kW * Math.Clamp((double)facility.HealthPercent, 0, 1);
+        }
+
+        /// <summary>Energy a line may spend in one daily pass, kWh. Unlimited for a line with no nameplate.</summary>
+        internal static double LineEnergyBudget_kWh(Entity industryEntity, string lineId, double powerShare)
+        {
+            var nameplate = LineNameplate_kW(industryEntity, lineId);
+            if (nameplate == null)
+                return double.PositiveInfinity;
+            return nameplate.Value * 24 * Math.Clamp(powerShare, 0, 1);
         }
 
         internal static void ConsumeResources(CargoStorageDB fromCargo, ref IDictionary<string, long> toUse)

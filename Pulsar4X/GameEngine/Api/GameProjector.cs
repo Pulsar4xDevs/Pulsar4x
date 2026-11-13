@@ -483,7 +483,8 @@ namespace Pulsar4X.Engine.Api
                 _ => t.ToString(),
             };
             var consumers = power.Consumers
-                .Select(c => new ColonyPowerConsumerRow(c.DesignId, c.Name, TierName(c.Tier), (int)c.Tier, c.Count, c.Draw_kW))
+                .Select(c => new ColonyPowerConsumerRow(c.DesignId, c.Name, TierName(c.Tier), (int)c.Tier, c.Count, c.Draw_kW,
+                    c.Nameplate_kW > 0 ? c.Nameplate_kW : c.Draw_kW))
                 .ToList();
             var plants = power.Plants
                 .Select(p => new ColonyPowerPlantRow(p.DesignId, p.Name, p.Kind.ToString(), p.Count, p.Output_kW, p.Nameplate_kW,

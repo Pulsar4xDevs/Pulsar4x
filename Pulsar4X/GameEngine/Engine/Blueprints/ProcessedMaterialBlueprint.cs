@@ -9,6 +9,12 @@ namespace Pulsar4X.Blueprints
         public Dictionary<string, string> Formulas { get; set;}
         public Dictionary<string, long> ResourceCosts { get; set; }
         public long IndustryPointCosts { get; set; }
+
+        /// <summary>
+        /// Refining energy of one batch (OutputAmount units), kWh, charged at the refinery as the
+        /// job runs. Optional: null falls back to IP x the industry type's EnergyPerPoint.
+        /// </summary>
+        public double? EnergyCost { get; set; }
         public string IndustryTypeID { get; set; }
         public string Description { get; set; }
         public ConstructableGuiHints GuiHints { get; set; }

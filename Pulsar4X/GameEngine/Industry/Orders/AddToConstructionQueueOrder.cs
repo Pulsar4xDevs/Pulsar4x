@@ -78,6 +78,8 @@ public class AddToConstructionQueueOrder : EntityAction
         if (_targetColony != null)
             job.TargetEntityId = _targetColony.Id;
         job.UpgradeLineId = _upgradeLineId;
+        if (_upgradeLineId != null)
+            job.ScrapEnergy = FacilityUpgrade.ScrapEnergy(_actor, _upgradeLineId);
         constructionDB.BuildQueue.Enqueue(job);
     }
 

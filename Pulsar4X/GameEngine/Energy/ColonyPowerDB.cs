@@ -125,8 +125,13 @@ namespace Pulsar4X.Energy
         public override object Clone() => new ColonyPowerDB(this);
     }
 
-    /// <summary>One consumer line: a design (or life support) and its total draw.</summary>
-    public sealed record ColonyPowerConsumer(string DesignId, string Name, PowerTier Tier, int Count, double Draw_kW);
+    /// <summary>
+    /// One consumer line: a design (or life support) and its total draw. A production facility draws
+    /// what its queued jobs' build energy needs, capped at <see cref="Nameplate_kW"/>; every other line
+    /// draws its nameplate. Nameplate_kW 0 means "same as Draw_kW".
+    /// </summary>
+    public sealed record ColonyPowerConsumer(string DesignId, string Name, PowerTier Tier, int Count, double Draw_kW,
+        double Nameplate_kW = 0);
 
     public enum ColonyPowerPlantKind
     {

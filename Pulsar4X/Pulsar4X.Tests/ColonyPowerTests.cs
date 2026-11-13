@@ -66,7 +66,8 @@ public class ColonyPowerTests
     public void EarthStart_StockDraws_MatchThePlan()
     {
         var power = Power(_earthColony);
-        double PerUnit(string id) { var l = Line(power, id); return l.Draw_kW / l.Count; }
+        // Nameplates (phase 3: production lines draw their jobs' energy up to this).
+        double PerUnit(string id) { var l = Line(power, id); return (l.Nameplate_kW > 0 ? l.Nameplate_kW : l.Draw_kW) / l.Count; }
 
         Assert.That(PerUnit("default-design-mine"), Is.EqualTo(140).Within(5), "extraction ~140 kW at full accessibility");
         Assert.That(PerUnit("default-design-refinery-site"), Is.InRange(100, 200), "refinery-site ~100-200 kW");
@@ -135,7 +136,11 @@ public class ColonyPowerTests
 
         _earthColony.AddComponent(lab, 3);
 
-        Assert.That(power.Demand_kW, Is.EqualTo(before + 3 * 250).Within(1e-6));
+        // Labs draw their nameplate. The new buildings also move infrastructure efficiency,
+        // which moves the industry lines' working draw, so check the lab line and the sum.
+        Assert.That(Line(power, "default-design-research-lab").Draw_kW, Is.EqualTo(5 * 250).Within(1e-6));
+        Assert.That(power.Demand_kW, Is.EqualTo(power.Consumers.Sum(c => c.Draw_kW)).Within(1e-6));
+        Assert.That(power.Demand_kW, Is.GreaterThan(before + 3 * 250 - 100));
         Assert.That(Line(power, "default-design-research-lab").Count, Is.EqualTo(5));
     }
 

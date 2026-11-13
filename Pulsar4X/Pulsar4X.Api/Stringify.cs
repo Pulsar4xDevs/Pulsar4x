@@ -102,6 +102,21 @@ namespace Pulsar4X.Api
         }
 
         /// <summary>
+        /// Build energy, given in kWh, shown as kWh, MWh, GWh or TWh.
+        /// </summary>
+        public static string EnergyKwh(double amountInKwh, string format = "0.##")
+        {
+            double a = Math.Abs(amountInKwh);
+            if (a >= 1e9)
+                return (amountInKwh * 1e-9).ToString(format) + " TWh";
+            if (a >= 1e6)
+                return (amountInKwh * 1e-6).ToString(format) + " GWh";
+            if (a >= 1e3)
+                return (amountInKwh * 1e-3).ToString(format) + " MWh";
+            return amountInKwh.ToString(format) + " kWh";
+        }
+
+        /// <summary>
         /// stored energy
         /// </summary>
         /// <param name="amountInKj"></param>

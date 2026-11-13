@@ -127,6 +127,7 @@ namespace Pulsar4X.Tests
             public bool IsValid => true;
             public Dictionary<string, long> ResourceCosts { get; } = new();
             public long IndustryPointCosts => 0;
+            public double EnergyCost => 0;
             public string IndustryTypeID => "";
             public ushort OutputAmount => 1;
             public void OnConstructionComplete(Entity industryEntity, Pulsar4X.Storage.CargoStorageDB storage,

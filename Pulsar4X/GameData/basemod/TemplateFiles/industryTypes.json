@@ -3,35 +3,40 @@
     "Type": "IndustryType",
     "Payload": {
       "UniqueID": "refining",
-      "Name": "Refining"
+      "Name": "Refining",
+      "EnergyPerPoint": 7
     }
   },
   {
     "Type": "IndustryType",
     "Payload": {
       "UniqueID": "component-construction",
-      "Name": "Component Construction"
+      "Name": "Component Construction",
+      "EnergyPerPoint": 10
     }
   },
   {
     "Type": "IndustryType",
     "Payload": {
       "UniqueID": "installation-construction",
-      "Name": "Installation Construction"
+      "Name": "Installation Construction",
+      "EnergyPerPoint": 10
     }
   },
   {
     "Type": "IndustryType",
     "Payload": {
       "UniqueID": "ordnance-construction",
-      "Name": "Ordnance Construction"
+      "Name": "Ordnance Construction",
+      "EnergyPerPoint": 10
     }
   },
   {
     "Type": "IndustryType",
     "Payload": {
       "UniqueID": "ship-assembly",
-      "Name": "Ship Assembly"
+      "Name": "Ship Assembly",
+      "EnergyPerPoint": 5
     }
   }
 ]

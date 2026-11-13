@@ -333,6 +333,15 @@ namespace Pulsar4X.Client
                     ImGui.Text(c.DesignId == "life-support" ? "" : c.Count.ToString());
                     ImGui.TableNextColumn();
                     ImGui.Text(Stringify.Power(c.Draw_kW));
+                    if (c.Nameplate_kW > c.Draw_kW + 1e-6)
+                    {
+                        ImGui.SameLine();
+                        ImGui.TextDisabled("of " + Stringify.Power(c.Nameplate_kW));
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip("Production draws its jobs' build energy, up to the nameplate.\nIdle, it draws a tenth of the nameplate.");
+                    }
+                    if (c.DesignId == "scrapping" && ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Facility upgrades taking a site-built facility apart.");
                 }
                 ImGui.EndTable();
             }

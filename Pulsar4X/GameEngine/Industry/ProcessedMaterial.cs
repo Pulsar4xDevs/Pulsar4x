@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Engine;
@@ -29,7 +30,19 @@ namespace Pulsar4X.Industry
             CargoTypeID = blueprint.CargoTypeID;
             MassPerUnit = blueprint.MassPerUnit;
             VolumePerUnit = blueprint.VolumePerUnit;
+            EnergyCost = blueprint.EnergyCost;
         }
+
+        /// <summary>Default batch energy, kWh, when the recipe sets no EnergyCost (IP x EnergyPerPoint).</summary>
+        [Newtonsoft.Json.JsonIgnore]
+        internal double FallbackEnergyCost { get; set; }
+
+        /// <summary>Refining energy of one batch, kWh: the recipe's EnergyCost, else the fallback.</summary>
+        double IConstructableDesign.EnergyCost => BatchEnergy;
+
+        /// <summary>Refining energy of one batch, kWh: the recipe's EnergyCost, else the fallback.</summary>
+        [Newtonsoft.Json.JsonIgnore]
+        public double BatchEnergy => EnergyCost is double e && double.IsFinite(e) ? Math.Max(0, e) : FallbackEnergyCost;
 
         public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, string productionLine, IndustryJob batchJob, IConstructableDesign designInfo)
         {

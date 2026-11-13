@@ -471,6 +471,15 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString(Styles.IntFormat) + " IP");
 
+                    ImGui.TableNextColumn();
+                    ImGui.Text("");
+                    ImGui.SameLine();
+                    ImGui.Text("Build energy");
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Drawn from the colony grid while the job runs, not stockpiled.\nNot refunded when the item is scrapped.");
+                    ImGui.TableNextColumn();
+                    ImGui.Text(Stringify.EnergyKwh(_componentDesigner.EnergyCostValue));
+
                     ImGui.EndTable();
                 }
 

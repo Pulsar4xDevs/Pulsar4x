@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
@@ -12,6 +13,25 @@ namespace Pulsar4X.Industry
         [JsonProperty]
         internal string TypeID;
         public IndustryJobStatus Status { get; internal set; } = IndustryJobStatus.Queued;
+
+        /// <summary>
+        /// Build energy per industry point of the item, kWh: the design's EnergyCost over its
+        /// IndustryPointCosts, copied at queue time. 0 (a job from an old save) builds free.
+        /// </summary>
+        [JsonProperty]
+        public double EnergyPerPoint { get; internal set; }
+
+        /// <summary>Build energy spent on this job so far, kWh, across every item built.</summary>
+        [JsonProperty]
+        public double EnergyUsed { get; internal set; }
+
+        /// <summary>Build energy of the whole order, kWh (items ordered x energy per item).</summary>
+        public double EnergyOrdered => EnergyPerPoint * ProductionPointsCost * NumberOrdered;
+
+        static double PerPoint(IConstructableDesign design)
+            => design.IndustryPointCosts > 0 && double.IsFinite(design.EnergyCost)
+                ? Math.Max(0, design.EnergyCost) / design.IndustryPointCosts
+                : 0;
 
         [JsonConstructor]
         private IndustryJob()
@@ -35,6 +55,7 @@ namespace Pulsar4X.Industry
             ResourcesCosts = design.ResourceCosts;
             ProductionPointsLeft = design.IndustryPointCosts;
             ProductionPointsCost = design.IndustryPointCosts;
+            EnergyPerPoint = PerPoint(design);
             NumberOrdered = 1;
         }
 
@@ -47,6 +68,7 @@ namespace Pulsar4X.Industry
             ResourcesCosts = design.ResourceCosts;
             ProductionPointsLeft = design.IndustryPointCosts;
             ProductionPointsCost = design.IndustryPointCosts;
+            EnergyPerPoint = PerPoint(design);
             NumberOrdered = 1;
         }
 

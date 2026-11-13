@@ -15,6 +15,7 @@
         "hydrocarbons": 1
       },
       "IndustryPointCosts": 20,
+      "EnergyCost": 70,
       "IndustryTypeID": "refining",
       "WealthCost": 0,
       "OutputAmount": 100
@@ -33,6 +34,7 @@
         "hydrocarbons": 4250
       },
       "IndustryPointCosts": 500,
+      "EnergyCost": 2975,
       "IndustryTypeID": "refining",
       "WealthCost": 3,
       "OutputAmount": 8500,
@@ -55,6 +57,7 @@
         "hydrocarbons": 4250
       },
       "IndustryPointCosts": 500,
+      "EnergyCost": 4250,
       "IndustryTypeID": "refining",
       "WealthCost": 3,
       "OutputAmount": 8500,
@@ -77,6 +80,7 @@
         "hydrocarbons": 4250
       },
       "IndustryPointCosts": 500,
+      "EnergyCost": 19550,
       "IndustryTypeID": "refining",
       "WealthCost": 3,
       "OutputAmount": 8500,
@@ -100,6 +104,7 @@
         "fissionables": 1
       },
       "IndustryPointCosts": 100,
+      "EnergyCost": 1200,
       "IndustryTypeID": "refining",
       "WealthCost": 3,
       "OutputAmount": 100,
@@ -123,6 +128,7 @@
         "hydrocarbons": 1
       },
       "IndustryPointCosts": 5,
+      "EnergyCost": 12,
       "IndustryTypeID": "refining",
       "WealthCost": 1,
       "OutputAmount": 2
@@ -142,6 +148,7 @@
         "hydrocarbons": 10
       },
       "IndustryPointCosts": 10,
+      "EnergyCost": 400,
       "IndustryTypeID": "refining",
       "WealthCost": 1000,
       "OutputAmount": 1
@@ -163,6 +170,7 @@
         "silicon": 1
       },
       "IndustryPointCosts": 100,
+      "EnergyCost": 1000,
       "IndustryTypeID": "refining",
       "WealthCost": 2,
       "OutputAmount": 5
@@ -200,6 +208,7 @@
         "water": 5 
       },
       "IndustryPointCosts": 25,
+      "EnergyCost": 50,
       "IndustryTypeID": "refining",
       "WealthCost": 0,
       "OutputAmount": 100

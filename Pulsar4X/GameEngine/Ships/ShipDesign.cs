@@ -89,6 +89,34 @@ namespace Pulsar4X.Ships
         public int CrewReq;
         public long IndustryPointCosts { get; private set; }
 
+        /// <summary>
+        /// Assembly energy of the hull job, kWh: IndustryPointCosts x ship-assembly EnergyPerPoint
+        /// (5 kWh). The components are their own jobs and carry their own energy.
+        /// </summary>
+        [JsonProperty]
+        public double EnergyCost { get; private set; }
+
+        /// <summary>
+        /// Everything a ship takes to build, kWh: assembly plus each component's build energy
+        /// x its count. Shown as "Build energy" in the ship designer.
+        /// </summary>
+        public double TotalBuildEnergy => EnergyCost + ComponentBuildEnergy(Components);
+
+        /// <summary>Σ component build energy x count, kWh.</summary>
+        public static double ComponentBuildEnergy(IEnumerable<(ComponentDesign design, int count)>? components)
+        {
+            double sum = 0;
+            if (components == null)
+                return sum;
+            foreach (var (design, count) in components)
+                sum += design.EnergyCost * count;
+            return sum;
+        }
+
+        /// <summary>Assembly energy of a hull of this mass, kWh, as <see cref="Recalculate"/> sets it.</summary>
+        public static double AssemblyEnergy(FactionDataStore data, long massPerUnit)
+            => (long)(massPerUnit * 0.1) * data.EnergyPerPoint("ship-assembly");
+
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ship Assembly"
         public string IndustryTypeID { get; } = "ship-assembly"; //new Guid("91823C5B-A71A-4364-A62C-489F0183EFB5");
@@ -180,6 +208,7 @@ namespace Pulsar4X.Ships
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             IndustryPointCosts = (long)(MassPerUnit * 0.1);
+            EnergyCost = IndustryPointCosts * faction.Data.EnergyPerPoint(IndustryTypeID);
         }
 
         /// <summary>

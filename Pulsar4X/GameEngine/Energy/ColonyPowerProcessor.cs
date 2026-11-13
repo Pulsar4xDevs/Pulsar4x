@@ -52,6 +52,14 @@ namespace Pulsar4X.Energy
         /// </summary>
         public const double FuelReserveDays = 730;
 
+        /// <summary>
+        /// Share of its nameplate a production facility draws with nothing to build: lights, HVAC,
+        /// controls (plan §4.5, "industry idle = 10 % hotel draw"). Working, it adds its jobs' build energy.
+        /// </summary>
+        public const double IndustryIdleShare = 0.1;
+
+        public const string ScrappingLineId = "scrapping";
+
         public static void Recalc(Entity colonyEntity)
         {
             if (colonyEntity == null
@@ -77,6 +85,9 @@ namespace Pulsar4X.Energy
             double atmosphereFactor = SolarAtmosphereFactor(body);
             bool hasOxygen = HasAtmosphericOxygen(body);
 
+            colonyEntity.TryGetDataBlob<Pulsar4X.Industry.IndustryAbilityDB>(out var industry);
+            double infraEfficiency = Pulsar4X.Industry.InfrastructureProcessor.GetEfficiency(colonyEntity);
+
             foreach (var (design, _) in instancesDB.DesignsAndComponentCount.ToList())
             {
                 var enabled = instancesDB.GetComponentsBySpecificDesign(design.UniqueID).Where(c => c.IsEnabled).ToList();
@@ -89,8 +100,11 @@ namespace Pulsar4X.Energy
 
                 if (design.TryGetAttribute<PowerConsumerAtb>(out var consumer) && consumer.Draw_kW > 0)
                 {
-                    double draw = consumer.Draw_kW * health;
-                    consumers.Add(new ColonyPowerConsumer(design.UniqueID, design.Name, consumer.Tier, count, draw));
+                    double nameplate = consumer.Draw_kW * health;
+                    double draw = industry != null
+                        ? enabled.Sum(c => ProductionDraw_kW(industry, c, consumer.Draw_kW, infraEfficiency))
+                        : nameplate;
+                    consumers.Add(new ColonyPowerConsumer(design.UniqueID, design.Name, consumer.Tier, count, draw, nameplate));
                     Add(demandByTier, consumer.Tier, draw);
                 }
 
@@ -138,6 +152,13 @@ namespace Pulsar4X.Energy
                 }
             }
 
+            double scrapping = Scrapping_kW(colonyEntity);
+            if (scrapping > 0)
+            {
+                consumers.Add(new ColonyPowerConsumer(ScrappingLineId, "Scrapping", PowerTier.Industry, 1, scrapping, scrapping));
+                Add(demandByTier, PowerTier.Industry, scrapping);
+            }
+
             var (lifeSupport, colonists) = LifeSupport(colonyEntity, colonyInfo);
             if (lifeSupport > 0)
             {
@@ -161,6 +182,55 @@ namespace Pulsar4X.Energy
             // Between daily passes, satisfaction follows what the plants can give now.
             power.TierSatisfaction = ShareByTier(power.Delivered_kW, demandByTier);
             power.LastRecalc = colonyEntity.StarSysDateTime;
+        }
+
+        /// <summary>
+        /// One facility's draw, kW. Not a production line: its nameplate x health. A production line
+        /// draws <see cref="IndustryIdleShare"/> of its nameplate plus what its head job of each industry
+        /// type needs at the line's full rate (rate x infrastructure x kWh per point / 24 h), capped at
+        /// the nameplate. The cap is also what the line can spend in a day (IndustryTools).
+        /// </summary>
+        internal static double ProductionDraw_kW(Pulsar4X.Industry.IndustryAbilityDB industry, ComponentInstance facility,
+            double nameplatePerUnit_kW, double infraEfficiency)
+        {
+            double nameplate = nameplatePerUnit_kW * Math.Clamp((double)facility.HealthPercent, 0, 1);
+            if (!industry.ProductionLines.TryGetValue(facility.UniqueID, out var line))
+                return nameplate;
+            double working_kWhPerDay = 0;
+            foreach (var (type, rate) in line.IndustryTypeRates)
+            {
+                var job = line.Jobs.FirstOrDefault(j => j.TypeID == type
+                    && j.NumberCompleted < j.NumberOrdered
+                    && j.Status != Pulsar4X.DataStructures.IndustryJobStatus.MissingResources);
+                if (job == null || job.EnergyPerPoint <= 0)
+                    continue;
+                working_kWhPerDay += rate * infraEfficiency * job.EnergyPerPoint;
+            }
+            return Math.Min(nameplate, nameplate * IndustryIdleShare + working_kWhPerDay / 24);
+        }
+
+        /// <summary>
+        /// Draw of the facility upgrades that scrap a site-built facility, kW: each queued job's
+        /// <see cref="Pulsar4X.Industry.LocalConstructionJob.ScrapEnergy"/> spread over its points,
+        /// for the points the colony will spend on it today.
+        /// </summary>
+        internal static double Scrapping_kW(Entity colonyEntity)
+        {
+            if (!colonyEntity.TryGetDataBlob<Pulsar4X.Industry.LocalConstructionDB>(out var construction))
+                return 0;
+            long pointsLeft = construction.PointsPerDay;
+            double kWh = 0;
+            foreach (var job in construction.BuildQueue)
+            {
+                if (pointsLeft <= 0)
+                    break;
+                long needed = Math.Max(0, job.PointCost - job.PointsAccumulated);
+                long spend = Math.Min(pointsLeft, needed);
+                pointsLeft -= spend;
+                if (job.ScrapEnergy > 0 && job.PointCost > 0)
+                    kWh += job.ScrapEnergy * spend / job.PointCost;
+            }
+            return kWh / 24;
         }
 
         /// <summary>

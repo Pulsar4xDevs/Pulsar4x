@@ -13,7 +13,7 @@ namespace Pulsar4X.Colonies
 {
     public class PopulationProcessor : IHotloopProcessor
     {
-        public TimeSpan RunFrequency { get; } = TimeSpan.FromDays(30);
+        public TimeSpan RunFrequency { get; } = TimeSpan.FromDays(TickDays);
         public TimeSpan FirstRunOffset { get; } = TimeSpan.FromDays(30);
         public Type GetParameterType { get; } = typeof(ColonyInfoDB);
 
@@ -81,6 +81,9 @@ namespace Pulsar4X.Colonies
             }
         }
 
+        /// <summary>Days between population passes (<see cref="RunFrequency"/>).</summary>
+        internal const double TickDays = 30;
+
         /// <summary>
         /// Growth for one 30-day tick, as a fraction. The Aurora rule is an annual percentage:
         /// 20 / (population in millions)^(1/3), capped at 10 % a year. It used to be applied to
@@ -94,7 +97,8 @@ namespace Pulsar4X.Colonies
             double annualPercent = 20.0 / Math.Pow(population / 1_000_000.0, 1.0 / 3.0);
             if (annualPercent > 10.0)
                 annualPercent = 10.0;
-            return annualPercent / 100.0 * (30.0 / 365.25);
+            // Compounded: 365.25/30 ticks multiply to exactly (1 + annual rate) a year.
+            return Math.Pow(1.0 + annualPercent / 100.0, TickDays / 365.25) - 1.0;
         }
 
         internal void ReCalcMaxPopulation(Entity colonyEntity)

@@ -41,6 +41,14 @@ namespace Pulsar4X.Components
         public float DestructionPercent;
         public int CrewReq;
         public long IndustryPointCosts { get; set; }
+
+        /// <summary>
+        /// Build energy of one unit, kWh: a grid load while the job runs (energy economy phase 3).
+        /// From the template's optional EnergyCost formula, else IP x the type's EnergyPerPoint.
+        /// </summary>
+        [JsonProperty]
+        public double EnergyCost { get; internal set; }
+
         public string IndustryTypeID { get; set; }
         public ushort OutputAmount
         {

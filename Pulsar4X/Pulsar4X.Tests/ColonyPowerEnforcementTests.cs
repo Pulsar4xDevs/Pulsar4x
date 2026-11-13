@@ -88,24 +88,35 @@ public class ColonyPowerEnforcementTests
     [Test]
     public void Brownout_ServesTiersInOrder_AndScalesTheShortTier()
     {
-        // 1,000 people (100 kW life support) plus Earth's facilities: 1,639.8 kW demand.
-        // One 1 MW thermal plant delivers 920 kW.
+        // 1,000 people (100 kW life support) plus Earth's facilities; phase 3 industry draws its
+        // jobs' energy (idle 10 %), so demand is about 1.3 MW. One 1 MW thermal plant delivers 920 kW.
         SmallEarthOnPlant(TemplateDesign("thermal-plant", ("Size", 1)));
 
         ColonyPowerProcessor.RunDay(_earth);
 
         var p = Power;
-        double control = p.DemandByTier[PowerTier.Control];
-        double storage = p.DemandByTier[PowerTier.Storage];
-        double industry = p.DemandByTier[PowerTier.Industry];
+        Assert.That(p.Demand_kW, Is.GreaterThan(920));
         Assert.That(p.Dispatched_kW, Is.EqualTo(1000).Within(1e-6), "the plant runs flat out");
+        double left = 920;
+        foreach (PowerTier tier in Enum.GetValues(typeof(PowerTier)))
+        {
+            double demand = p.DemandByTier.TryGetValue(tier, out var d) ? d : 0;
+            double expected = demand <= 0 ? 1 : Math.Min(1, left / demand);
+            Assert.That(p.TierSatisfaction[tier], Is.EqualTo(expected).Within(1e-9), tier.ToString());
+            left = Math.Max(0, left - demand);
+        }
         Assert.That(p.TierSatisfaction[PowerTier.LifeSupport], Is.EqualTo(1));
         Assert.That(p.TierSatisfaction[PowerTier.Control], Is.EqualTo(1));
-        Assert.That(p.TierSatisfaction[PowerTier.Storage], Is.EqualTo(1));
-        Assert.That(p.TierSatisfaction[PowerTier.Industry],
-            Is.EqualTo((920 - 100 - control - storage) / industry).Within(1e-9));
+        Assert.That(p.TierSatisfaction[PowerTier.Research], Is.LessThan(1).And.GreaterThan(0), "research is last, and short");
+
+        // More people: life support and control eat the plant, industry goes dark first.
+        _earth.GetDataBlob<ColonyInfoDB>().Population[_species.Id] = 7000;
+        ColonyPowerProcessor.RunDay(_earth);
+        Assert.That(p.TierSatisfaction[PowerTier.LifeSupport], Is.EqualTo(1));
+        Assert.That(p.TierSatisfaction[PowerTier.Control], Is.EqualTo((920 - 700) / p.DemandByTier[PowerTier.Control]).Within(1e-9));
+        Assert.That(p.TierSatisfaction[PowerTier.Industry], Is.EqualTo(0));
         Assert.That(p.TierSatisfaction[PowerTier.Mining], Is.EqualTo(0));
-        Assert.That(p.TierSatisfaction[PowerTier.Research], Is.EqualTo(0), "research is last");
+        Assert.That(p.TierSatisfaction[PowerTier.Research], Is.EqualTo(0));
         Assert.That(ColonyPowerProcessor.Satisfaction(_earth, PowerTier.Charging), Is.EqualTo(1), "no demand, no penalty");
     }
 
@@ -206,6 +217,8 @@ public class ColonyPowerEnforcementTests
     public void PlantStops_WhenItsFuelRunsOut_AndAnotherFuelTakesUpTheSlack()
     {
         SmallEarthOnPlant(TemplateDesign("thermal-plant", ("Size", 1)));
+        // 5,000 people keep demand high enough that the thermal plant's share needs more than its stock.
+        _earth.GetDataBlob<ColonyInfoDB>().Population[_species.Id] = 5000;
         SetStock("hydrocarbons", 3000);   // half a day at full load (6,234 kg/day)
 
         ColonyPowerProcessor.RunDay(_earth);
@@ -226,9 +239,11 @@ public class ColonyPowerEnforcementTests
         // the turbine covers the rest of the demand.
         SetStock("hydrocarbons", 3000);
         _earth.AddComponent(TemplateDesign("oxidiser-turbine", ("Size", 2)));
+        double hydrocarbons = Stock("hydrocarbons");
+        Assert.That(hydrocarbons, Is.GreaterThan(0).And.LessThan(6234), "less than a day at full load");
         ColonyPowerProcessor.RunDay(_earth);
         double demandGen = Power.Demand_kW / 0.92;
-        double thermal = 3000 / (86400 * ThermalKgPerKJ);
+        double thermal = hydrocarbons / (86400 * ThermalKgPerKJ);
         Assert.That(Power.Dispatched_kW, Is.EqualTo(demandGen).Within(1e-6));
         Assert.That(Power.FuelBurnt_kgLastDay["methalox"],
             Is.EqualTo((demandGen - thermal) * 86400 * TurbineKgPerKJ).Within(1e-6));
@@ -274,7 +289,9 @@ public class ColonyPowerEnforcementTests
         ColonyPowerProcessor.RunDay(_earth);
         var shortages = _events.Where(e => e.EventType == EventType.PowerShortage).ToList();
         Assert.That(shortages, Has.Count.EqualTo(1));
-        Assert.That(shortages[0].Message, Does.Contain("Mining 0%").And.Contain("Research 0%"));
+        foreach (var (tier, share) in Power.TierSatisfaction.Where(kv => kv.Value < 1))
+            Assert.That(shortages[0].Message, Does.Contain($"{ColonyPowerProcessor.TierName(tier)} {share * 100:0}%"));
+        Assert.That(shortages[0].Message, Does.Contain("Research"));
         Assert.That(shortages[0].EntityId, Is.EqualTo(_earth.Id));
         Assert.That(shortages[0].FactionId, Is.EqualTo(_player.Id));
 
@@ -306,12 +323,17 @@ public class ColonyPowerEnforcementTests
     [Test]
     public void RemovingAFacility_RecalcsTheGrid()
     {
-        double before = Power.Demand_kW;
         var lab = _earth.GetDataBlob<ComponentInstancesDB>().GetComponentsBySpecificDesign("default-design-research-lab").First();
+        Assert.That(Power.Consumers.Single(c => c.DesignId == "default-design-research-lab").Count, Is.EqualTo(2));
 
         _earth.RemoveComponent(lab);
 
-        Assert.That(Power.Demand_kW, Is.EqualTo(before - 250).Within(1e-6));
+        // Removing a building also moves infrastructure efficiency, and with it the industry
+        // lines' working draw, so check the lab line and the sum rather than a fixed delta.
+        var line = Power.Consumers.Single(c => c.DesignId == "default-design-research-lab");
+        Assert.That(line.Count, Is.EqualTo(1));
+        Assert.That(line.Draw_kW, Is.EqualTo(250).Within(1e-6));
+        Assert.That(Power.Demand_kW, Is.EqualTo(Power.Consumers.Sum(c => c.Draw_kW)).Within(1e-6));
     }
 
     [Test]
@@ -328,12 +350,16 @@ public class ColonyPowerEnforcementTests
     [Test]
     public void PopulationGrowth_IsAnAnnualRate_AppliedPerMonth()
     {
-        // 500,000 people: 20 / 0.5^(1/3) = 25 % a year, capped at 10 %.
-        Assert.That(PopulationProcessor.GrowthPerTick(500_000), Is.EqualTo(0.10 * 30 / 365.25).Within(1e-12));
+        // 500,000 people: 20 / 0.5^(1/3) = 25 % a year, capped at 10 %. Compounded per 30-day tick.
+        Assert.That(PopulationProcessor.GrowthPerTick(500_000), Is.EqualTo(Math.Pow(1.10, 30 / 365.25) - 1).Within(1e-12));
         // 8 million: 20 / 2 = 10 %. 1 billion: 20 / 10 = 2 %.
-        Assert.That(PopulationProcessor.GrowthPerTick(8_000_000), Is.EqualTo(0.10 * 30 / 365.25).Within(1e-12));
-        Assert.That(PopulationProcessor.GrowthPerTick(1_000_000_000), Is.EqualTo(0.02 * 30 / 365.25).Within(1e-12));
+        Assert.That(PopulationProcessor.GrowthPerTick(8_000_000), Is.EqualTo(Math.Pow(1.10, 30 / 365.25) - 1).Within(1e-12));
+        Assert.That(PopulationProcessor.GrowthPerTick(1_000_000_000), Is.EqualTo(Math.Pow(1.02, 30 / 365.25) - 1).Within(1e-12));
         Assert.That(PopulationProcessor.GrowthPerTick(0), Is.EqualTo(0));
+
+        // A year of ticks multiplies to exactly the 10 % cap.
+        double year = Math.Pow(1 + PopulationProcessor.GrowthPerTick(500_000), 365.25 / PopulationProcessor.TickDays);
+        Assert.That(year, Is.EqualTo(1.10).Within(1e-12));
     }
 
     [Test]
