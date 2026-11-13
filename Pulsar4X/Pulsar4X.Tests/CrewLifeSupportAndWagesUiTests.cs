@@ -96,9 +96,9 @@ public class CrewLifeSupportAndWagesUiTests
     {
         Assert.That(Finances.BannerText(Faction(5m), Inv), Is.Empty);
         var broke = Faction(-3000m) with { FundsNegative = true, SpendingBlocked = true, BlockedSpending = new[] { "Building", "Launches" } };
-        Assert.That(Finances.BannerText(broke, Inv), Is.EqualTo("Funds negative (-¤3,000.00). Blocked: Building, Launches."));
-        Assert.That(Finances.BannerText(broke with { BlockedSpending = Array.Empty<string>() }, Inv), Is.EqualTo("Funds negative (-¤3,000.00). Spending is blocked."));
-        Assert.That(Finances.BannerText(Faction(-1m) with { FundsNegative = true }, Inv), Is.EqualTo("Funds negative (-¤1.00)."));
+        Assert.That(Finances.BannerText(broke, Inv), Is.EqualTo("Funds negative: -¤3,000.00. Blocked: Building, Launches."));
+        Assert.That(Finances.BannerText(broke with { BlockedSpending = Array.Empty<string>() }, Inv), Is.EqualTo("Funds negative: -¤3,000.00. Spending is blocked."));
+        Assert.That(Finances.BannerText(Faction(-1m) with { FundsNegative = true }, Inv), Is.EqualTo("Funds negative: -¤1.00."));
     }
 
     [Test]

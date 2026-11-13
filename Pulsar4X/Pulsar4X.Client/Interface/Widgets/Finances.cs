@@ -58,7 +58,8 @@ public static class Finances
     {
         if (!f.FundsNegative && f.Funds >= 0)
             return "";
-        string text = "Funds negative (" + Money(f.Funds, culture) + ").";
+        // No brackets of our own: some cultures already write negative money as "($3,250.00)".
+        string text = "Funds negative: " + Money(f.Funds, culture) + ".";
         if (f.BlockedSpending.Count > 0)
             text += " Blocked: " + string.Join(", ", f.BlockedSpending) + ".";
         else if (f.SpendingBlocked)
