@@ -335,6 +335,79 @@ public class ColonyPowerTests
         Assert.That(power.LifeSupport_kW, Is.EqualTo(before + 1000 * ColonyPowerProcessor.LifeSupportBase_kWPerColonist).Within(1e-2));
     }
 
+    // ---- history ----
+
+    [Test]
+    public void History_TakesOneSamplePerDailyPass()
+    {
+        var power = Power(_earthColony);
+        Assert.That(power.History, Is.Empty, "no daily pass yet");
+
+        // A watching client keeps the system in the foreground, where the daily pass runs
+        // every day. A background system throttles hotloops tenfold.
+        _sol.IncrementExternalObserver(priority: true);
+        DateTime start = _game.TimePulse.GameGlobalDateTime;
+        _game.TimePulse.TimeStep(start + TimeSpan.FromDays(3));
+        Assert.That(_game.TimePulse.LastFault, Is.Null, _game.TimePulse.LastFault?.Report);
+
+        Assert.That(power.History, Has.Count.EqualTo(3), "passes on day 0, day 1 and day 2");
+        for (int i = 1; i < power.History.Count; i++)
+            Assert.That(power.History[i].Date.Date - power.History[i - 1].Date.Date, Is.EqualTo(TimeSpan.FromDays(1)), "one sample per calendar day");
+        var last = power.History[^1];
+        Assert.That(last.Demand_kW, Is.EqualTo(power.Demand_kW).Within(1e-6));
+        Assert.That(last.Generation_kW, Is.EqualTo(power.Generation_kW).Within(1e-6));
+        Assert.That(last.Delivered_kW, Is.EqualTo(power.Dispatched_kW * power.GridEfficiency).Within(1e-6));
+        Assert.That(last.Stored_kJ, Is.EqualTo(0), "batteries are not charged yet");
+
+        // The clock now stands on day 3: a pass adds that day, and a second pass the same day
+        // replaces it rather than adding another.
+        ColonyPowerProcessor.RunDay(_earthColony);
+        Assert.That(power.History, Has.Count.EqualTo(4));
+        ColonyPowerProcessor.RunDay(_earthColony);
+        Assert.That(power.History, Has.Count.EqualTo(4));
+        Assert.That(power.History[^1].Date, Is.EqualTo(_sol.StarSysDateTime));
+    }
+
+    [Test]
+    public void History_CapsAtNinetyDays_DroppingTheOldest()
+    {
+        var power = Power(_earthColony);
+        var day0 = new DateTime(2100, 1, 1);
+        for (int i = 0; i < 100; i++)
+            power.RecordDay(new ColonyPowerSample(day0.AddDays(i), i, i, i, 0));
+
+        Assert.That(ColonyPowerDB.HistoryDays, Is.EqualTo(90));
+        Assert.That(power.History, Has.Count.EqualTo(90));
+        Assert.That(power.History[0].Date, Is.EqualTo(day0.AddDays(10)));
+        Assert.That(power.History[^1].Date, Is.EqualTo(day0.AddDays(99)));
+        Assert.That(power.History.Select(h => h.Demand_kW), Is.EqualTo(Enumerable.Range(10, 90).Select(i => (double)i)));
+
+        var copy = (ColonyPowerDB)power.Clone();
+        Assert.That(copy.History, Is.EqualTo(power.History));
+        Assert.That(copy.History, Is.Not.SameAs(power.History));
+    }
+
+    [Test]
+    public void Projector_ShowsPowerHistoryToTheOwnerOnly()
+    {
+        var power = Power(_earthColony);
+        var day0 = new DateTime(2100, 1, 1);
+        power.RecordDay(new ColonyPowerSample(day0, 300, 400, 250, 0));
+        power.RecordDay(new ColonyPowerSample(day0.AddDays(1), 320, 400, 320, 0));
+
+        var projector = new GameProjector(_game);
+        var view = projector.ProjectEntity(_earthColony, _player.Id).GetView<ColonyPowerView>();
+        Assert.That(view, Is.Not.Null);
+        Assert.That(view!.History, Is.EqualTo(new[]
+        {
+            new ColonyPowerSampleView(day0, 300, 400, 250, 0),
+            new ColonyPowerSampleView(day0.AddDays(1), 320, 400, 320, 0),
+        }));
+
+        var rival = FactionFactory.CreateBasicFaction(_game, "Rival", "RVL", 0);
+        Assert.That(projector.ProjectEntity(_earthColony, rival.Id).HasView<ColonyPowerView>(), Is.False);
+    }
+
     // ---- API ----
 
     [Test]

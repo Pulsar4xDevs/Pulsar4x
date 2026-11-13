@@ -241,6 +241,9 @@ namespace Pulsar4X.Energy
                 Recalc(colonyEntity);
                 power.TierSatisfaction = ShareByTier(delivered, power.DemandByTier);
             }
+
+            // Batteries are not charged yet, so nothing is stored.
+            power.RecordDay(new ColonyPowerSample(colonyEntity.StarSysDateTime, power.Demand_kW, power.Generation_kW, delivered, 0));
         }
 
         /// <summary>

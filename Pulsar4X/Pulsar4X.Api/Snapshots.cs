@@ -377,7 +377,13 @@ public sealed record ColonyPowerView(
     double Dispatched_kW = 0) : IComponentView
 {
     public double Balance_kW => Delivered_kW - Demand_kW;
+
+    /// <summary>One sample per daily pass, oldest first, up to 90 days.</summary>
+    public IReadOnlyList<ColonyPowerSampleView> History { get; init; } = Array.Empty<ColonyPowerSampleView>();
 }
+
+/// <summary>One day of the grid. Generation is before grid loss; Delivered is what reached the facilities.</summary>
+public sealed record ColonyPowerSampleView(DateTime Date, double Demand_kW, double Generation_kW, double Delivered_kW, double Stored_kJ);
 
 /// <summary>One consumer line. Tier is the display name; TierRank 1 is served first.</summary>
 public sealed record ColonyPowerConsumerRow(string DesignId, string Name, string Tier, int TierRank, int Count, double Draw_kW);

@@ -74,6 +74,29 @@ public class SaveRoundTripTests
     }
 
     [Test]
+    public void ColonyPowerHistory_RoundTripsTheSavedGame()
+    {
+        var game = BuildEarth();
+        var sol = game.Systems.Single(s => s.ID == "system-sol");
+        var colony = sol.GetAllEntitiesWithDataBlob<Pulsar4X.Energy.ColonyPowerDB>().First();
+        var power = colony.GetDataBlob<Pulsar4X.Energy.ColonyPowerDB>();
+        var day0 = new DateTime(2100, 1, 1);
+        power.RecordDay(new Pulsar4X.Energy.ColonyPowerSample(day0, 300, 400, 250, 0));
+        power.RecordDay(new Pulsar4X.Energy.ColonyPowerSample(day0.AddDays(1), 320, 400, 320, 0));
+        var saved = power.History.ToList();
+        int colonyId = colony.Id;
+
+        string json = Game.Save(game);
+        EntityIDGenerator.NextId = 0;
+        Game.EntityIDCounter = 0;
+        var loaded = Game.Load(json);
+
+        var loadedSol = loaded.Systems.Single(s => s.ID == "system-sol");
+        Assert.That(loadedSol.TryGetEntityById(colonyId, out var loadedColony), Is.True);
+        Assert.That(loadedColony!.GetDataBlob<Pulsar4X.Energy.ColonyPowerDB>().History, Is.EqualTo(saved));
+    }
+
+    [Test]
     public void EarthColony_LoadAcceptReadsTheHumanFaction()
     {
         var game = BuildEarth();

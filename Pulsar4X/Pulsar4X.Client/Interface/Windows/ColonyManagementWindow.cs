@@ -289,53 +289,34 @@ namespace Pulsar4X.Client
             ImGui.EndChild();
         }
 
-        /// <summary>The colony power grid: demand by facility against generation, tier shares and plant fuel.</summary>
+        static readonly Vector4 PowerDemandColour = new(1f, 0.6f, 0.2f, 1f);
+        static readonly Vector4 PowerGenerationColour = new(0.35f, 0.75f, 1f, 1f);
+        static readonly Vector4 PowerDeliveredColour = PowerRing.FullColour;
+        static readonly Vector4 PowerShortfallColour = new(0.9f, 0.2f, 0.2f, 0.35f);
+
+        /// <summary>
+        /// The colony power grid: a summary beside 90 days of history, then demand grouped by tier
+        /// in serving order, then generation and storage, and plant fuel.
+        /// </summary>
         private static void DisplayPower(ColonyPowerView power)
         {
             ImGui.TextWrapped("Plants burn fuel from the colony stockpile once a day. In a shortfall, higher tiers are served first and industry, mining and research slow to their tier's share. Batteries are not charged yet.");
             ImGui.Separator();
 
-            if (ImGui.BeginTable("PowerSummary", 2, ImGuiTableFlags.SizingFixedFit))
+            if (ImGui.BeginTable("PowerTop", 2, ImGuiTableFlags.SizingStretchProp))
             {
-                DisplayHelpers.PrintRow("Demand", Stringify.Power(power.Demand_kW));
-                DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW),
-                    tooltipTwo: "What the plants can give now");
-                DisplayHelpers.PrintRow("Running at", Stringify.Power(power.Dispatched_kW),
-                    tooltipTwo: "Average plant output in the last daily pass");
-                DisplayHelpers.PrintRow("Delivered", Stringify.Power(power.Delivered_kW),
-                    tooltipTwo: $"After {(1 - power.GridEfficiency) * 100:0.#}% grid loss");
-                DisplayHelpers.PrintRow("Balance", (power.Balance_kW < 0 ? "-" : "+") + Stringify.Power(Math.Abs(power.Balance_kW)));
-                if (power.StoreMax_kJ > 0)
-                    DisplayHelpers.PrintRow("Grid storage", Stringify.Energy(power.StoreMax_kJ));
+                ImGui.TableSetupColumn("Summary", ImGuiTableColumnFlags.WidthFixed, 260f);
+                ImGui.TableSetupColumn("History", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                PowerSummary(power);
+                ImGui.TableNextColumn();
+                PowerHistoryChart(power.History, new Vector2(Math.Max(200f, ImGui.GetContentRegionAvail().X), 180f));
                 ImGui.EndTable();
             }
-            if (power.Balance_kW < 0)
-                ImGui.TextColored(new Vector4(1f, 0.6f, 0.2f, 1f), "Generation does not cover demand. Lower tiers go short first.");
 
-            ImGui.SeparatorText("Demand by facility");
-            if (ImGui.BeginTable("PowerConsumers", 4, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
-            {
-                ImGui.TableSetupColumn("Facility");
-                ImGui.TableSetupColumn("Tier");
-                ImGui.TableSetupColumn("Count");
-                ImGui.TableSetupColumn("Draw");
-                ImGui.TableHeadersRow();
-                foreach (var c in power.Consumers)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TableNextColumn();
-                    ImGui.Text(c.Name);
-                    if (c.DesignId == "life-support" && ImGui.IsItemHovered())
-                        ImGui.SetTooltip($"{power.LifeSupportColonists:N0} colonists: a base draw per person, more on hostile worlds");
-                    ImGui.TableNextColumn();
-                    ImGui.Text(c.Tier);
-                    ImGui.TableNextColumn();
-                    ImGui.Text(c.DesignId == "life-support" ? "" : c.Count.ToString());
-                    ImGui.TableNextColumn();
-                    ImGui.Text(Stringify.Power(c.Draw_kW));
-                }
-                ImGui.EndTable();
-            }
+            ImGui.SeparatorText("Demand by tier (served in this order)");
+            PowerTiers(power);
 
             ImGui.SeparatorText("Generation and storage");
             if (power.Plants.Count == 0)
@@ -375,26 +356,6 @@ namespace Pulsar4X.Client
                 ImGui.EndTable();
             }
 
-            ImGui.SeparatorText("Tier shares");
-            if (ImGui.BeginTable("PowerTiers", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
-            {
-                ImGui.TableSetupColumn("Tier (served in order)");
-                ImGui.TableSetupColumn("Demand");
-                ImGui.TableSetupColumn("Supplied");
-                ImGui.TableHeadersRow();
-                foreach (var t in power.Tiers.Where(t => t.Demand_kW > 0))
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TableNextColumn();
-                    ImGui.Text(t.Tier);
-                    ImGui.TableNextColumn();
-                    ImGui.Text(Stringify.Power(t.Demand_kW));
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{t.Satisfaction * 100:0.#}%");
-                }
-                ImGui.EndTable();
-            }
-
             if (power.Fuel.Count > 0)
             {
                 ImGui.SeparatorText("Plant fuel");
@@ -419,6 +380,183 @@ namespace Pulsar4X.Client
                     }
                     ImGui.EndTable();
                 }
+            }
+        }
+
+        private static void PowerSummary(ColonyPowerView power)
+        {
+            if (ImGui.BeginTable("PowerSummary", 2, ImGuiTableFlags.SizingFixedFit))
+            {
+                DisplayHelpers.PrintRow("Demand", Stringify.Power(power.Demand_kW));
+                DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW),
+                    tooltipTwo: "What the plants can give now");
+                DisplayHelpers.PrintRow("Running at", Stringify.Power(power.Dispatched_kW),
+                    tooltipTwo: "Average plant output in the last daily pass");
+                DisplayHelpers.PrintRow("Delivered", Stringify.Power(power.Delivered_kW),
+                    tooltipTwo: $"After {(1 - power.GridEfficiency) * 100:0.#}% grid loss");
+                DisplayHelpers.PrintRow("Balance", (power.Balance_kW < 0 ? "-" : "+") + Stringify.Power(Math.Abs(power.Balance_kW)));
+                if (power.StoreMax_kJ > 0)
+                    DisplayHelpers.PrintRow("Grid storage", Stringify.Energy(power.StoreMax_kJ));
+                ImGui.EndTable();
+            }
+            PowerRing.Draw("##powerTabRing", power, Styles.DescriptiveColor);
+            if (power.Balance_kW < 0)
+                ImGui.TextColored(PowerDemandColour, "Generation does not cover demand. Lower tiers go short first.");
+        }
+
+        /// <summary>One header per tier with a supply bar, then that tier's facilities.</summary>
+        private static void PowerTiers(ColonyPowerView power)
+        {
+            bool any = false;
+            foreach (var tier in power.Tiers.OrderBy(t => t.TierRank))
+            {
+                var consumers = power.Consumers.Where(c => c.TierRank == tier.TierRank).ToList();
+                if (tier.Demand_kW <= 0 && consumers.Count == 0)
+                    continue;
+                any = true;
+
+                double share = Math.Clamp(tier.Satisfaction, 0, 1);
+                Vector4 colour = PowerRing.ColourFor(share);
+
+                ImGui.PushStyleColor(ImGuiCol.PlotHistogram, colour);
+                ImGui.ProgressBar((float)share, new Vector2(80f, 0f), "");
+                ImGui.PopStyleColor();
+                ImGui.SameLine();
+                ImGui.TextUnformatted($"{tier.Tier} · {Stringify.Power(tier.Demand_kW)} · ");
+                ImGui.SameLine(0f, 0f);
+                ImGui.PushStyleColor(ImGuiCol.Text, colour);
+                ImGui.TextUnformatted(PowerRing.WordsFor(share));
+                ImGui.PopStyleColor();
+
+                if (consumers.Count == 0)
+                    continue;
+                if (ImGui.BeginTable("PowerTier" + tier.TierRank, 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+                {
+                    ImGui.TableSetupColumn("Facility");
+                    ImGui.TableSetupColumn("Count");
+                    ImGui.TableSetupColumn("Draw");
+                    ImGui.TableHeadersRow();
+                    foreach (var c in consumers)
+                    {
+                        ImGui.TableNextRow();
+                        ImGui.TableNextColumn();
+                        ImGui.Text(c.Name);
+                        if (c.DesignId == "life-support" && ImGui.IsItemHovered())
+                            ImGui.SetTooltip($"{power.LifeSupportColonists:N0} colonists: a base draw per person, more on hostile worlds");
+                        ImGui.TableNextColumn();
+                        ImGui.Text(c.DesignId == "life-support" ? "" : c.Count.ToString());
+                        ImGui.TableNextColumn();
+                        ImGui.Text(Stringify.Power(c.Draw_kW));
+                    }
+                    ImGui.EndTable();
+                }
+            }
+            if (!any)
+                ImGui.TextDisabled("Nothing on this colony draws power.");
+        }
+
+        /// <summary>
+        /// Demand, generation and delivered power over the stored days, drawn with the window draw list.
+        /// Where delivered falls below demand the gap is shaded. Hover shows that day's values.
+        /// </summary>
+        private static void PowerHistoryChart(IReadOnlyList<ColonyPowerSampleView> history, Vector2 size)
+        {
+            ImGui.TextColored(PowerDemandColour, "- Demand");
+            ImGui.SameLine();
+            ImGui.TextColored(PowerGenerationColour, "- Generation");
+            ImGui.SameLine();
+            ImGui.TextColored(PowerDeliveredColour, "- Delivered");
+            ImGui.SameLine();
+            ImGui.TextColored(new Vector4(0.9f, 0.3f, 0.3f, 1f), "# Shortfall");
+
+            if (history.Count < 2)
+            {
+                ImGui.TextDisabled("History builds daily");
+                return;
+            }
+
+            const float axisLeft = 70f;
+            const float axisBottom = 18f;
+            var draw = ImGui.GetWindowDrawList();
+            var origin = ImGui.GetCursorScreenPos();
+            ImGui.InvisibleButton("PowerHistoryPlot", size);
+            bool hovered = ImGui.IsItemHovered();
+
+            float x0 = origin.X + axisLeft;
+            float x1 = origin.X + size.X - 4f;
+            float y0 = origin.Y + 4f;
+            float y1 = origin.Y + size.Y - axisBottom;
+
+            double max = 0;
+            foreach (var h in history)
+                max = Math.Max(max, Math.Max(h.Demand_kW, Math.Max(h.Generation_kW, h.Delivered_kW)));
+            if (max <= 0)
+                max = 1;
+
+            int n = history.Count;
+            float X(int i) => x0 + (x1 - x0) * i / (n - 1);
+            float Y(double kW) => y1 - (float)(kW / max) * (y1 - y0);
+
+            uint axisColour = ImGui.GetColorU32(ImGuiCol.TextDisabled);
+            uint gridColour = ImGui.GetColorU32(ImGuiCol.Border);
+            draw.AddRect(new Vector2(x0, y0), new Vector2(x1, y1), gridColour);
+            foreach (float f in new[] { 0f, 0.5f, 1f })
+            {
+                float y = Y(max * f);
+                draw.AddLine(new Vector2(x0, y), new Vector2(x1, y), gridColour);
+                string label = Stringify.Power(max * f);
+                var labelSize = ImGui.CalcTextSize(label);
+                draw.AddText(new Vector2(x0 - labelSize.X - 4f, y - labelSize.Y / 2), axisColour, label);
+            }
+            string firstDay = history[0].Date.ToString("yyyy-MM-dd");
+            string lastDay = history[n - 1].Date.ToString("yyyy-MM-dd");
+            draw.AddText(new Vector2(x0, y1 + 2f), axisColour, firstDay);
+            draw.AddText(new Vector2(x1 - ImGui.CalcTextSize(lastDay).X, y1 + 2f), axisColour, lastDay);
+            string daysLabel = n + " days";
+            draw.AddText(new Vector2((x0 + x1 - ImGui.CalcTextSize(daysLabel).X) / 2, y1 + 2f), axisColour, daysLabel);
+
+            uint shortfall = ImGui.GetColorU32(PowerShortfallColour);
+            for (int i = 0; i < n - 1; i++)
+            {
+                var a = history[i];
+                var b = history[i + 1];
+                if (a.Delivered_kW >= a.Demand_kW && b.Delivered_kW >= b.Demand_kW)
+                    continue;
+                // The top edge never dips below delivered, so the quad does not fold over itself.
+                draw.AddQuadFilled(
+                    new Vector2(X(i), Y(Math.Max(a.Demand_kW, a.Delivered_kW))),
+                    new Vector2(X(i + 1), Y(Math.Max(b.Demand_kW, b.Delivered_kW))),
+                    new Vector2(X(i + 1), Y(b.Delivered_kW)),
+                    new Vector2(X(i), Y(a.Delivered_kW)),
+                    shortfall);
+            }
+
+            uint demandColour = ImGui.GetColorU32(PowerDemandColour);
+            uint generationColour = ImGui.GetColorU32(PowerGenerationColour);
+            uint deliveredColour = ImGui.GetColorU32(PowerDeliveredColour);
+            for (int i = 0; i < n - 1; i++)
+            {
+                var a = history[i];
+                var b = history[i + 1];
+                draw.AddLine(new Vector2(X(i), Y(a.Generation_kW)), new Vector2(X(i + 1), Y(b.Generation_kW)), generationColour, 1.5f);
+                draw.AddLine(new Vector2(X(i), Y(a.Demand_kW)), new Vector2(X(i + 1), Y(b.Demand_kW)), demandColour, 1.5f);
+                draw.AddLine(new Vector2(X(i), Y(a.Delivered_kW)), new Vector2(X(i + 1), Y(b.Delivered_kW)), deliveredColour, 1.5f);
+            }
+
+            if (hovered)
+            {
+                float mouseX = ImGui.GetIO().MousePos.X;
+                int day = (int)Math.Round((mouseX - x0) / (x1 - x0) * (n - 1));
+                day = Math.Clamp(day, 0, n - 1);
+                draw.AddLine(new Vector2(X(day), y0), new Vector2(X(day), y1), axisColour);
+                var h = history[day];
+                string tip = h.Date.ToString("yyyy-MM-dd")
+                    + "\nDemand: " + Stringify.Power(h.Demand_kW)
+                    + "\nGeneration: " + Stringify.Power(h.Generation_kW)
+                    + "\nDelivered: " + Stringify.Power(h.Delivered_kW);
+                if (h.Delivered_kW < h.Demand_kW)
+                    tip += "\nShort: " + Stringify.Power(h.Demand_kW - h.Delivered_kW);
+                ImGui.SetTooltip(tip);
             }
         }
 
