@@ -435,6 +435,16 @@ namespace Pulsar4X.Client
                     ImGui.EndTabItem();
                 }
 
+                // Owner-only: the projector sends ShipPowerView only to the ship's owner.
+                if (orderShip != null
+                    && SubjectEntity(galaxy) is { } powerSubject
+                    && powerSubject.GetView<ShipPowerView>() is { } shipPower
+                    && ImGui.BeginTabItem("Power"))
+                {
+                    ShipPowerDisplay.Display(shipPower, powerSubject.GetView<EnergyView>(), Styles.NeutralColor);
+                    ImGui.EndTabItem();
+                }
+
                 if (orderShip == null)
                     DisplayStandingOrdersTab();
 
@@ -495,10 +505,31 @@ namespace Pulsar4X.Client
 
                 if (ImGui.CollapsingHeader("Crew", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    int required = subject?.GetView<ShipView>()?.CrewRequired ?? 0;
+                    var shipView = subject?.GetView<ShipView>();
+                    int required = shipView?.CrewRequired ?? 0;
                     ImGui.Columns(2);
-                    DisplayHelpers.PrintRow("Required", required.ToString("N0"), separator: false);
+                    DisplayHelpers.PrintRow("Required", required.ToString("N0"),
+                        tooltipTwo: "Each component's crew per copy, times its copies", separator: false);
                     ImGui.Columns(1);
+                    if (shipView is { CrewByComponent.Count: > 0 }
+                        && ImGui.BeginTable("ShipCrewRows", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+                    {
+                        ImGui.TableSetupColumn("Component");
+                        ImGui.TableSetupColumn("Per copy x copies");
+                        ImGui.TableSetupColumn("Crew");
+                        ImGui.TableHeadersRow();
+                        foreach (var row in shipView.CrewByComponent)
+                        {
+                            ImGui.TableNextRow();
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted(row.Name);
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted($"{row.CrewPerCopy:N0} x {row.Count:N0}");
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted(row.Crew.ToString("N0"));
+                        }
+                        ImGui.EndTable();
+                    }
                 }
 
                 // Output is the net added to the batteries this step. The old power window's Load

@@ -348,8 +348,172 @@ namespace Pulsar4X.Engine.Api
                 energy.EnergyStored.TryGetValue(energyType, out stored);
                 energy.EnergyStoreMax.TryGetValue(energyType, out storeMax);
             }
-            bool hasPlant = energy.MaxOutputFromReactor > 0 || energy.MaxOutputFromSolar > 0 || storeMax > 0;
-            return new ShipPowerView(energy.TotalOutputMax, Math.Max(0, energy.Demand), stored, storeMax, hasPlant);
+            bool hasPlant = energy.MaxOutputFromReactor > 0 || energy.MaxOutputFromSolar > 0 || storeMax > 0
+                || energy.MaxOutputFromCells > 0 || (energy.DecaySources?.Count ?? 0) > 0;
+            double demand = Math.Max(0, energy.Demand);
+            double generation = energy.TotalOutputMax;
+            double aux = Math.Max(0, energy.AuxDemand);
+            double auxServed = Math.Clamp(energy.AuxServed, 0, aux);
+            return new ShipPowerView(generation, demand, stored, storeMax, hasPlant)
+            {
+                AuxDemand_kW = aux,
+                AuxServed_kW = auxServed,
+                Sources = ShipPowerSources(ship, energy),
+                LoadGroups = ShipPowerLoadGroups(ship, demand, generation, aux, auxServed),
+            };
+        }
+
+        /// <summary>The installed designs on a ship carrying attribute T, with their copy counts.</summary>
+        private static List<(ComponentDesign design, int count, T atb)> DesignsWith<T>(Entity ship) where T : IComponentDesignAttribute
+        {
+            var list = new List<(ComponentDesign, int, T)>();
+            if (!ship.TryGetDataBlob<ComponentInstancesDB>(out var ci))
+                return list;
+            foreach (var instances in ci.ComponentsByDesign.Values)
+            {
+                if (instances.Count == 0)
+                    continue;
+                var design = instances[0].Design;
+                if (design != null && design.TryGetAttribute<T>(out var atb))
+                    list.Add((design, instances.Count, atb));
+            }
+            return list.OrderBy(d => d.Item1.Name).ToList();
+        }
+
+        static string DesignNames<T>(List<(ComponentDesign design, int count, T atb)> designs, string fallback)
+            => designs.Count == 0 ? fallback : string.Join(", ", designs.Select(d => d.design.Name).Distinct());
+
+        const double SecondsPerYear = 365.25 * 86400.0;
+
+        /// <summary>
+        /// Solar, RTG, reactor and fuel-cell rows in dispatch order, from the ship's EnergyGenAbilityDB
+        /// (phase 6: DecaySources, LocalFuel, cell propellant in the hold). Names and counts come from the
+        /// installed designs; a kind is listed when the plant has it even if no design is found.
+        /// </summary>
+        private static IReadOnlyList<ShipPowerSourceRow> ShipPowerSources(Entity ship, Pulsar4X.Energy.EnergyGenAbilityDB energy)
+        {
+            var rows = new List<ShipPowerSourceRow>();
+            var generators = DesignsWith<Pulsar4X.Energy.EnergyGenerationAtb>(ship);
+            var cells = generators.Where(g => g.atb.TankFed > 0).ToList();
+            var isotopes = generators.Where(g => g.atb.TankFed <= 0 && g.atb.HalfLife_s > 0).ToList();
+            var reactors = generators.Where(g => g.atb.TankFed <= 0 && !(g.atb.HalfLife_s > 0)).ToList();
+            var library = ship.Manager != null ? ship.GetFactionCargoDefinitions() : null;
+            string FuelName(string id) => library?.GetAny(id)?.Name ?? id;
+
+            var solar = DesignsWith<Pulsar4X.Energy.EnergySolarGenerationAtb>(ship);
+            if (energy.MaxOutputFromSolar > 0 || solar.Count > 0 || energy.SolarPanels.Count > 0)
+            {
+                double solarKw = Math.Max(0, energy.MaxOutputFromSolar);
+                rows.Add(new ShipPowerSourceRow("Solar", DesignNames(solar, "Solar panels"),
+                    solar.Count > 0 ? solar.Sum(s => s.count) : energy.SolarPanels.Count, solarKw, solarKw)
+                {
+                    Note = solarKw > 0 ? null : "No sunlight",
+                });
+            }
+
+            var sources = energy.DecaySources ?? new List<Pulsar4X.Energy.DecaySource>();
+            if (sources.Count > 0)
+            {
+                double halfLife = sources.Where(d => d.HalfLife_s > 0).Select(d => d.HalfLife_s).DefaultIfEmpty(0).Max();
+                rows.Add(new ShipPowerSourceRow("RTG", DesignNames(isotopes, "RTG"),
+                    isotopes.Count > 0 ? isotopes.Sum(i => i.count) : sources.Count,
+                    energy.DecayOutputMax, sources.Sum(d => Math.Max(0, d.Output_kW)))
+                {
+                    HalfLife_years = halfLife > 0 ? halfLife / SecondsPerYear : null,
+                });
+            }
+
+            if (energy.MaxOutputFromReactor > 0)
+            {
+                string fuelId = energy.TotalFuelUseAtMax.type ?? "";
+                bool tracksFuel = energy.TotalFuelUseAtMax.maxUse > 0;
+                rows.Add(new ShipPowerSourceRow("Reactor", DesignNames(reactors, "Reactor"),
+                    reactors.Sum(r => r.count), energy.ReactorOutputMax, energy.MaxOutputFromReactor)
+                {
+                    FuelId = fuelId.Length > 0 ? fuelId : null,
+                    FuelName = fuelId.Length > 0 ? FuelName(fuelId) : null,
+                    FuelRemaining_kg = tracksFuel ? Math.Max(0, energy.LocalFuel) : null,
+                    FuelBurnAtFull_kgPerS = tracksFuel ? energy.TotalFuelUseAtMax.maxUse : null,
+                    Note = energy.ReactorOutOfFuel ? "Out of fuel" : null,
+                });
+            }
+
+            if (energy.MaxOutputFromCells > 0)
+            {
+                string fuelId = energy.CellFuelUseAtMax.type ?? "";
+                double left = energy.CellFuelAvailable_kg;
+                rows.Add(new ShipPowerSourceRow("Fuel cell", DesignNames(cells, "Fuel cell"),
+                    cells.Sum(c => c.count), energy.CellsOutputMax, energy.MaxOutputFromCells)
+                {
+                    FuelId = fuelId.Length > 0 ? fuelId : null,
+                    FuelName = fuelId.Length > 0 ? FuelName(fuelId) : null,
+                    FuelRemaining_kg = left,
+                    FuelBurnAtFull_kgPerS = energy.CellFuelUseAtMax.maxUse > 0 ? energy.CellFuelUseAtMax.maxUse : null,
+                    Note = left > 0 ? null : "No propellant in the hold",
+                });
+            }
+            return rows;
+        }
+
+        static string StateFor(double share) => share >= 1 - 1e-9 ? "Powered" : share <= 1e-9 ? "No power" : "Partial";
+
+        /// <summary>
+        /// Loads by kind. Warp draws EnergyGenAbilityDB.Demand and is served first; sensors and other
+        /// consumers (PowerConsumerAtb, phase 6 AuxDemand) share what is spare once the batteries are full,
+        /// so both groups get the same share. Miners draw per dig (ShipPower.DrawEnergy) and keep no kW
+        /// load, so their state comes from the running mining order's report.
+        /// </summary>
+        private static IReadOnlyList<ShipPowerLoadGroup> ShipPowerLoadGroups(Entity ship, double demand, double generation, double aux, double auxServed)
+        {
+            var groups = new List<ShipPowerLoadGroup>();
+
+            var drives = DesignsWith<Pulsar4X.Movement.WarpDriveAtb>(ship);
+            if (drives.Count > 0 || demand > 0)
+            {
+                double share = demand > 0 ? Math.Clamp(generation / demand, 0, 1) : 1;
+                var rows = drives.Select(d => new ShipPowerLoadRow(d.design.UniqueID, d.design.Name, d.count,
+                    d.atb.BubbleSustainCost * d.count, "Bubble sustain; creating a bubble draws more for a moment")).ToList();
+                groups.Add(new ShipPowerLoadGroup("Engines and warp", demand, Math.Min(demand, generation), share,
+                    demand > 0 ? StateFor(share) : "Idle", rows,
+                    demand > 0 ? null : "Not warping; the drives draw nothing"));
+            }
+
+            var consumers = DesignsWith<Pulsar4X.Energy.PowerConsumerAtb>(ship).Where(c => c.atb.Draw_kW > 0).ToList();
+            double auxShare = aux > 0 ? Math.Clamp(auxServed / aux, 0, 1) : 1;
+            string? auxNote = aux > 0 && auxServed < aux
+                ? "Runs on spare output once the batteries are full, after warp and charging" : null;
+            foreach (var (kind, sensors) in new[] { ("Sensors", true), ("Other loads", false) })
+            {
+                var mine = consumers.Where(c => c.design.HasAttribute<Pulsar4X.Sensors.SensorReceiverAtb>() == sensors).ToList();
+                if (mine.Count == 0)
+                    continue;
+                double kw = mine.Sum(c => c.atb.Draw_kW * c.count);
+                groups.Add(new ShipPowerLoadGroup(kind, kw, kw * auxShare, auxShare, StateFor(auxShare),
+                    mine.Select(c => new ShipPowerLoadRow(c.design.UniqueID, c.design.Name, c.count, c.atb.Draw_kW * c.count)).ToList(),
+                    auxNote));
+            }
+
+            var miners = DesignsWith<AsteroidMinerAtb>(ship);
+            if (miners.Count > 0)
+            {
+                var order = ship.TryGetDataBlob<ActionQueueDB>(out var queue)
+                    ? queue.ActionList.OfType<AsteroidMineOrder>().FirstOrDefault()
+                    : null;
+                // An order that has not run yet reports nothing, which reads as idle.
+                string details = order?.Details ?? "";
+                (string state, double? share) = details switch
+                {
+                    "Mining" => ("Powered", (double?)1),
+                    "No power for the miner" => ("No power", 0),
+                    "Mining, short of power" => ("Partial", null),
+                    _ => ("Idle", null),
+                };
+                groups.Add(new ShipPowerLoadGroup("Miners", 0, 0, share, state,
+                    miners.Select(m => new ShipPowerLoadRow(m.design.UniqueID, m.design.Name, m.count, 0,
+                        $"{m.atb.UnitsPerDay * m.count:N0} units/day")).ToList(),
+                    "Each dig draws the minerals' extraction energy from spare output, then the batteries"));
+            }
+            return groups;
         }
 
         private static EnergyView? ToEnergyView(Pulsar4X.Energy.EnergyGenAbilityDB energy)
@@ -585,6 +749,13 @@ namespace Pulsar4X.Engine.Api
                 armorThickness = damage.Armor.thickness;
             }
 
+            var crewRows = (shipInfo.Design?.Components ?? new List<(ComponentDesign design, int count)>())
+                .Where(c => c.design != null && c.design.CrewReq != 0 && c.count > 0)
+                .GroupBy(c => c.design.UniqueID)
+                .Select(g => new ShipCrewRow(g.Key, g.First().design.Name, g.Sum(c => c.count), g.First().design.CrewReq))
+                .OrderByDescending(r => r.Crew).ThenBy(r => r.Name)
+                .ToList();
+
             return new ShipView(
                 shipInfo.Design?.Name ?? "",
                 shipInfo.Design?.CrewReq ?? 0,
@@ -592,7 +763,10 @@ namespace Pulsar4X.Engine.Api
                 totalCount > 0 ? totalHealth / totalCount : 1,
                 operationalCount,
                 totalCount,
-                armorThickness);
+                armorThickness)
+            {
+                CrewByComponent = crewRows,
+            };
         }
 
         private static ThrustView? ToThrustView(Pulsar4X.Movement.NewtonThrustAbilityDB thrust, Entity ship, int factionId)

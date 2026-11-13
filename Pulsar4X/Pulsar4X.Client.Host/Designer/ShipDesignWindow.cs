@@ -714,6 +714,15 @@ namespace Pulsar4X.Client
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.EnergyKwh(_buildEnergy));
 
+                // Crew: each component's crew per copy times its copies (ShipDesign.CrewReq counts the same).
+                var crewRows = SelectedComponents.Where(c => c.design.CrewReq != 0 && c.count > 0).ToList();
+                ImGui.TableNextColumn();
+                ImGui.Text("Crew");
+                ImGui.TableNextColumn();
+                ImGui.Text(crewRows.Sum(c => c.design.CrewReq * c.count).ToString(Styles.IntFormat));
+                if (crewRows.Count > 0 && ImGui.IsItemHovered())
+                    ImGui.SetTooltip(string.Join("\n", crewRows.Select(c => $"{c.design.Name}: {c.design.CrewReq} x {c.count} = {c.design.CrewReq * c.count}")));
+
                 ImGui.TableNextColumn();
                 ImGui.Text("Total Thrust");
                 ImGui.TableNextColumn();

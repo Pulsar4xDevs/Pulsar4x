@@ -429,7 +429,14 @@ public sealed record ShipView(
     int OperationalComponents = 0,
     int TotalComponents = 0,
     /// <summary>0 when the ship has no armor.</summary>
-    double ArmorThicknessMm = 0) : IComponentView;
+    double ArmorThicknessMm = 0) : IComponentView
+{
+    /// <summary>
+    /// Owner only: where <see cref="CrewRequired"/> comes from, one row per component design with crew
+    /// (crew per copy x copies). The rows add up to CrewRequired.
+    /// </summary>
+    public IReadOnlyList<ShipCrewRow> CrewByComponent { get; init; } = Array.Empty<ShipCrewRow>();
+}
 
 /// <summary>Newtonian propulsion stats; ΔV values are pre-computed server-side.</summary>
 public sealed record ThrustView(
@@ -474,6 +481,80 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
     /// as fully powered, the same rule as the colony ring.
     /// </summary>
     public double Share => Demand_kW > 0 ? Math.Clamp(Generation_kW / Demand_kW, 0, 1) : 1;
+
+    /// <summary>
+    /// Demand from the ship's other loads (sensors and other consumers), kW. These run on spare output
+    /// once the batteries are full, after warp and charging. Not part of <see cref="Demand_kW"/>.
+    /// </summary>
+    public double AuxDemand_kW { get; init; }
+
+    /// <summary>The share of <see cref="AuxDemand_kW"/> the plant serves now, kW (0 while the batteries charge).</summary>
+    public double AuxServed_kW { get; init; }
+
+    /// <summary>Warp demand plus the other loads, kW.</summary>
+    public double TotalDemand_kW => Demand_kW + AuxDemand_kW;
+
+    /// <summary>What the plants serve now, kW: warp demand up to generation, plus the served other loads.</summary>
+    public double Delivered_kW => Math.Min(Demand_kW, Generation_kW) + AuxServed_kW;
+
+    /// <summary>
+    /// Delivered over all demand (warp and other loads), 0..1, for the Power tab's ring. Nothing drawing
+    /// counts as fully powered. <see cref="Share"/> stays warp-only for the entity card.
+    /// </summary>
+    public double SupplyShare => TotalDemand_kW > 0 ? Math.Clamp(Delivered_kW / TotalDemand_kW, 0, 1) : 1;
+
+    /// <summary>One row per source kind on board (solar, RTG, reactor, fuel cell), in dispatch order.</summary>
+    public IReadOnlyList<ShipPowerSourceRow> Sources { get; init; } = Array.Empty<ShipPowerSourceRow>();
+
+    /// <summary>The ship's loads grouped by kind: engines and warp, sensors, other loads, miners.</summary>
+    public IReadOnlyList<ShipPowerLoadGroup> LoadGroups { get; init; } = Array.Empty<ShipPowerLoadGroup>();
+}
+
+/// <summary>
+/// One kind of ship power source. Kind is "Solar", "RTG", "Reactor" or "Fuel cell"; Name lists the
+/// installed designs. Output_kW is what it can give now (an RTG after decay, a reactor or fuel cell
+/// with fuel left); Nameplate_kW is installed (an RTG when new).
+/// </summary>
+public sealed record ShipPowerSourceRow(string Kind, string Name, int Count, double Output_kW, double Nameplate_kW)
+{
+    /// <summary>Reactor fuel or fuel-cell propellant; null for solar and RTGs.</summary>
+    public string? FuelId { get; init; }
+    public string? FuelName { get; init; }
+
+    /// <summary>Reactor: the fuel built into the reactors. Fuel cell: the propellant in the hold. kg.</summary>
+    public double? FuelRemaining_kg { get; init; }
+
+    /// <summary>Burn at full output, kg/s.</summary>
+    public double? FuelBurnAtFull_kgPerS { get; init; }
+
+    /// <summary>Seconds the fuel lasts at full output, or null when nothing burns.</summary>
+    public double? RunwayAtFull_s => FuelRemaining_kg is { } kg && FuelBurnAtFull_kgPerS is { } rate && rate > 0 ? kg / rate : null;
+
+    /// <summary>RTG: years for the output to halve.</summary>
+    public double? HalfLife_years { get; init; }
+
+    /// <summary>RTG: output now over output when new, 0..1.</summary>
+    public double? DecayRemaining => HalfLife_years is not null && Nameplate_kW > 0 ? Math.Clamp(Output_kW / Nameplate_kW, 0, 1) : null;
+
+    /// <summary>A plain warning such as "Out of fuel", or null.</summary>
+    public string? Note { get; init; }
+}
+
+/// <summary>
+/// One group of ship loads. Kind is "Engines and warp", "Sensors", "Other loads" or "Miners".
+/// Satisfaction is the share served now, 0..1, or null when the engine does not measure it (a miner
+/// that is idle or reports it went short). State is "Powered", "Partial", "No power" or "Idle".
+/// </summary>
+public sealed record ShipPowerLoadGroup(string Kind, double Demand_kW, double Served_kW, double? Satisfaction, string State,
+    IReadOnlyList<ShipPowerLoadRow> Loads, string? Note = null);
+
+/// <summary>One installed load design: Draw_kW is the nameplate of all its copies (a warp drive's bubble sustain).</summary>
+public sealed record ShipPowerLoadRow(string DesignId, string Name, int Count, double Draw_kW, string? Note = null);
+
+/// <summary>One component design's crew on a ship: crew per copy times copies.</summary>
+public sealed record ShipCrewRow(string DesignId, string Name, int Count, int CrewPerCopy)
+{
+    public int Crew => CrewPerCopy * Count;
 }
 
 /// <summary>One sample of the energy history; <see cref="Seconds"/> is relative to the start of
