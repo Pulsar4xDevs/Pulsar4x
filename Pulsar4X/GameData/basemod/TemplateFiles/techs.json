@@ -886,7 +886,7 @@
     "Payload": {
       "UniqueID": "tech-power-conversion",
       "Name": "Reactor Power Conversion",
-      "Description": "Brayton and Stirling conversion for ship reactors: the share of reactor heat turned into electricity, 30% at level 0, +1.5 points a level. Ship reactors move onto this value with the realistic steam turbine (energy phase 6); until then the stock turbine keeps its own conversion.",
+      "Description": "Brayton and Stirling conversion for ship reactors: the share of reactor heat turned into electricity, 30% at level 0, +1.5 points a level. The steam turbine reactor uses this value; its core runs hot enough that a 2 tonne plant still gives 15 kW at level 0.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 10,
       "DataFormula": "0.30 + [Level] * 0.015",
@@ -922,11 +922,16 @@
     "Payload": {
       "UniqueID": "tech-fuel-cells",
       "Name": "Fuel Cells",
-      "Description": "Hydrogen and methane fuel cells: non-nuclear ship power from tank propellant. The generator itself arrives with energy phase 6.",
+      "Description": "Hydrogen and methane fuel cells: non-nuclear ship power from tank propellant. Unlocks the fuel cell generator (about 60 W/kg, half a kilogram of propellant per kWh).",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",
-      "CostFormula": "1500"
+      "CostFormula": "1500",
+      "Unlocks": {
+        "1": [
+          "fuel-cell"
+        ]
+      }
     }
   }
 ]

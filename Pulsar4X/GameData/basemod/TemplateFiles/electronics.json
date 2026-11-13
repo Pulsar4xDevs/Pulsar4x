@@ -28,7 +28,7 @@
         {
           "Name": "Power Draw",
           "Units": "kW",
-          "DescriptionFormula": "'0.01 kW per square metre of antenna (cooled detectors and processing). Colony grid only.'",
+          "DescriptionFormula": "'0.01 kW per square metre of antenna (cooled detectors and processing). On a ship it runs on spare output once the batteries are full, so it is shed during warp.'",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "PropertyValue('Antenna Size') * 0.01"
         },

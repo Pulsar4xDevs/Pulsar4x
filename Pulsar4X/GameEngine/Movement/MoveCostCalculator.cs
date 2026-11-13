@@ -44,6 +44,24 @@ public record struct MoveCostShip
     public double EnergyStoreMax;
     public double EnergyOutputMax;
 
+    // Where that output comes from (energy phase 6), dispatched in this order: free sources
+    // (solar, isotope generators), the reactor, then fuel cells. The fuel fields price the
+    // warp's energy in kg; zero output or fuel per kJ leaves the move's FuelUsed_kg empty.
+    /// <summary>Solar plus isotope output, kW. Burns nothing.</summary>
+    public double FreeOutputMax;
+    /// <summary>Reactor output while it has fuel, kW.</summary>
+    public double ReactorOutputMax;
+    /// <summary>Reactor fuel id (EnergyGenAbilityDB.TotalFuelUseAtMax.type).</summary>
+    public string ReactorFuelType;
+    /// <summary>Reactor fuel per kJ made: fuel use at full output / full output, kg/kJ.</summary>
+    public double ReactorFuelPerKJ;
+    /// <summary>Fuel-cell output while the hold has their propellant, kW.</summary>
+    public double CellOutputMax;
+    /// <summary>Fuel-cell propellant id.</summary>
+    public string CellFuelType;
+    /// <summary>Propellant per kJ the cells make, kg/kJ.</summary>
+    public double CellFuelPerKJ;
+
     /// <summary>Same sum as <see cref="MassVolumeDB.UpdateMassTotal(Pulsar4X.Storage.CargoStorageDB)"/>.</summary>
     public double MassTotal_kg => DryMass_kg + CargoMass_kg + FuelMass_kg;
 
@@ -83,6 +101,13 @@ public record struct MoveCostShip
         if (ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power))
         {
             spec.EnergyOutputMax = power.TotalOutputMax;
+            spec.FreeOutputMax = power.MaxOutputFromSolar + power.DecayOutputMax;
+            spec.ReactorOutputMax = power.ReactorOutputMax;
+            spec.ReactorFuelType = power.TotalFuelUseAtMax.type;
+            spec.ReactorFuelPerKJ = power.MaxOutputFromReactor > 0 ? power.TotalFuelUseAtMax.maxUse / power.MaxOutputFromReactor : 0;
+            spec.CellOutputMax = power.CellsOutputMax;
+            spec.CellFuelType = power.CellFuelUseAtMax.type;
+            spec.CellFuelPerKJ = power.MaxOutputFromCells > 0 ? power.CellFuelUseAtMax.maxUse / power.MaxOutputFromCells : 0;
             if (!string.IsNullOrEmpty(spec.WarpEnergyType))
             {
                 spec.EnergyStored = power.EnergyStored.TryGetValue(spec.WarpEnergyType, out double stored) ? stored : 0;
@@ -177,7 +202,49 @@ public static class MoveCostCalculator
             }
         }
 
-        return new MoveCost(mode, feasible, reason, price.limitLine ?? "", NoFuel, energy, 0, duration, 0, wait, speed);
+        var fuel = WarpPlantFuel(ship, price.demandKW, duration, ship.BubbleCreationCost + ship.BubbleCollapseCost);
+        return new MoveCost(mode, feasible, reason, price.limitLine ?? "", fuel, energy, 0, duration, 0, wait, speed);
+    }
+
+    /// <summary>
+    /// Plant fuel a warp burns (energy phase 6). The sustain runs <paramref name="demandKW"/> for
+    /// <paramref name="duration_s"/>, served free sources first, then the reactor, then the cells
+    /// (EnergyGenProcessor.BurnRates). <paramref name="storeKJ"/> (bubble creation and collapse)
+    /// comes out of the store and is made back at full output, each source in proportion to its
+    /// output. Empty when nothing burns.
+    /// </summary>
+    static IReadOnlyDictionary<string, double> WarpPlantFuel(MoveCostShip ship, double demandKW, double duration_s, double storeKJ)
+    {
+        double free = Math.Max(0, ship.FreeOutputMax);
+        double reactor = ship.ReactorFuelPerKJ > 0 ? Math.Max(0, ship.ReactorOutputMax) : 0;
+        double cells = ship.CellFuelPerKJ > 0 ? Math.Max(0, ship.CellOutputMax) : 0;
+        double reactorKJ = 0, cellKJ = 0;
+
+        double rest = Math.Max(0, demandKW - free);
+        double fromReactor = Math.Min(rest, reactor);
+        double fromCells = Math.Min(rest - fromReactor, cells);
+        if (duration_s > 0 && double.IsFinite(duration_s))
+        {
+            reactorKJ += fromReactor * duration_s;
+            cellKJ += fromCells * duration_s;
+        }
+        double all = free + Math.Max(0, ship.ReactorOutputMax) + Math.Max(0, ship.CellOutputMax);
+        if (storeKJ > 0 && all > 0)
+        {
+            reactorKJ += storeKJ * reactor / all;
+            cellKJ += storeKJ * cells / all;
+        }
+
+        var fuel = new Dictionary<string, double>();
+        void Add(string type, double kg)
+        {
+            if (string.IsNullOrEmpty(type) || !(kg > 0) || !double.IsFinite(kg))
+                return;
+            fuel[type] = fuel.TryGetValue(type, out double had) ? had + kg : kg;
+        }
+        Add(ship.ReactorFuelType, reactorKJ * ship.ReactorFuelPerKJ);
+        Add(ship.CellFuelType, cellKJ * ship.CellFuelPerKJ);
+        return fuel.Count == 0 ? NoFuel : fuel;
     }
 
     /// <summary>

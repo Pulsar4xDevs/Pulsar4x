@@ -551,6 +551,18 @@ namespace Pulsar4X.Components
                     Expression dataExpression = new Expression(cargo.Formulas["ExhaustVelocity"]);
                     args.Result = dataExpression.Evaluate();
                     break;
+                // Chemical energy of a propellant mix, kJ per kg of fuel and oxidiser (the material's
+                // "ChemicalEnergy" formula). 0 for a material without one.
+                case "ChemicalEnergyLookup":
+                {
+                    string fuelId = (string)args.EvaluateParameters()[0];
+                    var fuel = (_factionDataStore.CargoGoods.GetAny(fuelId) ?? _factionDataStore.LockedCargoGoods.GetAny(fuelId)) as ProcessedMaterialBlueprint;
+                    double energy = 0;
+                    if (fuel?.Formulas != null && fuel.Formulas.TryGetValue("ChemicalEnergy", out var formula))
+                        energy = Convert.ToDouble(new Expression(formula).Evaluate());
+                    args.Result = energy;
+                    break;
+                }
             }
         }
     }

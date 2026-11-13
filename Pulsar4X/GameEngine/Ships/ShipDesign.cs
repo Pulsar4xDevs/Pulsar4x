@@ -188,7 +188,7 @@ namespace Pulsar4X.Ships
             foreach (var component in Components)
             {
                 MassPerUnit += component.design.MassPerUnit * component.count;
-                CrewReq += component.design.CrewReq;
+                CrewReq += component.design.CrewReq * component.count;
                 CreditCost += component.design.CreditCost;
                 VolumePerUnit += component.design.VolumePerUnit * component.count;
                 if (ComponentCosts.ContainsKey(component.design.UniqueID))

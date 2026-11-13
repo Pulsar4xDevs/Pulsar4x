@@ -121,10 +121,13 @@ public class MoveCostCalculatorTests
             Assert.That(cost.Reason, Is.Empty);
             Assert.That(cost.Speed, Is.EqualTo(liveSpeed), "drive speed is the empty-ship MaxSpeed");
             Assert.That(cost.DeltaV, Is.EqualTo(0));
-            Assert.That(cost.FuelUsed_kg, Is.Empty);
             var ship = Loaded(0);
             double expected = ship.BubbleCreationCost + ship.BubbleSustainCost * distance / liveSpeed + ship.BubbleCollapseCost;
             Assert.That(cost.EnergyUsed_kJ, Is.EqualTo(expected).Within(1e-6));
+            // Energy phase 6: no reaction mass, but the steam turbine burns fissile fuel for every kJ:
+            // 50 kW of core heat at 1 kg per 40e9 kJ makes 15 kW, so 50 / 40e9 / 15 kg per kJ.
+            Assert.That(cost.FuelUsed_kg.Keys, Is.EquivalentTo(new[] { "fissile-fuels" }));
+            Assert.That(cost.FuelUsed_kg["fissile-fuels"], Is.EqualTo(expected * 50 / 40e9 / 15).Within(1e-12));
         }
         Assert.That(costs[1].EnergyUsed_kJ, Is.EqualTo(costs[0].EnergyUsed_kJ));
         Assert.That(costs[2].EnergyUsed_kJ, Is.EqualTo(costs[0].EnergyUsed_kJ));

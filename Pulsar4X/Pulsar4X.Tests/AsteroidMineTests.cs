@@ -131,6 +131,58 @@ public class AsteroidMineTests
     }
 
     [Test]
+    public void Mining_IsLimitedByThePlant_AtEachMineralsExtractionEnergy()
+    {
+        var faction = Faction();
+        var star = TestingUtilities.BasicSol(_sys);
+        var rock = Body(faction, star, "Rock", BodyType.Asteroid, new Vector3(2e11, 0, 0), surveyed: true);
+        var deposit = Deposit(faction, rock, 50_000);
+        var ship = Miner(star, rock.GetDataBlob<PositionDB>().AbsolutePosition, faction);
+        Park(ship, rock);
+        var iron = Iron(faction);
+        // Energy phase 6: a 1 kW plant and a 1 kJ store instead of the test battery.
+        var power = ship.GetDataBlob<EnergyGenAbilityDB>();
+        power.EnergyStoreMax["electricity"] = 1;
+        power.EnergyStored["electricity"] = 1;
+        power.MaxOutputFromReactor = 1;
+        power.TotalFuelUseAtMax = ("fissile-fuels", 1e-6);
+        power.LocalFuel = 1;
+
+        var order = new AsteroidMineOrder(ship, rock);
+        order.Execute(_epoch);
+        order.Execute(_epoch + TimeSpan.FromDays(1));
+
+        // 100 kg of iron at 0.388 kWh/kg = 139,680 kJ; a day of 1 kW spare plus the 1 kJ store is 86,401.
+        long expected = (long)Math.Floor(86_401.0 / (100 * 0.388 * 3600) * 100);
+        Assert.That(expected, Is.EqualTo(61));
+        Assert.That(Stored(ship, iron), Is.EqualTo(expected));
+        Assert.That(deposit.Amount.Actual, Is.EqualTo(50_000 - expected));
+        Assert.That(power.LocalFuel, Is.EqualTo(1 - 1e-6 * 86_400).Within(1e-9), "the plant ran flat out all day");
+        Assert.That(order.Details, Is.EqualTo("Mining, short of power"));
+    }
+
+    [Test]
+    public void Mining_WithNoPower_DigsNothing()
+    {
+        var faction = Faction();
+        var star = TestingUtilities.BasicSol(_sys);
+        var rock = Body(faction, star, "Rock", BodyType.Asteroid, new Vector3(2e11, 0, 0), surveyed: true);
+        var deposit = Deposit(faction, rock, 50_000);
+        var ship = Miner(star, rock.GetDataBlob<PositionDB>().AbsolutePosition, faction);
+        Park(ship, rock);
+        var power = ship.GetDataBlob<EnergyGenAbilityDB>();
+        power.EnergyStored["electricity"] = 0;
+
+        var order = new AsteroidMineOrder(ship, rock);
+        order.Execute(_epoch);
+        order.Execute(_epoch + TimeSpan.FromDays(1));
+
+        Assert.That(Stored(ship, Iron(faction)), Is.EqualTo(0));
+        Assert.That(deposit.Amount.Actual, Is.EqualTo(50_000));
+        Assert.That(order.Details, Is.EqualTo("No power for the miner"));
+    }
+
+    [Test]
     public void FullHold_ReturnsToTheOwnedColonyCloserInTime()
     {
         var faction = Faction();

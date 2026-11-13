@@ -17,7 +17,7 @@ namespace Pulsar4X.Tests;
 
 /// <summary>
 /// Energy economy phase 0: reactor load and fuel, fuel summing, running dry,
-/// old-save fuel clamp, uninstall, and the RTG's units.
+/// old-save fuel clamp, uninstall, and the RTG's units (an isotope source since phase 6).
 /// </summary>
 [TestFixture]
 public class EnergyGenFuelTests
@@ -239,7 +239,7 @@ public class EnergyGenFuelTests
     }
 
     [Test]
-    public void Rtg_FuelLastsItsOperationalLifetime_InSeconds()
+    public void Rtg_IsAnIsotopeSource_WithAHalfLife_InSeconds()
     {
         var data = _faction.GetDataBlob<FactionInfoDB>().Data;
         foreach (var good in data.LockedCargoGoods.GetAll().Values.Select(cargo => cargo.UniqueID).ToList())
@@ -257,13 +257,16 @@ public class EnergyGenFuelTests
             });
             var gen = design.GetAttribute<EnergyGenerationAtb>();
 
-            const double years = 5;
-            const double fuelKg = 500; // [Mass] 1000 * 0.5
-            Assert.That(gen.Lifetime, Is.EqualTo(years * 31557600).Within(1e-3));
-            Assert.That(gen.FuelUsedAtMax * gen.Lifetime, Is.EqualTo(fuelKg).Within(1e-9),
-                "LocalFuel from one RTG is its fuel mass, in kg");
-            // Fuel kg * (0.1 / years) kW/kg * Efficiency % * 0.01. Efficiency is 10 + tech-conductors (0 here).
-            Assert.That(gen.PowerOutputMax, Is.EqualTo(fuelKg * (0.1 / years) * 10 * 0.01).Within(1e-9));
+            // Energy phase 6: a GPHS-style Pu-238 unit. Fuel is 15% of the mass, 0.57 kW of heat
+            // per kg, 6% thermoelectric (+ 0.5 points per Conductors level, 0 here). It burns
+            // nothing; its output halves every 87.7 years.
+            const double fuelKg = 1000 * 0.15;
+            Assert.That(gen.PowerOutputMax, Is.EqualTo(fuelKg * 0.57 * 6 * 0.01).Within(1e-9));
+            Assert.That(gen.PowerOutputMax, Is.EqualTo(5.13).Within(1e-9));
+            Assert.That(gen.HalfLife_s, Is.EqualTo(87.7 * 31557600).Within(1e-3));
+            Assert.That(gen.FuelUsedAtMax, Is.EqualTo(0));
+            Assert.That(gen.Lifetime, Is.EqualTo(0));
+            Assert.That(gen.TankFed, Is.EqualTo(0));
         }
         finally
         {

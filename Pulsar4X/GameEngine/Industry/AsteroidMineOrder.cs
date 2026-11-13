@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GameEngine.Engine.Orders;
+using Pulsar4X.Energy;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Movement;
@@ -111,7 +112,31 @@ public class AsteroidMineOrder : EntityAction
             var library = _entityCommanding.GetFactionCargoDefinitions();
             if (library != null && budget > 0)
             {
-                MineIntoHold(minerals, cargo, library, budget);
+                // Energy phase 6: digging takes each mineral's extraction energy from the ship's plant.
+                var plan = PlanMining(minerals, cargo, library, budget);
+                double needed = 0;
+                foreach (var (mineral, _, wanted) in plan)
+                    needed += MineKJ(mineral, wanted);
+                double share = 1;
+                if (needed > 0)
+                {
+                    double got = ShipPower.DrawEnergy(_entityCommanding, needed, wholeDays * 86400.0, atDateTime);
+                    share = Math.Clamp(got / needed, 0, 1);
+                }
+                long total = 0;
+                foreach (var (mineral, deposit, wanted) in plan)
+                {
+                    long units = (long)Math.Floor(wanted * share + 1e-9);
+                    if (units <= 0)
+                        continue;
+                    long stored = cargo.AddCargoByUnit(mineral, units);
+                    MiningHelper.Deplete(deposit, stored);
+                    total += stored;
+                }
+                if (needed > 0 && share < 1)
+                    _details = total > 0 ? "Mining, short of power" : "No power for the miner";
+                else
+                    _details = "Mining";
                 CargoTransferProcessor.UpdateMassFuelAndDeltaV(_entityCommanding);
             }
         }
@@ -126,30 +151,28 @@ public class AsteroidMineOrder : EntityAction
         return _entityCommanding != null && Target != null;
     }
 
-    static void MineIntoHold(MineralsDB minerals, CargoStorageDB cargo, CargoDefinitionsLibrary library, long budget)
+    /// <summary>kJ to dig this many units: mass x the mineral's extraction energy (kWh/kg) x 3600.</summary>
+    public static double MineKJ(Mineral mineral, long units)
+        => units > 0 ? units * (double)mineral.MassPerUnit * EmbodiedEnergy.ExtractionOf(mineral) * 3600.0 : 0;
+
+    /// <summary>What a day's budget would dig of each mineral, before power is counted.</summary>
+    static List<(Mineral mineral, MineralDeposit deposit, long wanted)> PlanMining(MineralsDB minerals, CargoStorageDB cargo, CargoDefinitionsLibrary library, long budget)
     {
+        var plan = new List<(Mineral, MineralDeposit, long)>();
         foreach (var (id, deposit) in minerals.Minerals)
         {
             if (deposit == null || deposit.Amount.Actual <= 0)
                 continue;
-
             if (!library.GetMinerals().TryGetValue(id, out var mineral) || mineral == null)
                 continue;
             if (!cargo.TypeStores.ContainsKey(mineral.CargoTypeID))
                 continue;
-
             long free = CargoMath.GetFreeUnitSpace(cargo, mineral);
-            long wanted = budget;
-            if (wanted > deposit.Amount.Actual)
-                wanted = deposit.Amount.Actual;
-            if (wanted > free)
-                wanted = free;
-            if (wanted <= 0)
-                continue;
-
-            long stored = cargo.AddCargoByUnit(mineral, wanted);
-            MiningHelper.Deplete(deposit, stored);
+            long wanted = Math.Min(budget, Math.Min(deposit.Amount.Actual, free));
+            if (wanted > 0)
+                plan.Add((mineral, deposit, wanted));
         }
+        return plan;
     }
 
     /// <summary>True when some mineral still on the rock will fit at least one more unit.</summary>

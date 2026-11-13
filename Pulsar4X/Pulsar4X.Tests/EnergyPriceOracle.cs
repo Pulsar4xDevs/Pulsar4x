@@ -55,6 +55,12 @@ static class EnergyPriceOracle
     /// int(2e6 / 45,394 x 1000) = 44,058 m/s), back full with 1,000 t and out empty.
     /// Energy per leg = 4e6/3 kJ + 15 kW x distance / speed; over the 1,000,000 kg hold.
     /// </summary>
+    /// <summary>
+    /// Embodied energy of fissile fuel, kWh/kg, from its recipe in the data (checked by
+    /// EnergyPhase6Tests against EmbodiedEnergy).
+    /// </summary>
+    public const double Fissile_kWhPerKg = 400 + 100 * 10.0 + 10 * 0.3; // EnergyCost + 100 fissionables x 10 + 10 hydrocarbons x 0.3, one 1 kg unit
+
     public static double Delivery_kWhPerKg(Game game)
     {
         double au = game.Settings.DepotDeliveryDistance_AU;
@@ -62,8 +68,11 @@ static class EnergyPriceOracle
             return 0;
         double speed = 44058 * 0.5;
         double legKJ = 4e6 / 3 + 15 * (au * UniversalConstants.Units.MetersPerAu / speed);
+        // Energy phase 6: the turbine's fissile fuel for that energy (50 kW of heat per 15 kW,
+        // 40e9 kJ per kg) at its embodied energy.
+        double fuelKWh = legKJ * 50 / 40e9 / 15 * Fissile_kWhPerKg;
         int legs = game.Settings.DepotDeliveryRoundTrip ? 2 : 1;
-        return legs * legKJ / 3600 / 1_000_000;
+        return legs * (legKJ / 3600 + fuelKWh) / 1_000_000;
     }
 
     /// <summary>E x credits per kWh x (1 + markup), to the cent.</summary>

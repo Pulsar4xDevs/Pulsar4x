@@ -40,6 +40,7 @@
       "OutputAmount": 8500,
       "Formulas": {
         "ExhaustVelocity": "3510",
+        "ChemicalEnergy": "12000",
         "FuelType": "conventional"
       }
     }
@@ -63,6 +64,7 @@
       "OutputAmount": 8500,
       "Formulas": {
         "ExhaustVelocity": "3615",
+        "ChemicalEnergy": "11500",
         "FuelType": "conventional"
       }
     }
@@ -86,6 +88,7 @@
       "OutputAmount": 8500,
       "Formulas": {
         "ExhaustVelocity": "4462",
+        "ChemicalEnergy": "13300",
         "FuelType": "conventional"
       }
     }

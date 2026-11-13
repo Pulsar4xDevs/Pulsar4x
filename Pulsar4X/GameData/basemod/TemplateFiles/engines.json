@@ -180,7 +180,7 @@
         "Mass": "PropertyValue('Mass')",
         "Volume": "Max(1, PropertyValue('Mass'))",
         "HTK": "0.5",
-        "CrewReq": "[Mass]",
+        "CrewReq": "Max(1, [Mass] * 0.005)",
         "ResearchCost": "[Mass] * 1",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
