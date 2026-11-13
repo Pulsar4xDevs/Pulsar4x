@@ -109,13 +109,15 @@ public class PrefabFacilitiesTests
         ColonyFactory.PlaceOwnedColonies(game, store, player, store.Species["species-human"]);
 
         var mars = ColonyOn(sol, "Mars");
-        // Energy phase 2 seeds every start colony with a site-built power plant (no plant
-        // template ships as a crate yet), so the outpost's reactor is the one exception.
-        Assert.That(SiteOnly(mars).Where(d => !d.HasAttribute<Pulsar4X.Energy.PowerPlantAtb>()), Is.Empty);
-        Assert.That(SiteOnly(mars).Select(d => d.UniqueID), Is.EqualTo(new[] { "default-design-fission-plant-2" }));
+        // Energy phase 2 seeds every start colony with a site-built power plant, and the scenario
+        // banks add a site-built grid battery (no plant or grid-battery template ships as a crate
+        // yet), so the outpost's grid equipment is the one exception.
+        static bool Grid(ComponentDesign d) => d.HasAttribute<Pulsar4X.Energy.PowerPlantAtb>() || d.HasAttribute<Pulsar4X.Energy.EnergyStoreAtb>();
+        Assert.That(SiteOnly(mars).Where(d => !Grid(d)), Is.Empty);
+        Assert.That(SiteOnly(mars).Select(d => d.UniqueID), Is.EquivalentTo(new[] { "default-design-fission-plant-2", "default-design-grid-battery-50t" }));
 
-        Assert.That(SiteOnly(ColonyOn(sol, "Luna")).Where(d => !d.HasAttribute<Pulsar4X.Energy.PowerPlantAtb>()).Select(d => d.UniqueID), Is.EqualTo(new[] { "default-design-city-hall" }));
-        Assert.That(SiteOnly(ColonyOn(sol, "Ceres")).Where(d => !d.HasAttribute<Pulsar4X.Energy.PowerPlantAtb>()).Select(d => d.UniqueID), Is.EqualTo(new[] { "default-design-city-hall" }));
+        Assert.That(SiteOnly(ColonyOn(sol, "Luna")).Where(d => !Grid(d)).Select(d => d.UniqueID), Is.EqualTo(new[] { "default-design-city-hall" }));
+        Assert.That(SiteOnly(ColonyOn(sol, "Ceres")).Where(d => !Grid(d)).Select(d => d.UniqueID), Is.EqualTo(new[] { "default-design-city-hall" }));
     }
 
     [Test]

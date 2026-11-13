@@ -147,6 +147,9 @@ namespace Pulsar4X.Colonies
             LoadCargo(colonyEntity, factionInfo.Data, colonyBlueprint.Cargo);
             // The plants were installed before their fuel arrived: recalc so they show as fuelled.
             Pulsar4X.Energy.ColonyPowerProcessor.Recalc(colonyEntity);
+            // A scenario colony's grid batteries start charged, like its fuel runway: an empty bank
+            // would make the first daily passes burn extra fuel to fill it. Batteries built later start empty.
+            Pulsar4X.Energy.ColonyPowerProcessor.FillBatteries(colonyEntity);
 
             // Add starting launch queue entries
             if (colonyBlueprint.LaunchQueue != null && colonyEntity.TryGetDataBlob<LaunchComplexDB>(out var launchDB))

@@ -532,6 +532,11 @@ namespace Pulsar4X.Energy
             // The batteries sit on the delivered side of the grid: they charge from what is left
             // after the demand and give back (without further grid loss) what the demand lacks,
             // before any tier goes short. Average kW over the pass, like the plants.
+            // Known simplification (TessaBot P3, deferred): a plant that runs dry mid-pass is averaged
+            // over the whole day, so the discharge cap applies to the day-average shortfall, not to
+            // the deeper post-runout gap. Splitting the pass into before- and after-runout phases
+            // would need each fuel group's own wanted load and a ramp for the other groups after
+            // the runout, and would change what TierSatisfaction means for such a day.
             double chargeIn = 0, dischargeOut = 0;
             if (seconds > 0)
             {
@@ -560,6 +565,13 @@ namespace Pulsar4X.Energy
 
             power.RecordDay(new ColonyPowerSample(colonyEntity.StarSysDateTime, power.Demand_kW, power.Generation_kW, delivered,
                 power.Stored_kJ, chargeIn, dischargeOut));
+        }
+
+        /// <summary>Fills the colony's grid batteries to their capacity (a scenario start). No grid or no batteries: nothing.</summary>
+        public static void FillBatteries(Entity colonyEntity)
+        {
+            if (colonyEntity.TryGetDataBlob<ColonyPowerDB>(out var power))
+                power.Stored_kJ = Math.Max(0, power.StoreMax_kJ);
         }
 
         /// <summary>

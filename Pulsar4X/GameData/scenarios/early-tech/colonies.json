@@ -53,6 +53,10 @@
           "Amount": 1
         },
         {
+          "Id": "default-design-grid-battery-1000t",
+          "Amount": 1
+        },
+        {
           "Id": "default-design-infrastructure-site",
           "Amount": 5
         },
@@ -260,6 +264,7 @@
         "infrastructure-site"
       ],
       "ComponentDesigns": [
+        "default-design-grid-battery-1000t",
         "default-design-thermal-plant-75",
         "default-design-battery-2t",
         "default-design-cargo-hold-1t",

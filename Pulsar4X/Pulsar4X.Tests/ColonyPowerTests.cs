@@ -307,6 +307,8 @@ public class ColonyPowerTests
         var farm = TemplateDesign("solar-farm");
         var battery = TemplateDesign("grid-battery");
         double seeded = Power(_earthColony).Generation_kW;
+        double seededStore = Power(_earthColony).StoreMax_kJ;
+        Assert.That(seededStore, Is.GreaterThan(0), "Earth's start has a grid battery bank");
         _earthColony.AddComponent(farm);
         _earthColony.AddComponent(battery, 2);
         var power = Power(_earthColony);
@@ -321,7 +323,7 @@ public class ColonyPowerTests
         Assert.That(power.Generation_kW, Is.EqualTo(seeded + solar.Output_kW).Within(1e-6));
 
         double storePerUnit = battery.GetAttribute<EnergyStoreAtb>().MaxStore;
-        Assert.That(power.StoreMax_kJ, Is.EqualTo(2 * storePerUnit).Within(1e-6));
+        Assert.That(power.StoreMax_kJ, Is.EqualTo(seededStore + 2 * storePerUnit).Within(1e-6));
         Assert.That(_earthColony.HasDataBlob<EnergyGenAbilityDB>(), Is.False, "colony atbs skip the ship model");
     }
 
@@ -369,7 +371,8 @@ public class ColonyPowerTests
         Assert.That(last.Demand_kW, Is.EqualTo(power.Demand_kW).Within(1e-6));
         Assert.That(last.Generation_kW, Is.EqualTo(power.Generation_kW).Within(1e-6));
         Assert.That(last.Delivered_kW, Is.EqualTo(power.Dispatched_kW * power.GridEfficiency).Within(1e-6));
-        Assert.That(last.Stored_kJ, Is.EqualTo(0), "Earth's start has no grid batteries, so nothing is stored");
+        Assert.That(last.Stored_kJ, Is.EqualTo(power.StoreMax_kJ).And.GreaterThan(0), "Earth's start bank starts full, and its surplus keeps it full");
+        Assert.That(last.Charge_kW, Is.EqualTo(0), "a full bank takes no charge");
 
         // The clock now stands on day 3: a pass adds that day, and a second pass the same day
         // replaces it rather than adding another.
@@ -500,8 +503,9 @@ public class ColonyPowerTests
         Assert.That(view.Consumers[0].Tier, Is.EqualTo("Life support"));
         Assert.That(view.Consumers[0].TierRank, Is.EqualTo(1));
         Assert.That(view.Tiers.Select(t => t.TierRank), Is.EqualTo(new[] { 1, 2, 3, 4, 5, 6, 7 }));
-        Assert.That(view.Plants, Has.Count.EqualTo(2));
-        Assert.That(view.Plants.Select(p => p.FuelName), Is.All.Not.Empty);
+        Assert.That(view.Plants, Has.Count.EqualTo(3), "seeded fission, the thermal plant and the start battery bank");
+        Assert.That(view.Plants.Where(p => p.Kind != "Battery").Select(p => p.FuelName), Is.All.Not.Empty);
+        Assert.That(view.Plants.Single(p => p.Kind == "Battery").Store_kJ, Is.EqualTo(power.StoreMax_kJ).Within(1e-6));
         Assert.That(view.Fuel.Select(f => f.FuelId), Is.EquivalentTo(new[] { "fissile-fuels", "hydrocarbons" }));
         var fissile = view.Fuel.Single(f => f.FuelId == "fissile-fuels");
         Assert.That(fissile.Stock_kg, Is.EqualTo(359).Within(1e-9));

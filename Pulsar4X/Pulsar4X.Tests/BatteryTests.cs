@@ -63,6 +63,13 @@ public class BatteryTests
 
         var earth = NameLookup.GetFirstEntityWithName(_sol, "Earth");
         _earth = ColonyFactory.CreateFromBlueprint(_game, _player, _species, _sol, earth, _store.Colonies["colony-earth"]);
+        // The colony tests here measure banks they build themselves: take the scenario's start
+        // bank off so Earth begins with no storage (ScenarioBatteryTests covers the start bank).
+        var instances = _earth.GetDataBlob<ComponentInstancesDB>();
+        if (instances.TryGetComponentsByAttribute<EnergyStoreAtb>(out var bank))
+            foreach (var unit in bank.ToList())
+                _earth.RemoveComponent(unit);
+        Assert.That(Power.StoreMax_kJ, Is.EqualTo(0));
         _start = _sol.StarSysDateTime;
     }
 

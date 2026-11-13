@@ -710,6 +710,28 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-grid-battery-50t",
+      "Name": "Grid Battery 50 t",
+      "TemplateId": "grid-battery",
+      "Properties": [
+        { "Key": "Mass", "Value": 50000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-grid-battery-1000t",
+      "Name": "Grid Battery 1000 t",
+      "TemplateId": "grid-battery",
+      "Properties": [
+        { "Key": "Mass", "Value": 1000000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-fission-plant-2",
       "Name": "Fission Plant 2 MW",
       "TemplateId": "fission-plant",
