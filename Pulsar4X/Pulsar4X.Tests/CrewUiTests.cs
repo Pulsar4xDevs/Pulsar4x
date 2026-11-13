@@ -96,4 +96,30 @@ public class CrewUiTests
         Assert.That(segments.Select(s => s.Label), Is.EqualTo(new[] { "Human", "Martian" }));
         Assert.That(segments.Select(s => s.Colour), Is.EqualTo(rows.Select(r => r.Chip)));
     }
+
+    [Test]
+    public void SummaryIndicator_ShowsNeededAndBerths_UntilTracked_ThenAboard()
+    {
+        Assert.That(CrewBars.Indicator(Ship(17, 12)), Is.EqualTo("17 needed, 12 berths"));
+        Assert.That(CrewBars.Indicator(Ship(17, 1)), Is.EqualTo("17 needed, 1 berth"));
+        Assert.That(CrewBars.Indicator(Ship(17, 20, tracked: true, aboard: 9, under: true)), Is.EqualTo("9/17 aboard"));
+    }
+
+    [Test]
+    public void CrewTabPartRows_ShareTheTotals()
+    {
+        var ship = Ship(28, 10) with
+        {
+            CrewByComponent = new[] { new ShipCrewRow("a", "Laser", 2, 5), new ShipCrewRow("b", "Bridge", 1, 18) },
+            BerthsByComponent = new[] { new ShipBerthRow("q", "Crew Quarters", 2, 5) },
+        };
+        var crew = CrewBars.CrewByComponentRows(ship);
+        Assert.That(crew.Select(r => r.Value), Is.EqualTo(new[] { "10", "18" }));
+        Assert.That(crew.Select(r => r.Percent), Is.EqualTo(new[] { "36%", "64%" }));
+        Assert.That(crew[0].Trailing, Is.EqualTo("5 x 2"));
+        var berths = CrewBars.BerthsByComponentRows(ship).Single();
+        Assert.That(berths.Value, Is.EqualTo("10"));
+        Assert.That(berths.Percent, Is.EqualTo("100%"));
+        Assert.That(berths.Fill, Is.EqualTo(1f));
+    }
 }

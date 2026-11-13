@@ -43,6 +43,43 @@ public static class CrewBars
         => berths < required ? $"{required - berths:N0} {(required - berths == 1 ? "berth" : "berths")} short" : "";
 
     /// <summary>
+    /// The Fleet window Summary's one-line crew indicator: "9/17 aboard" once the engine tracks crew aboard,
+    /// "17 needed, 12 berths" before that. The full crew view is the Crew tab.
+    /// </summary>
+    public static string Indicator(ShipView ship)
+        => ship.CrewTracked
+            ? $"{ship.CrewAboard:N0}/{ship.CrewRequired:N0} aboard"
+            : $"{ship.CrewRequired:N0} needed, {ship.CrewBerths:N0} {(ship.CrewBerths == 1 ? "berth" : "berths")}";
+
+    /// <summary>Crew Tab detail: one row per component design, crew per copy x copies, its share of the crew.</summary>
+    public static List<PowerRow> CrewByComponentRows(ShipView ship)
+        => ship.CrewByComponent.Select((r, i) => new PowerRow
+        {
+            Id = "crew-" + r.DesignId,
+            Chip = PowerBars.GroupColour(i),
+            Name = r.Name,
+            Value = r.Crew.ToString("N0"),
+            Percent = PowerBars.Percent(r.Crew, ship.CrewRequired),
+            Fill = ship.CrewRequired > 0 ? Fill(r.Crew, ship.CrewRequired) : 0f,
+            FillColour = PowerBars.GroupColour(i),
+            Trailing = r.CrewPerCopy.ToString("N0") + " x " + r.Count.ToString("N0"),
+        }).ToList();
+
+    /// <summary>Crew tab detail: one row per design that gives berths, its share of the berths.</summary>
+    public static List<PowerRow> BerthsByComponentRows(ShipView ship)
+        => ship.BerthsByComponent.Select((r, i) => new PowerRow
+        {
+            Id = "berth-" + r.DesignId,
+            Chip = PowerBars.GroupColour(i),
+            Name = r.Name,
+            Value = r.Berths.ToString("N0"),
+            Percent = PowerBars.Percent(r.Berths, ship.CrewBerths),
+            Fill = ship.CrewBerths > 0 ? Fill(r.Berths, ship.CrewBerths) : 0f,
+            FillColour = PowerBars.GroupColour(i),
+            Trailing = r.BerthsPerCopy.ToString("N0") + " x " + r.Count.ToString("N0"),
+        }).ToList();
+
+    /// <summary>
     /// The Fleet window's rows, narrow enough for its summary column: a chip, a name, a value and a thin
     /// bar, with the share and what it limits in the hover. Aboard and engine crew show only while
     /// <see cref="ShipView.CrewTracked"/>; before crew plan phase 3 they are defaults and would read as a
