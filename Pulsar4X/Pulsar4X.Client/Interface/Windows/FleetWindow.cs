@@ -367,7 +367,7 @@ namespace Pulsar4X.Client
                         {
                             if (ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
                             {
-                                ImGui.Columns(2);
+                                ImGui.Columns(2, "##fleet-information", true);
                                 DisplayHelpers.PrintRow("Name", selectedFleet.Name);
                                 DisplayHelpers.PrintRow("Flagship", selectedFleet.FlagshipName ?? "-");
                                 DisplayFleetCommanderRow();
@@ -401,8 +401,8 @@ namespace Pulsar4X.Client
                                 ImGui.NextColumn();
                                 ImGui.Separator();
                                 DisplayHelpers.PrintRow("Ships", selectedFleet.Ships.Count.ToString());
+                                ImGui.Columns(1);
                             }
-                            ImGui.Columns(1);
                         }
                         ImGui.EndChild();
                     }
@@ -582,7 +582,7 @@ namespace Pulsar4X.Client
             {
                 if (ImGui.CollapsingHeader("Ship", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##ship-summary", true);
                     DisplayHelpers.PrintRow("Name", ship.Name);
                     DisplayHelpers.PrintRow("Design", string.IsNullOrEmpty(ship.DesignName) ? "-" : ship.DesignName);
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
@@ -669,7 +669,7 @@ namespace Pulsar4X.Client
                         flow = "-" + Stringify.Power(-flowKw);
 
                     ImGui.ProgressBar((float)fraction, new Vector2(ImGui.GetContentRegionAvail().X, 16), batteries);
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##ship-summary-energy", true);
                     DisplayHelpers.PrintRow("Status", status, "Charging fills the batteries. Draining means demand is above generation.");
                     DisplayHelpers.PrintRow("Flow", flow, "Spare or shortfall added to the batteries this step.");
                     DisplayHelpers.PrintRow("Demand", Stringify.Power(energy.Demand < 0 ? 0 : energy.Demand), "What the ship's components are drawing.");
@@ -3327,7 +3327,7 @@ namespace Pulsar4X.Client
                         if (ImGui.CollapsingHeader("Ship", ImGuiTreeNodeFlags.DefaultOpen))
                         {
                             ImGui.TextDisabled("Not your ship. View only.");
-                            ImGui.Columns(2);
+                            ImGui.Columns(2, "##inspect-ship-summary", true);
 
                             string name = ship.GetView<NameView>()?.Name ?? "Unknown ship";
                             DisplayHelpers.PrintRow("Name", name);

@@ -112,7 +112,7 @@ public static class ModDataInspector
             _numLines = memberInfos.Length;
             var chsize = new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, _totalHeight);
             ImGui.BeginChild("InnerColomns", chsize);
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##data-viewer", true);
 
             if (value != null && typeof(IDictionary).IsAssignableFrom(value.GetType()))
             {

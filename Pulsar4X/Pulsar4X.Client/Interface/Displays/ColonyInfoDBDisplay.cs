@@ -9,10 +9,9 @@ namespace Pulsar4X.Client
         public static void Display(this Pulsar4X.Api.ColonyView colony, int entityId)
         {
             ImGui.PushID("###Population " + entityId);
-            ImGui.Columns(1);
             if(ImGui.CollapsingHeader("Population", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##colony-population", true);
 
                 foreach(var species in colony.SpeciesPopulations)
                 {

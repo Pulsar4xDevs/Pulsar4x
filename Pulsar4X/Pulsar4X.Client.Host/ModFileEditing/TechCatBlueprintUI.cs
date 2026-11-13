@@ -41,7 +41,7 @@ public class TechCatBlueprintUI : BluePrintsUI
         string desc = selectedItem.Description;
         if (ImGui.Begin("Tech Category Editor: " + name, ref _isActive[selectedIndex]))
         {
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##tech-cat-bp", true);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
             ImGui.Text("Name: ");

@@ -62,7 +62,7 @@ public class ComponentPropertyBlueprintUI : BluePrintsUI
 
     public void Display()
     {
-        ImGui.Columns(2);
+        ImGui.Columns(2, "##component-property-bp", true);
         ImGui.SetColumnWidth(0,150);
         //ImGui.SetColumnWidth(1,400);
 

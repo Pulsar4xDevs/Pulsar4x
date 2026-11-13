@@ -152,7 +152,7 @@ namespace Pulsar4X.Client
 
                 var data = _systemState.StarSystem.ManagerSubpulses.Performance.GetLatestEntry();
                 ImGui.Text($"StarSystemID: {_systemState.StarSystem.ID}");
-                ImGui.Columns(4);
+                ImGui.Columns(4, "##performance", true);
                 ImGui.SetColumnWidth(0, 160);
                 ImGui.SetColumnWidth(1, 64);
                 ImGui.SetColumnWidth(2, 128);

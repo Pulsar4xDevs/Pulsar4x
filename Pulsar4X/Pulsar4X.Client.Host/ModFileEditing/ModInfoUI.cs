@@ -56,7 +56,7 @@ public class ModInfoUI
 
             ImGui.BeginChild(label,_childSize, ImGuiChildFlags.Borders);
 
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##mod-info-header", true);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
 
@@ -131,7 +131,7 @@ public class ModInfoUI
 
         if (ImGui.Begin($"Tech Category Editor: {name}###{selectedItem.Namespace}", ref _isActive[selectedIndex]))
         {
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##mod-info-body", true);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
             ImGui.Text("Name: ");

@@ -32,7 +32,7 @@ public static class CargoStorageDBDisplay
                 ImGui.PushID(entity.Id.ToString());
                 if(ImGui.CollapsingHeader(header + "###" + headerId, flags))
                 {
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##cargo-store-" + headerId, true);
                     DisplayHelpers.PrintRow("Total Volume", Stringify.VolumeLtr(storageType.MaxVolume));
                     DisplayHelpers.PrintRow("Available Volume", Stringify.VolumeLtr(freeVolume), null, null, false);
                     ImGui.Columns(1);

@@ -220,7 +220,10 @@ namespace Pulsar4X.Client
             var rgnSize = ImGui.GetContentRegionAvail();
 
             ImGui.NextColumn();
-            ImGui.Columns(colomnCount);
+            if (colomnCount > 1)
+                ImGui.Columns(colomnCount, "##borderlist-restore-" + _nestIndex, true);
+            else
+                ImGui.Columns(colomnCount);
             var scpos = ImGui.GetCursorScreenPos();
             ImGui.Unindent(_dentFactor);
 

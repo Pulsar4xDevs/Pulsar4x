@@ -24,7 +24,7 @@ public static class SizesDemo
 
             var getCursorScreenPos1st = ImGui.GetCursorScreenPos();
             var getCursorPos1st = ImGui.GetCursorPos();
-            ImGui.Columns(2, "", true);
+            ImGui.Columns(2, "##sizes-demo", true);
 
             var getCursorStartPos = ImGui.GetCursorStartPos();
             _windowPos = ImGui.GetWindowPos();

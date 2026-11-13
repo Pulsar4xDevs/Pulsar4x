@@ -349,7 +349,7 @@ namespace Pulsar4X.Client
                 {
                     SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.RemoveLogiBaseDB);
                 }
-                ImGui.Columns(4);
+                ImGui.Columns(4, "##colony-logistics-list", true);
                 foreach (var typeStore in _displayedStoredResources)
                 {
                     CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
@@ -439,7 +439,7 @@ namespace Pulsar4X.Client
                         SetLogisticsOrder.CreateCommand_SetBaseItems(_selectedEntity, _changes);
                     }
                 }
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##colony-logistics-detail", true);
                 foreach (var item in _logisticsDB.ListedItems)
                 {
                     ImGui.Text(item.Key.Name);

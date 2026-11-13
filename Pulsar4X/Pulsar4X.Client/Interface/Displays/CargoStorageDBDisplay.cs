@@ -20,7 +20,7 @@ namespace Pulsar4X.Client
                 ImGui.PushID(holderId.ToString());
                 if(ImGui.CollapsingHeader(header + "###" + store.TypeId, flags))
                 {
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##cargo-store-" + store.TypeId, true);
                     DisplayHelpers.PrintRow("Total Volume", Stringify.VolumeLtr(store.MaxVolume));
                     DisplayHelpers.PrintRow("Available Volume", Stringify.VolumeLtr(store.FreeVolume), null, null, false);
                     ImGui.Columns(1);

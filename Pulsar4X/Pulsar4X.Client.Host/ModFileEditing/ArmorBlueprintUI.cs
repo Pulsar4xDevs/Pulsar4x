@@ -41,7 +41,7 @@ public class ArmorBlueprintUI : BluePrintsUI
         //string desc = selectedItem.Description;
         if (ImGui.Begin($"Tech Category Editor: {_editStr}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##armor-bp", true);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
             ImGui.Text("Name: ");

@@ -343,7 +343,7 @@ namespace Pulsar4X.Client
                                 ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod.TotalSeconds);
 
                                 var ke = OrbitMath.KeplerFromOrbitDB(orbitDB);
-                                ImGui.Columns(3);
+                                ImGui.Columns(3, "##debug-entities", true);
                                 ImGui.SetColumnWidth(0, 128);
                                 ImGui.SetColumnWidth(1, 128);
                                 ImGui.SetColumnWidth(2, 128);
@@ -1093,7 +1093,7 @@ namespace Pulsar4X.Client
             for (int i = 0; i < loopto; i++)
             {
                 ImGui.BeginChild("TopItems", new System.Numerics.Vector2(400, heightt));
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##debug-top-" + i, true);
                 ImGui.SetColumnWidth(0, 300);
 
                 ImGui.BeginGroup();
@@ -1123,7 +1123,7 @@ namespace Pulsar4X.Client
                 ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 0.5f);
                 ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 2f);
                 ImGui.BeginChild("Buttons", new System.Numerics.Vector2(400, hoverHeigt), ImGuiChildFlags.Borders);
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##debug-hover-buttons", true);
                 ImGui.SetColumnWidth(0, 300);
 
                 var queueItem = _listfoo[_hvSelectedIndex];
@@ -1171,7 +1171,7 @@ namespace Pulsar4X.Client
                 for (int i = _hvSelectedIndex + 1; i < _listfoo.Count; i++)
                 {
                     ImGui.BeginChild("Bottom", new System.Numerics.Vector2(400, heightb));
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##debug-bottom-" + i, true);
                     ImGui.SetColumnWidth(0, 300);
 
                     ImGui.BeginGroup();
@@ -1278,7 +1278,7 @@ namespace Pulsar4X.Client
 
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
             ImGui.BeginChild("ButtonBoxList", new System.Numerics.Vector2(280, 100), ImGuiChildFlags.Borders, ImGuiWindowFlags.ChildWindow);
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##debug-button-box", true);
             for (int i = 0; i < _listfoo.Count; i++)
             {
 

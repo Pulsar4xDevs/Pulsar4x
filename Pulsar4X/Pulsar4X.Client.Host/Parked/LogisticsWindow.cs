@@ -141,7 +141,7 @@ namespace Pulsar4X.Client
                     }
 
                     ImGui.Text(_tradeshipDB.StateString);
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##logistics-left", true);
                     foreach (var item in _tradeshipDB.ActiveCargoTasks)
                     {
                         ImGui.Text("From: " + item.Source.GetName(_factionID));
@@ -158,7 +158,7 @@ namespace Pulsar4X.Client
 
                     ImGui.Text("Current Cargo Manafest");
                     //ImGui.Text("Maybe this should show entire cargo, not just trade cargo, and use colours to diffentiate?");
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##logistics-right", true);
                     foreach (var item in _tradeshipDB.ItemsToShip)
                     {
                         ImGui.Text(item.item.Name);

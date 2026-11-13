@@ -110,7 +110,7 @@ namespace Pulsar4X.Client
             if (Window.Begin("Sensor Display: " + _selectedEntitySate.Name, ref IsActive))
             {
                 
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##sensor-draw", true);
                 ImGui.SetColumnWidth(0, 300);
                 if (_potentialTargetNames != null
                     && _potentialTargetEntities != null

@@ -43,7 +43,7 @@ public class CargoTypeBlueprintUI : BluePrintsUI
 
         if (ImGui.Begin($"Cargo Type Editor: {selectedItem.Name}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##cargo-type-bp", true);
             ImGui.SetColumnWidth(0, 150);
             ImGui.SetColumnWidth(1, 500);
 

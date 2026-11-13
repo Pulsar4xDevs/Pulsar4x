@@ -221,7 +221,7 @@ namespace Pulsar4X.Client
             ImGui.SetNextWindowSize(new Vector2(860f, 560f), ImGuiCond.FirstUseEver);
             if (Window.Begin("Nav Control: " + entityName, ref IsActive, _flags))
             {
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##nav-window", true);
                 ManuverTree(_manuverLines.RootSequence);
                 ImGui.NextColumn();
                 if (_navMode == NavMode.None)

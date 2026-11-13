@@ -115,7 +115,7 @@ public abstract class BluePrintsUI
 
             ImGui.BeginChild(label,_childSize, ImGuiChildFlags.Borders);
 
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##blueprints-ui", true);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
 

@@ -109,7 +109,7 @@ namespace Pulsar4X.Client
 
             ImGui.BeginChild("InnerColomns", size);
 
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##entity-inspector", true);
 
             _seen.Clear();
             _mineralNames = null;

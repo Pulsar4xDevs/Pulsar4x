@@ -634,7 +634,7 @@ namespace Pulsar4X.Client
                 var colonyName = colony.GetView<NameView>()?.Name ?? "Unknown";
                 if(ImGui.CollapsingHeader("Colony", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##colony-summary", true);
                     DisplayHelpers.PrintRow("Name", colonyName);
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                     ImGui.Text("Administrator");
@@ -684,7 +684,7 @@ namespace Pulsar4X.Client
                 {
                     bool overCapacity = infrastructure.CapacityAvailable < 0;
 
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##colony-infrastructure", true);
                     DisplayHelpers.PrintRow("Provided", infrastructure.CapacityProvided.ToString("N0"));
                     DisplayHelpers.PrintRow("Used", infrastructure.CapacityRequired.ToString("N0"));
                     DisplayHelpers.PrintRow("Available", infrastructure.CapacityAvailable.ToString("N0"));
@@ -711,7 +711,7 @@ namespace Pulsar4X.Client
 
                 if(ImGui.CollapsingHeader(planetName + " Information", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##colony-planet-info", true);
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                     ImGui.Text("Name");
                     ImGui.PopStyleColor();
@@ -734,8 +734,8 @@ namespace Pulsar4X.Client
                         DisplayHelpers.PrintRow("Radiation Level", body.RadiationLevel.ToString("#"));
                         DisplayHelpers.PrintRow("Atmospheric Dust", body.AtmosphericDust.ToString("#"), separator: false);
                     }
+                    ImGui.Columns(1);
                 }
-                ImGui.Columns(1);
                 if(planet?.GetView<AtmosphereView>() is { } atmosphere)
                 {
                     atmosphere.Display();
@@ -788,7 +788,7 @@ namespace Pulsar4X.Client
                             ImGui.PopStyleColor(3);
                         }
 
-                        ImGui.Columns(2);
+                        ImGui.Columns(2, "##colony-stockpile", true);
                         DisplayHelpers.PrintRow("Total Mass in Storage", Stringify.Mass(storage.TotalStoredMassKg));
                         DisplayHelpers.PrintRow("Transfer Rate", storage.TransferRateKgPerHour.ToString() + " kg/hr");
                         DisplayHelpers.PrintRow("Transfer Range", storage.TransferRangeDvMps.ToString("0.#") + " dV m/s", tooltipOne: "This is confusing as hell :D", separator: false);

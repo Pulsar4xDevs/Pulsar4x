@@ -64,7 +64,7 @@ public class CreateTransferWindow : UniquePulsarGuiWindow<CreateTransferWindow>
             if(ImGui.BeginChild("Transfer Details", secondChildSize, ImGuiChildFlags.Borders))
             {
 
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##create-transfer", true);
 
                 ImGui.Text("Items to Transfer");
                 ImGui.NextColumn();

@@ -82,7 +82,7 @@ namespace Pulsar4X.Client
             ImGui.SetNextWindowSizeConstraints(new System.Numerics.Vector2(32, 32), new System.Numerics.Vector2(720, 720));
             if (Window.Begin("SM", ref IsActive, _flags))
             {
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##sm-window", true);
                 ImGui.SetColumnWidth(0, 200);
                 for (int i = 0; i < _systemEntities.Length; i++)
                 {

@@ -55,7 +55,7 @@ public static class FileDialog
             fileName = Utils.StringFromBytes(_strInputBuffer);
         }
 
-        ImGui.Columns(2);
+        ImGui.Columns(2, "##file-dialog", true);
         ImGui.SetColumnWidth(0,128);
 
 

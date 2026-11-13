@@ -62,6 +62,12 @@ namespace Pulsar4X.Client
         private double _estor;
         private double _egen;
         private double _solarArea;
+        private double _lifeSupportPower;
+        private int _lifeSupportCapacity;
+        private double _lifeSupportPerCrew;
+        private double _lifeSupportFactor;
+        private double _auxPower;
+        private List<string> _auxPowerLines = new();
 
         //mass
         private double _massDry;
@@ -338,10 +344,13 @@ namespace Pulsar4X.Client
         internal void DisplayExistingDesigns()
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y - 24f), ImGuiChildFlags.Borders, ImGuiWindowFlags.ChildWindow))
+            // Leave room for "Create New Design" and "Copy Design" plus the gap between them.
+            float buttonsHeight = ImGui.GetFrameHeightWithSpacing() * 2 + ImGui.GetStyle().ItemSpacing.Y;
+            float childHeight = Math.Max(1f, windowContentSize.Y - buttonsHeight);
+            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(Styles.LeftColumnWidth, childHeight), ImGuiChildFlags.Borders, ImGuiWindowFlags.ChildWindow))
             {
                 DisplayHelpers.Header("Existing Designs", "Select an existing ship design to edit it.");
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##existing-designs", true);
                 ImGui.SetColumnWidth(0, Styles.LeftColumnWidth - 24);
                 ImGui.SetColumnWidth(1, 24);
                 for (int index = 0; index < _existingShipDesignNames.Count; index++)
@@ -817,6 +826,48 @@ namespace Pulsar4X.Client
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Power(_egen));
 
+                ImGui.TableNextColumn();
+                ImGui.Text("Life Support");
+                string lifeTip = "Crew capacity " + _lifeSupportCapacity.ToString(Styles.IntFormat)
+                    + " (the lesser of required crew and berths).\n"
+                    + Stringify.Power(_lifeSupportPerCrew) + " per crew × "
+                    + _lifeSupportFactor.ToString(Styles.DecimalFormat) + " life-support factor.";
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(lifeTip);
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Power(_lifeSupportPower));
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(lifeTip);
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Component Loads");
+                string auxTip = _auxPowerLines.Count == 0 ? "None" : string.Join("\n", _auxPowerLines);
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(auxTip);
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Power(_auxPower));
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(auxTip);
+
+                double totalDraw = _lifeSupportPower + _auxPower;
+                bool solarFitted = _solarArea > 0 || double.IsNaN(_solarArea);
+                bool powerDeficit = totalDraw > _egen && !solarFitted;
+                string totalTip = "Life support plus component loads (warp bubble costs are listed above).";
+                if (powerDeficit)
+                    totalTip += "\nDeficit " + Stringify.Power(totalDraw - _egen) + " with no solar collectors fitted.";
+                ImGui.TableNextColumn();
+                ImGui.Text("Total Power Draw");
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(totalTip);
+                ImGui.TableNextColumn();
+                if (powerDeficit)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.MediocreColor);
+                ImGui.Text(Stringify.Power(totalDraw));
+                if (powerDeficit)
+                    ImGui.PopStyleColor();
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(totalTip);
+
                 if (_solarArea > 0 || double.IsNaN(_solarArea))
                 {
                     ImGui.TableNextColumn();
@@ -1053,6 +1104,29 @@ namespace Pulsar4X.Client
                 .ToList();
             _egen = egen;
             _solarArea = ShipDesign.GetSolarCollectionArea(SelectedComponents);
+
+            var factionEntity = GameLifecycle.Instance?.Faction;
+            _lifeSupportPerCrew = factionEntity?.Manager?.Game?.Settings?.ShipLifeSupport_kWPerCrew
+                ?? GameLifecycle.Instance?.Game?.Settings?.ShipLifeSupport_kWPerCrew
+                ?? Pulsar4X.Engine.GameSettings.DefaultShipLifeSupport_kWPerCrew;
+            _lifeSupportFactor = CrewTech.LifeSupportFactor(_factionInfoDB.Data);
+            var crewSplit = ShipCrew.Split(SelectedComponents);
+            _lifeSupportCapacity = crewSplit.Capacity;
+            _lifeSupportPower = crewSplit.Capacity * _lifeSupportPerCrew * _lifeSupportFactor;
+
+            _auxPower = 0;
+            _auxPowerLines = new List<string>();
+            foreach (var c in SelectedComponents)
+            {
+                if (c.count <= 0 || c.design == null)
+                    continue;
+                if (!c.design.TryGetAttribute<PowerConsumerAtb>(out var consumer) || !(consumer.Draw_kW > 0))
+                    continue;
+                double draw = consumer.Draw_kW * c.count;
+                _auxPower += draw;
+                _auxPowerLines.Add($"{c.design.Name} x{c.count}: {Stringify.Power(draw)}");
+            }
+
             _estor = estor;
             _trate = cargoTransfer.rate;
             if(double.IsNaN(cargoTransfer.range))

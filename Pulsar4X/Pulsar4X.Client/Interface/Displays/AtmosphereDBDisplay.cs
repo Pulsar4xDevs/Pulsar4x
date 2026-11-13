@@ -12,7 +12,7 @@ namespace Pulsar4X.Client
             ImGui.PushID("atmosphere-display");
             if(ImGui.CollapsingHeader("Atmosphere", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##atmosphere-info", true);
                 DisplayHelpers.PrintRow("Surface Temp", atmosphere.SurfaceTemperatureC.ToString("###,##0.00") + "°C");
                 DisplayHelpers.PrintRow("Pressure", atmosphere.PressureAtm + " atm");
                 if(atmosphere.Hydrosphere)
@@ -25,9 +25,9 @@ namespace Pulsar4X.Client
                     var amountString = Math.Round(gas.Percent, 4) > 0 ? Stringify.Quantity(Math.Round(gas.Percent, 4)) + " %%" : "trace amounts";
                     DisplayHelpers.PrintRow(gas.Name, amountString);
                 }
+                ImGui.Columns(1);
             }
             ImGui.PopID();
-            ImGui.Columns(1);
         }
 
     }

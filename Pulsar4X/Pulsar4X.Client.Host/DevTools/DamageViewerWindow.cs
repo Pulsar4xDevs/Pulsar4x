@@ -379,7 +379,7 @@ namespace Pulsar4X.Client
                             drawList.AddLine(lineStart, lineEnd, color, 1f);
 
 
-                            ImGui.Columns(2);
+                            ImGui.Columns(2, "##damage-viewer", true);
 
 
                             //type of damage to test

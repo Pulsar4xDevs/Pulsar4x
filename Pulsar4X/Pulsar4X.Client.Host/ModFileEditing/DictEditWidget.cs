@@ -23,8 +23,8 @@ public static class DictEditWidget
     private static int _addVal = -1;
     public static bool Display(string label, ref Dictionary<int, List<string>> dict, string[] techs)
     {
-        ImGui.BeginChild("##dic");
-        ImGui.Columns(2);
+        ImGui.BeginChild("##dic" + label);
+        ImGui.Columns(2, "##dict-intlist-" + label, true);
         ImGui.SetColumnWidth(0, 150);
         ImGui.SetColumnWidth(1, 500);
         bool isChanged = false;
@@ -93,6 +93,7 @@ public static class DictEditWidget
             }
         }
 
+        ImGui.Columns(1);
         ImGui.EndChild();
         return isChanged;
     }
@@ -100,7 +101,7 @@ public static class DictEditWidget
     public static bool Display(string label, ref Dictionary<string, string> dict)
     {
         ImGui.BeginChild("##dic" + label, new Vector2(800,160), ImGuiChildFlags.Borders);
-        ImGui.Columns(2);
+        ImGui.Columns(2, "##dict-strstr-" + label, true);
         ImGui.SetColumnWidth(0, 150);
         ImGui.SetColumnWidth(1, 500);
         bool isChanged = false;
@@ -142,7 +143,7 @@ public static class DictEditWidget
         for(int i = 0; i < selectedItem.Properties.Count; i++)
             propertyNames[i] = selectedItem.Properties[i].Name;
         ImGui.BeginChild("##dic" + label, new Vector2(800,160), ImGuiChildFlags.Borders);
-        ImGui.Columns(2);
+        ImGui.Columns(2, "##dict-fn-" + label, true);
         ImGui.SetColumnWidth(0, 150);
         ImGui.SetColumnWidth(1, 500);
         bool isChanged = false;
@@ -186,7 +187,7 @@ public static class DictEditWidget
     public static bool Display(string label, ref Dictionary<string, long> dict)
     {
         ImGui.BeginChild("##dic" + label, new Vector2(800,160), ImGuiChildFlags.Borders);
-        ImGui.Columns(2);
+        ImGui.Columns(2, "##dict-strlong-" + label, true);
         ImGui.SetColumnWidth(0, 150);
         ImGui.SetColumnWidth(1, 500);
         bool isChanged = false;
@@ -229,7 +230,7 @@ public static class DictEditWidget
     public static bool Display(string label, ref Dictionary<BodyType, double> dict)
     {
         ImGui.BeginChild("##dic" + label, new Vector2(400,160), ImGuiChildFlags.Borders);
-        ImGui.Columns(2);
+        ImGui.Columns(2, "##dict-bodytype-" + label, true);
         ImGui.SetColumnWidth(0, 150);
         ImGui.SetColumnWidth(1, 500);
         bool isChanged = false;
@@ -258,6 +259,7 @@ public static class DictEditWidget
 
         }
 
+        ImGui.Columns(1);
         ImGui.EndChild();
         return isChanged;
     }

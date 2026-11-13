@@ -59,7 +59,7 @@ namespace Pulsar4X.Client
                 {
                     var weaponsById = fireControl.Weapons.ToDictionary(w => w.Id);
 
-                    ImGui.Columns(2);
+                    ImGui.Columns(2, "##fire-control", true);
                     ImGui.SetColumnWidth(0, 400);
                     DisplayFC(entity, fireControl, weaponsById);
 
