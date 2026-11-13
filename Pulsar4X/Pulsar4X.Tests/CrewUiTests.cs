@@ -122,4 +122,77 @@ public class CrewUiTests
         Assert.That(berths.Percent, Is.EqualTo("100%"));
         Assert.That(berths.Fill, Is.EqualTo(1f));
     }
+
+    static NavalAcademyClassView CrewAcademy(int seats, int inUse, int months = 6, string reason = "")
+        => new NavalAcademyClassView(7, 8, 24, 0, 50, Array.Empty<AcademyCohortView>())
+        { CrewSeats = seats, CrewSeatsInUse = inUse, CrewCourseLengthMonths = months, CrewCourseReason = reason };
+
+    static EntitySnapshot Body(int id) => new() { Id = id, Kind = BodyKind.Planet };
+
+    static EntitySnapshot Colony(int id, int planet, long pool, OwnerRelation relation = OwnerRelation.Owned)
+        => new() { Id = id, Kind = BodyKind.Colony, Relation = relation,
+            Views = new IComponentView[] { new ColonyView(1000, planet) { CrewPool = pool } } };
+
+    static EntitySnapshot ShipAt(int? parent)
+        => new() { Id = 1, Kind = BodyKind.Ship, Relation = OwnerRelation.Owned,
+            Views = new IComponentView[] { new PositionView(default, default, parent) } };
+
+    [Test]
+    public void TrainCrew_CountDefaultsToFreeSeats_ClampsToOneToMax()
+    {
+        var academy = CrewAcademy(seats: 40, inUse: 15);
+        Assert.That(CrewActions.TrainMax(academy, 1_000_000), Is.EqualTo(25));
+        Assert.That(CrewActions.TrainMax(academy, 10), Is.EqualTo(10), "No more trainees than colonists.");
+        Assert.That(CrewActions.ClampTrain(null, 25), Is.EqualTo(25));
+        Assert.That(CrewActions.ClampTrain(0, 25), Is.EqualTo(1));
+        Assert.That(CrewActions.ClampTrain(99, 25), Is.EqualTo(25));
+        Assert.That(CrewActions.ClampTrain(12, 25), Is.EqualTo(12));
+        Assert.That(CrewActions.ClampTrain(null, 0), Is.EqualTo(0));
+        Assert.That(CrewActions.TrainRefusal(academy, 1_000_000), Is.Null);
+    }
+
+    [Test]
+    public void TrainCrew_DisabledWithReason_WithoutSeatsOrCourse()
+    {
+        Assert.That(CrewActions.TrainRefusal(CrewAcademy(0, 0), 1000), Is.EqualTo("This academy has no crew seats."));
+        Assert.That(CrewActions.TrainRefusal(CrewAcademy(40, 0, months: 0), 1000), Is.EqualTo("This academy has no crew seats."));
+        Assert.That(CrewActions.TrainRefusal(CrewAcademy(40, 40), 1000), Is.EqualTo("This academy has no free crew seats."));
+        Assert.That(CrewActions.TrainRefusal(CrewAcademy(40, 0, reason: "The colony has 0 people. This crew course needs 1."), 1000),
+            Is.EqualTo("The colony has 0 people. This crew course needs 1."));
+        Assert.That(CrewActions.TrainRefusal(CrewAcademy(40, 0), 0), Is.Not.Null);
+    }
+
+    [Test]
+    public void OrbitedColony_IsTheOwnedColonyOnTheShipsParentBody()
+    {
+        var entities = new[] { Body(10), Colony(20, 10, 50), Colony(21, 11, 50), Colony(22, 12, 50, OwnerRelation.Hostile) };
+        Assert.That(CrewActions.OrbitedColony(ShipAt(10), entities)?.Id, Is.EqualTo(20));
+        Assert.That(CrewActions.OrbitedColony(ShipAt(11), entities)?.Id, Is.EqualTo(21));
+        Assert.That(CrewActions.OrbitedColony(ShipAt(12), entities), Is.Null, "Not someone else's colony.");
+        Assert.That(CrewActions.OrbitedColony(ShipAt(99), entities), Is.Null);
+        Assert.That(CrewActions.OrbitedColony(ShipAt(null), entities), Is.Null, "In deep space.");
+    }
+
+    [Test]
+    public void TopUpAndToPool_GateOnOrbitShortfallPoolAndAboard()
+    {
+        var colony = Colony(20, 10, 50);
+        var shortShip = Ship(17, 20, tracked: true, aboard: 9);
+        Assert.That(CrewActions.Room(shortShip), Is.EqualTo(8));
+        Assert.That(CrewActions.TopUpRefusal(shortShip, colony), Is.Null);
+        Assert.That(CrewActions.ToPoolRefusal(shortShip, colony), Is.Null);
+
+        Assert.That(CrewActions.TopUpRefusal(shortShip, null), Is.EqualTo(CrewActions.NotInOrbit));
+        Assert.That(CrewActions.ToPoolRefusal(shortShip, null), Is.EqualTo(CrewActions.NotInOrbit));
+        Assert.That(CrewActions.NotInOrbit, Is.EqualTo("Must be in orbit of a colony."));
+
+        Assert.That(CrewActions.TopUpRefusal(Ship(17, 20, tracked: true, aboard: 17), colony), Is.EqualTo("The ship has a full crew."));
+        Assert.That(CrewActions.TopUpRefusal(Ship(17, 12, tracked: true, aboard: 12), colony), Is.EqualTo("The ship has a full crew."),
+            "Berths cap the crew aboard.");
+        Assert.That(CrewActions.TopUpRefusal(shortShip, Colony(20, 10, 0)), Is.EqualTo("The colony's crew pool is empty."));
+
+        Assert.That(CrewActions.ToPoolRefusal(Ship(17, 20, tracked: true, aboard: 0), colony), Is.EqualTo("Nobody is aboard."));
+        Assert.That(CrewActions.TopUpRefusal(Ship(17, 20), colony), Is.EqualTo("This ship does not carry crew."));
+        Assert.That(CrewActions.ToPoolRefusal(Ship(17, 20), colony), Is.EqualTo("This ship does not carry crew."));
+    }
 }

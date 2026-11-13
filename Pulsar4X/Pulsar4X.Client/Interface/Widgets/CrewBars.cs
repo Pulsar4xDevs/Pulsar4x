@@ -8,14 +8,80 @@ using Pulsar4X.Api;
 namespace Pulsar4X.Client.Interface.Widgets;
 
 /// <summary>
-/// Reasons for crew buttons whose engine command does not exist yet (crew plan phases 2-3). One place, so
-/// wiring a command when it lands means deleting its line here and the BeginDisabled at the call site.
+/// When the crew buttons may send their commands, from Api views only. Each refusal is the sentence the
+/// server would give (or a plainer one), shown on the disabled button's hover; null means enabled.
 /// </summary>
-public static class CrewCommandsPending
+public static class CrewActions
 {
-    public const string TrainCrew = "Waiting on engine command: train crew (crew plan phase 2).";
-    public const string TopUp = "Waiting on engine command: top up crew from this colony's pool (crew plan phase 3).";
-    public const string ToPool = "Waiting on engine command: send crew down to the colony pool (crew plan phase 3).";
+    public const string NotInOrbit = "Must be in orbit of a colony.";
+
+    /// <summary>Most trainees one crew course can take now: free crew seats, capped by the colony's people.</summary>
+    public static int TrainMax(NavalAcademyClassView row, long population)
+    {
+        int free = Math.Max(0, row.CrewSeats - row.CrewSeatsInUse);
+        return (int)Math.Max(0, Math.Min(free, population));
+    }
+
+    /// <summary>The count input's value: the free seats by default, clamped to 1..max (0 when nothing fits).</summary>
+    public static int ClampTrain(int? count, int max)
+        => max <= 0 ? 0 : Math.Clamp(count ?? max, 1, max);
+
+    /// <summary>Null when a crew course can start at this academy.</summary>
+    public static string? TrainRefusal(NavalAcademyClassView row, long population)
+    {
+        if (row.CrewSeats <= 0 || row.CrewCourseLengthMonths <= 0)
+            return "This academy has no crew seats.";
+        if (row.CrewSeats - row.CrewSeatsInUse <= 0)
+            return "This academy has no free crew seats.";
+        if (row.CrewCourseReason.Length > 0)
+            return row.CrewCourseReason;
+        if (population <= 0)
+            return "The colony has no people to train.";
+        return null;
+    }
+
+    /// <summary>
+    /// The owned colony on the body the ship orbits, or null. The engine moves crew only when the ship's
+    /// position parent is the colony's planet.
+    /// </summary>
+    public static EntitySnapshot? OrbitedColony(EntitySnapshot? ship, IEnumerable<EntitySnapshot>? entities)
+    {
+        if (ship?.GetView<PositionView>()?.ParentId is not int parent || entities == null)
+            return null;
+        return entities.FirstOrDefault(e => e.Kind == BodyKind.Colony
+            && e.Relation == OwnerRelation.Owned
+            && e.GetView<ColonyView>()?.PlanetEntityId == parent);
+    }
+
+    /// <summary>Crew the ship can still take aboard: min(required, berths) less those aboard.</summary>
+    public static int Room(ShipView ship)
+        => Math.Max(0, Math.Min(ship.CrewRequired, ship.CrewBerths) - ship.CrewAboard);
+
+    /// <summary>Null when Top up may fill the ship from <paramref name="colony"/>'s pool.</summary>
+    public static string? TopUpRefusal(ShipView ship, EntitySnapshot? colony)
+    {
+        if (colony == null)
+            return NotInOrbit;
+        if (!ship.CrewTracked)
+            return "This ship does not carry crew.";
+        if (Room(ship) <= 0)
+            return "The ship has a full crew.";
+        if ((colony.GetView<ColonyView>()?.CrewPool ?? 0) <= 0)
+            return "The colony's crew pool is empty.";
+        return null;
+    }
+
+    /// <summary>Null when To pool may send everyone aboard down to <paramref name="colony"/>'s pool.</summary>
+    public static string? ToPoolRefusal(ShipView ship, EntitySnapshot? colony)
+    {
+        if (colony == null)
+            return NotInOrbit;
+        if (!ship.CrewTracked)
+            return "This ship does not carry crew.";
+        if (ship.CrewAboard <= 0)
+            return "Nobody is aboard.";
+        return null;
+    }
 }
 
 /// <summary>
@@ -320,18 +386,27 @@ public static class CrewBars
     }
 
     /// <summary>A disabled button whose hover (allowed while disabled) says why.</summary>
-    public static void PendingButton(string label, string reason, Vector2 size = default)
+    /// <summary>
+    /// A button that is disabled with <paramref name="refusal"/> on hover when that is non-null, or shows
+    /// <paramref name="tooltip"/> when enabled. True when clicked while enabled.
+    /// </summary>
+    public static bool GatedButton(string label, string? refusal, string? tooltip = null, Vector2 size = default)
     {
-        ImGui.BeginDisabled();
-        ImGui.Button(label, size);
-        ImGui.EndDisabled();
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+        bool disabled = refusal != null;
+        if (disabled)
+            ImGui.BeginDisabled();
+        bool clicked = ImGui.Button(label, size) && !disabled;
+        if (disabled)
+            ImGui.EndDisabled();
+        string? hover = refusal ?? tooltip;
+        if (hover != null && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
             ImGui.BeginTooltip();
             ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
-            ImGui.TextUnformatted(reason);
+            ImGui.TextUnformatted(hover);
             ImGui.PopTextWrapPos();
             ImGui.EndTooltip();
         }
+        return clicked;
     }
 }

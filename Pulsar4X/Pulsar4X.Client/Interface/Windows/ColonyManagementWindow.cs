@@ -23,6 +23,7 @@ namespace Pulsar4X.Client
         private int _logShownId = -1;
         private int _logShownCount = -1;
         private readonly Dictionary<int, int> _academyRecruits = new();
+        private readonly Dictionary<int, int> _academyCrewCount = new();
         private readonly Dictionary<int, int> _academyOfficer = new();
         // The colony whose administrator chair the assign modal is editing.
         private int? _administratorChooserColonyId = null;
@@ -1052,7 +1053,7 @@ namespace Pulsar4X.Client
                     ImGui.SetTooltip("This academy has no free seats.");
             }
 
-            DisplayCrewCourse(colonyId, row);
+            DisplayCrewCourse(colonyId, row, academy.Population);
 
             _academyRecruits[row.ComponentId] = recruits;
             _academyOfficer[row.ComponentId] = selected;
@@ -1060,9 +1061,10 @@ namespace Pulsar4X.Client
 
         /// <summary>
         /// The crew (ratings) course of one academy: a seats row in the Power tab look, the running crew cohorts
-        /// with Cancel (the shared cancel command takes any cohort), and Train, disabled until the engine command lands.
+        /// with Cancel (the shared cancel command takes any cohort), then a trainee count (free crew seats by default)
+        /// and Train crew, which sends TrainAcademyCrewCommand. Both are disabled with the reason when no course fits.
         /// </summary>
-        private void DisplayCrewCourse(int colonyId, NavalAcademyClassView row)
+        private void DisplayCrewCourse(int colonyId, NavalAcademyClassView row, long population)
         {
             PowerBars.Rows("##crewCourse-" + row.ComponentId, new[] { CrewBars.CourseRow(row) }, 56f);
 
@@ -1083,9 +1085,32 @@ namespace Pulsar4X.Client
             if (row.CrewCourseReason.Length > 0)
                 CrewBars.Warning(row.CrewCourseReason);
 
-            string reason = CrewCommandsPending.TrainCrew
-                + (row.CrewCourseReason.Length > 0 ? "\n" + row.CrewCourseReason : "");
-            CrewBars.PendingButton("Train crew###train-crew-" + row.ComponentId, reason, new Vector2(-1, 0));
+            string? refusal = CrewActions.TrainRefusal(row, population);
+            int max = refusal == null ? CrewActions.TrainMax(row, population) : 0;
+            if (max <= 0)
+                refusal ??= "This academy has no free crew seats.";
+            int count = CrewActions.ClampTrain(_academyCrewCount.TryGetValue(row.ComponentId, out int kept) ? kept : null, max);
+
+            if (refusal != null)
+                ImGui.BeginDisabled();
+            ImGui.SetNextItemWidth(Math.Min(110f, ImGui.GetContentRegionAvail().X * 0.35f));
+            if (ImGui.InputInt("###train-crew-count-" + row.ComponentId, ref count, 1, 10) && refusal == null)
+            {
+                count = CrewActions.ClampTrain(count, max);
+                _academyCrewCount[row.ComponentId] = count;
+            }
+            if (refusal != null)
+                ImGui.EndDisabled();
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                ImGui.SetTooltip(refusal ?? "Trainees, 1 to " + max.ToString("N0") + ". One colonist per seat.");
+            ImGui.SameLine();
+            string tip = "Enrol " + count.ToString("N0") + " colonists. They graduate into the crew pool in "
+                + row.CrewCourseLengthMonths.ToString("N0") + " months.";
+            if (CrewBars.GatedButton("Train crew###train-crew-" + row.ComponentId, refusal, tip, new Vector2(-1, 0)))
+            {
+                _uiState.GameClient?.SubmitCommandAsync(new TrainAcademyCrewCommand(colonyId, row.ComponentId, count));
+                _academyCrewCount.Remove(row.ComponentId);
+            }
         }
 
         private static string OfficerLine(CommanderSnapshot officer)

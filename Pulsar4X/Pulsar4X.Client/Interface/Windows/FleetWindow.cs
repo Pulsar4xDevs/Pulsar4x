@@ -440,7 +440,8 @@ namespace Pulsar4X.Client
                     && SubjectEntity(galaxy)?.GetView<ShipView>() is { } crewView
                     && ImGui.BeginTabItem("Crew"))
                 {
-                    DisplayCrewTab(crewView);
+                    DisplayCrewTab(crewView, CrewActions.OrbitedColony(SubjectEntity(galaxy),
+                        galaxy.GetSystem(SubjectSystemId() ?? "")?.Entities));
                     ImGui.EndTabItem();
                 }
 
@@ -513,7 +514,7 @@ namespace Pulsar4X.Client
         /// the berths come from, one row per part. Aboard and the fractions are hidden until the engine tracks
         /// crew aboard (ShipView.CrewTracked, crew plan phase 3).
         /// </summary>
-        private static void DisplayCrewTab(ShipView shipView)
+        private void DisplayCrewTab(ShipView shipView, EntitySnapshot? colony)
         {
             var size = ImGui.GetContentRegionAvail();
             var left = new Vector2(size.X * 0.35f, size.Y);
@@ -533,9 +534,19 @@ namespace Pulsar4X.Client
 
                 ImGui.Spacing();
                 float half = (ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X) * 0.5f;
-                CrewBars.PendingButton("Top up###crewTopUp", CrewCommandsPending.TopUp, new Vector2(half, 0));
+                string colonyName = colony?.GetView<NameView>()?.Name ?? "the colony";
+                long pool = colony?.GetView<ColonyView>()?.CrewPool ?? 0;
+                int shipId = orderShip?.Id ?? -1;
+                if (CrewBars.GatedButton("Top up###crewTopUp", CrewActions.TopUpRefusal(shipView, colony),
+                        "Take up to " + CrewActions.Room(shipView).ToString("N0") + " crew aboard from " + colonyName
+                        + "'s pool (" + pool.ToString("N0") + " waiting).", new Vector2(half, 0))
+                    && colony != null && shipId >= 0)
+                    _uiState.GameClient?.SubmitCommandAsync(new TopUpCrewCommand(shipId, colony.Id));
                 ImGui.SameLine();
-                CrewBars.PendingButton("To pool###crewToPool", CrewCommandsPending.ToPool, new Vector2(half, 0));
+                if (CrewBars.GatedButton("To pool###crewToPool", CrewActions.ToPoolRefusal(shipView, colony),
+                        "Send all " + shipView.CrewAboard.ToString("N0") + " crew down to " + colonyName + "'s pool.", new Vector2(half, 0))
+                    && colony != null && shipId >= 0)
+                    _uiState.GameClient?.SubmitCommandAsync(new CrewToPoolCommand(shipId, colony.Id));
             }
             ImGui.EndChild();
             ImGui.SameLine();
