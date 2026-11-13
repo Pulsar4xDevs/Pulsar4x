@@ -1610,9 +1610,18 @@
           "PropertyFormula": "100000"
         },
         {
+          "Name": "Launch Fuel",
+          "DescriptionFormula": "'The propellant this pad burns to lift a ship to orbit'",
+          "GuiHint": "GuiFuelTypeSelection",
+          "DataDict": {
+            "fuel-storage": "'conventional'"
+          },
+          "PropertyFormula": "UniqueID('rp-1')"
+        },
+        {
           "Name": "DBargs",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(PropertyValue('Max Tonnage'))",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Max Tonnage'), PropertyValue('Launch Fuel'))",
           "AttributeType": "Pulsar4X.Ships.LaunchComplexAtb"
         }
       ]

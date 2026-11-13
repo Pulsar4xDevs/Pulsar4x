@@ -35,7 +35,11 @@ namespace Pulsar4X.Ships
         }
 
         public const string NoFreePad = "No free pad";
-        public const string NotEnoughFuel = "Not enough fuel";
+        /// <summary>The hold reason's prefix when the pad's launch fuel is short.</summary>
+        public const string NotEnoughFuel = "Not enough";
+
+        /// <summary>"Not enough RP-1": the hold reason naming the pad's launch fuel.</summary>
+        public static string NotEnoughOf(string fuelName) => $"{NotEnoughFuel} {fuelName}";
         public const string OverTonnage = "Tonnage over the pad";
 
         /// <summary>
@@ -47,23 +51,43 @@ namespace Pulsar4X.Ships
                 return NoFreePad;
 
             bool anyFits = false;
-            bool anyFreeFits = false;
+            LaunchPad? firstFree = null;
             foreach (var pad in launch.Pads.Values)
             {
                 if (mass > pad.MaxTonnage)
                     continue;
                 anyFits = true;
-                if (pad.ShipDesignId == null)
-                    anyFreeFits = true;
+                if (pad.ShipDesignId != null)
+                    continue;
+                if (HasFuel(colony, mass, pad))
+                    return "";
+                firstFree ??= pad;
             }
 
             if (!anyFits)
                 return OverTonnage;
-            if (!anyFreeFits)
+            if (firstFree == null)
                 return NoFreePad;
-            if (!HasFuel(colony, mass))
-                return NotEnoughFuel;
-            return "";
+            return NotEnoughOf(FuelName(colony, firstFree.LaunchFuel));
+        }
+
+        /// <summary>
+        /// Why a pad holding a ship has not launched it: empty when it can go, else the pad's
+        /// launch fuel is short.
+        /// </summary>
+        public static string PadHoldReason(Entity colony, LaunchPad pad)
+        {
+            if (pad.ShipDesignId == null)
+                return "";
+            return HasFuel(colony, pad.ShipMass, pad, pad.TargetOrbitRadius) ? "" : NotEnoughOf(FuelName(colony, pad.LaunchFuel));
+        }
+
+        /// <summary>The cargo's display name, or its id when the faction does not know it.</summary>
+        public static string FuelName(Entity colony, string fuelId)
+        {
+            if (!colony.GetFactionOwner.TryGetDataBlob<FactionInfoDB>(out var info))
+                return fuelId;
+            return (info.Data.CargoGoods.GetAny(fuelId) ?? info.Data.LockedCargoGoods.GetAny(fuelId))?.Name ?? fuelId;
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
@@ -148,7 +172,7 @@ namespace Pulsar4X.Ships
 
             double fuelCost = OrbitMath.FuelCostToOrbit(planet, shipDesign.MassPerUnit, targetRadius);
 
-            if (!TryDeductFuel(colonyEntity, fuelCost))
+            if (!TryDeductFuel(colonyEntity, pad.LaunchFuel, fuelCost))
                 return false;
 
             var position = new Vector3(targetRadius, 0, 0);
@@ -173,54 +197,38 @@ namespace Pulsar4X.Ships
         }
 
         /// <summary>
-        /// Takes launch propellant from the colony's fuel store. Nothing is taken unless the whole
-        /// amount is there. A power plant fuel only gives what sits above the plants' runway reserve
-        /// (<see cref="ColonyPowerProcessor.FuelReserveUnits"/>, the hold the market and the refinery
-        /// planner also keep), and is drawn after every other fuel.
+        /// Takes the pad's launch fuel (picked in its launch complex design) and no other. Nothing is
+        /// taken unless the whole amount is there. If a design picks a power plant fuel, a launch
+        /// only gets what sits above the plants' runway reserve
+        /// (<see cref="ColonyPowerProcessor.FuelReserveUnits"/>, the hold the market and the
+        /// refinery planner also keep).
         /// </summary>
-        private static bool TryDeductFuel(Entity colonyEntity, double fuelMassNeeded)
+        private static bool TryDeductFuel(Entity colonyEntity, string fuelId, double fuelMassNeeded)
         {
             if (!colonyEntity.TryGetDataBlob<CargoStorageDB>(out var storage))
                 return false;
-            var fuels = LaunchFuels(colonyEntity, storage);
-            if (fuels.Sum(f => f.Mass) + 1e-9 < fuelMassNeeded)
+            var (fuel, available) = LaunchFuelAvailable(colonyEntity, storage, fuelId);
+            if (fuel == null || available + 1e-9 < fuelMassNeeded)
                 return false;
-
-            double remaining = fuelMassNeeded;
-            foreach (var (fuelItem, available) in fuels)
-            {
-                if (remaining <= 0)
-                    break;
-                double toDeduct = Math.Min(remaining, available);
-                if (toDeduct <= 0)
-                    continue;
-                CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, fuelItem, -toDeduct);
-                remaining -= toDeduct;
-            }
-
-            return remaining <= 1e-9;
+            if (fuelMassNeeded > 0)
+                CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, fuel, -fuelMassNeeded);
+            return true;
         }
 
         /// <summary>
-        /// Each fuel in the colony's fuel store with the mass a launch may burn: everything for a
-        /// plain propellant, only what is above the runway reserve for a power plant fuel. Plain
-        /// propellants come first.
+        /// The launch fuel in the colony's fuel store and the mass a launch may burn: all of it for a
+        /// plain propellant, only what is above the runway reserve for a power plant fuel.
         /// </summary>
-        static List<(ICargoable Fuel, double Mass)> LaunchFuels(Entity colony, CargoStorageDB storage)
+        static (ICargoable? Fuel, double Mass) LaunchFuelAvailable(Entity colony, CargoStorageDB storage, string fuelId)
         {
-            var fuels = new List<(ICargoable Fuel, double Mass, bool PlantFuel)>();
             if (!storage.TypeStores.TryGetValue("fuel-storage", out var fuelStore))
-                return new List<(ICargoable, double)>();
-            foreach (var fuelItem in fuelStore.Cargoables.Values.ToArray())
-            {
-                double stored = storage.GetMassStored(fuelItem, false);
-                if (stored <= 0)
-                    continue;
-                long reserveUnits = ColonyPowerProcessor.FuelReserveUnits(colony, fuelItem.UniqueID);
-                double available = Math.Max(0, stored - reserveUnits * fuelItem.MassPerUnit);
-                fuels.Add((fuelItem, available, reserveUnits > 0));
-            }
-            return fuels.OrderBy(f => f.PlantFuel).Select(f => (f.Fuel, f.Mass)).ToList();
+                return (null, 0);
+            var fuel = fuelStore.Cargoables.Values.FirstOrDefault(c => c.UniqueID == fuelId);
+            if (fuel == null)
+                return (null, 0);
+            double stored = storage.GetMassStored(fuel, false);
+            long reserveUnits = ColonyPowerProcessor.FuelReserveUnits(colony, fuelId);
+            return (fuel, Math.Max(0, stored - reserveUnits * fuel.MassPerUnit));
         }
 
         /// <summary>
@@ -254,7 +262,7 @@ namespace Pulsar4X.Ships
                     if (hull.Mass > pad.MaxTonnage)
                         continue;
 
-                    if (TryLaunchHull(colony, hull))
+                    if (TryLaunchHull(colony, hull, pad))
                     {
                         line.Hulls.Remove(hull);
                         launched.Add(hull);
@@ -264,7 +272,7 @@ namespace Pulsar4X.Ships
             }
         }
 
-        static bool TryLaunchHull(Entity colony, IndustryAbilityDB.YardHull hull)
+        static bool TryLaunchHull(Entity colony, IndustryAbilityDB.YardHull hull, LaunchPad pad)
         {
             if (!colony.TryGetDataBlob<ColonyInfoDB>(out var colonyInfo) || colonyInfo.PlanetEntity == null)
                 return false;
@@ -277,9 +285,9 @@ namespace Pulsar4X.Ships
                 return false;
             if (!factionInfo.IndustryDesigns.TryGetValue(hull.DesignId, out var designInfo) || designInfo is not ShipDesign shipDesign)
                 return false;
-            if (!HasFuel(colony, hull.Mass) || !TryFuelCost(colony, hull.Mass, out double fuelCost))
+            if (!TryFuelCost(colony, hull.Mass, 0, out double fuelCost))
                 return false;
-            if (!TryDeductFuel(colony, fuelCost))
+            if (!TryDeductFuel(colony, pad.LaunchFuel, fuelCost))
                 return false;
 
             var position = new Vector3(OrbitMath.LowOrbitRadius(planet), 0, 0);
@@ -291,29 +299,27 @@ namespace Pulsar4X.Ships
             return true;
         }
 
-        static bool HasFuel(Entity colony, long mass)
+        static bool HasFuel(Entity colony, long mass, LaunchPad pad, double targetRadius = 0)
         {
-            if (!TryFuelCost(colony, mass, out double cost))
+            if (!TryFuelCost(colony, mass, targetRadius, out double cost))
                 return false;
-            return FuelOnHand(colony) + 1e-9 >= cost;
+            if (!colony.TryGetDataBlob<CargoStorageDB>(out var storage))
+                return false;
+            var (fuel, available) = LaunchFuelAvailable(colony, storage, pad.LaunchFuel);
+            return fuel != null && available + 1e-9 >= cost;
         }
 
-        static bool TryFuelCost(Entity colony, long mass, out double cost)
+        /// <summary>Fuel to lift this mass to the target radius, low orbit when 0.</summary>
+        static bool TryFuelCost(Entity colony, long mass, double targetRadius, out double cost)
         {
             cost = 0;
             if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info) || info.PlanetEntity == null)
                 return false;
             if (!info.PlanetEntity.TryGetDataBlob<MassVolumeDB>(out _))
                 return false;
-            cost = OrbitMath.FuelCostToOrbit(info.PlanetEntity, mass, OrbitMath.LowOrbitRadius(info.PlanetEntity));
+            double radius = targetRadius > 0 ? targetRadius : OrbitMath.LowOrbitRadius(info.PlanetEntity);
+            cost = OrbitMath.FuelCostToOrbit(info.PlanetEntity, mass, radius);
             return true;
-        }
-
-        static double FuelOnHand(Entity colony)
-        {
-            if (!colony.TryGetDataBlob<CargoStorageDB>(out var storage))
-                return 0;
-            return LaunchFuels(colony, storage).Sum(f => f.Mass);
         }
     }
 }

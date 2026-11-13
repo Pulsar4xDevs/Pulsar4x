@@ -23,6 +23,17 @@ namespace Pulsar4X.Ships
 
         [JsonProperty]
         public bool ReadyToLaunch { get; set; }
+
+        /// <summary>
+        /// Cargo id of the propellant this pad burns, from its launch complex design. Null in a save
+        /// from before the choice: see <see cref="LaunchFuel"/>.
+        /// </summary>
+        [JsonProperty]
+        public string? LaunchFuelId { get; set; }
+
+        /// <summary>The launch fuel, checked by <see cref="LaunchComplexAtb.NormalizeLaunchFuel"/>: rp-1 unless the id is an allowed propellant.</summary>
+        [JsonIgnore]
+        public string LaunchFuel => LaunchComplexAtb.NormalizeLaunchFuel(LaunchFuelId);
     }
 
     public class LaunchQueueEntry

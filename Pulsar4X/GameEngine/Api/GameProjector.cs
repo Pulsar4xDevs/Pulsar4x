@@ -1456,7 +1456,11 @@ namespace Pulsar4X.Engine.Api
             if (entity.TryGetDataBlob<LaunchComplexDB>(out var launch))
             {
                 foreach (var pad in launch.Pads.Values)
-                    pads.Add(new LaunchPadStateView(pad.MaxTonnage, pad.ShipDesignId == null));
+                    pads.Add(new LaunchPadStateView(pad.MaxTonnage, pad.ShipDesignId == null)
+                    {
+                        LaunchFuel = LaunchComplexProcessor.FuelName(entity, pad.LaunchFuel),
+                        Reason = LaunchComplexProcessor.PadHoldReason(entity, pad),
+                    });
             }
 
             return new IndustryView(lines) { Pads = pads };

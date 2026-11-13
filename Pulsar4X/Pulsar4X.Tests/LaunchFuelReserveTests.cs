@@ -3,10 +3,13 @@ using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.Client;
 using Pulsar4X.Client.Host;
+using Pulsar4X.Blueprints;
 using Pulsar4X.Colonies;
+using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Energy;
 using Pulsar4X.Engine;
+using Pulsar4X.Engine.Factories;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
@@ -23,8 +26,9 @@ namespace Pulsar4X.Tests;
 /// <summary>
 /// Jon's playtest: Earth's fissile fuels were all gone by hour 4 of day 1. The launch complex
 /// burned every fuel in the store as launch propellant, plant fuel first, to lift ISS Hermes.
-/// A launch now leaves a power plant fuel's runway reserve alone and takes nothing unless it can
-/// pay the whole cost.
+/// A launch now burns only its pad's launch fuel (rp-1, methalox or hydrolox, picked in the
+/// launch complex design), leaves a power plant fuel's runway reserve alone (methalox is one when
+/// the colony runs a Methalox Turbine), and takes nothing unless it can pay the whole cost.
 /// </summary>
 [TestFixture]
 public class LaunchFuelReserveTests
@@ -78,8 +82,7 @@ public class LaunchFuelReserveTests
         Assert.That(Stock(earth, fissile), Is.GreaterThanOrEqualTo(reserve - plantBurn30Days));
     }
 
-    [Test]
-    public void Launch_LeavesThePlantFuelRunway_AndTakesNothingWhenShort()
+    static (Game game, Entity player, StarSystem sol, Entity planet, Entity earth) EarthFromBlueprint()
     {
         var modLoader = new ModLoader();
         var store = new ModDataStore();
@@ -96,39 +99,104 @@ public class LaunchFuelReserveTests
         player.GetDataBlob<FactionInfoDB>().Species.Add(species);
         var planet = NameLookup.GetFirstEntityWithName(sol, "Earth");
         var earth = ColonyFactory.CreateFromBlueprint(game, player, species, sol, planet, store.Colonies["colony-earth"]);
+        return (game, player, sol, planet, earth);
+    }
 
-        var info = player.GetDataBlob<FactionInfoDB>();
-        var cargo = earth.GetDataBlob<CargoStorageDB>();
-        var fissile = info.Data.CargoGoods.GetAny(Fissile)!;
-        var rp1 = info.Data.CargoGoods.GetAny("rp-1")!;
-        long reserve = ColonyPowerProcessor.FuelReserveUnits(earth, Fissile);
-        Assert.That(reserve, Is.GreaterThan(0));
-        Assert.That(ColonyPowerProcessor.FuelReserveUnits(earth, "rp-1"), Is.EqualTo(0), "rp-1 is plain propellant");
-
+    static double HermesCost(Entity player, Entity planet, Entity earth)
+    {
         var hermes = earth.GetDataBlob<LaunchComplexDB>().LaunchQueue.Single(e => e.ShipName == "ISS Hermes");
-        var design = info.ShipDesigns[hermes.DesignId];
-        double cost = OrbitMath.FuelCostToOrbit(planet, design.MassPerUnit, OrbitMath.LowOrbitRadius(planet));
+        var design = player.GetDataBlob<FactionInfoDB>().ShipDesigns[hermes.DesignId];
+        return OrbitMath.FuelCostToOrbit(planet, design.MassPerUnit, OrbitMath.LowOrbitRadius(planet));
+    }
+
+    static void SetStock(Entity colony, ICargoable item, double kg)
+    {
+        var cargo = colony.GetDataBlob<CargoStorageDB>();
+        CargoTransferProcessor.AddRemoveCargoMass(colony, item, -cargo.GetMassStored(item, false));
+        if (kg > 0)
+            CargoTransferProcessor.AddRemoveCargoMass(colony, item, kg);
+        Assert.That(Stock(colony, item), Is.EqualTo((long)Math.Round(kg)).Within(1), $"room for {item.UniqueID}");
+    }
+
+    [Test]
+    public void Launch_OnMethalox_WithAMethaloxTurbine_LeavesTheRunway_AndTakesNothingWhenShort()
+    {
+        var (_, player, sol, planet, earth) = EarthFromBlueprint();
+        var info = player.GetDataBlob<FactionInfoDB>();
+        var methalox = info.Data.CargoGoods.GetAny("methalox")!;
+        Assert.That(ColonyPowerProcessor.FuelReserveUnits(earth, "methalox"), Is.EqualTo(0), "no methalox plant yet");
+
+        // A 1 MW Methalox Turbine (the oxidiser-turbine template) makes methalox a plant fuel at Earth.
+        info.Data.Unlock("oxidiser-turbine");
+        var turbine = ComponentDesignFromJson.Create(player, info.Data, new ComponentDesignBlueprint
+        {
+            UniqueID = "test-methalox-turbine-1mw",
+            Name = "Methalox Turbine",
+            TemplateId = "oxidiser-turbine",
+            Properties = new() { new ComponentDesignBlueprint.Property { Key = "Size", Value = new Newtonsoft.Json.Linq.JValue(1.0) } },
+        });
+        earth.AddComponent(turbine);
+        ColonyPowerProcessor.Recalc(earth);
+        long reserve = ColonyPowerProcessor.FuelReserveUnits(earth, "methalox");
+        Assert.That(reserve, Is.GreaterThan(0), "the turbine keeps a methalox runway");
+
+        // A methalox launch complex: Earth's pad burns methalox.
+        var pad = earth.GetDataBlob<LaunchComplexDB>().Pads.Values.Single();
+        pad.LaunchFuelId = "methalox";
+        Assert.That(pad.LaunchFuel, Is.EqualTo("methalox"));
+        double cost = HermesCost(player, planet, earth);
         Assert.That(cost, Is.GreaterThan(2000));
 
-        // Only plant fuel in the store: the reserve plus 1000 kg, well short of the launch.
-        foreach (var fuel in cargo.TypeStores["fuel-storage"].Cargoables.Values.ToArray())
-            CargoTransferProcessor.AddRemoveCargoMass(earth, fuel, -cargo.GetMassStored(fuel, false));
-        CargoTransferProcessor.AddRemoveCargoMass(earth, fissile, reserve + 1000);
-        Assert.That(Stock(earth, fissile), Is.EqualTo(reserve + 1000));
-
+        // The runway plus 1000 kg: plenty of methalox in the store, but only 1000 kg a launch may take.
+        SetStock(earth, methalox, reserve + 1000);
+        var rp1 = info.Data.CargoGoods.GetAny("rp-1")!;
+        long rp1Before = Stock(earth, rp1);
         int ships = sol.GetAllEntitiesWithDataBlob<ShipInfoDB>().Count;
         var processor = new LaunchComplexProcessor();
         processor.ProcessEntity(earth, 0);
-        Assert.That(sol.GetAllEntitiesWithDataBlob<ShipInfoDB>().Count, Is.EqualTo(ships), "not enough fuel: no launch");
-        Assert.That(Stock(earth, fissile), Is.EqualTo(reserve + 1000), "a launch that cannot go takes nothing");
+        Assert.That(sol.GetAllEntitiesWithDataBlob<ShipInfoDB>().Count, Is.EqualTo(ships), "not enough above the runway: no launch");
+        Assert.That(Stock(earth, methalox), Is.EqualTo(reserve + 1000), "a launch that cannot go takes nothing");
+        Assert.That(Stock(earth, rp1), Is.EqualTo(rp1Before), "RP-1 is not this pad's fuel");
+        Assert.That(LaunchComplexProcessor.PadHoldReason(earth, pad), Is.EqualTo(LaunchComplexProcessor.NotEnoughOf("Methalox")));
 
-        // Propellant 500 kg short of the cost: the 1000 kg of fissile above the runway covers it,
-        // propellant first, and the runway stays.
-        CargoTransferProcessor.AddRemoveCargoMass(earth, rp1, Math.Ceiling(cost) - 500);
+        // Enough above the runway, 500 kg to spare: the launch goes and takes only methalox above it.
+        SetStock(earth, methalox, reserve + Math.Ceiling(cost) + 500);
         processor.ProcessEntity(earth, 0);
         Assert.That(sol.GetAllEntitiesWithDataBlob<ShipInfoDB>().Count, Is.EqualTo(ships + 1), "the launch goes");
-        Assert.That(Stock(earth, rp1), Is.LessThanOrEqualTo(1), "propellant is burned first");
-        Assert.That(Stock(earth, fissile), Is.GreaterThanOrEqualTo(reserve));
-        Assert.That(Stock(earth, fissile), Is.EqualTo(reserve + 500).Within(2));
+        Assert.That(Stock(earth, methalox), Is.GreaterThanOrEqualTo(reserve));
+        Assert.That(Stock(earth, methalox), Is.EqualTo(reserve + 500).Within(2));
+        Assert.That(Stock(earth, rp1), Is.EqualTo(rp1Before));
+    }
+
+    [Test]
+    public void DefaultPad_WithoutRp1_DoesNotLaunch_OnSurplusFissile()
+    {
+        var (game, player, sol, planet, earth) = EarthFromBlueprint();
+        var info = player.GetDataBlob<FactionInfoDB>();
+        var fissile = info.Data.CargoGoods.GetAny(Fissile)!;
+        var rp1 = info.Data.CargoGoods.GetAny("rp-1")!;
+        var pad = earth.GetDataBlob<LaunchComplexDB>().Pads.Values.Single();
+        Assert.That(pad.LaunchFuel, Is.EqualTo("rp-1"), "the default launch complex");
+
+        // No RP-1. Fissile: the runway plus more than the whole launch cost, so a launch that fell
+        // back to any fuel in the store could go.
+        long reserve = ColonyPowerProcessor.FuelReserveUnits(earth, Fissile);
+        double cost = HermesCost(player, planet, earth);
+        SetStock(earth, rp1, 0);
+        SetStock(earth, fissile, reserve + Math.Ceiling(cost) + 1000);
+        long fissileBefore = Stock(earth, fissile);
+        int ships = sol.GetAllEntitiesWithDataBlob<ShipInfoDB>().Count;
+
+        // Past the launch complex's first pass at hour 4 (and its next, a day later).
+        sol.UpdateActivityState();
+        var t0 = game.TimePulse.GameGlobalDateTime;
+        game.TimePulse.TimeStep(t0 + TimeSpan.FromHours(30));
+        Assert.That(game.TimePulse.LastFault, Is.Null, game.TimePulse.LastFault?.Report);
+        Assert.That(earth.StarSysDateTime, Is.GreaterThan(t0 + TimeSpan.FromHours(4)));
+
+        Assert.That(sol.GetAllEntitiesWithDataBlob<ShipInfoDB>().Count, Is.EqualTo(ships), "no launch without RP-1");
+        Assert.That(earth.GetDataBlob<LaunchComplexDB>().Pads.Values.Single().ShipName, Is.EqualTo("ISS Hermes"), "Hermes waits on the pad");
+        Assert.That(Stock(earth, fissile), Is.EqualTo(fissileBefore), "fissile unchanged");
+        Assert.That(LaunchComplexProcessor.PadHoldReason(earth, pad), Is.EqualTo(LaunchComplexProcessor.NotEnoughOf("RP-1")));
     }
 }
