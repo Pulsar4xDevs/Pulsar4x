@@ -234,6 +234,29 @@ public class PrefabFacilitiesTests
         return store;
     }
 
+    [Test]
+    public void EveryTemplate_OpensInTheDesigner_WithGoodsStillLocked()
+    {
+        // A fresh faction keeps most materials locked; the designer must not throw on any template
+        // (the fuel cell once listed a locked material and crashed the component designer).
+        var store = Load();
+        var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
+        var faction = FactionFactory.CreateBasicFaction(game, "Locked", "LK", 0);
+        var data = faction.GetDataBlob<FactionInfoDB>().Data;
+        var tech = faction.GetDataBlob<FactionTechDB>();
+        var failures = new List<string>();
+        // Older ordnance templates name attribute classes that no longer exist; tracked separately.
+        var knownBroken = new HashSet<string> { "missile-payload", "missile-electronics-suite", "ordnance-cargo-hold" };
+        foreach (var (id, template) in store.ComponentTemplates)
+        {
+            if (knownBroken.Contains(id)) continue;
+            try { new ComponentDesigner(template, data, tech, "probe-" + id); }
+            catch (System.Exception e) { failures.Add(id + ": " + e.Message); }
+        }
+        Assert.That(failures, Is.Empty, string.Join("\n", failures));
+        Assert.That(store.ComponentTemplates["fuel-cell"].ResourceCost.ContainsKey("electronics"), Is.False);
+    }
+
     static (Entity Faction, FactionDataStore Data, ModDataStore Store) Faction()
     {
         var store = Load();

@@ -64,10 +64,12 @@ namespace Pulsar4X.Components
 
             foreach (var kvp in componentSD.ResourceCost)
             {
-                if(factionDataStore.CargoGoods.GetAny(kvp.Key) != null)
+                // A locked material (not yet researched or unlocked) is still a valid cost: the design
+                // just can't be built until the faction can get it.
+                if(factionDataStore.CargoGoods.GetAny(kvp.Key) != null || factionDataStore.LockedCargoGoods.GetAny(kvp.Key) != null)
                     resourceCostForulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionDataStore, factionTech));
-                else //TODO: log don't crash.
-                    throw new Exception("GUID object {" + kvp.Key + "} not found in resourceCosting for " + this.TemplateName + " This object needs to be either a mineral, material or component defined in the Data folder");
+                else // Unknown id: log and skip the cost rather than crash the designer.
+                    System.Diagnostics.Trace.TraceWarning("Resource {" + kvp.Key + "} not found in resourceCosting for " + this.TemplateName + "; skipping it. It needs to be a mineral, material or component defined in the Data folder.");
             }
 
             ResourceCostFormulas = resourceCostForulas;

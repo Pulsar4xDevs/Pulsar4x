@@ -303,7 +303,7 @@
         "plastic": "[Mass] * 0.3",
         "nickel": "[Mass] * 0.2",
         "graphite": "[Mass] * 0.1",
-        "electronics": "[Mass] * 0.1"
+        "copper": "[Mass] * 0.1"
       },
       "ComponentType": "Energy Generator",
       "MountType": "ShipComponent, ShipCargo, Fighter",
