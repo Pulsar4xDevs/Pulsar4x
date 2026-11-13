@@ -60,6 +60,48 @@ namespace Pulsar4X.Energy
 
         public const string ScrappingLineId = "scrapping";
 
+        /// <summary>
+        /// Instant demand refresh, for a change to what the colony is building (an industry job
+        /// queued, cancelled, edited, reordered or finished; an installation job queued, removed,
+        /// reordered or finished). Runs <see cref="Recalc"/>, which only rebuilds the demand lines
+        /// and the capacity-based satisfaction it already sets between daily passes: no fuel is
+        /// burnt, no history is recorded and no event is raised, so the daily <see cref="RunDay"/>
+        /// is unchanged. Does nothing for an entity with no grid (ships, colonies without a
+        /// <see cref="ColonyPowerDB"/>), so it never creates one.
+        /// </summary>
+        public static void RefreshDemand(Entity? colonyEntity)
+        {
+            if (colonyEntity == null || !colonyEntity.IsValid || colonyEntity.Manager == null || !colonyEntity.HasDataBlob<ColonyPowerDB>())
+                return;
+            Recalc(colonyEntity);
+        }
+
+        /// <summary>
+        /// What <see cref="ProductionDraw_kW"/> reads from the production lines: each line's head job
+        /// of each industry type, with its build energy. Two equal keys give the same draw, so a daily
+        /// industry pass only refreshes demand when the key changed.
+        /// </summary>
+        internal static string ProductionDrawKey(Pulsar4X.Industry.IndustryAbilityDB industry)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var (lineId, line) in industry.ProductionLines)
+            {
+                sb.Append(lineId).Append(':');
+                foreach (var (type, _) in line.IndustryTypeRates)
+                {
+                    var job = HeadJob(line, type);
+                    sb.Append(type).Append('=').Append(job == null ? "-" : job.JobID + "@" + job.EnergyPerPoint.ToString("R")).Append(',');
+                }
+                sb.Append(';');
+            }
+            return sb.ToString();
+        }
+
+        static Pulsar4X.Industry.IndustryJob? HeadJob(Pulsar4X.Industry.IndustryAbilityDB.ProductionLine line, string type)
+            => line.Jobs.FirstOrDefault(j => j.TypeID == type
+                && j.NumberCompleted < j.NumberOrdered
+                && j.Status != Pulsar4X.DataStructures.IndustryJobStatus.MissingResources);
+
         public static void Recalc(Entity colonyEntity)
         {
             if (colonyEntity == null
@@ -202,9 +244,7 @@ namespace Pulsar4X.Energy
             double working_kWhPerDay = 0;
             foreach (var (type, rate) in line.IndustryTypeRates)
             {
-                var job = line.Jobs.FirstOrDefault(j => j.TypeID == type
-                    && j.NumberCompleted < j.NumberOrdered
-                    && j.Status != Pulsar4X.DataStructures.IndustryJobStatus.MissingResources);
+                var job = HeadJob(line, type);
                 if (job == null || job.EnergyPerPoint <= 0)
                     continue;
                 working_kWhPerDay += rate * infraEfficiency * job.EnergyPerPoint * energyFactor;

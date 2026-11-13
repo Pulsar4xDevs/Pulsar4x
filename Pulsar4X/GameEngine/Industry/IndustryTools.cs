@@ -26,6 +26,8 @@ namespace Pulsar4X.Industry
                 var pline = industryDB.ProductionLines[plineID];
                 pline.Jobs.Add(job);
             }
+            // A new job can become a line's head job: its draw counts from now, not tomorrow.
+            Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(industryDB.OwningEntity);
         }
 
         public static void ChangeJobPriority(Entity industryEntity, string prodLine, string jobID, int delta)
@@ -53,6 +55,7 @@ namespace Pulsar4X.Industry
                     jobList.RemoveAt(currentIndex);
                     jobList.Insert(newIndex, job);
                 }
+                Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(industryEntity);
             }
         }
 
@@ -66,6 +69,8 @@ namespace Pulsar4X.Industry
             {
                 job.Auto = RepeatJob;
                 job.NumberOrdered = NumberOrderd;
+                Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(industryEntity);
+
                 /*if (job is ConstructJob)
                 {
                     var cj = (ConstructJob)job;
@@ -84,6 +89,7 @@ namespace Pulsar4X.Industry
             if (job != null)
             {
                 jobList.Remove(job);
+                Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(industryEntity);
             }
         }
 
@@ -115,6 +121,9 @@ namespace Pulsar4X.Industry
             double infraEfficiency = InfrastructureProcessor.GetEfficiency(industryEntity);
             // Power: industry runs at its tier's share of demand (1 with no grid or no shortage).
             double powerEfficiency = Pulsar4X.Energy.ColonyPowerProcessor.Satisfaction(industryEntity, Pulsar4X.Energy.PowerTier.Industry);
+            // What the lines draw now; if a job finishes or stalls today, demand is refreshed at the end.
+            string drawBefore = Pulsar4X.Energy.ColonyPowerProcessor.ProductionDrawKey(industryDB);
+            int queuedBefore = industryEntity.TryGetDataBlob<LocalConstructionDB>(out var siteQueue) ? siteQueue.BuildQueue.Count : 0;
 
             foreach (var (prodLineID, prodLine) in industryDB.ProductionLines.ToArray())
             {
@@ -223,6 +232,12 @@ namespace Pulsar4X.Industry
                 }
                 prodLine.EnergyUsedLastDay = energyUsed;
             }
+
+            // A finished or stalled job changes its line's draw, and a finished site-only facility
+            // queues its assembly (which may carry scrap energy): refresh demand now, once.
+            int queuedAfter = siteQueue != null ? siteQueue.BuildQueue.Count : 0;
+            if (queuedAfter != queuedBefore || Pulsar4X.Energy.ColonyPowerProcessor.ProductionDrawKey(industryDB) != drawBefore)
+                Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(industryEntity);
         }
 
         /// <summary>
