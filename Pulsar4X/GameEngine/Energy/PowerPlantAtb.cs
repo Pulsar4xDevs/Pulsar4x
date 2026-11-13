@@ -9,8 +9,8 @@ namespace Pulsar4X.Energy
     /// <summary>
     /// A colony power plant that burns a fuel. Electric output P_e = Size; fuel burn at full
     /// output = P_e / (efficiency * LHV). Each plant burns one fuel; a colony grid can mix
-    /// plants on different fuels. Read by <see cref="ColonyPowerProcessor"/>; nothing is burnt
-    /// in phase 1.
+    /// plants on different fuels. Read by <see cref="ColonyPowerProcessor"/>, whose daily pass
+    /// burns the fuel from the colony stockpile.
     /// </summary>
     public class PowerPlantAtb : IComponentDesignAttribute
     {

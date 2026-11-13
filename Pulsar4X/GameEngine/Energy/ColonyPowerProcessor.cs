@@ -18,7 +18,8 @@ namespace Pulsar4X.Energy
     /// Recomputes a colony's <see cref="ColonyPowerDB"/> from its installations, population
     /// and body, following the InfrastructureProcessor pattern. Runs when installations change
     /// (ReCalcProcessor) and once a day (<see cref="ColonyPowerHotloopProcessor"/>), so population
-    /// and the sun's distance stay current. The daily pass also burns fuel and enforces tiers.
+    /// and the sun's distance stay current. The daily pass also burns fuel, charges and draws
+    /// the grid batteries, and enforces tiers.
     /// </summary>
     public static class ColonyPowerProcessor
     {

@@ -12,6 +12,10 @@ namespace Pulsar4X.Energy
         Storage = 3,
         Industry = 4,
         Mining = 5,
+        /// <summary>
+        /// Reserved. Grid battery charging is not a tier: the daily pass charges from what is left
+        /// after all demand (ColonyPowerProcessor.RunDay), so nothing is placed in this tier.
+        /// </summary>
         Charging = 6,
         Research = 7,
     }

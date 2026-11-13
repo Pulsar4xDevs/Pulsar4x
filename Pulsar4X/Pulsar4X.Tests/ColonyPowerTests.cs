@@ -369,7 +369,7 @@ public class ColonyPowerTests
         Assert.That(last.Demand_kW, Is.EqualTo(power.Demand_kW).Within(1e-6));
         Assert.That(last.Generation_kW, Is.EqualTo(power.Generation_kW).Within(1e-6));
         Assert.That(last.Delivered_kW, Is.EqualTo(power.Dispatched_kW * power.GridEfficiency).Within(1e-6));
-        Assert.That(last.Stored_kJ, Is.EqualTo(0), "batteries are not charged yet");
+        Assert.That(last.Stored_kJ, Is.EqualTo(0), "Earth's start has no grid batteries, so nothing is stored");
 
         // The clock now stands on day 3: a pass adds that day, and a second pass the same day
         // replaces it rather than adding another.

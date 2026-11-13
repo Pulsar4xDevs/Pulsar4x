@@ -884,7 +884,7 @@
       "UniqueID": "grid-battery",
       "Name": "Grid Battery",
       "Formulas": {
-        "Description": "Stores power for a colony grid. Not charged or drawn yet.",
+        "Description": "Stores power for a colony grid. The daily pass charges it from spare generation and draws it down to cover a shortfall before any tier goes short.",
         "Mass": "PropertyValue('Mass')",
         "Volume": "[Mass] / 2896.6",
         "HTK": "0.5",
