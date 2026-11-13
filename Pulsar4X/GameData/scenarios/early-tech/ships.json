@@ -18,6 +18,10 @@
           "Amount": 1
         },
         {
+          "Id": "default-design-crew-quarters-1",
+          "Amount": 1
+        },
+        {
           "Id": "default-design-fuel-tank-3000",
           "Amount": 1
         },
@@ -52,6 +56,10 @@
         },
         {
           "Id": "default-design-Cockpit",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-crew-quarters-1",
           "Amount": 1
         },
         {

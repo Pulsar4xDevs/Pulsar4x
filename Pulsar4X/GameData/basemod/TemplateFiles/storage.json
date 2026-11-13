@@ -186,6 +186,50 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
+      "UniqueID": "crew-quarters",
+      "Name": "Crew Quarters",
+      "Formulas": {
+        "Description": "Bunks, lockers and a share of galley and washroom for the ship's own crew. A ship needs a berth for every crew member; its bridge sleeps a few. Bigger quarters share more, so each berth weighs less.",
+        "Mass": "250 * Pow(PropertyValue('Berths'), 0.85)",
+        "Volume": "[Mass] * 0.1",
+        "HTK": "0.5",
+        "CrewReq": "0.02 * Pow(PropertyValue('Berths'), 0.7)",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass] * 0.12",
+        "BuildPointCost": "[Mass] * 4.5"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 0.4",
+        "aluminium": "[Mass] * 0.3",
+        "plastic": "[Mass] * 0.3"
+      },
+      "ComponentType": "Habitation",
+      "MountType": "ShipComponent, ShipCargo",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Berths",
+          "DescriptionFormula": "'How many crew these quarters sleep'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "DataDict": {},
+          "MaxFormula": "1000",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "10"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Berths'))",
+          "AttributeType": "Pulsar4X.Ships.CrewQuartersAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
       "UniqueID": "passenger-hold",
       "Name": "Passenger Quarters",
       "Formulas": {
@@ -441,6 +485,12 @@
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs((8 * PropertyValue('Command Span')) - (2 * PropertyValue('Command Span') * PropertyValue('Command Span')), PropertyValue('Console Space'))",
           "AttributeType": "GameEngine.People.AdminSpaceAtb"
+        },
+        {
+          "Name": "DBargsBerths",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(Max(2, PropertyValue('Console Space') / 2))",
+          "AttributeType": "Pulsar4X.Ships.CrewQuartersAtb"
         }
       ]
     }

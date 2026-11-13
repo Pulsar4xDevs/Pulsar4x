@@ -20,7 +20,10 @@
         "default-design-battery-2t",
         "default-design-reactor-2t",
         "default-design-raptor",
-        "default-design-passenger-hold"
+        "default-design-passenger-hold",
+        "default-design-crew-quarters-1",
+        "default-design-crew-quarters-10",
+        "default-design-crew-quarters-25"
       ],
       "ShipDesigns": [
         "default-ship-design-geo-surveyor"
@@ -63,7 +66,10 @@
         "default-design-battery-2t",
         "default-design-reactor-2t",
         "default-design-raptor",
-        "default-design-passenger-hold"
+        "default-design-passenger-hold",
+        "default-design-crew-quarters-1",
+        "default-design-crew-quarters-10",
+        "default-design-crew-quarters-25"
       ],
       "ShipDesigns": [
         "ship-design-lode-prospector"

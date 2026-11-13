@@ -65,7 +65,7 @@ namespace Pulsar4X.Energy
         /// </summary>
         public static MoveCostShip ReferenceHauler => new()
         {
-            DryMass_kg = 45394,
+            DryMass_kg = 47422, // crew plan phase 1: + crew quarters (10 + 1 berths)
             FuelMass_kg = 2393601,
             FuelType = "methalox",
             ExhaustVelocity = 3615,

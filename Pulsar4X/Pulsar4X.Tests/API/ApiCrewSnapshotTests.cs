@@ -49,8 +49,9 @@ public class ApiCrewSnapshotTests
             var design = ship.GetDataBlob<ShipInfoDB>().Design;
             var view = _projector.ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
             Assert.That(view.CrewRequired, Is.EqualTo(design.CrewReq), design.Name);
-            Assert.That(view.CrewBerths, Is.EqualTo(design.CrewBerths).And.EqualTo(0), "no berths before phase 1");
-            Assert.That(view.BerthsByComponent, Is.Empty);
+            Assert.That(view.CrewBerths, Is.EqualTo(design.CrewBerths).And.GreaterThanOrEqualTo(design.CrewReq), design.Name);
+            Assert.That(view.BerthsByComponent, Is.Not.Empty, "a bridge or crew quarters");
+            Assert.That(view.BerthsByComponent.Sum(r => r.Berths), Is.EqualTo(view.CrewBerths));
             Assert.That(view.CrewTracked, Is.False, "crew aboard arrives in phase 3");
             Assert.That(view.CrewAboard, Is.EqualTo(0));
             Assert.That(view.CrewFactor, Is.EqualTo(1));
@@ -66,7 +67,7 @@ public class ApiCrewSnapshotTests
         {
             var design = ships.Single(s => s.Id == snapshot.Id).GetDataBlob<ShipInfoDB>().Design;
             Assert.That(snapshot.CrewRequired, Is.EqualTo(design.CrewReq), snapshot.Name);
-            Assert.That(snapshot.CrewBerths, Is.EqualTo(0));
+            Assert.That(snapshot.CrewBerths, Is.EqualTo(design.CrewBerths));
             Assert.That(snapshot.CrewTracked, Is.False);
             Assert.That(snapshot.UnderCrewed, Is.False);
         }
@@ -101,8 +102,8 @@ public class ApiCrewSnapshotTests
         foreach (var row in shipRows)
         {
             Assert.That(row.CrewRequired, Is.EqualTo(designs[row.DesignId].CrewReq), row.Name);
-            Assert.That(row.CrewBerths, Is.EqualTo(0));
-            Assert.That(row.CrewWarning, Is.Empty);
+            Assert.That(row.CrewBerths, Is.EqualTo(designs[row.DesignId].CrewBerths).And.GreaterThanOrEqualTo(row.CrewRequired));
+            Assert.That(row.CrewWarning, Is.Empty, "every stock design sleeps its crew");
         }
         foreach (var pad in industry.Pads.Where(p => p.Free))
         {
@@ -119,6 +120,8 @@ public class ApiCrewSnapshotTests
         var info = _player.GetDataBlob<FactionInfoDB>();
         var laser = snapshot.Designs.Single(d => d.Id == "default-design-laser-weapon");
         Assert.That(laser.CrewRequired, Is.EqualTo(info.InternalComponentDesigns["default-design-laser-weapon"].CrewReq).And.EqualTo(5));
-        Assert.That(snapshot.Designs.All(d => d.Berths == 0), Is.True, "no berths before phase 1");
+        Assert.That(laser.Berths, Is.EqualTo(0));
+        Assert.That(snapshot.Designs.Single(d => d.Id == "default-design-crew-quarters-10").Berths, Is.EqualTo(10));
+        Assert.That(snapshot.Designs.Single(d => d.Id == "default-design-Cockpit").Berths, Is.EqualTo(2));
     }
 }

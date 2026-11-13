@@ -227,12 +227,17 @@ public class ShipRefitTests
         int next = 1;
         foreach (var part in freighter.Components)
         {
-            // Passenger quarters are on the freighter only. This diff is about the construction bay.
-            if (part.Id == "default-design-passenger-hold")
+            // Passenger quarters are on the freighter only, and the colony ship's crew quarters are bigger
+            // (the bay's crew needs berths). This diff is about the construction bay, so the ship here
+            // already carries the colony ship's crew quarters.
+            if (part.Id == "default-design-passenger-hold" || part.Id.StartsWith("default-design-crew-quarters"))
                 continue;
             for (int i = 0; i < part.Amount; i++)
                 onShip.Add(new RefitPartView(next++, part.Id, 1, 1) { DesignId = part.Id });
         }
+        foreach (var part in colonyShip.Components.Where(part => part.Id.StartsWith("default-design-crew-quarters")))
+            for (int i = 0; i < part.Amount; i++)
+                onShip.Add(new RefitPartView(next++, part.Id, 1, 1) { DesignId = part.Id });
         var target = new RefitTargetView(colonyShip.UniqueID, colonyShip.Name)
         {
             Parts = colonyShip.Components

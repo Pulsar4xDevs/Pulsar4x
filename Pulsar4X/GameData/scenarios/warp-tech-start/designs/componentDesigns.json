@@ -111,6 +111,39 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-crew-quarters-1",
+      "Name": "Crew Bunk",
+      "TemplateId": "crew-quarters",
+      "Properties": [
+        { "Key": "Berths", "Value": 1 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-crew-quarters-10",
+      "Name": "Crew Quarters 10",
+      "TemplateId": "crew-quarters",
+      "Properties": [
+        { "Key": "Berths", "Value": 10 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-crew-quarters-25",
+      "Name": "Crew Quarters 25",
+      "TemplateId": "crew-quarters",
+      "Properties": [
+        { "Key": "Berths", "Value": 25 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-shuttlebay",
       "Name": "Cargo Shuttlebay",
       "TemplateId": "cargo-Shuttlebay",
