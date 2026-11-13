@@ -1617,6 +1617,8 @@ public class BootstrapColonyTests
             "default-design-alcubierre-2k",
             "default-design-battery-2t",
             "default-design-reactor-2t",
+            "default-design-reactor-5t", // freighter (crew plan phase 4)
+            "default-design-reactor-7t", // colony ship
             "default-design-raptor",
             "default-design-infrastructure",
             "default-design-infrastructure-mars",

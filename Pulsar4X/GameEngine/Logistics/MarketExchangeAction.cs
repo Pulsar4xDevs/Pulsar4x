@@ -184,6 +184,12 @@ public class MarketExchangeAction : EntityAction
         if (!colonists && crossFaction && price > 0)
         {
             int payer = Side == MarketSide.BuyFromMarket ? shipFaction : marketFaction;
+            // Crew plan phase 5: the player cannot buy while its balance is negative; it can still sell.
+            if (Pulsar4X.Factions.FactionSpending.IsBlocked(game, payer))
+            {
+                Fail(Pulsar4X.Factions.FactionSpending.FundsNegative);
+                return;
+            }
             quantity = Math.Min(quantity, Affordable(game, payer, price));
         }
 

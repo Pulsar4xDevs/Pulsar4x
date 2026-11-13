@@ -145,6 +145,31 @@ public class CeresFuelBuyTests
     }
 
     [Test]
+    public void PlayerInDebt_BuysNoFuel()
+    {
+        var (game, sol) = Place();
+        var strata = Faction(game, CeresStart.SurveyFactionName);
+        var depotFaction = Faction(game, CeresStart.DepotFactionName);
+        var fleet = Fleet(sol, strata.Id);
+        var ship = Ship(sol, strata.Id);
+        var depot = Depot(sol);
+        FinishChild(ship);
+        long beforeUnits = Drain(ship, 1);
+        BringAlongside(ship, depot);
+        game.LocalHumanFactionId = strata.Id;
+        var money = strata.GetDataBlob<FactionInfoDB>().Money;
+        money.AddExpense(fleet.StarSysDateTime, TransactionCategory.Trade, "test", money.GetCurrentFunds() + 1000);
+        decimal depotBefore = depotFaction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds();
+
+        AgentProcessor.RunAgentNow(fleet);
+        AgentProcessor.RunAgentNow(ship);
+
+        Assert.That(ship.GetDataBlob<CargoStorageDB>().GetUnitsStored(Fuel(ship), false), Is.EqualTo(beforeUnits));
+        Assert.That(money.GetCurrentFunds(), Is.EqualTo(-1000));
+        Assert.That(depotFaction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(depotBefore));
+    }
+
+    [Test]
     public void NoMethaloxForSale_LeavesTheStandingGoalActive()
     {
         var (game, sol) = Place();

@@ -66,7 +66,8 @@ public class BalanceBaselineTests
             Assert.That(factory.ResourceCosts["iron"], Is.EqualTo(12));
 
             var yard = Design(faction, data, "shipyard");
-            Assert.That(yard.MassPerUnit, Is.EqualTo(272000));
+            // 8 x the 38 t default slip (34 t before crew plan phase 4 grew the Starship to 37.7 t).
+            Assert.That(yard.MassPerUnit, Is.EqualTo(304000));
             Assert.That(yard.IndustryPointCosts, Is.EqualTo(20000));
             Assert.That(yard.GetAttribute<ConstructionAtb>().ConstructionPoints["ship-refit"], Is.EqualTo(10));
 

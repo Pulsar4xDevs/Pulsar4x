@@ -91,6 +91,13 @@ public class LotOfferAction : EntityAction
         foreach (var line in carried)
             units += line.Units;
 
+        // Crew plan phase 5: the player's office does not buy lots while its balance is negative.
+        if (shipFaction != officeFaction && Pulsar4X.Factions.FactionSpending.IsBlocked(game, officeFaction))
+        {
+            Finish(Pulsar4X.Factions.FactionSpending.FundsNegative);
+            return;
+        }
+
         if (shipFaction != officeFaction
             && MarketExchangeAction.Affordable(game, officeFaction, CeresStart.LotPrice(game, officeFaction)) < units)
         {

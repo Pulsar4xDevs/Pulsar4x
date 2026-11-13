@@ -31,6 +31,7 @@ namespace Pulsar4X.Engine
             { EventType.PowerShortage, false },
             { EventType.WarpExited, true },
             { EventType.OrdersCompleted, false },
+            { EventType.LifeSupportFailing, true },
         };
 
         public string CurrentTheme { get; set; } = "default-theme";
@@ -99,6 +100,40 @@ namespace Pulsar4X.Engine
 
         /// <summary>The hauler flies out empty as well as back full, so delivery is priced as a round trip.</summary>
         public bool DepotDeliveryRoundTrip { get; set; } = true;
+
+        #endregion
+
+        #region Crew life support and pay (crew plan phases 4-5)
+
+        public const double DefaultShipLifeSupport_kWPerCrew = 1.0;
+        public const double DefaultColonyGardenLifeSupport_kWPerPerson = 0.01;
+        public const double DefaultColonySealedLifeSupport_kWPerPerson = 0.05;
+        public const double DefaultColonyHostileLifeSupport_kWPerPersonPerCost = 0.6;
+        public const decimal DefaultCrewWagePerDay = 100m;
+
+        /// <summary>
+        /// Ship life support per crew aboard at life-support tech 0, kW. A must-run load: it comes before
+        /// warp and charging. The tech-life-support-efficiency factor multiplies it.
+        /// </summary>
+        public double ShipLifeSupport_kWPerCrew { get; set; } = DefaultShipLifeSupport_kWPerCrew;
+
+        /// <summary>Life support per person on a garden world (colony cost 0), kW: the survival share of household power.</summary>
+        public double ColonyGardenLifeSupport_kWPerPerson { get; set; } = DefaultColonyGardenLifeSupport_kWPerPerson;
+
+        /// <summary>Base life support per person on a sealed world (colony cost above 0), kW, before the hostility term.</summary>
+        public double ColonySealedLifeSupport_kWPerPerson { get; set; } = DefaultColonySealedLifeSupport_kWPerPerson;
+
+        /// <summary>
+        /// Extra life support per person per point of colony cost (capped at 3) on a sealed world, kW. The
+        /// tech-life-support-efficiency factor multiplies it.
+        /// </summary>
+        public double ColonyHostileLifeSupport_kWPerPersonPerCost { get; set; } = DefaultColonyHostileLifeSupport_kWPerPersonPerCost;
+
+        /// <summary>
+        /// Crew pay, cr per crew per day: crew aboard the player's ships and trained crew in its pools.
+        /// Also the wage shown on civilian candidates.
+        /// </summary>
+        public decimal CrewWagePerDay { get; set; } = DefaultCrewWagePerDay;
 
         #endregion
 

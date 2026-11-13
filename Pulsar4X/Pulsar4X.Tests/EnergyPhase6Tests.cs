@@ -291,9 +291,10 @@ public class EnergyPhase6Tests
 
         // 10 kW of free output (solar or isotopes) and fuel cells besides: sustain (15 kW) takes the
         // free 10 then 5 from the reactor; creation is made back by all three by output.
+        // (No crew here: life support is checked below.)
         var mixed = ship with
         {
-            FreeOutputMax = 10, EnergyOutputMax = 35,
+            FreeOutputMax = 10, EnergyOutputMax = 35, ReactorOutputMax = 15, LifeSupport_kW = 0,
             CellOutputMax = 10, CellFuelType = "hydrolox", CellFuelPerKJ = 1e-4,
         };
         var c = MoveCostCalculator.Warp(mixed, d);
@@ -302,6 +303,13 @@ public class EnergyPhase6Tests
         double cellKJ = ship.BubbleCreationCost * 10 / 35;
         Assert.That(c.FuelUsed_kg["fissile-fuels"], Is.EqualTo(reactorKJ * ship.ReactorFuelPerKJ).Within(1e-12));
         Assert.That(c.FuelUsed_kg["hydrolox"], Is.EqualTo(cellKJ * 1e-4).Within(1e-9));
+
+        // Crew plan phase 4: 8 kW of life support already takes the free 10 kW's first 8, so the 15 kW
+        // sustain takes the other 2 free, then 13 from the reactor; creation is shared as before.
+        var crewed = mixed with { LifeSupport_kW = 8 };
+        var cc = MoveCostCalculator.Warp(crewed, d);
+        double crewedReactorKJ = 13 * cc.Duration_s + ship.BubbleCreationCost * 15 / 35;
+        Assert.That(cc.FuelUsed_kg["fissile-fuels"], Is.EqualTo(crewedReactorKJ * ship.ReactorFuelPerKJ).Within(1e-12));
 
         var none = ship with { ReactorFuelPerKJ = 0 };
         Assert.That(MoveCostCalculator.Warp(none, d).FuelUsed_kg, Is.Empty);
@@ -353,14 +361,20 @@ public class EnergyPhase6Tests
                 TestContext.Out.WriteLine($"{name}: no power");
                 continue;
             }
-            Assert.That(power.MaxOutputFromReactor, Is.EqualTo(15.0 * reactors).Within(1e-6), name);
+            // Crew plan phase 4: stock reactors are sized per design (2-7 t); output is the sum of the mounted designs.
+            double designReactor = design.Components.Where(c => c.design.TemplateID == "steam-turbine-reactor")
+                .Sum(c => c.design.GetAttribute<EnergyGenerationAtb>().PowerOutputMax * c.count);
+            Assert.That(power.MaxOutputFromReactor, Is.EqualTo(designReactor).Within(1e-6), name);
+            double lifeSupport = ShipCrew.LifeSupport(ship);
+            Assert.That(lifeSupport, Is.EqualTo(ShipCrew.Aboard(ship) * 1.0).Within(1e-9), name + " life support");
             double sustain = ship.TryGetDataBlob<WarpAbilityDB>(out var warp) ? warp.BubbleSustainCost : 0;
             TestContext.Out.WriteLine($"{name}: reactors {power.MaxOutputFromReactor:0.###} kW, solar {power.MaxOutputFromSolar:0.###} kW,"
                 + $" ship loads {power.AuxDemand:0.###} kW, warp sustain {sustain:0.###} kW, store {power.EnergyStoreMax.Values.Sum():N0} kJ,"
                 + $" crew {design.CrewReq} (one per component type before: {design.Components.Sum(c => c.design.CrewReq)}), design {design.Name}");
             if (warp != null)
             {
-                Assert.That(WarpMath.WarpRefusal(warp.MaxSpeed, sustain, power.TotalOutputMax), Is.Empty, name + " can warp");
+                Assert.That(WarpMath.WarpRefusal(warp.MaxSpeed, sustain, power.TotalOutputMax - lifeSupport, lifeSupport), Is.Empty, name + " can warp");
+                Assert.That(power.MaxOutputFromReactor, Is.GreaterThanOrEqualTo(1.1 * (sustain + lifeSupport)), name + " has 10% headroom over warp plus life support on its reactors alone");
                 Assert.That(power.AuxDemand, Is.LessThan(power.TotalOutputMax), name);
             }
         }

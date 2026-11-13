@@ -104,17 +104,17 @@ public sealed record FactionSnapshot(
 
     /// <summary>
     /// The ledger category name of a crew pay line, as in <see cref="LedgerEntrySnapshot.Category"/>. The pay
-    /// processor books one such line per faction per day (amount negative). No lines are booked before phase 5.
+    /// processor books one such line a day for the player (amount negative); NPC factions pay no wages yet.
     /// </summary>
     public const string WagesCategory = "Wages";
 
     /// <summary>People the faction pays: crew aboard its ships plus trained crew in its colony pools (academy students are not paid).</summary>
     public long CrewOnPayroll { get; init; }
 
-    /// <summary>Wage per crew per day, cr. 0 until crew pay is charged (phase 5).</summary>
+    /// <summary>Wage per crew per day, cr (GameSettings.CrewWagePerDay, default 100). 0 for factions that do not pay (NPCs, and every faction in a game with no local human player).</summary>
     public decimal CrewWagePerDay { get; init; }
 
-    /// <summary>Daily crew payroll, cr/day: <see cref="CrewOnPayroll"/> × <see cref="CrewWagePerDay"/>. 0 until crew pay is charged (phase 5).</summary>
+    /// <summary>Daily crew payroll, cr/day: <see cref="CrewOnPayroll"/> × <see cref="CrewWagePerDay"/>. 0 when the faction pays no wages.</summary>
     public decimal PayrollPerDay { get; init; }
 
     /// <summary>Research labs' running cost, cr/day: the labs that research today (a queued tech and points to spend).</summary>
@@ -139,12 +139,15 @@ public sealed record FactionSnapshot(
     public bool FundsNegative { get; init; }
 
     /// <summary>
-    /// True while spending is blocked because funds are negative (building, launches, new academy courses,
-    /// market and intel buys). False until the spending gate lands (phase 5).
+    /// True while spending is blocked because funds are negative: research, market, fuel, intel and shipment
+    /// buys, lot offers, building, launches and new academy courses. The player only; income is never blocked.
     /// </summary>
     public bool SpendingBlocked { get; init; }
 
-    /// <summary>What the block stops, for the negative-balance banner, e.g. "Building", "Launches". Empty when not blocked.</summary>
+    /// <summary>
+    /// What the block stops, for the negative-balance banner: "Research", "Market buys", "Fuel buys", "Intel buys",
+    /// "Shipment buys", "Lot offers", "Construction", "Launches", "Academy courses". Empty when not blocked.
+    /// </summary>
     public IReadOnlyList<string> BlockedSpending { get; init; } = Array.Empty<string>();
 }
 
@@ -453,7 +456,7 @@ public sealed record ColonyPowerView(
     /// <summary>True when the world is sealed (colony cost above 0 for its people), so life support pays the hostility term.</summary>
     public bool LifeSupportSealed { get; init; }
 
-    /// <summary>The life-support rate for the Power tab, e.g. "Garden world: 0.05 kW per person" or "Sealed world: 1.85 kW per person". Empty with no colonists.</summary>
+    /// <summary>The life-support rate for the Power tab, e.g. "Garden world: 0.01 kW per person" or "Sealed world: 1.85 kW per person". Empty with no colonists.</summary>
     public string LifeSupportRateLabel { get; init; } = "";
 
     /// <summary>
@@ -622,6 +625,8 @@ public sealed record EnergyView(
 /// A ship's power supply against its current demand, for the entity card's power ring (owner-only).
 /// Projected for every owned ship. A ship with no power plant has HasPlant false and zeros.
 /// Generation_kW is what the plants can give now (a reactor out of fuel gives nothing).
+/// Demand_kW is the warp's demand only: ship life support (crew plan phase 4) is in the engine's must-run
+/// demand but is reported apart, in <see cref="LifeSupport_kW"/> and <see cref="LifeSupportServed_kW"/>.
 /// </summary>
 public sealed record ShipPowerView(double Generation_kW, double Demand_kW, double Stored_kJ, double StoreMax_kJ, bool HasPlant) : IComponentView
 {
@@ -652,16 +657,19 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
     /// </summary>
     // ---- Ship life support (crew plan phase 4) ----
 
-    /// <summary>True once ships draw life support (phase 4). While false the life support fields are 0 and the row should not show.</summary>
+    /// <summary>True for a ship that tracks crew (has a ShipCrewDB). While false the life support fields are 0 and the row should not show.</summary>
     public bool HasLifeSupport { get; init; }
 
     /// <summary>People aboard that life support keeps alive (the ship's crew aboard).</summary>
     public int LifeSupportCrew { get; init; }
 
-    /// <summary>Life support per crew aboard, kW (1 kW × the faction's life-support efficiency tech). 0 until phase 4.</summary>
+    /// <summary>Life support per crew aboard, kW (1 kW × the faction's life-support efficiency tech). 0 without crew tracking.</summary>
     public double LifeSupportPerCrew_kW { get; init; }
 
-    /// <summary>Life support draw, kW: <see cref="LifeSupportCrew"/> × <see cref="LifeSupportPerCrew_kW"/>. 0 until phase 4.</summary>
+    /// <summary>
+    /// Life support booked on the plant, kW: <see cref="LifeSupportCrew"/> × <see cref="LifeSupportPerCrew_kW"/>
+    /// (0 for a ship with no plant). Part of the engine's must-run demand, but not of <see cref="Demand_kW"/> or <see cref="TotalDemand_kW"/>.
+    /// </summary>
     public double LifeSupport_kW { get; init; }
 
     /// <summary>
@@ -669,6 +677,20 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
     /// not an aux load that waits for full batteries.
     /// </summary>
     public bool LifeSupportMustRun { get; init; } = true;
+
+    /// <summary>
+    /// Life support actually powered now, kW: <see cref="LifeSupport_kW"/> × <see cref="LifeSupportServedFraction"/>.
+    /// </summary>
+    public double LifeSupportServed_kW { get; init; }
+
+    /// <summary>
+    /// Share of life support powered now, 0..1; 1 with no life-support load. The engine serves its
+    /// must-run demand (warp plus life support, shared alike) from the plant's output and, while the
+    /// batteries hold charge, from them up to their discharge limit: (generation + battery discharge
+    /// limit if charged) / (warp + life support demand), capped at 1. Below 1 only when the batteries
+    /// are empty (or rate-limited) and the plant cannot carry the must-run load.
+    /// </summary>
+    public double LifeSupportServedFraction { get; init; } = 1;
 
     public double? FullIn_s
     {
@@ -684,7 +706,7 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
     /// <summary>True while the batteries charge and the other loads wait for them (not a shortage).</summary>
     public bool LoadsWaitOnCharge => Charging_kW > 0 && AuxDemand_kW > 0 && AuxServed_kW < AuxDemand_kW;
 
-    /// <summary>Warp demand plus the other loads, kW.</summary>
+    /// <summary>Warp demand plus the other loads, kW. Excludes ship life support (see <see cref="LifeSupport_kW"/>).</summary>
     public double TotalDemand_kW => Demand_kW + AuxDemand_kW;
 
     /// <summary>What the plants serve now, kW: warp demand up to generation, plus the served other loads.</summary>
@@ -1011,7 +1033,7 @@ public sealed record NavalAcademyClassView(
     /// <summary>Why a crew course cannot start now (e.g. no free crew seats, too few colonists). Empty when it can.</summary>
     public string CrewCourseReason { get; init; } = "";
 
-    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while new courses are refused for negative funds. Empty otherwise; always empty until phase 5.</summary>
+    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while new courses are refused for negative funds. Empty otherwise.</summary>
     public string FundsReason { get; init; } = "";
 }
 
@@ -1056,7 +1078,7 @@ public sealed record LaunchPadStateView(long MaxTonnage, bool Free)
     /// <summary>The launch-short warning, e.g. "Launches with 12/28 crew; train crew at an academy". Empty when not short.</summary>
     public string CrewWarning { get; init; } = "";
 
-    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while launches are held for negative funds. Empty otherwise; always empty until phase 5.</summary>
+    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while launches are held for negative funds. Empty otherwise.</summary>
     public string FundsReason { get; init; } = "";
 }
 
@@ -1187,7 +1209,7 @@ public sealed record IndustryJobView(
     /// </summary>
     public string CrewWarning { get; init; } = "";
 
-    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while the job spends no points for negative funds. Empty otherwise; always empty until phase 5.</summary>
+    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while the job spends no points for negative funds. Empty otherwise.</summary>
     public string FundsReason { get; init; } = "";
 }
 

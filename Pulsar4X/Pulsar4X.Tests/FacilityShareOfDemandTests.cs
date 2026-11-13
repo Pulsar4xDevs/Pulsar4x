@@ -12,7 +12,8 @@ namespace Pulsar4X.Tests;
 
 /// <summary>
 /// Power rebalance: on quickstart day 1, in the warp-tech and early-tech starts, every player
-/// colony's facilities make up 10-30 % of its demand (life support the rest), its plants cover the
+/// colony's facilities make up 10-30 % of its demand (life support the rest; 10-50 % on a garden
+/// world since crew plan phase 4 cut garden life support to 0.01 kW a head), its plants cover the
 /// whole demand at satisfaction 1 in every tier, and it starts with the 730-day fuel runway.
 /// </summary>
 [TestFixture]
@@ -56,14 +57,25 @@ public class FacilityShareOfDemandTests
             double share = facilities / power.Demand_kW;
             TestContext.Out.WriteLine($"{scenario} {Name(colony)}: demand {power.Demand_kW:N1} kW, life support {power.LifeSupport_kW:N1}, facilities {facilities:N1} ({share:P1}), delivered {power.Delivered_kW:N1}");
             Assert.That(power.Demand_kW, Is.EqualTo(power.LifeSupport_kW + facilities).Within(1e-6));
-            Assert.That(share, Is.InRange(0.10, 0.30), $"{Name(colony)} facility share");
+            // Crew plan phase 4: garden-world life support fell 0.05 -> 0.01 kW a head (Earth 25 MW -> 5 MW),
+            // so Earth's facilities are now ~45 % of its demand. Sealed worlds keep the old band.
+            bool garden = power.LifeSupportColonists > 0
+                && power.LifeSupport_kW / power.LifeSupportColonists <= ColonyPowerProcessor.LifeSupportBase_kWPerColonist + 1e-9;
+            Assert.That(share, Is.InRange(0.10, garden ? 0.50 : 0.30), $"{Name(colony)} facility share");
             Assert.That(power.Delivered_kW, Is.GreaterThanOrEqualTo(power.Demand_kW), $"{Name(colony)}: the plants cover day 1");
             Assert.That(power.TierSatisfaction.Values, Is.All.EqualTo(1), $"{Name(colony)}: every tier served");
         }
 
-        // Life support oracles: 0.05 kW a head on Earth; on Mars (colony cost 2) 0.05 + 0.6 x 2.
+        // Life support oracles: 0.01 kW a head on Earth (crew plan phase 4; the trained pool counts);
+        // on Mars (colony cost 2) the sealed 0.05 + 0.6 x 2.
         var earth = Colonies().Single(c => Name(c) == "Earth HQ").GetDataBlob<ColonyPowerDB>();
-        Assert.That(earth.LifeSupport_kW, Is.EqualTo(earth.LifeSupportColonists * 0.05).Within(1e-6));
+        Assert.That(earth.LifeSupport_kW, Is.EqualTo(earth.LifeSupportColonists * 0.01).Within(1e-6));
+        var earthEntity = Colonies().Single(c => Name(c) == "Earth HQ");
+        long pooled = earthEntity.TryGetDataBlob<ColonyCrewPoolDB>(out var pool) ? pool.Trained.Values.Sum() : 0;
+        Assert.That(pooled, Is.GreaterThan(0), "Earth starts with trained crew in its pool");
+        // The pool moves during the day (graduations, launches), so check it is counted, not its exact size.
+        Assert.That(earth.LifeSupportColonists, Is.GreaterThan(earthEntity.GetDataBlob<ColonyInfoDB>().Population.Values.Sum()),
+            "the trained crew in the pool count as residents");
         var mars = Colonies().SingleOrDefault(c => Name(c) == "Mars HQ")?.GetDataBlob<ColonyPowerDB>();
         if (mars != null)
             Assert.That(mars.LifeSupport_kW, Is.EqualTo(mars.LifeSupportColonists * (0.05 + 0.6 * 2)).Within(1e-6));

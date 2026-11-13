@@ -88,6 +88,9 @@ public static class NavalAcademyCourse
     {
         if (row.CrewSeats <= 0 || row.CrewCourseMonths <= 0)
             return "This academy has no crew seats.";
+        // Crew plan phase 5: no new courses while the player's balance is negative.
+        if (Pulsar4X.Factions.FactionSpending.IsBlocked(colony))
+            return Pulsar4X.Api.FundsText.PausedFundsNegative;
         if (count < 1)
             return "Enrol at least one trainee.";
         int free = row.CrewSeats - CrewSeatsUsed(row);
@@ -204,6 +207,8 @@ public static class NavalAcademyCourse
     {
         if (!TryAcademy(colony, componentId, out var db, out int index, out var reason))
             return reason;
+        if (Pulsar4X.Factions.FactionSpending.IsBlocked(colony))
+            return Pulsar4X.Api.FundsText.PausedFundsNegative;
         if (count < 1)
             return "A class needs at least one recruit.";
         if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))

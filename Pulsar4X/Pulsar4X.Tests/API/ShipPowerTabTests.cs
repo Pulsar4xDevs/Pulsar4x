@@ -193,10 +193,20 @@ namespace Pulsar4X.Tests
             Assert.That(sensorKw, Is.GreaterThan(0));
             Assert.That(power.AuxDemand, Is.EqualTo(2 * sensorKw).Within(1e-12), "two sensors");
 
-            // At rest with full batteries: warp idle, sensors powered from spare output, miner idle.
+            // At rest with full batteries: life support runs, warp idle, sensors powered from spare output, miner idle.
+            double lifeSupport = Pulsar4X.Ships.ShipCrew.LifeSupport(ship);
+            Assert.That(lifeSupport, Is.GreaterThan(0), "crew plan phase 4: the crew aboard draw life support");
             var view = _projector.ProjectEntity(ship, _faction.Id).GetView<ShipPowerView>()!;
-            Assert.That(view.LoadGroups.Select(g => g.Kind), Is.EqualTo(new[] { "Engines and warp", "Sensors", "Miners" }).AsCollection,
+            Assert.That(view.LoadGroups.Select(g => g.Kind), Is.EqualTo(new[] { "Life support", "Engines and warp", "Sensors", "Miners" }).AsCollection,
                 "no other consumers on this ship");
+            var life = view.LoadGroups.Single(g => g.Kind == "Life support");
+            Assert.That(life.Demand_kW, Is.EqualTo(lifeSupport).Within(1e-9));
+            Assert.That(life.Satisfaction, Is.EqualTo(1));
+            Assert.That(view.LifeSupport_kW, Is.EqualTo(lifeSupport).Within(1e-9));
+            Assert.That(view.LifeSupportServed_kW, Is.EqualTo(lifeSupport).Within(1e-9));
+            Assert.That(view.LifeSupportServedFraction, Is.EqualTo(1));
+            Assert.That(view.Demand_kW, Is.EqualTo(0), "Demand_kW is warp-only: life support is not in it");
+            Assert.That(view.TotalDemand_kW, Is.EqualTo(2 * sensorKw).Within(1e-12), "TotalDemand_kW excludes life support");
 
             var warp = view.LoadGroups.Single(g => g.Kind == "Engines and warp");
             Assert.That(warp.State, Is.EqualTo("Idle"));
@@ -219,21 +229,24 @@ namespace Pulsar4X.Tests
             Assert.That(miners.Satisfaction, Is.Null, "the engine keeps no kW load for the miner");
             Assert.That(miners.Loads.Single().DesignId, Is.EqualTo(parts.Miner.UniqueID));
 
-            // A warp asking twice what the plant gives: warp gets half, and nothing is spare for sensors.
+            // Warp plus life support asking twice what the plant gives: each gets half, and nothing is spare for sensors.
             double generation = power.TotalOutputMax;
-            power.AddDemand(2 * generation, power.dateTimeLastProcess);
+            power.AddDemand(2 * generation - lifeSupport, power.dateTimeLastProcess);
             var warping = _projector.ProjectEntity(ship, _faction.Id).GetView<ShipPowerView>()!;
             var warpNow = warping.LoadGroups.Single(g => g.Kind == "Engines and warp");
             Assert.That(warpNow.State, Is.EqualTo("Partial"));
             Assert.That(warpNow.Satisfaction, Is.EqualTo(0.5).Within(1e-9));
-            Assert.That(warpNow.Demand_kW, Is.EqualTo(2 * generation).Within(1e-9));
-            Assert.That(warpNow.Served_kW, Is.EqualTo(generation).Within(1e-9));
+            Assert.That(warpNow.Demand_kW, Is.EqualTo(2 * generation - lifeSupport).Within(1e-9));
+            Assert.That(warpNow.Served_kW, Is.EqualTo(generation - lifeSupport / 2).Within(1e-9));
+            Assert.That(warping.LoadGroups.Single(g => g.Kind == "Life support").Satisfaction, Is.EqualTo(1),
+                "full batteries carry life support through the shortfall");
+            Assert.That(warping.LifeSupportServedFraction, Is.EqualTo(1));
             var sensorsNow = warping.LoadGroups.Single(g => g.Kind == "Sensors");
             Assert.That(sensorsNow.State, Is.EqualTo("No power"));
             Assert.That(sensorsNow.Satisfaction, Is.EqualTo(0));
             Assert.That(sensorsNow.Note, Is.Not.Null);
-            Assert.That(warping.Share, Is.EqualTo(0.5).Within(1e-9), "the entity card's warp-only ring is unchanged");
-            Assert.That(warping.SupplyShare, Is.EqualTo(generation / (2 * generation + 2 * sensorKw)).Within(1e-9));
+            Assert.That(warping.Share, Is.EqualTo(generation / (2 * generation - lifeSupport)).Within(1e-9), "the entity card's ring stays warp-only");
+            Assert.That(warping.SupplyShare, Is.EqualTo(generation / (2 * generation - lifeSupport + 2 * sensorKw)).Within(1e-9));
         }
 
         [Test]
@@ -248,10 +261,14 @@ namespace Pulsar4X.Tests
             Assert.That(generation, Is.GreaterThan(0));
             Assert.That(power.AuxServed, Is.EqualTo(0), "engine: other loads wait for full batteries");
 
+            // Crew plan phase 4: life support is must-run; the rest of the output charges.
+            double lifeSupport = Pulsar4X.Ships.ShipCrew.LifeSupport(ship);
+            Assert.That(lifeSupport, Is.GreaterThan(0).And.LessThan(generation));
             var view = _projector.ProjectEntity(ship, _faction.Id).GetView<ShipPowerView>()!;
-            Assert.That(view.Charging_kW, Is.EqualTo(generation).Within(1e-9), "no warp demand: all output charges");
+            Assert.That(view.Charging_kW, Is.EqualTo(generation - lifeSupport).Within(1e-9), "no warp demand: all spare output charges");
+            Assert.That(view.LifeSupportServedFraction, Is.EqualTo(1), "the plant alone carries life support");
             Assert.That(view.LoadsWaitOnCharge, Is.True);
-            Assert.That(view.FullIn_s, Is.EqualTo(max / generation).Within(1e-6));
+            Assert.That(view.FullIn_s, Is.EqualTo(max / (generation - lifeSupport)).Within(1e-6));
             Assert.That(view.Delivered_kW, Is.EqualTo(0), "charging is not delivered to a load");
             Assert.That(view.SupplyShare, Is.EqualTo(0));
             var sensors = view.LoadGroups.Single(g => g.Kind == "Sensors");
@@ -266,6 +283,11 @@ namespace Pulsar4X.Tests
             Assert.That(warping.LoadsWaitOnCharge, Is.False);
             Assert.That(warping.FullIn_s, Is.Null);
             Assert.That(warping.LoadGroups.Single(g => g.Kind == "Sensors").State, Is.EqualTo("No power"));
+            // Empty batteries: warp and life support share the plant alike.
+            double lsShare = generation / (2 * generation + lifeSupport);
+            Assert.That(warping.LifeSupportServedFraction, Is.EqualTo(lsShare).Within(1e-9));
+            Assert.That(warping.LifeSupportServed_kW, Is.EqualTo(lifeSupport * lsShare).Within(1e-9));
+            Assert.That(warping.LoadGroups.Single(g => g.Kind == "Life support").Served_kW, Is.EqualTo(lifeSupport * lsShare).Within(1e-9));
 
             // Full batteries: nothing to charge.
             power.AddDemand(-2 * generation, power.dateTimeLastProcess);

@@ -75,6 +75,10 @@ public class BuyFuelPlan : IGoalPlanner
                 return PlanResult.Continue(new List<EntityAction>());
         }
 
+        // Crew plan phase 5: no buying while the player's balance is negative.
+        if (Pulsar4X.Factions.FactionSpending.IsBlocked(managedEntity))
+            return PlanResult.Fail(Pulsar4X.Factions.FactionSpending.FundsNegative);
+
         if (!TryQuote(managedEntity, goal.TargetEntityID, out var market, out var cargoId, out var units))
         {
             // The purchase was already handed off. This wake is the one after it finished.

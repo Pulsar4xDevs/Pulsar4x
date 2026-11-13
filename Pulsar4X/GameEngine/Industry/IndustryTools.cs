@@ -116,6 +116,10 @@ namespace Pulsar4X.Industry
                 throw new Exception("Unable to find IndustryAbilityDB");
             }
 
+            // Crew plan phase 5: no industry points are spent while the player's balance is negative.
+            if (Pulsar4X.Factions.FactionSpending.IsBlocked(industryEntity.Manager.Game, industryEntity.FactionOwnerID))
+                return;
+
             // Infrastructure is the limiting factor on a colony's output: when the colony's
             // buildings exceed its infrastructure capacity, every production rate is scaled down.
             double infraEfficiency = InfrastructureProcessor.GetEfficiency(industryEntity);

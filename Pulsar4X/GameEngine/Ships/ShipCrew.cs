@@ -270,6 +270,82 @@ namespace Pulsar4X.Ships
         {
             var db = new ShipCrewDB(Split(Mounted(ship)).Capacity);
             ship.SetDataBlob(db);
+            RefreshLifeSupport(ship);
+        }
+
+        // ---- phase 4: life support ----
+
+        /// <summary>Life support per crew aboard now, kW: the game's kW per crew × the owner's life-support tech factor.</summary>
+        public static double KWPerCrew(Entity ship)
+        {
+            double perCrew = ship.Manager?.Game?.Settings?.ShipLifeSupport_kWPerCrew ?? GameSettings.DefaultShipLifeSupport_kWPerCrew;
+            return perCrew * CrewTech.LifeSupportFactor(ship);
+        }
+
+        /// <summary>Life support the crew aboard need now, kW. 0 without crew tracking.</summary>
+        public static double LifeSupportNeed(Entity ship)
+            => ship.TryGetDataBlob<ShipCrewDB>(out var db) ? db.Aboard * KWPerCrew(ship) : 0;
+
+        /// <summary>Life support booked into the ship's must-run demand, kW (0 for a ship with no plant).</summary>
+        public static double LifeSupport(Entity ship)
+            => ship != null && ship.TryGetDataBlob<ShipCrewDB>(out var db) ? db.LifeSupport_kW : 0;
+
+        /// <summary>
+        /// Books the crew's life support into the plant's must-run demand: aboard × kW per crew. Called whenever
+        /// crew aboard change and when the life-support tech levels up. A ship with no plant books nothing.
+        /// </summary>
+        public static void RefreshLifeSupport(Entity ship)
+        {
+            if (ship == null || !ship.TryGetDataBlob<ShipCrewDB>(out var db)
+                || !ship.TryGetDataBlob<Pulsar4X.Energy.EnergyGenAbilityDB>(out var energy) || ship.Manager == null)
+                return;
+            double target = db.Aboard * KWPerCrew(ship);
+            double delta = target - db.LifeSupport_kW;
+            if (Math.Abs(delta) < 1e-12)
+                return;
+            DateTime at = ship.Manager.ManagerSubpulses.NextSafeInterruptTime;
+            // AddDemand runs the plant up to now at the old demand, then changes it.
+            energy.AddDemand(delta, at);
+            db.LifeSupport_kW = target;
+            // A zero step at the new demand books the next fill or empty interrupt.
+            Pulsar4X.Energy.EnergyGenProcessor.EnergyGen(ship, at);
+        }
+
+        /// <summary>Rebooks life support on every ship of the faction (the life-support tech levelled up).</summary>
+        public static void RefreshFactionLifeSupport(Game game, int factionId)
+        {
+            foreach (var system in game.Systems)
+                foreach (var ship in system.GetAllEntitiesWithDataBlob<ShipCrewDB>())
+                    if (ship.FactionOwnerID == factionId)
+                        RefreshLifeSupport(ship);
+        }
+
+        /// <summary>The "life support failing" line for the event log.</summary>
+        public static string LifeSupportFailingText(string name, double lifeSupportKW, double outputKW)
+            => $"{(string.IsNullOrEmpty(name) ? "A ship" : name)}: life support failing - the batteries are empty and the plant makes {outputKW:0.#} kW against {lifeSupportKW:0.#} kW of life support and other must-run loads";
+
+        /// <summary>
+        /// After a plant step: fires LifeSupportFailing once when the batteries are empty and the plant cannot
+        /// carry the must-run demand (life support and any warp); clears when it can again.
+        /// </summary>
+        internal static void CheckLifeSupport(Entity ship, Pulsar4X.Energy.EnergyGenAbilityDB energy, double stored, DateTime at)
+        {
+            if (!ship.TryGetDataBlob<ShipCrewDB>(out var db) || !(db.LifeSupport_kW > 0))
+                return;
+            bool failing = stored <= 1e-9 && energy.TotalOutputMax + 1e-9 < energy.Demand;
+            if (failing && !db.LifeSupportFailing)
+            {
+                db.LifeSupportFailing = true;
+                EventManager.Instance.Publish(Event.Create(
+                    EventType.LifeSupportFailing,
+                    at,
+                    LifeSupportFailingText(ship.GetName(ship.FactionOwnerID), energy.Demand, energy.TotalOutputMax),
+                    ship.FactionOwnerID,
+                    ship.Manager?.ManagerID,
+                    ship.Id));
+            }
+            else if (!failing && db.LifeSupportFailing)
+                db.LifeSupportFailing = false;
         }
 
         /// <summary>

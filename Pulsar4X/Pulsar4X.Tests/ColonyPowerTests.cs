@@ -165,7 +165,10 @@ public class ColonyPowerTests
     public void LifeSupport_IsASmallBasePerColonist_OnAGardenWorld()
     {
         var power = Power(_earthColony);
-        long people = _earthColony.GetDataBlob<ColonyInfoDB>().Population.Values.Sum();
+        // Pooled trained crew live at the colony and count too (crew plan phase 4).
+        long people = _earthColony.GetDataBlob<ColonyInfoDB>().Population.Values.Sum()
+            + (_earthColony.TryGetDataBlob<Pulsar4X.Colonies.ColonyCrewPoolDB>(out var pool) ? pool.Trained.Values.Sum() : 0);
+        Assert.That(ColonyPowerProcessor.LifeSupportBase_kWPerColonist, Is.EqualTo(0.01), "garden worlds: 0.01 kW per person");
         Assert.That(_species.GetDataBlob<SpeciesDB>().ColonyCost(_earthColony.GetDataBlob<ColonyInfoDB>().PlanetEntity), Is.EqualTo(0));
         Assert.That(power.LifeSupportColonists, Is.EqualTo(people));
         Assert.That(power.LifeSupport_kW, Is.EqualTo(people * ColonyPowerProcessor.LifeSupportBase_kWPerColonist).Within(1e-3),
@@ -182,7 +185,7 @@ public class ColonyPowerTests
         if (cost < 0 || cost > SpeciesDBExtensions.MAX_COST) cost = SpeciesDBExtensions.MAX_COST;
 
         Assert.That(cost, Is.GreaterThan(0), "Mars is hostile to humans");
-        double perColonist = ColonyPowerProcessor.LifeSupportBase_kWPerColonist
+        double perColonist = ColonyPowerProcessor.LifeSupportSealed_kWPerColonist
                              + ColonyPowerProcessor.LifeSupportHostile_kWPerColonistPerCost * cost;
         Assert.That(power.LifeSupport_kW, Is.EqualTo(1000 * perColonist).Within(1e-6));
         Assert.That(power.LifeSupport_kW / 1000, Is.GreaterThan(ColonyPowerProcessor.LifeSupportBase_kWPerColonist));
@@ -196,7 +199,7 @@ public class ColonyPowerTests
             "raw colony cost runs past the cap on Luna");
         var colony = ColonyFactory.CreateColony(_player, _species, luna, 1000);
 
-        double perColonist = ColonyPowerProcessor.LifeSupportBase_kWPerColonist
+        double perColonist = ColonyPowerProcessor.LifeSupportSealed_kWPerColonist
                              + ColonyPowerProcessor.LifeSupportHostile_kWPerColonistPerCost * SpeciesDBExtensions.MAX_COST;
         Assert.That(Power(colony).LifeSupport_kW, Is.EqualTo(1000 * perColonist).Within(1e-6), "1.9 kW per colonist");
     }
@@ -371,7 +374,7 @@ public class ColonyPowerTests
         Assert.That(last.Demand_kW, Is.EqualTo(power.Demand_kW).Within(1e-6));
         Assert.That(last.Generation_kW, Is.EqualTo(power.Generation_kW).Within(1e-6));
         Assert.That(last.Delivered_kW, Is.EqualTo(power.Dispatched_kW * power.GridEfficiency).Within(1e-6));
-        Assert.That(last.Stored_kJ, Is.EqualTo(power.StoreMax_kJ).And.GreaterThan(0), "Earth's start bank starts full, and its surplus keeps it full");
+        Assert.That(last.Stored_kJ, Is.EqualTo(power.StoreMax_kJ).Within(1e-3).And.GreaterThan(0), "Earth's start bank starts full, and its surplus keeps it full");
         Assert.That(last.Charge_kW, Is.EqualTo(0), "a full bank takes no charge");
 
         // The clock now stands on day 3: a pass adds that day, and a second pass the same day

@@ -30,6 +30,9 @@ namespace Pulsar4X.Ships
                 return;
 
             AssignQueueToPads(launchDB, entity);
+            // Crew plan phase 5: launches are held while the player's balance is negative.
+            if (Pulsar4X.Factions.FactionSpending.IsBlocked(entity))
+                return;
             ProcessPadLaunches(launchDB, entity);
             LaunchYardHulls(launchDB, entity);
         }
@@ -47,6 +50,8 @@ namespace Pulsar4X.Ships
         /// </summary>
         public static string HoldReason(Entity colony, long mass)
         {
+            if (Pulsar4X.Factions.FactionSpending.IsBlocked(colony))
+                return Pulsar4X.Api.FundsText.PausedFundsNegative;
             if (!colony.TryGetDataBlob<LaunchComplexDB>(out var launch) || launch.Pads.Count == 0)
                 return NoFreePad;
 
@@ -79,6 +84,8 @@ namespace Pulsar4X.Ships
         {
             if (pad.ShipDesignId == null)
                 return "";
+            if (Pulsar4X.Factions.FactionSpending.IsBlocked(colony))
+                return Pulsar4X.Api.FundsText.PausedFundsNegative;
             return HasFuel(colony, pad.ShipMass, pad, pad.TargetOrbitRadius) ? "" : NotEnoughOf(FuelName(colony, pad.LaunchFuel));
         }
 

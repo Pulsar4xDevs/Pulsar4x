@@ -26,6 +26,21 @@ namespace Pulsar4X.Tests;
 [TestFixture]
 public class ShipmentTests
 {
+    [Test]
+    public void MarketSeal_IsRefused_WhileThePlayerBuyerIsNegative()
+    {
+        var scene = Scene.Build();
+        scene.Game.LocalHumanFactionId = scene.BuyerFaction.Id;
+        scene.BuyerInfo.Money.AddExpense(scene.Buyer.StarSysDateTime, TransactionCategory.Trade, "test drain", scene.BuyerInfo.Money.GetCurrentFunds() + 1);
+
+        var result = scene.Seal(("iron", 10), fee: 1m);
+
+        Assert.That(result.Accepted, Is.False);
+        Assert.That(result.RejectionReason, Is.EqualTo(FactionSpending.FundsNegative));
+        Assert.That(ShipmentBook.At(scene.Seller), Is.Empty);
+        Assert.That(scene.Units(scene.Seller, scene.Iron), Is.EqualTo(100));
+    }
+
     // ------------------------------------------------------------------ seal (market path)
 
     [Test]

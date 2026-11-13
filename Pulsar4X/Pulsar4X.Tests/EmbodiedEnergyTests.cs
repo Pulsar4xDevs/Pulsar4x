@@ -254,11 +254,12 @@ public class EmbodiedEnergyTests
     {
         var data = Info.Data;
         double hand = EnergyPriceOracle.Delivery_kWhPerKg(_game);
-        // 2 x (4e6/3 kJ + 15 kW x 0.2 AU / 21,087 m/s) / 3600 / 1e6 kg = 0.012565, plus (energy
-        // phase 6) the turbine's fissile fuel for those kJ at 1,403 kWh/kg: 0.0000053. Crew plan
-        // phase 1: the miner's crew quarters (+2,028 kg dry) slow its drive from 22,029 m/s, so
-        // this was 0.012064.
-        Assert.That(hand, Is.EqualTo(0.012570).Within(1e-6));
+        // 2 x (4e6/3 kJ + 15 kW x 0.2 AU / 20,233.5 m/s) / 3600 / 1e6 kg = 0.013064, plus (energy
+        // phase 6) the turbine's fissile fuel for those kJ at 1,403 kWh/kg: 0.0000055. Crew plan
+        // phase 1: the miner's crew quarters (+2,028 kg dry) slowed its drive from 22,029 m/s
+        // (0.012064 before); phase 4: its 4 t reactor (+2,000 kg) from 21,087 m/s (0.012570 before).
+        // Life support (17 kW) runs anyway and is not charged to the haul.
+        Assert.That(hand, Is.EqualTo(0.013069).Within(1e-6));
         Assert.That(EnergyPricing.DepotDeliveryKWhPerKg(_game, data), Is.EqualTo(hand).Within(1e-12));
         var legs = EnergyPricing.DepotDeliveryLegs(_game);
         Assert.That(legs, Has.Count.EqualTo(2));
@@ -382,6 +383,7 @@ public class EmbodiedEnergyTests
         Assert.That(reference.Coupling, Is.EqualTo(live.Coupling).Within(1e-12));
         Assert.That(reference.BleedFraction, Is.EqualTo(live.BleedFraction).Within(1e-12));
         Assert.That(reference.EnergyOutputMax, Is.EqualTo(live.EnergyOutputMax).Within(1e-9));
+        Assert.That(reference.LifeSupport_kW, Is.EqualTo(live.LifeSupport_kW).Within(1e-9), "crew plan phase 4: life support");
         Assert.That(reference.EnergyStoreMax, Is.EqualTo(live.EnergyStoreMax).Within(1e-6));
         Assert.That(reference.ReactorOutputMax, Is.EqualTo(live.ReactorOutputMax).Within(1e-9));
         Assert.That(reference.ReactorFuelType, Is.EqualTo(live.ReactorFuelType));

@@ -88,7 +88,7 @@ public class ColonyPowerEnforcementTests
     [Test]
     public void Brownout_ServesTiersInOrder_AndScalesTheShortTier()
     {
-        // 1,000 people (50 kW life support) plus Earth's facilities: 2.2 MW of control (the 2 MW
+        // 1,000 people (10 kW life support at the garden 0.01 kW, plus the trained pool) plus Earth's facilities: 2.2 MW of control (the 2 MW
         // spaceport), 0.5 MW of storage, idle industry, the mine and two idle labs (1.2 MW), about
         // 4.2 MW in all. One 4 MW thermal plant delivers 3,680 kW: research is the tier left short.
         SmallEarthOnPlant(TemplateDesign("thermal-plant", ("Size", 4)));
@@ -112,10 +112,11 @@ public class ColonyPowerEnforcementTests
         Assert.That(p.TierSatisfaction[PowerTier.Research], Is.LessThan(1).And.GreaterThan(0), "research is last, and short");
 
         // More people: life support and control eat the plant, industry goes dark first.
-        _earth.GetDataBlob<ColonyInfoDB>().Population[_species.Id] = 50_000; // 2,500 kW at 0.05 kW each
+        _earth.GetDataBlob<ColonyInfoDB>().Population[_species.Id] = 250_000; // 2,500 kW at the garden 0.01 kW each (crew plan phase 4)
         ColonyPowerProcessor.RunDay(_earth);
+        Assert.That(p.DemandByTier[PowerTier.LifeSupport], Is.EqualTo(2500).Within(10), "250k people plus the small trained pool");
         Assert.That(p.TierSatisfaction[PowerTier.LifeSupport], Is.EqualTo(1));
-        Assert.That(p.TierSatisfaction[PowerTier.Control], Is.EqualTo((delivered - 2500) / p.DemandByTier[PowerTier.Control]).Within(1e-9));
+        Assert.That(p.TierSatisfaction[PowerTier.Control], Is.EqualTo((delivered - p.DemandByTier[PowerTier.LifeSupport]) / p.DemandByTier[PowerTier.Control]).Within(1e-9));
         Assert.That(p.TierSatisfaction[PowerTier.Industry], Is.EqualTo(0));
         Assert.That(p.TierSatisfaction[PowerTier.Mining], Is.EqualTo(0));
         Assert.That(p.TierSatisfaction[PowerTier.Research], Is.EqualTo(0));
@@ -127,10 +128,12 @@ public class ColonyPowerEnforcementTests
     {
         SmallEarthOnPlant(TemplateDesign("thermal-plant", ("Size", 1)));
         var info = _earth.GetDataBlob<ColonyInfoDB>();
-        info.Population[_species.Id] = 40_000; // 2 MW of life support at 0.05 kW each, more than the plant
+        info.Population[_species.Id] = 200_000; // 2 MW of life support at the garden 0.01 kW each, more than the plant
         ColonyPowerProcessor.RunDay(_earth);
 
-        Assert.That(Power.TierSatisfaction[PowerTier.LifeSupport], Is.EqualTo(920.0 / 2000).Within(1e-9));
+        double lifeSupport = Power.DemandByTier[PowerTier.LifeSupport];
+        Assert.That(lifeSupport, Is.EqualTo(2000).Within(10), "200k people plus the small trained pool");
+        Assert.That(Power.TierSatisfaction[PowerTier.LifeSupport], Is.EqualTo(920.0 / lifeSupport).Within(1e-9));
         foreach (var tier in new[] { PowerTier.Control, PowerTier.Storage, PowerTier.Industry, PowerTier.Mining, PowerTier.Research })
             Assert.That(Power.TierSatisfaction[tier], Is.EqualTo(0), tier.ToString());
 
@@ -344,7 +347,9 @@ public class ColonyPowerEnforcementTests
         double before = Power.LifeSupport_kW;
         _earth.GetDataBlob<ColonyInfoDB>().Population[_species.Id] += 10_000;
         new PopulationProcessor().ProcessEntity(_earth, 0);
-        long people = _earth.GetDataBlob<ColonyInfoDB>().Population.Values.Sum();
+        // Pooled trained crew live at the colony and count too (crew plan phase 4).
+        long people = _earth.GetDataBlob<ColonyInfoDB>().Population.Values.Sum()
+            + (_earth.TryGetDataBlob<Pulsar4X.Colonies.ColonyCrewPoolDB>(out var pool) ? pool.Trained.Values.Sum() : 0);
         Assert.That(Power.LifeSupport_kW, Is.EqualTo(people * ColonyPowerProcessor.LifeSupportBase_kWPerColonist).Within(1e-6));
         Assert.That(Power.LifeSupport_kW, Is.GreaterThan(before));
     }

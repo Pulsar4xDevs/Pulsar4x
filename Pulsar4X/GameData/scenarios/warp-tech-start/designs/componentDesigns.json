@@ -420,6 +420,61 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-reactor-3t",
+      "Name": "25kW Steam Turbine Reactor",
+      "TemplateId": "steam-turbine-reactor",
+      "Properties": [
+        { "Key": "Mass", "Value": 3000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-reactor-4t",
+      "Name": "37kW Steam Turbine Reactor",
+      "TemplateId": "steam-turbine-reactor",
+      "Properties": [
+        { "Key": "Mass", "Value": 4000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-reactor-5t",
+      "Name": "49kW Steam Turbine Reactor",
+      "TemplateId": "steam-turbine-reactor",
+      "Properties": [
+        { "Key": "Mass", "Value": 5000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-reactor-6t",
+      "Name": "63kW Steam Turbine Reactor",
+      "TemplateId": "steam-turbine-reactor",
+      "Properties": [
+        { "Key": "Mass", "Value": 6000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-reactor-7t",
+      "Name": "77kW Steam Turbine Reactor",
+      "TemplateId": "steam-turbine-reactor",
+      "Properties": [
+        { "Key": "Mass", "Value": 7000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-refinery",
       "Name": "Prefab Refinery",
       "TemplateId": "refinery",

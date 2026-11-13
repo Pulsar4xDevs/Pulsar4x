@@ -315,6 +315,12 @@ public static class ShipmentBook
             reason = "Faction has no ledger.";
             return false;
         }
+        // Crew plan phase 5: no buying from another faction while the player's balance is negative.
+        if (!sameFaction && Pulsar4X.Factions.FactionSpending.IsBlocked(game, buyer.FactionOwnerID))
+        {
+            reason = Pulsar4X.Factions.FactionSpending.FundsNegative;
+            return false;
+        }
 
         decimal funds = buyerInfo.Money.GetCurrentFunds();
         var picked = new List<(ICargoable item, long units)>();

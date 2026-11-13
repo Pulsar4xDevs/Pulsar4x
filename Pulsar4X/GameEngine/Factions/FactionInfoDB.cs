@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -91,6 +92,9 @@ namespace Pulsar4X.Factions
         /// </summary>
         public bool AutoHires { get; internal set; }
 
+        /// <summary>The last day crew wages were paid (crew plan phase 5); null before the first payday.</summary>
+        public DateTime? LastCrewPayday { get; internal set; }
+
         public SafeList<Entity> Commanders { get; internal set; } = new ();
 
         public Dictionary<string, ShipDesign> ShipDesigns = new ();
@@ -167,6 +171,7 @@ namespace Pulsar4X.Factions
             Grants = new Dictionary<int, FactionGrants>(factionDB.Grants ?? new Dictionary<int, FactionGrants>());
             Colonies = new List<Entity>(factionDB.Colonies);
             AutoHires = factionDB.AutoHires;
+            LastCrewPayday = factionDB.LastCrewPayday;
             InternalKnownJumpPoints = new Dictionary<string, List<Entity>>(factionDB.KnownJumpPoints);
 
             ShipDesigns = new Dictionary<string, ShipDesign>(factionDB.ShipDesigns);

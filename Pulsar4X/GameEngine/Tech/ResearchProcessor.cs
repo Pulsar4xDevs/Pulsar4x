@@ -99,8 +99,8 @@ namespace Pulsar4X.Technology
 
             var cost = researcherDB.CostPerDay.GetValue();
 
-            // Check to make sure the cost can be paid
-            if(factionInfoDB.Money.GetCurrentFunds() < cost)
+            // Check to make sure the cost can be paid (and, crew plan phase 5, the player is not in debt)
+            if(factionInfoDB.Money.GetCurrentFunds() < cost || Pulsar4X.Factions.FactionSpending.IsBlocked(entity.Manager.Game, entity.FactionOwnerID))
                 return;
 
             // Pay the costs
@@ -123,6 +123,10 @@ namespace Pulsar4X.Technology
 
                 if (tech.Faction != null && tech.Design != null && tech.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
                     RegisterConstructableDesign(factionInfo, tech.Design);
+
+                // Crew plan phase 4: life support efficiency applies at once to the whole fleet.
+                if (tech.UniqueID == Pulsar4X.Ships.CrewTech.LifeSupportEfficiency)
+                    Pulsar4X.Ships.ShipCrew.RefreshFactionLifeSupport(entity.Manager.Game, entity.FactionOwnerID);
 
                 // if (cycleProject)
                 //     scientist.ProjectQueue.Add((project.UniqueID, true));
