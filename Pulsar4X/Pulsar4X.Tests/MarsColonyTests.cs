@@ -58,7 +58,6 @@ public class MarsColonyTests
             Is.GreaterThanOrEqualTo(4000));
 
         var techs = player.GetDataBlob<FactionInfoDB>().Data.Techs;
-        Assert.That(techs["tech-infra-gravity-min-extension"].Level, Is.EqualTo(3));
-        Assert.That(techs["tech-infra-pressure-min-extension"].Level, Is.EqualTo(1));
+        Assert.That(techs["tech-infra-gravity-min-extension"].Level, Is.EqualTo(1));
     }
 }

@@ -377,10 +377,7 @@
         { "Id": "methalox", "Amount": 500, "Type": "byCount" }
       ],
       "StartingItems": [
-        "tech-infra-gravity-min-extension",
-        "tech-infra-gravity-min-extension",
-        "tech-infra-gravity-min-extension",
-        "tech-infra-pressure-min-extension"
+        "tech-infra-gravity-min-extension"
       ],
       "ComponentDesigns": [
         "default-design-grid-battery-50t",

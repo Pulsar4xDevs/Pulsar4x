@@ -1593,13 +1593,9 @@ public class BootstrapColonyTests
                 info.Data.IncrementTechLevel(id);
         }
         info.Data.Unlock("plastic-armor");
-        // The low-gravity design only keeps its window once the Mars outpost's range extensions are researched.
-        foreach (var id in new[] { "tech-infra-gravity-min-extension", "tech-infra-gravity-min-extension",
-                     "tech-infra-gravity-min-extension", "tech-infra-pressure-min-extension" })
-        {
-            info.Data.Unlock(id);
-            info.Data.IncrementTechLevel(id);
-        }
+        // The low-gravity design only keeps its window once Low-Gravity Habitat Engineering is researched.
+        info.Data.Unlock("tech-infra-gravity-min-extension");
+        info.Data.IncrementTechLevel("tech-infra-gravity-min-extension");
 
         string[] designs =
         {

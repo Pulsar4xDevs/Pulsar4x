@@ -1150,7 +1150,7 @@
           "GuiHint": "GuiSelectionMinMaxRange",
           "PairedPropertyName": "Max Pressure",
           "MaxFormula": "Min(10, 1.15 + TechData('tech-infra-pressure-max-extension'))",
-          "MinFormula": "Max(0, 0.85 - TechData('tech-infra-pressure-min-extension'))",
+          "MinFormula": "0",
           "MaxRangeFormula": "2.0 * TechData('tech-infra-pressure-range')",
           "StepFormula": "0.1",
           "PropertyFormula": "0.9"
@@ -1160,7 +1160,7 @@
           "DescriptionFormula": "'Upper bound of the pressure operating range. Configured via the Min Pressure range slider.'",
           "GuiHint": "None",
           "MaxFormula": "Min(10, 1.15 + TechData('tech-infra-pressure-max-extension'))",
-          "MinFormula": "Max(0, 0.85 - TechData('tech-infra-pressure-min-extension'))",
+          "MinFormula": "0",
           "StepFormula": "0.1",
           "PropertyFormula": "1.1"
         },

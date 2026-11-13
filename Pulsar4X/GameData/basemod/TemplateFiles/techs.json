@@ -28,11 +28,11 @@
     "Payload": {
       "UniqueID": "tech-infra-gravity-min-extension",
       "Name": "Low-Gravity Habitat Engineering",
-      "Description": "Opens track below the prefab window so that window can slide toward low-gravity bodies. It does not widen the window. The five levels reach 0 m/s².",
+      "Description": "Opens the prefab gravity track down to 0 m/s² so the window can slide toward low-gravity bodies. It does not widen the window. Level 1 reaches 0 m/s².",
       "Category": "tech-category-biology-genetics",
-      "MaxLevel": 5,
-      "DataFormula": "[Level] * 0.2",
-      "CostFormula": "1000 + [Level] * 1000"
+      "MaxLevel": 1,
+      "DataFormula": "[Level]",
+      "CostFormula": "1000"
     }
   },
   {
@@ -57,18 +57,6 @@
       "MaxLevel": 3,
       "DataFormula": "0.1 + [Level] * 0.05",
       "CostFormula": "1500 + [Level] * 1500"
-    }
-  },
-  {
-    "Type": "Tech",
-    "Payload": {
-      "UniqueID": "tech-infra-pressure-min-extension",
-      "Name": "Thin-Atmosphere Habitat Engineering",
-      "Description": "Opens the floor of the prefab track toward vacuum. It does not widen the window. Level 1 reaches 0 atm.",
-      "Category": "tech-category-biology-genetics",
-      "MaxLevel": 1,
-      "DataFormula": "[Level] * 0.85",
-      "CostFormula": "1000"
     }
   },
   {
@@ -562,7 +550,6 @@
           "tech-infra-gravity-min-extension",
           "tech-infra-gravity-max-extension",
           "tech-infra-pressure-range",
-          "tech-infra-pressure-min-extension",
           "tech-infra-pressure-max-extension",
           "tech-thermal-efficiency",
           "tech-grid-distribution",
@@ -754,7 +741,6 @@
           "tech-infra-gravity-min-extension",
           "tech-infra-gravity-max-extension",
           "tech-infra-pressure-range",
-          "tech-infra-pressure-min-extension",
           "tech-infra-pressure-max-extension",
           "tech-early-nuclear-power",
           "tech-thermal-efficiency",

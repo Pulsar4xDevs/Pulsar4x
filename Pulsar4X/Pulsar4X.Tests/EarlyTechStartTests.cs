@@ -23,6 +23,7 @@ using Pulsar4X.Names;
 using Pulsar4X.Ships;
 using Pulsar4X.Logistics;
 using Pulsar4X.Storage;
+using Pulsar4X.Technology;
 
 namespace Pulsar4X.Tests;
 
@@ -679,5 +680,86 @@ public class EarlyTechStartTests
         Assert.That(accepting.Bid, Is.EqualTo(SpeciesCargo.FareCreditsPerPerson));
     }
 
+    // --- Prefab infrastructure: zero pressure at start, Luna after one research -------------
 
+    [Test]
+    public void EarlyTech_PrefabInfrastructure_AllowsZeroPressure_WithEarthGravityFloor()
+    {
+        var (_, faction) = StartGameLikeTheMenu(EarlyTech);
+        var data = faction.GetDataBlob<FactionInfoDB>().Data;
+        var tech = faction.GetDataBlob<FactionTechDB>();
+
+        Assert.That(data.Techs["tech-infra-gravity-min-extension"].Level, Is.EqualTo(0));
+        Assert.That(data.Techs.ContainsKey("tech-infra-pressure-min-extension"), Is.False);
+
+        var designer = new ComponentDesigner(data.ComponentTemplates["infrastructure"], data, tech, "zero-pressure");
+        var minGravity = designer.ComponentDesignProperties["Min Gravity"];
+        var maxGravity = designer.ComponentDesignProperties["Max Gravity"];
+        var minPressure = designer.ComponentDesignProperties["Min Pressure"];
+        var maxPressure = designer.ComponentDesignProperties["Max Pressure"];
+        minGravity.SetMin();
+        minPressure.SetMin();
+
+        Assert.That(minGravity.MinValue, Is.EqualTo(8.829).Within(1e-6), "level-0 gravity floor is 9.81 * 0.9");
+        Assert.That(minPressure.MinValue, Is.EqualTo(0.0).Within(1e-6), "prefab pressure track opens at 0 atm from the start");
+
+        minPressure.SetValueFromInput(0.0);
+        maxPressure.SetValueFromInput(0.2);
+
+        Assert.That(minPressure.Value, Is.EqualTo(0.0).Within(1e-6));
+        Assert.That(maxPressure.Value, Is.EqualTo(0.2).Within(1e-6));
+        Assert.That(minGravity.Value, Is.EqualTo(8.829).Within(1e-6));
+        Assert.That(maxGravity.Value, Is.EqualTo(10.791).Within(1e-6));
+
+        var design = designer.CreateDesign(faction);
+        Assert.That(design.GetAttribute<PressureToleranceAtb>().SupportsBodyPressure(0.0), Is.True);
+        Assert.That(design.GetAttribute<GravityToleranceAtb>().SupportsBodyGravity(9.81), Is.True);
+    }
+
+    [Test]
+    public void EarlyTech_OneLowGravityResearch_LetsPrefabInfrastructureColoniseLuna()
+    {
+        var (game, faction) = StartGameLikeTheMenu(EarlyTech);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        var data = info.Data;
+        var techDb = faction.GetDataBlob<FactionTechDB>();
+
+        var gravityTech = data.Techs["tech-infra-gravity-min-extension"];
+        Assert.That(gravityTech.MaxLevel, Is.EqualTo(1));
+        Assert.That(gravityTech.Level, Is.EqualTo(0));
+        Assert.That(gravityTech.TechCostFormula(), Is.EqualTo(1000));
+        Assert.That(data.IsResearchable("tech-infra-gravity-min-extension"), Is.True);
+        Assert.That(data.Techs.ContainsKey("tech-infra-pressure-min-extension"), Is.False);
+
+        data.IncrementTechLevel("tech-infra-gravity-min-extension");
+        Assert.That(gravityTech.Level, Is.EqualTo(1));
+        Assert.That(data.IsResearchable("tech-infra-gravity-min-extension"), Is.False,
+            "a single research is the cap; level 1 already reaches 0 m/s²");
+
+        var designer = new ComponentDesigner(data.ComponentTemplates["infrastructure"], data, techDb, "luna-prefab");
+        var minGravity = designer.ComponentDesignProperties["Min Gravity"];
+        minGravity.SetMin();
+        Assert.That(minGravity.MinValue, Is.EqualTo(0.0).Within(1e-6),
+            "Max(0, 9.81 * (1.0 - 0.1 - 1)) is exact 0 after one level");
+
+        minGravity.SetValueFromInput(1.4);
+        designer.ComponentDesignProperties["Max Gravity"].SetValueFromInput(1.8);
+        designer.ComponentDesignProperties["Min Pressure"].SetValueFromInput(0.0);
+        designer.ComponentDesignProperties["Max Pressure"].SetValueFromInput(0.2);
+
+        var design = designer.CreateDesign(faction);
+        var sol = game.Systems.Single(system => system.ID == "system-sol");
+        var luna = NameLookup.GetFirstEntityWithName(sol, "Luna");
+        double lunaGravity = luna.GetDataBlob<MassVolumeDB>().SurfaceGravity;
+        Assert.That(lunaGravity, Is.EqualTo(1.625).Within(0.01));
+        Assert.That(design.GetAttribute<GravityToleranceAtb>().SupportsBodyGravity(lunaGravity), Is.True);
+        Assert.That(design.GetAttribute<PressureToleranceAtb>().SupportsBodyPressure(0), Is.True);
+
+        var species = info.Species.First();
+        var colony = ColonyFactory.CreateColony(faction, species, luna, 0);
+        colony.AddComponent(design);
+        Assert.That(
+            colony.GetDataBlob<ComponentInstancesDB>().GetPopulationSupportValue(luna),
+            Is.GreaterThanOrEqualTo(200));
+    }
 }
