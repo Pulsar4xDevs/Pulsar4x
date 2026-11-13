@@ -30,7 +30,7 @@
           "Units": "kW",
           "DescriptionFormula": "'0.1 W per cubic metre (automated, low light).'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Storage Volume') * 0.0001"
+          "PropertyFormula": "PropertyValue('Storage Volume') * 0.0005"
         },
         {
           "Name": "DBargsPower",
@@ -96,7 +96,7 @@
           "Units": "kW",
           "DescriptionFormula": "'0.1 W per cubic metre (automated, low light).'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Storage Volume') * 0.0001"
+          "PropertyFormula": "PropertyValue('Storage Volume') * 0.0005"
         },
         {
           "Name": "DBargsPower",
@@ -258,7 +258,7 @@
           "Units": "kW",
           "DescriptionFormula": "'Port cranes and transfer handling, 0.75 W per unit of size.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Size') * 0.00075"
+          "PropertyFormula": "PropertyValue('Size') * 0.02"
         },
         {
           "Name": "DBargsPower",

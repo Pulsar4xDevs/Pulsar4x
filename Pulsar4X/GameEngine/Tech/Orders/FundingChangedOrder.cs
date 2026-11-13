@@ -57,6 +57,9 @@ public class FundingChangedOrder : EntityAction
                     _labEntity.FactionOwnerID,
                     _labEntity.Manager.ManagerID,
                     _labEntity.Id));
+
+        // A lab with or without a project draws differently: refresh its colony's demand now.
+        Pulsar4X.Energy.ColonyPowerProcessor.RefreshLab(_labEntity);
     }
 
     internal override bool IsFinished()

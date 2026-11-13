@@ -254,7 +254,7 @@
           "Units": "kW",
           "DescriptionFormula": "'About 3 kW per researcher, compute included.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "250"
+          "PropertyFormula": "3000"
         },
         {
           "Name": "DBargsPower",
@@ -1024,7 +1024,7 @@
           "Units": "kW",
           "DescriptionFormula": "'0.5 kW per crew.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "0.5 * 2"
+          "PropertyFormula": "PropertyValue('Cargo Transfer Rate') * 20"
         },
         {
           "Name": "DBargsPower",

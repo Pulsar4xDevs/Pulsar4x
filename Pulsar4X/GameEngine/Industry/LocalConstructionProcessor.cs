@@ -44,6 +44,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
 
         long pointsLeft = constructionDB.PointsPerDay;
         int queuedBefore = constructionDB.BuildQueue.Count;
+        int refitsBefore = constructionDB.RefitQueue.Count;
         double scrapBefore = Pulsar4X.Energy.ColonyPowerProcessor.Scrapping_kW(entity);
         while (pointsLeft > 0 && constructionDB.BuildQueue.Count > 0)
         {
@@ -77,6 +78,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
         // A finished job (an upgrade's scrapping done, the next job's starting) changes the grid
         // load: refresh demand now rather than at the next daily power pass.
         if (constructionDB.BuildQueue.Count != queuedBefore
+            || constructionDB.RefitQueue.Count != refitsBefore
             || Math.Abs(Pulsar4X.Energy.ColonyPowerProcessor.Scrapping_kW(entity) - scrapBefore) > 1e-9)
             Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(entity);
     }

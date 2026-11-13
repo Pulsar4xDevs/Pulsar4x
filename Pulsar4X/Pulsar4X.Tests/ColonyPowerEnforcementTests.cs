@@ -88,16 +88,18 @@ public class ColonyPowerEnforcementTests
     [Test]
     public void Brownout_ServesTiersInOrder_AndScalesTheShortTier()
     {
-        // 1,000 people (100 kW life support) plus Earth's facilities; phase 3 industry draws its
-        // jobs' energy (idle 10 %), so demand is about 1.3 MW. One 1 MW thermal plant delivers 920 kW.
-        SmallEarthOnPlant(TemplateDesign("thermal-plant", ("Size", 1)));
+        // 1,000 people (50 kW life support) plus Earth's facilities: 2.2 MW of control (the 2 MW
+        // spaceport), 0.5 MW of storage, idle industry, the mine and two idle labs (1.2 MW), about
+        // 4.2 MW in all. One 4 MW thermal plant delivers 3,680 kW: research is the tier left short.
+        SmallEarthOnPlant(TemplateDesign("thermal-plant", ("Size", 4)));
 
         ColonyPowerProcessor.RunDay(_earth);
 
         var p = Power;
-        Assert.That(p.Demand_kW, Is.GreaterThan(920));
-        Assert.That(p.Dispatched_kW, Is.EqualTo(1000).Within(1e-6), "the plant runs flat out");
-        double left = 920;
+        const double delivered = 4000 * 0.92;
+        Assert.That(p.Demand_kW, Is.GreaterThan(delivered));
+        Assert.That(p.Dispatched_kW, Is.EqualTo(4000).Within(1e-6), "the plant runs flat out");
+        double left = delivered;
         foreach (PowerTier tier in Enum.GetValues(typeof(PowerTier)))
         {
             double demand = p.DemandByTier.TryGetValue(tier, out var d) ? d : 0;
@@ -110,10 +112,10 @@ public class ColonyPowerEnforcementTests
         Assert.That(p.TierSatisfaction[PowerTier.Research], Is.LessThan(1).And.GreaterThan(0), "research is last, and short");
 
         // More people: life support and control eat the plant, industry goes dark first.
-        _earth.GetDataBlob<ColonyInfoDB>().Population[_species.Id] = 7000;
+        _earth.GetDataBlob<ColonyInfoDB>().Population[_species.Id] = 50_000; // 2,500 kW at 0.05 kW each
         ColonyPowerProcessor.RunDay(_earth);
         Assert.That(p.TierSatisfaction[PowerTier.LifeSupport], Is.EqualTo(1));
-        Assert.That(p.TierSatisfaction[PowerTier.Control], Is.EqualTo((920 - 700) / p.DemandByTier[PowerTier.Control]).Within(1e-9));
+        Assert.That(p.TierSatisfaction[PowerTier.Control], Is.EqualTo((delivered - 2500) / p.DemandByTier[PowerTier.Control]).Within(1e-9));
         Assert.That(p.TierSatisfaction[PowerTier.Industry], Is.EqualTo(0));
         Assert.That(p.TierSatisfaction[PowerTier.Mining], Is.EqualTo(0));
         Assert.That(p.TierSatisfaction[PowerTier.Research], Is.EqualTo(0));
@@ -125,7 +127,7 @@ public class ColonyPowerEnforcementTests
     {
         SmallEarthOnPlant(TemplateDesign("thermal-plant", ("Size", 1)));
         var info = _earth.GetDataBlob<ColonyInfoDB>();
-        info.Population[_species.Id] = 20_000; // 2 MW of life support, more than the plant
+        info.Population[_species.Id] = 40_000; // 2 MW of life support at 0.05 kW each, more than the plant
         ColonyPowerProcessor.RunDay(_earth);
 
         Assert.That(Power.TierSatisfaction[PowerTier.LifeSupport], Is.EqualTo(920.0 / 2000).Within(1e-9));
@@ -238,7 +240,7 @@ public class ColonyPowerEnforcementTests
         // A methalox turbine alongside: when the thermal plant's fuel gives out mid-day,
         // the turbine covers the rest of the demand.
         SetStock("hydrocarbons", 3000);
-        _earth.AddComponent(TemplateDesign("oxidiser-turbine", ("Size", 2)));
+        _earth.AddComponent(TemplateDesign("oxidiser-turbine", ("Size", 5)));
         double hydrocarbons = Stock("hydrocarbons");
         Assert.That(hydrocarbons, Is.GreaterThan(0).And.LessThan(6234), "less than a day at full load");
         ColonyPowerProcessor.RunDay(_earth);
@@ -332,7 +334,7 @@ public class ColonyPowerEnforcementTests
         // lines' working draw, so check the lab line and the sum rather than a fixed delta.
         var line = Power.Consumers.Single(c => c.DesignId == "default-design-research-lab");
         Assert.That(line.Count, Is.EqualTo(1));
-        Assert.That(line.Draw_kW, Is.EqualTo(250).Within(1e-6));
+        Assert.That(line.Draw_kW, Is.EqualTo(0.2 * 3000).Within(1e-6), "the idle 3 MW lab left");
         Assert.That(Power.Demand_kW, Is.EqualTo(Power.Consumers.Sum(c => c.Draw_kW)).Within(1e-6));
     }
 
@@ -369,7 +371,7 @@ public class ColonyPowerEnforcementTests
         labs[0].HealthPercent = 0.5f;
         ColonyPowerProcessor.Recalc(_earth);
         var line = Power.Consumers.Single(c => c.DesignId == "default-design-research-lab");
-        Assert.That(line.Draw_kW, Is.EqualTo(250 * 1.5).Within(1e-3));
+        Assert.That(line.Draw_kW, Is.EqualTo(0.2 * 3000 * 1.5).Within(1e-3), "two idle 3 MW labs, one at half health");
         Assert.That(line.Count, Is.EqualTo(2));
     }
 

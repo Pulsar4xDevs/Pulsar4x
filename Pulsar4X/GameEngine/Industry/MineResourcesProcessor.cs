@@ -94,6 +94,10 @@ namespace Pulsar4X.Industry
 
                 MiningHelper.Deplete(mineralDeposit, unitsMinedThisTick);
             }
+
+            // The stores filled up or a deposit ran out (or the reverse): refresh the mines' draw,
+            // but only when their idle/working state flipped.
+            Pulsar4X.Energy.ColonyPowerProcessor.RefreshIfIdleStateChanged(colonyEntity);
         }
 
         /// <summary>

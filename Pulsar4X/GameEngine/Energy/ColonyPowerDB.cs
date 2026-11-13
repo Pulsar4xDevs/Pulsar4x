@@ -74,6 +74,14 @@ namespace Pulsar4X.Energy
         [JsonProperty]
         public DateTime LastRecalc { get; internal set; }
 
+        /// <summary>
+        /// Idle/working state of the colony's mines, labs and construction offices at the last recalc
+        /// (<see cref="ColonyPowerProcessor.IdleStateKey"/>), so a daily pass only refreshes demand
+        /// when one flipped. Not saved: an empty key after a load just costs one recalc.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        internal string IdleStateKey { get; set; } = "";
+
         /// <summary>Average generation over the last daily pass, kW (before grid loss).</summary>
         [JsonProperty]
         public double Dispatched_kW { get; internal set; }
@@ -171,6 +179,7 @@ namespace Pulsar4X.Energy
             TierSatisfaction = new Dictionary<PowerTier, double>(db.TierSatisfaction);
             FuelAtFull_kgPerDay = new Dictionary<string, double>(db.FuelAtFull_kgPerDay);
             LastRecalc = db.LastRecalc;
+            IdleStateKey = db.IdleStateKey;
             Dispatched_kW = db.Dispatched_kW;
             FuelBurnt_kgLastDay = new Dictionary<string, double>(db.FuelBurnt_kgLastDay);
             FuelBurnDebt_kg = new Dictionary<string, double>(db.FuelBurnDebt_kg);

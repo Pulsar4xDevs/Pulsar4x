@@ -22,8 +22,12 @@ namespace Pulsar4X.Energy
     /// </summary>
     public static class ColonyPowerProcessor
     {
-        /// <summary>Life support every colonist pays, kW per person, on any world.</summary>
-        public const double LifeSupportBase_kWPerColonist = 0.1;
+        /// <summary>
+        /// Life support every colonist pays, kW per person, on any world: the survival half of a
+        /// household's electricity (refrigeration, water, minimum heating, cooling and lighting).
+        /// World-average household use is about 0.1 kW per person; the discretionary half is not modelled.
+        /// </summary>
+        public const double LifeSupportBase_kWPerColonist = 0.05;
 
         /// <summary>
         /// Extra life support per colonist per point of the species' colony cost on this body
@@ -58,7 +62,154 @@ namespace Pulsar4X.Energy
         /// </summary>
         public const double IndustryIdleShare = 0.1;
 
+        /// <summary>
+        /// Share of its nameplate a research lab draws with no project (empty tech queue or no
+        /// funding). Labs keep much more running than an idle factory: fume-hood and once-through
+        /// ventilation, cold storage, instruments and servers stay on, so the top of the 10-20 % band.
+        /// </summary>
+        public const double ResearchIdleShare = 0.2;
+
+        /// <summary>
+        /// Share of its nameplate a mine draws with nothing it can mine and store: no deposit of any
+        /// mineral it extracts left on the body, or no room in the colony's stores for any of them.
+        /// Dewatering, ventilation and site lighting stay on.
+        /// </summary>
+        public const double MiningIdleShare = 0.1;
+
+        /// <summary>Share of its nameplate a construction office draws with an empty queue.</summary>
+        public const double ConstructionIdleShare = 0.1;
+
         public const string ScrappingLineId = "scrapping";
+
+        /// <summary>
+        /// Refreshes demand when a facility's idle/working state (mines, labs, construction offices)
+        /// differs from what the last <see cref="Recalc"/> used, e.g. after the stores filled up or
+        /// a deposit ran out. Cheap when nothing flipped: no recalc.
+        /// </summary>
+        public static void RefreshIfIdleStateChanged(Entity? colonyEntity)
+        {
+            if (colonyEntity == null || !colonyEntity.IsValid || colonyEntity.Manager == null
+                || !colonyEntity.TryGetDataBlob<ColonyPowerDB>(out var power))
+                return;
+            if (IdleStateKey(colonyEntity) != power.IdleStateKey)
+                Recalc(colonyEntity);
+        }
+
+        /// <summary>
+        /// Instant refresh for a lab's project or funding change: the lab's colony
+        /// (<see cref="Pulsar4X.Technology.ResearcherDB.LocationId"/>) is recalculated.
+        /// </summary>
+        public static void RefreshLab(Entity? labEntity, bool onlyIfIdleStateChanged = false)
+        {
+            if (labEntity?.Manager == null
+                || !labEntity.TryGetDataBlob<Pulsar4X.Technology.ResearcherDB>(out var researcher)
+                || !labEntity.Manager.TryGetEntityById(researcher.LocationId, out var colony))
+                return;
+            if (onlyIfIdleStateChanged)
+                RefreshIfIdleStateChanged(colony);
+            else
+                RefreshDemand(colony);
+        }
+
+        /// <summary>
+        /// Idle share of one facility, or null when it is working (or has no idle state).
+        /// Production lines are handled by <see cref="ProductionDraw_kW"/>.
+        /// </summary>
+        internal static double? IdleShare(Entity colonyEntity, ComponentDesign design, ComponentInstance facility)
+        {
+            if (design.TryGetAttribute<Pulsar4X.Technology.ResearchPointsAtbDB>(out _))
+                return LabWorking(colonyEntity, facility) ? null : ResearchIdleShare;
+            if (design.TryGetAttribute<Pulsar4X.Industry.MineResourcesAtbDB>(out var mine))
+                return MineWorking(colonyEntity, mine) ? null : MiningIdleShare;
+            if (design.TryGetAttribute<Pulsar4X.Industry.ConstructionAtb>(out var construction))
+                return ConstructionWorking(colonyEntity, construction) ? null : ConstructionIdleShare;
+            return null;
+        }
+
+        /// <summary>A lab works while its tech queue has a project and it is funded.</summary>
+        internal static bool LabWorking(Entity colonyEntity, ComponentInstance lab)
+        {
+            if (colonyEntity.Manager == null
+                || !colonyEntity.Manager.TryGetEntityById(lab.SpawnedEntityId, out var labEntity)
+                || !labEntity.TryGetDataBlob<Pulsar4X.Technology.ResearcherDB>(out var researcher))
+                return false;
+            return researcher.TechQueue.Count > 0 && researcher.FundingLevel > 0;
+        }
+
+        /// <summary>
+        /// A mine works while at least one mineral it extracts is still in the body's deposits and
+        /// the colony has room to store it.
+        /// </summary>
+        internal static bool MineWorking(Entity colonyEntity, Pulsar4X.Industry.MineResourcesAtbDB mine)
+        {
+            if (mine.ResourcesPerEconTick == null
+                || !colonyEntity.TryGetDataBlob<ColonyInfoDB>(out var info)
+                || info.PlanetEntity == null
+                || !info.PlanetEntity.TryGetDataBlob<Pulsar4X.Industry.MineralsDB>(out var minerals)
+                || !colonyEntity.TryGetDataBlob<CargoStorageDB>(out var storage)
+                || colonyEntity.Manager?.Game == null
+                || !colonyEntity.Manager.Game.Factions.TryGetValue(colonyEntity.FactionOwnerID, out var faction)
+                || !faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
+                return false;
+            foreach (var (mineralId, rate) in mine.ResourcesPerEconTick)
+            {
+                if (rate <= 0 || factionInfo.Data.CargoGoods.GetAny(mineralId) is not Pulsar4X.Industry.Mineral mineral)
+                    continue;
+                if (!minerals.Minerals.TryGetValue(mineral.ID, out var deposit)
+                    || deposit.Amount.Actual <= 0 || deposit.Accessibility <= 0)
+                    continue;
+                if (!storage.TypeStores.ContainsKey(mineral.CargoTypeID) || storage.GetFreeUnitSpace(mineral) <= 0)
+                    continue;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>A construction office works while the queue its points feed has a job.</summary>
+        internal static bool ConstructionWorking(Entity colonyEntity, Pulsar4X.Industry.ConstructionAtb construction)
+        {
+            if (!colonyEntity.TryGetDataBlob<Pulsar4X.Industry.LocalConstructionDB>(out var queue))
+                return false;
+            bool installs = construction.ConstructionPoints.TryGetValue("installation", out int i) && i != 0;
+            bool refits = construction.ConstructionPoints.TryGetValue("refit", out int r) && r != 0;
+            return (installs && queue.BuildQueue.Count > 0) || (refits && queue.RefitQueue.Count > 0);
+        }
+
+        /// <summary>Every idle-capable facility's working (1) or idle (0) state, per enabled instance.</summary>
+        internal static string IdleStateKey(Entity colonyEntity)
+        {
+            if (!colonyEntity.TryGetDataBlob<ComponentInstancesDB>(out var instancesDB))
+                return "";
+            var sb = new System.Text.StringBuilder();
+            foreach (var (design, _) in instancesDB.DesignsAndComponentCount)
+            {
+                if (!design.TryGetAttribute<PowerConsumerAtb>(out var consumer) || !(consumer.Draw_kW > 0))
+                    continue;
+                bool any = false;
+                foreach (var c in instancesDB.GetComponentsBySpecificDesign(design.UniqueID))
+                {
+                    if (!c.IsEnabled)
+                        continue;
+                    var share = IdleShare(colonyEntity, design, c);
+                    if (!any)
+                    {
+                        if (share == null && !IdleCapable(design))
+                            break;
+                        sb.Append(design.UniqueID).Append(':');
+                        any = true;
+                    }
+                    sb.Append(share == null ? '1' : '0');
+                }
+                if (any)
+                    sb.Append(';');
+            }
+            return sb.ToString();
+        }
+
+        static bool IdleCapable(ComponentDesign design)
+            => design.TryGetAttribute<Pulsar4X.Technology.ResearchPointsAtbDB>(out _)
+            || design.TryGetAttribute<Pulsar4X.Industry.MineResourcesAtbDB>(out _)
+            || design.TryGetAttribute<Pulsar4X.Industry.ConstructionAtb>(out _);
 
         /// <summary>
         /// Instant demand refresh, for a change to what the colony is building (an industry job
@@ -145,9 +296,7 @@ namespace Pulsar4X.Energy
                 if (design.TryGetAttribute<PowerConsumerAtb>(out var consumer) && consumer.Draw_kW > 0)
                 {
                     double nameplate = consumer.Draw_kW * health;
-                    double draw = industry != null
-                        ? enabled.Sum(c => ProductionDraw_kW(industry, c, consumer.Draw_kW, infraEfficiency, energyFactor))
-                        : nameplate;
+                    double draw = enabled.Sum(c => FacilityDraw_kW(colonyEntity, industry, design, c, consumer.Draw_kW, infraEfficiency, energyFactor));
                     consumers.Add(new ColonyPowerConsumer(design.UniqueID, design.Name, consumer.Tier, count, draw, nameplate));
                     Add(demandByTier, consumer.Tier, draw);
                 }
@@ -225,7 +374,22 @@ namespace Pulsar4X.Energy
             power.Demand_kW = demandByTier.Values.Sum();
             // Between daily passes, satisfaction follows what the plants can give now.
             power.TierSatisfaction = ShareByTier(power.Delivered_kW, demandByTier);
+            power.IdleStateKey = IdleStateKey(colonyEntity);
             power.LastRecalc = colonyEntity.StarSysDateTime;
+        }
+
+        /// <summary>
+        /// One facility's draw, kW: a production line's from <see cref="ProductionDraw_kW"/>; a lab,
+        /// mine or construction office its nameplate working and <see cref="IdleShare"/> of it idle;
+        /// anything else its nameplate. Damaged facilities draw in proportion to their health.
+        /// </summary>
+        internal static double FacilityDraw_kW(Entity colonyEntity, Pulsar4X.Industry.IndustryAbilityDB? industry,
+            ComponentDesign design, ComponentInstance facility, double nameplatePerUnit_kW, double infraEfficiency, double energyFactor)
+        {
+            if (industry != null && industry.ProductionLines.ContainsKey(facility.UniqueID))
+                return ProductionDraw_kW(industry, facility, nameplatePerUnit_kW, infraEfficiency, energyFactor);
+            double nameplate = nameplatePerUnit_kW * Math.Clamp((double)facility.HealthPercent, 0, 1);
+            return IdleShare(colonyEntity, design, facility) is double share ? nameplate * share : nameplate;
         }
 
         /// <summary>

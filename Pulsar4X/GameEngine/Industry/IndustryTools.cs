@@ -238,6 +238,9 @@ namespace Pulsar4X.Industry
             int queuedAfter = siteQueue != null ? siteQueue.BuildQueue.Count : 0;
             if (queuedAfter != queuedBefore || Pulsar4X.Energy.ColonyPowerProcessor.ProductionDrawKey(industryDB) != drawBefore)
                 Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(industryEntity);
+            else
+                // Jobs took minerals out of the stores: a mine that was full may resume.
+                Pulsar4X.Energy.ColonyPowerProcessor.RefreshIfIdleStateChanged(industryEntity);
         }
 
         /// <summary>
