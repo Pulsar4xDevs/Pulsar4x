@@ -249,6 +249,41 @@ public class BuildEnergyTests
     }
 
     [Test]
+    public void IndustrialEnergyEfficiency_ScalesEveryPointsKwh_AndTheDraw()
+    {
+        // Phase 4: level 4 is x0.8 on every point's kWh, for jobs already queued too.
+        for (int i = 0; i < 4; i++)
+            Info.Data.IncrementTechLevel(EnergyTech.IndustrialEnergyEfficiency);
+        Assert.That(EnergyTech.IndustrialEnergyFactor(_earth), Is.EqualTo(0.8).Within(1e-12));
+
+        var (_, line) = Refinery();
+        var steel = QueueOnly(line, "stainless-steel", 50);
+        StockRecipe("stainless-steel", 50);
+        ColonyPowerProcessor.Recalc(_earth);
+        double infra = Pulsar4X.Industry.InfrastructureProcessor.GetEfficiency(_earth);
+        var refinery = Power.Consumers.Single(c => c.DesignId == "default-design-refinery-site");
+        Assert.That(refinery.Draw_kW, Is.EqualTo(Math.Min(refinery.Nameplate_kW,
+            0.1 * refinery.Nameplate_kW + line.IndustryTypeRates["refining"] * infra * 3.5 * 0.8 / 24)).Within(1e-9));
+        long left = steel.ProductionPointsLeft;
+        new IndustryProcessor().ProcessEntity(_earth, 0);
+        double points = steel.NumberCompleted * (double)steel.ProductionPointsCost + (steel.ProductionPointsCost - steel.ProductionPointsLeft) - (steel.ProductionPointsCost - left);
+        Assert.That(points, Is.GreaterThan(0));
+        Assert.That(steel.EnergyPerPoint, Is.EqualTo(3.5), "the job keeps the list kWh per point");
+        Assert.That(steel.EnergyUsed, Is.EqualTo(points * 3.5 * 0.8).Within(1e-6));
+
+        // A hungry recipe still runs at the nameplate, but gets 1/0.8 more points out of it.
+        var hydrolox = QueueOnly(line, "hydrolox", 5);
+        StockRecipe("hydrolox", 5);
+        ColonyPowerProcessor.Recalc(_earth);
+        refinery = Power.Consumers.Single(c => c.DesignId == "default-design-refinery-site");
+        double budget = refinery.Nameplate_kW * 24;
+        new IndustryProcessor().ProcessEntity(_earth, 0);
+        double hPoints = hydrolox.ProductionPointsCost - hydrolox.ProductionPointsLeft;
+        Assert.That(hPoints, Is.EqualTo(Math.Floor(budget / (39.1 * 0.8) + 1e-9)));
+        Assert.That(hydrolox.EnergyUsed, Is.EqualTo(hPoints * 39.1 * 0.8).Within(1e-6));
+    }
+
+    [Test]
     public void IdleLines_DrawATenth_AndJobsFromOldSavesBuildFree()
     {
         var industry = _earth.GetDataBlob<IndustryAbilityDB>();

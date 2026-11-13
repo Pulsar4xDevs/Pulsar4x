@@ -501,7 +501,10 @@ namespace Pulsar4X.Components
 
                 case "TechData":
                     techID = (string)args.EvaluateParameters()[0];
-                    var tech = _factionDataStore.Techs[techID];
+                    // A tech the faction has not opened yet counts at level 0.
+                    var tech = _factionDataStore.Techs.TryGetValue(techID, out var openTech) && openTech != null
+                        ? openTech
+                        : _factionDataStore.LockedTechs[techID];
                     args.Result = tech.TechDataFormula();
                     break;
 
