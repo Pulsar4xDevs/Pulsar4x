@@ -546,9 +546,11 @@ public class MarketHistoryTests
             .Single(c => c.GetDataBlob<NameDB>().DefaultName == CeresStart.DepotFactionName);
         var depotBook = depot.GetDataBlob<LogiBaseDB>();
         DateTime depotStart = depot.StarSysDateTime.Date;
-        AssertPriorSeed(depotBook, "iron", depotStart, 1.50m);
-        AssertPriorSeed(depotBook, "methalox", depotStart, 3.00m);
-        AssertPriorSeed(depotBook, "water", depotStart, 1.00m);
+        // Anchors follow the energy-priced seeds: iron mid of bid and ask, methalox and water ask only.
+        decimal ironMid = Math.Round((EnergyPriceOracle.IronBid(game) + EnergyPriceOracle.IronAsk(game)) / 2, 2, MidpointRounding.AwayFromZero);
+        AssertPriorSeed(depotBook, "iron", depotStart, ironMid);
+        AssertPriorSeed(depotBook, "methalox", depotStart, EnergyPriceOracle.FuelAsk(game));
+        AssertPriorSeed(depotBook, "water", depotStart, EnergyPriceOracle.WaterAsk(game));
 
         bool foundZeroOnEarthOrLuna = false;
         foreach (var office in sol.GetAllEntitiesWithDataBlob<LogiBaseDB>())

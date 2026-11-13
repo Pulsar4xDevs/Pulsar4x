@@ -7,6 +7,7 @@
       "Description": "Crude Oil, Coal and Natural Gas",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 0.3,
       "VolumePerUnit": 0.0011111,
       "Abundance": {
         "Terrestrial": 0.2,
@@ -28,6 +29,7 @@
       "Description": "A naturally-occurring mineral in large deposits.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 0.388,
       "VolumePerUnit": 0.0001270648,
       "Abundance": {
         "Terrestrial": 0.8,
@@ -50,6 +52,7 @@
       "CargoTypeID": "general-storage",
       "PartMatUniqueID": "aluminum",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 0.3,
       "VolumePerUnit": 0.0003703703,
       "Abundance": {
         "Terrestrial": 0.7,
@@ -71,6 +74,7 @@
       "Description": "A naturally-occurring mineral in large deposits.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 3.0,
       "VolumePerUnit": 0.0001118568,
       "Abundance": {
         "Terrestrial": 0.0001,
@@ -92,6 +96,7 @@
       "Description": "A naturally-occurring mineral in large deposits.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 1.5,
       "VolumePerUnit": 0.0002202643,
       "Abundance": {
         "Terrestrial": 0.005,
@@ -113,6 +118,7 @@
       "Description": "A naturally-occurring mineral in large deposits.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 5.0,
       "VolumePerUnit": 0.0018691589,
       "Abundance": {
         "Terrestrial": 0.00002,
@@ -134,6 +140,7 @@
       "Description": "A naturally-occurring mineral in large deposits.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 0.8,
       "VolumePerUnit": 0.0001388889,
       "Abundance": {
         "Terrestrial": 0.001,
@@ -155,6 +162,7 @@
       "Description": "Un-refined Fissionable Metals",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 10.0,
       "VolumePerUnit": 0.0000531915,
       "Abundance": {
         "Terrestrial": 0.001,
@@ -176,6 +184,7 @@
       "Description": "A naturally-occurring mineral in large deposits.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 0.1,
       "VolumePerUnit": 0.000429185,
       "Abundance": {
         "Terrestrial": 0.9,
@@ -197,6 +206,7 @@
       "Description": "A naturally-occurring mineral in large deposits.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 0.5,
       "VolumePerUnit": 0.00044,
       "Abundance": {
         "Terrestrial": 0.01,
@@ -218,6 +228,7 @@
       "Description": "A naturally-occurring mineral.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 20.0,
       "VolumePerUnit": 0.000052,
       "Abundance": {
         "Terrestrial": 0.00001,
@@ -239,6 +250,7 @@
       "Description": "A naturally-occurring mineral in large deposits.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 0.45,
       "VolumePerUnit": 0.000112259,
       "Abundance": {
         "Terrestrial": 0.008,
@@ -260,6 +272,7 @@
       "Description": "Essential for life, found in various forms across celestial bodies.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 0.188,
       "VolumePerUnit": 0.001,
       "Abundance": {
         "Terrestrial": 0.5,
@@ -281,6 +294,7 @@
       "Description": "A group of metals crucial for advanced technology and industry.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
+      "ExtractionEnergy": 15.0,
       "VolumePerUnit": 0.00018,
       "Abundance": {
         "Terrestrial": 0.0002,
@@ -302,6 +316,7 @@
       "Description": "Loose, heterogeneous material covering solid rock on celestial bodies.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0, 
+      "ExtractionEnergy": 0.02,
       "VolumePerUnit": 0.0004, 
       "Abundance": {
         "Terrestrial": 0.9,

@@ -39,8 +39,8 @@ public class CeresDirectOfferTests
         var ironGood = depotFaction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny("iron");
         long stock = MarketBook.Stock(depot, ironGood);
         Assert.That(MarketBook.TryGet(depot, "iron", out var iron), Is.True);
-        Assert.That(iron.Ask, Is.EqualTo(CeresStart.IronAsk));
-        Assert.That(iron.Bid, Is.EqualTo(CeresStart.IronBid));
+        Assert.That(iron.Ask, Is.EqualTo(EnergyPriceOracle.IronAsk(game)));
+        Assert.That(iron.Bid, Is.EqualTo(EnergyPriceOracle.IronBid(game)));
         Assert.That(iron.SellQuantity, Is.EqualTo(stock));
         Assert.That(iron.BuyQuantity, Is.EqualTo(0));
 
@@ -87,7 +87,7 @@ public class CeresDirectOfferTests
         AgentProcessor.RunAgentNow(ship);
 
         long units = IronUnits + CopperUnits;
-        decimal cost = units * CeresStart.LotPrice;
+        decimal cost = units * EnergyPriceOracle.LotPrice(game);
         Assert.That(MarketBook.Stock(ship, iron), Is.EqualTo(0));
         Assert.That(MarketBook.Stock(ship, copper), Is.EqualTo(0));
         Assert.That(MarketBook.Stock(depot, depotIron), Is.EqualTo(depotIronBefore + IronUnits));
@@ -144,7 +144,7 @@ public class CeresDirectOfferTests
         AgentProcessor.RunAgentNow(ship);
 
         long units = IronUnits + CopperUnits;
-        decimal cost = units * CeresStart.LotPrice;
+        decimal cost = units * EnergyPriceOracle.LotPrice(game);
         Assert.That(ship.GetDataBlob<GoalsDB>().ActiveGoal!.DestEntityId, Is.EqualTo(luna.Id));
         Assert.That(MarketBook.Stock(ship, iron), Is.EqualTo(0));
         Assert.That(MarketBook.Stock(ship, copper), Is.EqualTo(0));

@@ -11,6 +11,12 @@ namespace Pulsar4X.Blueprints
         public long MassPerUnit { get; set; }
         public double VolumePerUnit { get; set; }
         public Dictionary<BodyType, double> Abundance { get; set; }
+
+        /// <summary>
+        /// Extraction energy, kWh per kg, for its embodied energy. Optional: null is
+        /// EmbodiedEnergy.DefaultExtraction_kWhPerKg (0.05, the mine's draw per kg).
+        /// </summary>
+        public double? ExtractionEnergy { get; set; }
         
         public string PartMatUniqueID { get; set; }
     }

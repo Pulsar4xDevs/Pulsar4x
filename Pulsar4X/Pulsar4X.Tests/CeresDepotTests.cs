@@ -87,18 +87,18 @@ public class CeresDepotTests
             .Single(c => c.GetDataBlob<NameDB>().DefaultName == "Luna Concord");
 
         var depotPolicy = depot.GetDataBlob<ColonyMarketPolicyDB>();
-        Assert.That(depotPolicy.Rows["methalox"].Ask, Is.EqualTo(CeresStart.FuelAsk));
+        Assert.That(depotPolicy.Rows["methalox"].Ask, Is.EqualTo(EnergyPriceOracle.FuelAsk(game)));
         Assert.That(depotPolicy.Rows["iron"].Bid, Is.LessThan(depotPolicy.Rows["iron"].Ask));
-        Assert.That(depotPolicy.Rows["iron"].Ask, Is.EqualTo(CeresStart.IronAsk));
-        Assert.That(depotPolicy.Rows["iron"].Bid, Is.EqualTo(CeresStart.IronBid));
-        Assert.That(depotPolicy.Rows["water"].Ask, Is.EqualTo(CeresStart.WaterAsk));
+        Assert.That(depotPolicy.Rows["iron"].Ask, Is.EqualTo(EnergyPriceOracle.IronAsk(game)));
+        Assert.That(depotPolicy.Rows["iron"].Bid, Is.EqualTo(EnergyPriceOracle.IronBid(game)));
+        Assert.That(depotPolicy.Rows["water"].Ask, Is.EqualTo(EnergyPriceOracle.WaterAsk(game)));
 
         Assert.That(MarketBook.TryGet(depot, "methalox", out var fuel), Is.True);
-        Assert.That(fuel.Ask, Is.EqualTo(CeresStart.FuelAsk));
+        Assert.That(fuel.Ask, Is.EqualTo(EnergyPriceOracle.FuelAsk(game)));
         Assert.That(fuel.SellQuantity, Is.GreaterThan(0));
         Assert.That(MarketBook.TryGet(depot, "iron", out var iron), Is.True);
-        Assert.That(iron.Ask, Is.EqualTo(CeresStart.IronAsk));
-        Assert.That(iron.Bid, Is.EqualTo(CeresStart.IronBid));
+        Assert.That(iron.Ask, Is.EqualTo(EnergyPriceOracle.IronAsk(game)));
+        Assert.That(iron.Bid, Is.EqualTo(EnergyPriceOracle.IronBid(game)));
         Assert.That(iron.SellQuantity, Is.GreaterThan(0));
 
         var lunaIron = luna.GetDataBlob<ColonyMarketPolicyDB>().Rows["iron"];

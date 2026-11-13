@@ -298,9 +298,16 @@ namespace Pulsar4X.Colonies
             var policy = colony.TryGetDataBlob<ColonyMarketPolicyDB>(out var existing)
                 ? existing
                 : new ColonyMarketPolicyDB();
-            policy.Rows["methalox"] = Priced("methalox", CeresStart.FuelAsk, 0);
-            policy.Rows["iron"] = Priced("iron", CeresStart.IronAsk, CeresStart.IronBid);
-            policy.Rows["water"] = Priced("water", CeresStart.WaterAsk, 0);
+            // Energy economy phase 5: priced from each good's embodied energy.
+            var game = colony.Manager?.Game;
+            if (game == null
+                || !game.Factions.TryGetValue(colony.FactionOwnerID, out var faction)
+                || !faction.TryGetDataBlob<FactionInfoDB>(out var info))
+                return;
+            var data = info.Data;
+            policy.Rows[CeresStart.FuelId] = Priced(CeresStart.FuelId, CeresStart.FuelAsk(game, data), 0);
+            policy.Rows[CeresStart.IronId] = Priced(CeresStart.IronId, CeresStart.IronAsk(game, data), CeresStart.IronBid(game, data));
+            policy.Rows[CeresStart.WaterId] = Priced(CeresStart.WaterId, CeresStart.WaterAsk(game, data), 0);
             colony.SetDataBlob(policy);
         }
 
