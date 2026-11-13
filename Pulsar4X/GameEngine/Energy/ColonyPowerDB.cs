@@ -97,6 +97,32 @@ namespace Pulsar4X.Energy
         [JsonProperty]
         public HashSet<string> FuelOut { get; internal set; } = new();
 
+        /// <summary>Days of history kept. The oldest sample drops when a new day is added.</summary>
+        public const int HistoryDays = 90;
+
+        /// <summary>
+        /// One sample per daily pass, oldest first, at most <see cref="HistoryDays"/>.
+        /// Saved with the blob. A save from before this field loads with an empty history.
+        /// </summary>
+        [JsonProperty]
+        public List<ColonyPowerSample> History { get; internal set; } = new();
+
+        /// <summary>
+        /// Adds a day's sample. A second pass on the same day replaces that day's sample,
+        /// so the history stays one sample per day.
+        /// </summary>
+        internal void RecordDay(ColonyPowerSample sample)
+        {
+            // A save that wrote "History": null loads as null. Treat it as empty.
+            History ??= new List<ColonyPowerSample>();
+            if (History.Count > 0 && History[History.Count - 1].Date.Date == sample.Date.Date)
+                History[History.Count - 1] = sample;
+            else
+                History.Add(sample);
+            if (History.Count > HistoryDays)
+                History.RemoveRange(0, History.Count - HistoryDays);
+        }
+
         public ColonyPowerDB() { }
 
         public ColonyPowerDB(ColonyPowerDB db)
@@ -120,10 +146,17 @@ namespace Pulsar4X.Energy
             LastDispatch = db.LastDispatch;
             Short = db.Short;
             FuelOut = new HashSet<string>(db.FuelOut);
+            History = db.History == null ? new List<ColonyPowerSample>() : new List<ColonyPowerSample>(db.History);
         }
 
         public override object Clone() => new ColonyPowerDB(this);
     }
+
+    /// <summary>
+    /// One day of the grid: nameplate demand, generation available before grid loss, power actually
+    /// delivered after grid loss, and energy held in grid batteries. Power in kW, storage in kJ.
+    /// </summary>
+    public sealed record ColonyPowerSample(DateTime Date, double Demand_kW, double Generation_kW, double Delivered_kW, double Stored_kJ);
 
     /// <summary>
     /// One consumer line: a design (or life support) and its total draw. A production facility draws

@@ -513,7 +513,12 @@ namespace Pulsar4X.Engine.Api
                 .ToList();
             return new ColonyPowerView(power.EnergyTypeID, power.Demand_kW, power.Generation_kW, power.Delivered_kW,
                 power.GridEfficiency, power.StoreMax_kJ, power.LifeSupport_kW, power.LifeSupportColonists,
-                consumers, plants, tiers, fuel, power.Dispatched_kW);
+                consumers, plants, tiers, fuel, power.Dispatched_kW)
+            {
+                History = (power.History ?? new List<Pulsar4X.Energy.ColonyPowerSample>())
+                    .Select(h => new ColonyPowerSampleView(h.Date, h.Demand_kW, h.Generation_kW, h.Delivered_kW, h.Stored_kJ))
+                    .ToList(),
+            };
         }
 
         private static bool HasInstalledInfrastructure(Entity colony)
