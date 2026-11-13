@@ -47,6 +47,8 @@ namespace Pulsar4X.Client
         public ComponentTemplateBlueprint? Template { get; private set;}
         // Set when the server rejects a submitted design; shown so a failed save isn't silent.
         private string? _saveError;
+        // The saved design currently loaded into the sliders; used to color improved/worsened stats.
+        private ComponentDesignSummary? _baselineDesign;
         private static byte[] _nameInputBuffer = new byte[128];
         private static Tech[]? _techSDs;
         private static string[]? _techNames;
@@ -86,6 +88,7 @@ namespace Pulsar4X.Client
 
             Template = blueprint;
             _saveError = null;
+            _baselineDesign = null;
             _componentDesigner = new ComponentDesigner(blueprint, info.Data, techs);
 
             NoTemplateState = NoTemplateState.Created;
@@ -99,6 +102,7 @@ namespace Pulsar4X.Client
 
             Template = blueprint;
             _saveError = null;
+            _baselineDesign = component;
             _componentDesigner = new ComponentDesigner(blueprint, info.Data, techs);
 
             NoTemplateState = NoTemplateState.Created;
@@ -191,6 +195,7 @@ namespace Pulsar4X.Client
                         NoTemplateState = NoTemplateState.Created;
                         Template = null;
                         _componentDesigner = null;
+                        _baselineDesign = null;
                         _nameInputBuffer = new byte[128];
                     }
                 }
@@ -326,14 +331,24 @@ namespace Pulsar4X.Client
                     ImGui.SameLine();
                     ImGui.Text("Mass");
                     ImGui.TableNextColumn();
-                    ImGui.Text(Stringify.Mass(_componentDesigner.MassValue));
+                    RenderValueWithDelta(
+                        ComponentUpgradeHelper.FormatValue(_componentDesigner.MassValue, "kg"),
+                        _baselineDesign?.MassPerUnit,
+                        _componentDesigner.MassValue,
+                        "kg",
+                        "Mass");
 
                     ImGui.TableNextColumn();
                     ImGui.Text("");
                     ImGui.SameLine();
                     ImGui.Text("Volume");
                     ImGui.TableNextColumn();
-                    ImGui.Text(Stringify.Volume(_componentDesigner.VolumeM3Value));
+                    RenderValueWithDelta(
+                        ComponentUpgradeHelper.FormatValue(_componentDesigner.VolumeM3Value, "m^3"),
+                        _baselineDesign?.VolumePerUnit,
+                        _componentDesigner.VolumeM3Value,
+                        "m^3",
+                        "Volume");
 
                     if(_componentDesigner.CrewReqValue > 0)
                     {
@@ -342,7 +357,12 @@ namespace Pulsar4X.Client
                         ImGui.SameLine();
                         ImGui.Text("Crew Required");
                         ImGui.TableNextColumn();
-                        ImGui.Text(_componentDesigner.CrewReqValue.ToString(Styles.IntFormat));
+                        RenderValueWithDelta(
+                            _componentDesigner.CrewReqValue.ToString(Styles.IntFormat),
+                            _baselineDesign?.CrewRequired,
+                            _componentDesigner.CrewReqValue,
+                            null,
+                            "Crew Required");
                     }
 
                     foreach (ComponentDesignProperty attribute in _componentDesigner.ComponentDesignProperties.Values) //For each property of the comp type
@@ -357,73 +377,26 @@ namespace Pulsar4X.Client
                                 ImGui.SetTooltip(attribute.Description);
                             ImGui.TableNextColumn();
 
-                            if(attribute.Unit.IsNotNullOrEmpty())
+                            double value;
+                            try { value = attribute.Value; }
+                            catch { continue; }
+
+                            string displayStr = attribute.Unit.IsNotNullOrEmpty()
+                                ? ComponentUpgradeHelper.FormatValue(value, attribute.Unit)
+                                : value.ToString(Styles.IntFormat);
+
+                            string fallbackTooltip = attribute.Unit.IsNotNullOrEmpty()
+                                ? value.ToString(Styles.DecimalFormat) + " " + attribute.Unit
+                                : value.ToString(Styles.DecimalFormat);
+
+                            double? oldVal = null;
+                            if (_baselineDesign?.DisplayStats != null
+                                && _baselineDesign.DisplayStats.TryGetValue(attribute.Name, out var baselineStat))
                             {
-                                var value = attribute.Value;
-                                var strUnit = attribute.Unit;
-                                var displayStr = "";
-
-                                switch (strUnit)
-                                {
-                                    case "KJ":
-                                    {
-                                        displayStr = Stringify.Energy(value);
-                                        break;
-                                    }
-                                    case "KW":
-                                    {
-                                        displayStr = Stringify.Power(value);
-                                        break;
-                                    }
-                                    case "m^2":
-                                    {
-                                        displayStr = Stringify.Area(value);
-                                        break;
-                                    }
-                                    case "nm":
-                                    {
-                                        displayStr = Stringify.DistanceSmall(value);
-                                        break;
-                                    }
-                                    case "kg":
-                                    {
-                                        displayStr = Stringify.Mass(value);
-                                        break;
-                                    }
-                                    case "m":
-                                    {
-                                        displayStr = Stringify.Distance(value);
-                                        break;
-                                    }
-                                    case "N":
-                                    {
-                                        displayStr = Stringify.Thrust(value);
-                                        break;
-                                    }
-                                    case "m/s":
-                                        displayStr = Stringify.Velocity(value);
-                                        break;
-                                    case "s":
-                                        displayStr = TimeSpan.FromSeconds(value).ToString() ;
-                                        break;
-                                    default:
-                                    {
-                                        displayStr = attribute.Value.ToString(Styles.DecimalFormat) + " " + attribute.Unit;
-                                        break;
-                                    }
-                                }
-
-                                ImGui.TextUnformatted(displayStr);
-                                if(ImGui.IsItemHovered())
-                                    ImGui.SetTooltip(@attribute.Value.ToString(Styles.IntFormat) + " " + attribute.Unit.Replace("%", "%%"));
-
+                                oldVal = baselineStat;
                             }
-                            else
-                            {
-                                ImGui.Text(attribute.Value.ToString(Styles.IntFormat));
-                                if(ImGui.IsItemHovered())
-                                    ImGui.SetTooltip(attribute.Value.ToString(Styles.DecimalFormat));
-                            }
+
+                            RenderValueWithDelta(displayStr, oldVal, value, attribute.Unit, attribute.Name, fallbackTooltip);
                         }
                         else if(attribute.IsEnabled && attribute.GuiHint == GuiHint.GuiFuelTypeSelection)
                         {
@@ -455,21 +428,36 @@ namespace Pulsar4X.Client
                     ImGui.SameLine();
                     ImGui.Text("Cost");
                     ImGui.TableNextColumn();
-                    ImGui.Text(_componentDesigner.CreditCostValue.ToString(Styles.IntFormat));
+                    RenderValueWithDelta(
+                        _componentDesigner.CreditCostValue.ToString(Styles.IntFormat),
+                        _baselineDesign?.CreditCost,
+                        _componentDesigner.CreditCostValue,
+                        null,
+                        "Cost");
 
                     ImGui.TableNextColumn();
                     ImGui.Text("");
                     ImGui.SameLine();
                     ImGui.Text("Research");
                     ImGui.TableNextColumn();
-                    ImGui.Text(_componentDesigner.ResearchCostValue.ToString(Styles.IntFormat) + " RP");
+                    RenderValueWithDelta(
+                        _componentDesigner.ResearchCostValue.ToString(Styles.IntFormat) + " RP",
+                        _baselineDesign?.ResearchCost,
+                        _componentDesigner.ResearchCostValue,
+                        "RP",
+                        "Research");
 
                     ImGui.TableNextColumn();
                     ImGui.Text("");
                     ImGui.SameLine();
                     ImGui.Text("Production");
                     ImGui.TableNextColumn();
-                    ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString(Styles.IntFormat) + " IP");
+                    RenderValueWithDelta(
+                        _componentDesigner.IndustryPointCostsValue.ToString(Styles.IntFormat) + " IP",
+                        _baselineDesign?.IndustryPoints,
+                        _componentDesigner.IndustryPointCostsValue,
+                        "IP",
+                        "Production");
 
                     ImGui.TableNextColumn();
                     ImGui.Text("");
@@ -478,7 +466,12 @@ namespace Pulsar4X.Client
                     if (ImGui.IsItemHovered())
                         ImGui.SetTooltip("Drawn from the colony grid while the job runs, not stockpiled.\nNot refunded when the item is scrapped.");
                     ImGui.TableNextColumn();
-                    ImGui.Text(Stringify.EnergyKwh(_componentDesigner.EnergyCostValue));
+                    RenderValueWithDelta(
+                        Stringify.EnergyKwh(_componentDesigner.EnergyCostValue),
+                        _baselineDesign?.EnergyCost,
+                        _componentDesigner.EnergyCostValue,
+                        "kWh",
+                        "Build energy");
 
                     ImGui.EndTable();
                 }
@@ -503,11 +496,76 @@ namespace Pulsar4X.Client
                         ImGui.SameLine();
                         ImGui.Text(resource.Name);
                         ImGui.TableNextColumn();
-                        ImGui.Text(kvp.Value.ToString(Styles.IntFormat));
+
+                        double? oldAmount = null;
+                        if (_baselineDesign?.ResourceCosts != null)
+                        {
+                            foreach (var line in _baselineDesign.ResourceCosts)
+                            {
+                                if (line.CargoId == kvp.Key)
+                                {
+                                    oldAmount = line.Amount;
+                                    break;
+                                }
+                            }
+                        }
+
+                        RenderValueWithDelta(
+                            kvp.Value.ToString(Styles.IntFormat),
+                            oldAmount,
+                            kvp.Value,
+                            null,
+                            resource.Name,
+                            isResourceCost: true);
                     }
                     ImGui.EndTable();
                 }
             }
+        }
+
+        /// <summary>
+        /// Colors a statistic when it has improved (green) or worsened (amber) versus the loaded
+        /// baseline design, and shows a signed delta tooltip. Neutral changes keep the default
+        /// color but still note the delta. Tooltips always use TextUnformatted so '%' units are safe.
+        /// </summary>
+        private void RenderValueWithDelta(
+            string display,
+            double? oldValue,
+            double newValue,
+            string? unit,
+            string statName,
+            string? fallbackTooltip = null,
+            bool isResourceCost = false)
+        {
+            var change = StatChange.Unchanged;
+            if (oldValue is double old)
+                change = ComponentUpgradeHelper.ClassifyChange(old, newValue, ComponentUpgradeHelper.ClassifyStat(statName, isResourceCost));
+
+            if (change == StatChange.Better)
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.GoodColor);
+            else if (change == StatChange.Worse)
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.MediocreColor);
+
+            ImGui.TextUnformatted(display);
+
+            if (ImGui.IsItemHovered())
+            {
+                string? tip = null;
+                if (change != StatChange.Unchanged && oldValue is double baseline)
+                    tip = ComponentUpgradeHelper.FormatSignedDelta(newValue - baseline, unit);
+                else if (!string.IsNullOrEmpty(fallbackTooltip))
+                    tip = fallbackTooltip;
+
+                if (!string.IsNullOrEmpty(tip))
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.TextUnformatted(tip);
+                    ImGui.EndTooltip();
+                }
+            }
+
+            if (change == StatChange.Better || change == StatChange.Worse)
+                ImGui.PopStyleColor();
         }
 
         private void GuiHintText(ComponentDesignProperty property)

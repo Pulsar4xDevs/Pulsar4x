@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
+using Pulsar4X.Api;
 
 namespace Pulsar4X.Client.Interface.Widgets;
 
 /// <summary>
 /// A compact Category / Type / search filter for design pickers (component templates, industry jobs).
-/// State is explicit so Wave 2 can keep one instance per list. Filter() has no ImGui dependency.
+/// State is explicit so each list (templates, refinery, factory, shipyard) can keep its own instance.
+/// Filter() has no ImGui dependency.
 /// </summary>
 public sealed class DesignFilterWidget
 {
@@ -26,6 +28,42 @@ public sealed class DesignFilterWidget
 
     public bool IsAllCategory => IsAll(SelectedCategory);
     public bool IsAllType => IsAll(SelectedType);
+
+    /// <summary>
+    /// Categories implied by a template or design's mount flags. A design can belong to more than
+    /// one category (e.g. Ship + Colony when it can mount as both a ship component and a planetary
+    /// installation).
+    /// </summary>
+    public static IReadOnlyList<string> MountCategories(ComponentMountFlags flags)
+    {
+        var categories = new List<string>(4);
+        if ((flags & (ComponentMountFlags.ShipComponent | ComponentMountFlags.Fighter)) != 0)
+            categories.Add("Ship");
+        if ((flags & ComponentMountFlags.PlanetInstallation) != 0)
+            categories.Add("Colony");
+        if ((flags & ComponentMountFlags.Missile) != 0)
+            categories.Add("Missile");
+        if (categories.Count == 0 && (flags & ComponentMountFlags.ShipCargo) != 0)
+            categories.Add("Cargo");
+        return categories;
+    }
+
+    /// <summary>Categories for an industry-line constructible (ship design, material, or component).</summary>
+    public static IReadOnlyList<string> ConstructibleCategories(ConstructibleItemView item)
+    {
+        if (item.IsShipDesign)
+            return new[] { "Ship Design" };
+        if (item.IsMaterial)
+            return new[] { "Material" };
+        return MountCategories(item.MountFlags);
+    }
+
+    public static DesignFilterEntry DescribeTemplate(ComponentTemplateSummary template)
+        => new(template.Name, MountCategories(template.MountFlags), template.ComponentType, template.Description);
+
+    public static DesignFilterEntry DescribeConstructible(ConstructibleItemView item)
+        => new(item.Name, ConstructibleCategories(item), item.ComponentType,
+            string.IsNullOrEmpty(item.CrewWarning) ? null : item.CrewWarning);
 
     /// <summary>
     /// If the current items no longer contain the selected category or type, reset that
@@ -64,7 +102,7 @@ public sealed class DesignFilterWidget
         foreach (var item in items)
         {
             var entry = describe(item);
-            if (!IsAll(SelectedCategory) && !EqualsIgnoreCase(entry.Category, SelectedCategory))
+            if (!IsAll(SelectedCategory) && !entry.HasCategory(SelectedCategory))
                 continue;
             if (!IsAll(SelectedType) && !EqualsIgnoreCase(entry.Type, SelectedType))
                 continue;
@@ -179,8 +217,11 @@ public sealed class DesignFilterWidget
             foreach (var item in items)
             {
                 var entry = describe(item);
-                if (!string.IsNullOrWhiteSpace(entry.Category))
-                    categories.Add(entry.Category);
+                foreach (var category in entry.Categories)
+                {
+                    if (!string.IsNullOrWhiteSpace(category))
+                        categories.Add(category);
+                }
                 if (!string.IsNullOrWhiteSpace(entry.Type))
                     types.Add(entry.Type);
             }
@@ -199,16 +240,79 @@ public sealed class DesignFilterWidget
 }
 
 /// <summary>One list item's searchable fields for <see cref="DesignFilterWidget"/>.</summary>
-public readonly record struct DesignFilterEntry(string Name, string Category, string Type, string? Extra = null)
+public readonly struct DesignFilterEntry
 {
+    public string Name { get; }
+    public IReadOnlyList<string> Categories { get; }
+    public string Type { get; }
+    public string? Extra { get; }
+
+    /// <summary>First category, or empty when the item has none. Kept for callers of the single-category constructor.</summary>
+    public string Category => Categories.Count == 0 ? "" : Categories[0];
+
+    /// <summary>Single-category constructor; a null or whitespace category becomes an empty list.</summary>
+    public DesignFilterEntry(string Name, string Category, string Type, string? Extra = null)
+        : this(Name, string.IsNullOrWhiteSpace(Category) ? Array.Empty<string>() : new[] { Category }, Type, Extra)
+    {
+    }
+
+    public DesignFilterEntry(string Name, IReadOnlyList<string>? Categories, string Type, string? Extra = null)
+    {
+        this.Name = Name ?? "";
+        this.Type = Type ?? "";
+        this.Extra = Extra;
+        this.Categories = SanitizeCategories(Categories);
+    }
+
+    public bool HasCategory(string? selected)
+    {
+        if (string.IsNullOrEmpty(selected))
+            return false;
+        foreach (var category in Categories)
+        {
+            if (string.Equals(category, selected, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
     public bool MatchesSearch(string search)
     {
         if (string.IsNullOrEmpty(search))
             return true;
-        return Contains(Name, search)
-            || Contains(Category, search)
-            || Contains(Type, search)
-            || Contains(Extra, search);
+        if (Contains(Name, search) || Contains(Type, search) || Contains(Extra, search))
+            return true;
+        foreach (var category in Categories)
+        {
+            if (Contains(category, search))
+                return true;
+        }
+        return false;
+    }
+
+    static IReadOnlyList<string> SanitizeCategories(IReadOnlyList<string>? categories)
+    {
+        if (categories == null || categories.Count == 0)
+            return Array.Empty<string>();
+
+        var cleaned = new List<string>(categories.Count);
+        foreach (var category in categories)
+        {
+            if (string.IsNullOrWhiteSpace(category))
+                continue;
+            bool exists = false;
+            foreach (var already in cleaned)
+            {
+                if (string.Equals(already, category, StringComparison.OrdinalIgnoreCase))
+                {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists)
+                cleaned.Add(category);
+        }
+        return cleaned.Count == 0 ? Array.Empty<string>() : cleaned;
     }
 
     static bool Contains(string? haystack, string needle)

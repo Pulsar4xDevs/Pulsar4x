@@ -28,6 +28,7 @@ namespace Pulsar4X.Client
         private string? _refitAppliedKey;
         private readonly HashSet<int> _refitRemove = new();
         private readonly HashSet<int> _refitMount = new();
+        private readonly Dictionary<string, DesignFilterWidget> _lineFilters = new();
 
         internal ColonyProductionDisplay() { }
 
@@ -369,24 +370,43 @@ namespace Pulsar4X.Client
 
             // Snapshots are sorted by name: an insertion or rename must not silently
             // switch the queued design. If the selected design disappears, require a new pick.
+            // Look the selection up in the full Constructibles list (not the filtered view) so
+            // tightening the filter cannot drop an already-chosen design.
             var selectedDesign = line.Constructibles.FirstOrDefault(d => d.DesignId == _newJobDesignId);
             if (selectedDesign == null)
                 _newJobDesignId = null;
 
+            if (!_lineFilters.TryGetValue(line.Id, out var filter))
+            {
+                filter = new DesignFilterWidget();
+                _lineFilters[line.Id] = filter;
+            }
+
             ImGui.NewLine();
+            filter.Draw("##jobfilter-" + line.Id, line.Constructibles, DesignFilterWidget.DescribeConstructible, out var filtered);
+
             ImGui.Text("Select a design:");
             if (ImGui.BeginCombo("###newjobselection", selectedDesign?.Name ?? "Select a design"))
             {
-                foreach (var item in line.Constructibles)
+                if (filtered.Count == 0)
                 {
-                    if (item.OverSlip)
-                        ImGui.BeginDisabled();
-                    if (ImGui.Selectable(item.Name + "##" + item.DesignId, item.DesignId == _newJobDesignId))
-                        _newJobDesignId = item.DesignId;
-                    if (item.OverSlip && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && item.SlipReason.Length > 0)
-                        ImGui.SetTooltip(item.SlipReason);
-                    if (item.OverSlip)
-                        ImGui.EndDisabled();
+                    ImGui.BeginDisabled();
+                    ImGui.Selectable("No matching designs");
+                    ImGui.EndDisabled();
+                }
+                else
+                {
+                    foreach (var item in filtered)
+                    {
+                        if (item.OverSlip)
+                            ImGui.BeginDisabled();
+                        if (ImGui.Selectable(item.Name + "##" + item.DesignId, item.DesignId == _newJobDesignId))
+                            _newJobDesignId = item.DesignId;
+                        if (item.OverSlip && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && item.SlipReason.Length > 0)
+                            ImGui.SetTooltip(item.SlipReason);
+                        if (item.OverSlip)
+                            ImGui.EndDisabled();
+                    }
                 }
                 ImGui.EndCombo();
             }

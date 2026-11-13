@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Tests;
 
-/// <summary>Filtering logic for the reusable design picker widget (QoL Fix 5 prep). No ImGui.</summary>
+/// <summary>Filtering logic for the reusable design picker widget (QoL Fix 5). No ImGui.</summary>
 [TestFixture]
 public class DesignFilterWidgetTests
 {
@@ -118,5 +119,132 @@ public class DesignFilterWidgetTests
         var empty = Array.Empty<DesignFilterEntry>();
         Assert.That(widget.Filter(empty, Describe), Is.Empty);
         Assert.That(widget.SelectedCategory, Is.EqualTo(DesignFilterWidget.All));
+    }
+
+    [Test]
+    public void MountCategories_MapsFlagsAndAllowsMultipleCategories()
+    {
+        Assert.That(DesignFilterWidget.MountCategories(ComponentMountFlags.ShipComponent),
+            Is.EqualTo(new[] { "Ship" }));
+        Assert.That(DesignFilterWidget.MountCategories(ComponentMountFlags.Fighter),
+            Is.EqualTo(new[] { "Ship" }));
+        Assert.That(DesignFilterWidget.MountCategories(ComponentMountFlags.PlanetInstallation),
+            Is.EqualTo(new[] { "Colony" }));
+        Assert.That(DesignFilterWidget.MountCategories(ComponentMountFlags.Missile),
+            Is.EqualTo(new[] { "Missile" }));
+        Assert.That(DesignFilterWidget.MountCategories(ComponentMountFlags.ShipCargo),
+            Is.EqualTo(new[] { "Cargo" }));
+
+        // Cargo is only used when none of Ship / Colony / Missile matched.
+        Assert.That(
+            DesignFilterWidget.MountCategories(ComponentMountFlags.ShipComponent | ComponentMountFlags.ShipCargo),
+            Is.EqualTo(new[] { "Ship" }));
+
+        Assert.That(
+            DesignFilterWidget.MountCategories(
+                ComponentMountFlags.ShipComponent | ComponentMountFlags.PlanetInstallation),
+            Is.EqualTo(new[] { "Ship", "Colony" }));
+
+        Assert.That(DesignFilterWidget.MountCategories(ComponentMountFlags.None), Is.Empty);
+        Assert.That(DesignFilterWidget.MountCategories(ComponentMountFlags.Pdc), Is.Empty);
+    }
+
+    [Test]
+    public void ConstructibleCategories_UsesShipDesignMaterialOrMountFlags()
+    {
+        var ship = new ConstructibleItemView("s", "Scout", 1, 1, false)
+        {
+            IsShipDesign = true,
+            MountFlags = ComponentMountFlags.ShipComponent,
+            ComponentType = "Ship",
+        };
+        Assert.That(DesignFilterWidget.ConstructibleCategories(ship), Is.EqualTo(new[] { "Ship Design" }));
+
+        var material = new ConstructibleItemView("m", "Steel", 1, 1, false)
+        {
+            IsMaterial = true,
+            ComponentType = "Material",
+        };
+        Assert.That(DesignFilterWidget.ConstructibleCategories(material), Is.EqualTo(new[] { "Material" }));
+
+        var component = new ConstructibleItemView("c", "Passive Sensor", 1, 1, false)
+        {
+            MountFlags = ComponentMountFlags.ShipComponent | ComponentMountFlags.PlanetInstallation,
+            ComponentType = "Sensors",
+        };
+        Assert.That(DesignFilterWidget.ConstructibleCategories(component), Is.EqualTo(new[] { "Ship", "Colony" }));
+    }
+
+    [Test]
+    public void Filter_MultiCategoryItem_MatchesAnySelectedCategoryAndSearch()
+    {
+        var items = new[]
+        {
+            new DesignFilterEntry("Passive Sensor", new[] { "Ship", "Colony" }, "Sensors"),
+            new DesignFilterEntry("Fuel Cargo Hold", new[] { "Ship", "Colony" }, "Storage", "hold"),
+            new DesignFilterEntry("Military Reactor", "Ship", "Power"),
+        };
+
+        var widget = Widget();
+        widget.SelectedCategory = "Colony";
+        Assert.That(Names(widget, items), Is.EqualTo(new[] { "Passive Sensor", "Fuel Cargo Hold" }));
+
+        widget.SelectedCategory = "ship";
+        Assert.That(Names(widget, items), Is.EqualTo(new[] { "Passive Sensor", "Fuel Cargo Hold", "Military Reactor" }));
+
+        widget.SelectedCategory = "Colony";
+        widget.SearchText = "hold";
+        Assert.That(Names(widget, items), Is.EqualTo(new[] { "Fuel Cargo Hold" }));
+    }
+
+    [Test]
+    public void Sanitize_KeepsCategoryPresentOnAMultiCategoryItem()
+    {
+        var items = new[]
+        {
+            new DesignFilterEntry("Passive Sensor", new[] { "Ship", "Colony" }, "Sensors"),
+        };
+        var widget = Widget();
+        widget.SelectedCategory = "Colony";
+        Assert.That(widget.Sanitize(items, Describe), Is.False);
+        Assert.That(widget.SelectedCategory, Is.EqualTo("Colony"));
+
+        widget.SelectedCategory = "Missile";
+        Assert.That(widget.Sanitize(items, Describe), Is.True);
+        Assert.That(widget.SelectedCategory, Is.EqualTo(DesignFilterWidget.All));
+    }
+
+    [Test]
+    public void DescribeHelpers_PopulateNameTypeAndCategories()
+    {
+        var template = new ComponentTemplateSummary("passive-sensor", "Passive Sensor", "Sensors", "A quiet eye")
+        {
+            MountFlags = ComponentMountFlags.ShipComponent | ComponentMountFlags.PlanetInstallation,
+        };
+        var described = DesignFilterWidget.DescribeTemplate(template);
+        Assert.That(described.Name, Is.EqualTo("Passive Sensor"));
+        Assert.That(described.Type, Is.EqualTo("Sensors"));
+        Assert.That(described.Categories, Is.EqualTo(new[] { "Ship", "Colony" }));
+        Assert.That(described.MatchesSearch("quiet"), Is.True);
+
+        var item = new ConstructibleItemView("scout", "Scout", 10, 1, false)
+        {
+            IsShipDesign = true,
+            ComponentType = "Ship",
+            CrewWarning = "10 berths for 28 crew",
+        };
+        var constructible = DesignFilterWidget.DescribeConstructible(item);
+        Assert.That(constructible.Categories, Is.EqualTo(new[] { "Ship Design" }));
+        Assert.That(constructible.Type, Is.EqualTo("Ship"));
+        Assert.That(constructible.MatchesSearch("berths"), Is.True);
+    }
+
+    [Test]
+    public void SingleCategoryConstructor_TreatsWhitespaceAsEmptyList()
+    {
+        var entry = new DesignFilterEntry("Nameless", "  ", "Type");
+        Assert.That(entry.Categories, Is.Empty);
+        Assert.That(entry.Category, Is.EqualTo(""));
+        Assert.That(entry.HasCategory("Ship"), Is.False);
     }
 }

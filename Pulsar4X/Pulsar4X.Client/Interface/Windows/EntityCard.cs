@@ -977,6 +977,13 @@ namespace Pulsar4X.Client
                 DisplayHelpers.PrintRow("Spectral Type", star.SpectralType + star.SpectralSubDivision);
                 DisplayHelpers.PrintRow("Class", star.SpectralClass);
                 DisplayHelpers.PrintRow("Temperature", star.SurfaceTemperatureC.ToString("#,##0") + " °C");
+                if (star.PeakWavelengthNm > 0)
+                {
+                    DisplayHelpers.PrintRow(
+                        "Ideal Solar Wavelength",
+                        star.PeakWavelengthNm.ToString("0") + " nm",
+                        "Peak emission wavelength (Wien's law). Tune solar panels near this wavelength for best output.");
+                }
                 DisplayHelpers.PrintRow("Luminosity", star.Luminosity + " " + star.LuminosityClass + " (" + star.LuminosityClassDescription + ")");
                 DisplayHelpers.PrintRow("Age", Stringify.Quantity(star.AgeYears));
             }
