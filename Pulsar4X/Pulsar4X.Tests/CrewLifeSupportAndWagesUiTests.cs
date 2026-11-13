@@ -97,6 +97,69 @@ public class CrewLifeSupportAndWagesUiTests
         Assert.That(LifeSupportRows.LoadScale_kW(ShipPower(false)), Is.EqualTo(5));
     }
 
+    // Prospector I at game start, as the engine projects it: 17 kW life support served in full, no warp,
+    // 55 W of sensors waiting while ~18 kW charges the batteries.
+    static ShipPowerView StartShip()
+        => new ShipPowerView(36.934, 0, 0, 3_000_000, true) with
+        {
+            AuxDemand_kW = 0.055,
+            AuxServed_kW = 0,
+            Charging_kW = 17.941,
+            HasLifeSupport = true,
+            LifeSupportCrew = 17,
+            LifeSupportPerCrew_kW = 1,
+            LifeSupport_kW = 17,
+            LifeSupportServed_kW = 17,
+            LifeSupportServedFraction = 1,
+            LoadGroups = new[] { LifeGroup(17, 1), WarpGroup(0) },
+        };
+
+    [Test]
+    public void ShipPowerTotals_IncludeLifeSupport_LikeTheRows()
+    {
+        var p = StartShip();
+        Assert.That(p.Delivered_kW, Is.EqualTo(0), "the Api's delivered leaves life support out");
+        Assert.That(ShipPowerTotals.Demand_kW(p), Is.EqualTo(17.055).Within(1e-9));
+        Assert.That(ShipPowerTotals.Served_kW(p), Is.EqualTo(17).Within(1e-9));
+        Assert.That(ShipPowerTotals.Share(p), Is.EqualTo(17 / 17.055).Within(1e-9));
+        Assert.That(ShipPowerTotals.Demand_kW(p), Is.EqualTo(LifeSupportRows.LoadScale_kW(p)), "summary demand = the rows' total");
+        Assert.That(p.LoadsWaitOnCharge, Is.True, "the sensors still wait on the charge, so the header stays 'charging batteries'");
+        Assert.That(ShipPowerTotals.GenerationShare(p), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void ShipPowerTotals_WarpSharesTheMustRunSupply_AndLifeSupportCountsOnce()
+    {
+        // 10 kW warp + 10 kW life support on 10 kW: the engine serves both at 50%.
+        var p = new ShipPowerView(10, 10, 0, 0, true) with
+        {
+            HasLifeSupport = true, LifeSupport_kW = 10, LifeSupportServed_kW = 5, LifeSupportServedFraction = 0.5,
+            LoadGroups = new[] { LifeGroup(10, 0.5), WarpGroup(10) },
+        };
+        Assert.That(ShipPowerTotals.OtherServed_kW(p), Is.EqualTo(5));
+        Assert.That(ShipPowerTotals.Served_kW(p), Is.EqualTo(10));
+        Assert.That(ShipPowerTotals.Share(p), Is.EqualTo(0.5));
+        Assert.That(ShipPowerTotals.GenerationShare(p), Is.EqualTo(0.5));
+        // Read from its parts, not from Delivered_kW (min(warp, generation) = 10 here), so life support is not counted twice.
+        Assert.That(p.Delivered_kW, Is.EqualTo(10));
+
+        // Served never runs above demand, whatever the served figure says.
+        var over = p with { LifeSupportServed_kW = 50 };
+        Assert.That(ShipPowerTotals.LifeSupportServed_kW(over), Is.EqualTo(10));
+        Assert.That(ShipPowerTotals.Served_kW(over), Is.LessThanOrEqualTo(ShipPowerTotals.Demand_kW(over)));
+    }
+
+    [Test]
+    public void ShipPowerTotals_WithoutLifeSupport_MatchTheApi()
+    {
+        var p = new ShipPowerView(6, 8, 0, 0, true) with { AuxDemand_kW = 2, AuxServed_kW = 0 };
+        Assert.That(ShipPowerTotals.Demand_kW(p), Is.EqualTo(p.TotalDemand_kW));
+        Assert.That(ShipPowerTotals.Served_kW(p), Is.EqualTo(p.Delivered_kW));
+        Assert.That(ShipPowerTotals.Share(p), Is.EqualTo(p.SupplyShare));
+        Assert.That(ShipPowerTotals.GenerationShare(p), Is.EqualTo(p.Share));
+        Assert.That(ShipPowerTotals.Share(new ShipPowerView(0, 0, 0, 0, false)), Is.EqualTo(1));
+    }
+
     [Test]
     public void ColonyLifeSupportLine_CarriesTheRateLabel()
     {

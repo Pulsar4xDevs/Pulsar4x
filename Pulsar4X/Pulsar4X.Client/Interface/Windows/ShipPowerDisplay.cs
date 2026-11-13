@@ -54,7 +54,8 @@ namespace Pulsar4X.Client
             // batteries, and the engine serves sensors and other loads once they are full.
             if (power.LoadsWaitOnCharge)
                 return ("charging batteries", PowerRing.PartialColour);
-            return (PowerRing.WordsFor(power.SupplyShare), PowerRing.ColourFor(power.SupplyShare));
+            double share = ShipPowerTotals.Share(power);
+            return (PowerRing.WordsFor(share), PowerRing.ColourFor(share));
         }
 
         /// <summary>
@@ -91,14 +92,17 @@ namespace Pulsar4X.Client
             ImGui.Columns(2, "ShipPowerSummaryCols", false);
             ImGui.SetColumnWidth(0, 96f);
             DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW), tooltipTwo: "What the sources can give now (an RTG after decay, a reactor or fuel cell only with fuel)");
-            DisplayHelpers.PrintRow("Demand", Stringify.Power(power.TotalDemand_kW),
-                tooltipTwo: $"Warp {Stringify.Power(power.Demand_kW)}, other loads {Stringify.Power(power.AuxDemand_kW)}");
-            DisplayHelpers.PrintRow("Available", Stringify.Power(power.Delivered_kW), tooltipTwo: "After grid loss: what reaches the loads (warp up to generation, plus the other loads served from spare output). Charging is not counted.");
+            // Life support is in every total here, as in the Loads rows (the Api's demand and delivered leave it out).
+            double lifeSupport = LifeSupportRows.Demand_kW(power);
+            DisplayHelpers.PrintRow("Demand", Stringify.Power(ShipPowerTotals.Demand_kW(power)),
+                tooltipTwo: $"Life support {Stringify.Power(lifeSupport)}, warp {Stringify.Power(power.Demand_kW)}, other loads {Stringify.Power(power.AuxDemand_kW)}");
+            DisplayHelpers.PrintRow("Available", Stringify.Power(ShipPowerTotals.Served_kW(power)),
+                tooltipTwo: $"What reaches the loads: life support {Stringify.Power(ShipPowerTotals.LifeSupportServed_kW(power))}, warp and other loads {Stringify.Power(ShipPowerTotals.OtherServed_kW(power))}. Charging is not counted.");
             if (Math.Abs(power.Battery_kW) > 1e-6)
                 DisplayHelpers.PrintRow(power.Battery_kW > 0 ? "To batteries" : "Discharging", Stringify.Power(Math.Abs(power.Battery_kW)),
                     tooltipTwo: power.Battery_kW > 0 ? "Output over warp demand while the batteries have room" : "The batteries cover what generation does not");
             // PrintRow draws with ImGui.Text, which reads printf formats: escape the percent signs.
-            DisplayHelpers.PrintRow("Share", $"{power.SupplyShare * 100:0}%%", tooltipTwo: "Available over demand");
+            DisplayHelpers.PrintRow("Share", $"{ShipPowerTotals.Share(power) * 100:0}%%", tooltipTwo: "Available over demand, life support included");
             if (power.StoreMax_kJ > 0)
             {
                 double fraction = Math.Clamp(power.StoredFraction, 0, 1);
@@ -106,8 +110,8 @@ namespace Pulsar4X.Client
                     tooltipTwo: $"{Stringify.Energy(Math.Max(0, power.Stored_kJ))} of {Stringify.Energy(power.StoreMax_kJ)}, as of the plant's last energy step", separator: false);
             }
             ImGui.Columns(1);
-            if (power.Demand_kW > power.Generation_kW && power.Stored_kJ > 0)
-                ImGui.TextWrapped("Generation is below warp demand. The batteries cover the gap while they last.");
+            if (ShipPowerTotals.MustRun_kW(power) > power.Generation_kW && power.Stored_kJ > 0)
+                ImGui.TextWrapped("Generation is below the must-run demand (warp and life support). The batteries cover the gap while they last.");
         }
 
         /// <summary>A stacked bar of what each source can give now, grey for decayed or idle capacity, then one row per source.</summary>

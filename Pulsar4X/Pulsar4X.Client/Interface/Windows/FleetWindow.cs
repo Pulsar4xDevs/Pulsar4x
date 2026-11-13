@@ -637,8 +637,8 @@ namespace Pulsar4X.Client
                     }
                     ImGui.TextDisabled("Available");
                     if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("After grid loss: what reaches the loads, over all demand");
-                    ImGui.TextUnformatted($"{Stringify.Power(shipPower.Delivered_kW)} / {Stringify.Power(shipPower.TotalDemand_kW)}");
+                        ImGui.SetTooltip("After grid loss: what reaches the loads, over all demand (life support included)");
+                    ImGui.TextUnformatted($"{Stringify.Power(ShipPowerTotals.Served_kW(shipPower))} / {Stringify.Power(ShipPowerTotals.Demand_kW(shipPower))}");
                     ImGui.PopTextWrapPos();
                     ImGui.EndGroup();
                 }

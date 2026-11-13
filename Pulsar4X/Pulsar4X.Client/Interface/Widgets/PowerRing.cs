@@ -47,13 +47,14 @@ public static class PowerRing
     public static void Draw(string id, ShipPowerView power, Vector4 accentColor, float radius = 22f, float ringThickness = 4f)
     {
         bool charging = power.LoadsWaitOnCharge;
-        double share = power.SupplyShare;
+        double share = ShipPowerTotals.Share(power);
+        double demand = ShipPowerTotals.Demand_kW(power);
         var cursor = ImGui.GetCursorScreenPos();
         var center = new Vector2(cursor.X + radius + ringThickness, cursor.Y + radius + ringThickness);
         string tooltip = charging
             ? $"{Stringify.Power(power.Charging_kW)} is charging the batteries; {Stringify.Power(power.AuxDemand_kW)} of other loads wait until they are full"
-            : power.TotalDemand_kW > 0
-                ? $"Delivered {Stringify.Power(power.Delivered_kW)} of {Stringify.Power(power.TotalDemand_kW)} demand, {WordsFor(share)}"
+            : demand > 0
+                ? $"Delivered {Stringify.Power(ShipPowerTotals.Served_kW(power))} of {Stringify.Power(demand)} demand, {WordsFor(share)}"
                 : power.HasPlant ? "Nothing draws power" : "No power plant. Nothing draws power";
         RadialIndicator.Draw(ImGui.GetWindowDrawList(), center, radius, ringThickness, (float)share,
             "POWER", $"{share * 100:0}%", false, accentColor, charging ? PartialColour : ColourFor(share), tooltip);
@@ -65,10 +66,13 @@ public static class PowerRing
     {
         if (!power.HasPlant)
             return "No power plant. Nothing draws power";
-        if (power.Demand_kW <= 0)
+        // Must-run demand: warp plus life support (the Api's Demand_kW leaves life support out).
+        double mustRun = ShipPowerTotals.MustRun_kW(power);
+        double share = ShipPowerTotals.GenerationShare(power);
+        if (mustRun <= 0)
             return $"Generation {Stringify.Power(power.Generation_kW)}. Nothing draws power";
-        string text = $"Generation {Stringify.Power(power.Generation_kW)} of {Stringify.Power(power.Demand_kW)} demand, {WordsFor(power.Share)}";
-        if (power.Share < 1 && power.Stored_kJ > 0)
+        string text = $"Generation {Stringify.Power(power.Generation_kW)} of {Stringify.Power(mustRun)} demand, {WordsFor(share)}";
+        if (share < 1 && power.Stored_kJ > 0)
             text += $"\nBatteries cover the gap while they last ({Stringify.Energy(power.Stored_kJ)} stored)";
         return text;
     }

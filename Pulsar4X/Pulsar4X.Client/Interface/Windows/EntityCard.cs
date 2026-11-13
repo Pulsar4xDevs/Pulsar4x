@@ -848,7 +848,7 @@ namespace Pulsar4X.Client
                 radius, ringThickness, 0f, "SHIELD", "N/A", true);
             if (power != null)
                 PowerRing.DrawAt(drawList, new Vector2(x0 + indicatorWidth * 5f, centerY), radius, ringThickness,
-                    power.Share, _accentColor, PowerRing.TooltipFor(power));
+                    ShipPowerTotals.GenerationShare(power), _accentColor, PowerRing.TooltipFor(power));
 
             ImGui.InvisibleButton("##statusRow", new Vector2(availWidth, radius * 2f + 24f));
         }
