@@ -257,7 +257,19 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
 
     /// <summary>Owning faction only. True when a colony-level chair exists, even if nobody sits it.</summary>
     public bool HasAdministrativePost { get; init; }
+
+    /// <summary>
+    /// Owning faction only. Trained crew waiting in this colony's pool, people. Academy crew courses graduate
+    /// into it; launches draw from it; scrapped ships return to it. 0 until crew plan phase 2.
+    /// </summary>
+    public long CrewPool { get; init; }
+
+    /// <summary>Owning faction only. <see cref="CrewPool"/> by species. Empty until crew plan phase 2.</summary>
+    public IReadOnlyList<CrewPoolRow> CrewPoolBySpecies { get; init; } = Array.Empty<CrewPoolRow>();
 }
+
+/// <summary>Trained crew of one species in a colony pool, people.</summary>
+public sealed record CrewPoolRow(string SpeciesName, long Trained);
 
 /// <summary>Flagship or colony bridge span, as shown to the owning faction.</summary>
 public static class CommandSpanLabels
@@ -468,6 +480,46 @@ public sealed record ShipView(
     /// (crew per copy x copies). The rows add up to CrewRequired.
     /// </summary>
     public IReadOnlyList<ShipCrewRow> CrewByComponent { get; init; } = Array.Empty<ShipCrewRow>();
+
+    /// <summary>Owner only. Crew the ship can house: quarters plus bridge berths, people. 0 until crew plan phase 1.</summary>
+    public int CrewBerths { get; init; }
+
+    /// <summary>Owner only. Where <see cref="CrewBerths"/> come from, one row per design that gives berths. Empty until phase 1.</summary>
+    public IReadOnlyList<ShipBerthRow> BerthsByComponent { get; init; } = Array.Empty<ShipBerthRow>();
+
+    /// <summary>
+    /// Owner only. True once the engine tracks the people aboard this ship (crew plan phase 3). While false,
+    /// <see cref="CrewAboard"/>, <see cref="CrewFactor"/>, <see cref="EngineCrewFactor"/> and <see cref="UnderCrewed"/> are defaults
+    /// and should not be shown.
+    /// </summary>
+    public bool CrewTracked { get; init; }
+
+    /// <summary>Owner only. People aboard, at most min(required, berths). 0 until crew plan phase 3.</summary>
+    public int CrewAboard { get; init; }
+
+    /// <summary>
+    /// Owner only. F = min(1, aboard / required), 0..1; 1 when the ship needs no crew. Work parts run at F² (surveyors,
+    /// miners, shuttlebay rate, construction bay). 1 until crew plan phase 3.
+    /// </summary>
+    public double CrewFactor { get; init; } = 1;
+
+    /// <summary>
+    /// Owner only. Share of the engines' own crew requirement that is filled, 0..1 (crew fill the engines first);
+    /// engine power is scaled by it. 1 until crew plan phase 3.
+    /// </summary>
+    public double EngineCrewFactor { get; init; } = 1;
+
+    /// <summary>Owner only. True when aboard is below required. False until crew plan phase 3.</summary>
+    public bool UnderCrewed { get; init; }
+
+    /// <summary>Owner only. One line on what the crew shortfall limits, e.g. "12/28 crew: engines 60 %, surveyors 18 %". Empty when fully crewed.</summary>
+    public string CrewNote { get; init; } = "";
+}
+
+/// <summary>Berths from one component design on a ship: berths per copy x copies.</summary>
+public sealed record ShipBerthRow(string DesignId, string Name, int Count, int BerthsPerCopy)
+{
+    public int Berths => BerthsPerCopy * Count;
 }
 
 /// <summary>Newtonian propulsion stats; ΔV values are pre-computed server-side.</summary>
@@ -817,6 +869,8 @@ public enum AcademyCourseKind
     Idle,
     Class,
     Command,
+    /// <summary>A crew (ratings) course: graduates go into the colony's crew pool. Crew plan phase 2.</summary>
+    Crew,
 }
 
 /// <summary>
@@ -852,7 +906,26 @@ public sealed record NavalAcademyClassView(
     int TrainingPeriodMonths,
     int SeatsInUse,
     int MeanCap,
-    IReadOnlyList<AcademyCohortView> Cohorts);
+    IReadOnlyList<AcademyCohortView> Cohorts)
+{
+    /// <summary>Crew-course seats, separate from the officer seats in <see cref="ClassSize"/>, people. 0 until crew plan phase 2.</summary>
+    public int CrewSeats { get; init; }
+
+    /// <summary>Crew-course seats taken by running crew cohorts, people. 0 until crew plan phase 2.</summary>
+    public int CrewSeatsInUse { get; init; }
+
+    /// <summary>Length of a crew course, months. 0 until crew plan phase 2.</summary>
+    public int CrewCourseLengthMonths { get; init; }
+
+    /// <summary>Date the next crew cohort graduates into the pool. Null when no crew course runs.</summary>
+    public DateTime? NextCrewGraduation { get; init; }
+
+    /// <summary>People in the cohort graduating at <see cref="NextCrewGraduation"/>. 0 when none.</summary>
+    public int NextCrewGraduationCount { get; init; }
+
+    /// <summary>Why a crew course cannot start now (e.g. no free crew seats, too few colonists). Empty when it can.</summary>
+    public string CrewCourseReason { get; init; } = "Crew courses are not available yet.";
+}
 
 /// <summary>One run. A class enrolls <see cref="Count"/> recruits. A command course is one officer.</summary>
 public sealed record AcademyCohortView(
@@ -882,6 +955,18 @@ public sealed record LaunchPadStateView(long MaxTonnage, bool Free)
 
     /// <summary>Why the ship on this pad has not launched, e.g. "Not enough RP-1". Empty when it can go or the pad is free.</summary>
     public string Reason { get; init; } = "";
+
+    /// <summary>Crew the design on this pad needs, people. 0 when the pad is free.</summary>
+    public int CrewRequired { get; init; }
+
+    /// <summary>Crew the ship will take aboard at launch: min(required, berths, colony pool), people. 0 until crew plan phase 3.</summary>
+    public int CrewToBoard { get; init; }
+
+    /// <summary>True when the ship would launch with fewer crew than it needs. False until crew plan phase 3.</summary>
+    public bool CrewShort { get; init; }
+
+    /// <summary>The launch-short warning, e.g. "Launches with 12/28 crew; train crew at an academy". Empty when not short.</summary>
+    public string CrewWarning { get; init; } = "";
 }
 
 public sealed record ProductionLineView(
@@ -1001,6 +1086,15 @@ public sealed record IndustryJobView(
 {
     /// <summary>What the job still needs (names pre-resolved), for status tooltips.</summary>
     public IReadOnlyList<ResourceRequirement> RemainingRequirements { get; init; } = Array.Empty<ResourceRequirement>();
+
+    /// <summary>Crew one unit of a ship design job needs, people. 0 for anything that is not a ship.</summary>
+    public int CrewRequired { get; init; }
+
+    /// <summary>
+    /// Ship jobs: warning that the colony's crew pool will not fill this ship when it launches, e.g.
+    /// "Pool 5 of 28 crew; the ship will launch under-crewed". Empty when not short. Empty until crew plan phase 3.
+    /// </summary>
+    public string CrewWarning { get; init; } = "";
 }
 
 public sealed record ResourceRequirement(string Name, long Amount);
@@ -1028,6 +1122,15 @@ public sealed record ConstructibleItemView(
 
     /// <summary>Why the design is disabled in the new-job combo. Empty when it fits the slip.</summary>
     public string SlipReason { get; init; } = "";
+
+    /// <summary>Crew one unit needs, people (a ship design's sum, or a component's own crew).</summary>
+    public int CrewRequired { get; init; }
+
+    /// <summary>Ship designs: crew the design can house, people. 0 for components, and 0 until crew plan phase 1.</summary>
+    public int CrewBerths { get; init; }
+
+    /// <summary>Ship designs: the designer's crew warning, e.g. "10 berths for 28 crew". Empty when none.</summary>
+    public string CrewWarning { get; init; } = "";
 }
 
 public sealed record IndustryCostItem(
@@ -1227,6 +1330,10 @@ public sealed record ComponentDesignSummary(string Id, string Name, string Templ
     /// <summary>The gravity and pressure window of an infrastructure design. Null for every other design.</summary>
     public InfrastructureWindow? Infrastructure { get; init; }
     public IReadOnlyList<DesignerInput> PropertyValues { get; init; } = Array.Empty<DesignerInput>();
+    /// <summary>Crew one copy needs, people.</summary>
+    public int CrewRequired { get; init; }
+    /// <summary>Berths one copy gives (crew quarters, bridge console space), people. 0 until crew plan phase 1.</summary>
+    public int Berths { get; init; }
 }
 
 /// <summary>One player-set designer property value: numeric for sliders/ranges/enums, a string id
@@ -1351,6 +1458,21 @@ public sealed record ShipSnapshot(
 
     /// <summary>Systems a haul or trade from this ship may use.</summary>
     public IReadOnlyList<string> LogisticsSystemIds { get; init; } = Array.Empty<string>();
+
+    /// <summary>Crew the design needs, people.</summary>
+    public int CrewRequired { get; init; }
+
+    /// <summary>Crew the design can house, people. 0 until crew plan phase 1.</summary>
+    public int CrewBerths { get; init; }
+
+    /// <summary>People aboard. 0 until crew plan phase 3 (see <see cref="CrewTracked"/>).</summary>
+    public int CrewAboard { get; init; }
+
+    /// <summary>True once the engine tracks crew aboard (phase 3). While false, ignore CrewAboard and UnderCrewed.</summary>
+    public bool CrewTracked { get; init; }
+
+    /// <summary>For the fleet tree badge: aboard below required. False until crew plan phase 3.</summary>
+    public bool UnderCrewed { get; init; }
 }
 
 /// <summary>

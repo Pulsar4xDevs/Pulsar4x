@@ -802,6 +802,14 @@ namespace Pulsar4X.Engine.Api
                 .Select(g => new ShipCrewRow(g.Key, g.First().design.Name, g.Sum(c => c.count), g.First().design.CrewReq))
                 .OrderByDescending(r => r.Crew).ThenBy(r => r.Name)
                 .ToList();
+            var parts = shipInfo.Design?.Components ?? new List<(ComponentDesign design, int count)>();
+            var berthRows = parts
+                .Where(c => c.design != null && c.count > 0)
+                .GroupBy(c => c.design.UniqueID)
+                .Select(g => new ShipBerthRow(g.Key, g.First().design.Name, g.Sum(c => c.count), ShipCrew.Berths(new[] { (g.First().design, 1) })))
+                .Where(r => r.BerthsPerCopy > 0)
+                .OrderByDescending(r => r.Berths).ThenBy(r => r.Name)
+                .ToList();
 
             return new ShipView(
                 shipInfo.Design?.Name ?? "",
@@ -813,6 +821,9 @@ namespace Pulsar4X.Engine.Api
                 armorThickness)
             {
                 CrewByComponent = crewRows,
+                // Crew plan: berths are real from phase 1 (ShipCrew.Berths); aboard and the factors from phase 3.
+                CrewBerths = ShipCrew.Berths(parts),
+                BerthsByComponent = berthRows,
             };
         }
 
@@ -1562,6 +1573,8 @@ namespace Pulsar4X.Engine.Api
                         percent, job.ProductionPointsLeft)
                     {
                         RemainingRequirements = requirements,
+                        CrewRequired = factionInfo.IndustryDesigns.TryGetValue(job.ItemGuid, out var jobDesign) && jobDesign is ShipDesign jobShip
+                            ? jobShip.CrewReq : 0,
                     });
                 }
 
@@ -1610,6 +1623,14 @@ namespace Pulsar4X.Engine.Api
                         Mass = design is ICargoable cargo ? cargo.MassPerUnit : 0,
                         OverSlip = overSlip,
                         SlipReason = overSlip ? "That design is over this slip." : "",
+                        CrewRequired = design switch
+                        {
+                            ShipDesign s => s.CrewReq,
+                            Pulsar4X.Components.ComponentDesign c => c.CrewReq,
+                            _ => 0,
+                        },
+                        CrewBerths = design is ShipDesign withBerths ? withBerths.CrewBerths : 0,
+                        CrewWarning = design is ShipDesign warned ? string.Join("; ", ShipCrew.DesignCrewWarnings(warned.Components)) : "",
                     });
                 }
 
@@ -1681,6 +1702,8 @@ namespace Pulsar4X.Engine.Api
                     {
                         LaunchFuel = LaunchComplexProcessor.FuelName(entity, pad.LaunchFuel),
                         Reason = LaunchComplexProcessor.PadHoldReason(entity, pad),
+                        CrewRequired = pad.ShipDesignId != null && factionInfo.ShipDesigns.TryGetValue(pad.ShipDesignId, out var padDesign)
+                            ? padDesign.CrewReq : 0,
                     });
             }
 
@@ -2225,6 +2248,8 @@ namespace Pulsar4X.Engine.Api
                     IsSiteOnly = LocalConstructionJob.IsSiteOnly(design),
                     ResourceCosts = CostLines(info, design),
                     Infrastructure = InfrastructureSuitability.WindowOf(design),
+                    CrewRequired = design.CrewReq,
+                    Berths = ShipCrew.Berths(new[] { (design, 1) }),
                 });
             }
 
@@ -2476,6 +2501,8 @@ namespace Pulsar4X.Engine.Api
                 ReachFixWell = CommandSpan.Fix(ship, CommandSpanKind.Well) ?? "",
                 ReachFixSystem = CommandSpan.Fix(ship, CommandSpanKind.System) ?? "",
                 LogisticsSystemIds = LogisticsSpan.SystemIds(ship),
+                CrewRequired = shipInfo?.Design?.CrewReq ?? 0,
+                CrewBerths = shipInfo?.Design?.CrewBerths ?? 0,
             };
         }
 

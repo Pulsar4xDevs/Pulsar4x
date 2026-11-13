@@ -87,6 +87,9 @@ namespace Pulsar4X.Ships
         public Dictionary<string, long> ComponentCosts = new Dictionary<string, long>();
         public Dictionary<string, long> ShipInstanceCost = new Dictionary<string, long>();
         public int CrewReq;
+
+        /// <summary>Crew the design can house (quarters plus bridge berths, <see cref="ShipCrew.Berths"/>). 0 until crew plan phase 1.</summary>
+        public int CrewBerths;
         public long IndustryPointCosts { get; private set; }
 
         /// <summary>
@@ -184,6 +187,8 @@ namespace Pulsar4X.Ships
             MaterialCosts.Clear();
             ComponentCosts.Clear();
             ShipInstanceCost.Clear();
+
+            CrewBerths = ShipCrew.Berths(Components);
 
             foreach (var component in Components)
             {
