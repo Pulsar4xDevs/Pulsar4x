@@ -2,15 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Api;
 
 namespace Pulsar4X.Client.Interface.Widgets;
 
 /// <summary>
 /// One part of a stacked power bar. Served (0..1) is the share of Value_kW that is met: the met part
 /// is drawn in Colour, the rest grey and hatched (amber hatching when Waiting, i.e. not a shortage).
+/// ShowLabel writes Label inside the segment when it fits (the battery slices, which have no row).
 /// </summary>
 public readonly record struct PowerSegment(string Label, double Value_kW, double Served, Vector4 Colour, string Tooltip,
-    bool Waiting = false);
+    bool Waiting = false, bool ShowLabel = false);
 
 /// <summary>
 /// One compact line under a stacked bar: a colour chip, a name, a value, its share of the total, a thin
@@ -109,6 +111,13 @@ public static class PowerBars
                     Hatch(draw, new Vector2(xs, min.Y), new Vector2(x + w, max.Y), s.Waiting);
                 if (x > min.X)
                     draw.AddLine(new Vector2(x, min.Y), new Vector2(x, max.Y), gap, 2f);
+                if (s.ShowLabel)
+                {
+                    var ts = ImGui.CalcTextSize(s.Label);
+                    if (ts.X + 8f <= w)
+                        draw.AddText(new Vector2(x + (w - ts.X) * 0.5f, min.Y + (height - ts.Y) * 0.5f),
+                            ImGui.GetColorU32(new Vector4(0.05f, 0.07f, 0.1f, 1f)), s.Label);
+                }
                 if (hovered && mouseX >= x && mouseX < x + w)
                     tip = s.Tooltip;
                 x += w;
@@ -172,6 +181,160 @@ public static class PowerBars
             for (int i = 0; i < w.Length; i++)
                 w[i] *= used / sum;
         return w;
+    }
+
+    /// <summary>Charging (blue, right of zero) and discharging (amber, left of zero) on the Storage bar.</summary>
+    public static readonly Vector4 ChargeColour = new(0.35f, 0.75f, 1f, 1f);
+    public static readonly Vector4 DischargeColour = PowerRing.PartialColour;
+
+    /// <summary>
+    /// The Storage section shared by the ship and colony Power tabs: a two-way bar centred on zero
+    /// (blue to the right while charging, amber to the left while discharging, each half scaled to its
+    /// max rate), a thin charge-level gauge under it, and the stored % with "full in" / "empty in"
+    /// beside it. Capacity and rates show on hover. Greyed when there is no storage.
+    /// </summary>
+    /// <param name="battery_kW">+charge / -discharge.</param>
+    /// <param name="detail">Optional lines for the hover, e.g. the colony's battery designs.</param>
+    public static void Storage(string id, double battery_kW, double storedFraction, double capacity_kJ,
+        double maxCharge_kW, double maxDischarge_kW, double? timeToFullOrEmpty_s,
+        IReadOnlyList<(string Name, string Value)>? detail = null)
+    {
+        ImGui.SeparatorText("Storage");
+        const double eps = 1e-6;
+        if (capacity_kJ <= 0)
+        {
+            ImGui.TextDisabled("No batteries");
+            return;
+        }
+
+        double level = Math.Clamp(storedFraction, 0, 1);
+        bool charging = battery_kW > eps, discharging = battery_kW < -eps;
+        string when = timeToFullOrEmpty_s is { } t && (charging || discharging) ? ShortDuration(t) : "";
+        string note = charging ? (when != "" ? "full in " + when : "charging")
+            : discharging ? (when != "" ? "empty in " + when : "discharging")
+            : level >= 0.999 ? "full" : level <= 0.001 ? "empty" : "idle";
+        string pct = $"{level * 100:0}%";
+        string flow = charging ? "+" + Stringify.Power(battery_kW) : discharging ? "-" + Stringify.Power(-battery_kW) : "0 kW";
+
+        // Text block on the right: flow, stored %, then the note. Fixed widths so the bar does not jump.
+        float gap = ImGui.GetStyle().ItemSpacing.X * 2f;
+        float flowW = Math.Max(ImGui.CalcTextSize(flow).X, ImGui.CalcTextSize("-000.0 kW").X);
+        float pctW = ImGui.CalcTextSize("100%").X;
+        float noteW = Math.Max(ImGui.CalcTextSize(note).X, ImGui.CalcTextSize("empty in 00 d").X);
+        float avail = ImGui.GetContentRegionAvail().X;
+        float barW = Math.Max(80f, avail - flowW - pctW - noteW - gap * 3f);
+        float line = ImGui.GetTextLineHeight();
+        const float barH = 14f, gaugeH = 3f;
+
+        var draw = ImGui.GetWindowDrawList();
+        var origin = ImGui.GetCursorScreenPos();
+        ImGui.InvisibleButton(id, new Vector2(barW, Math.Max(line, barH + gaugeH + 2f)));
+        bool hovered = ImGui.IsItemHovered();
+        var min = origin;
+        var max = origin + new Vector2(barW, barH);
+        float mid = min.X + barW * 0.5f;
+        // Faint halves so the direction reads even when idle.
+        draw.AddRectFilled(min, new Vector2(mid, max.Y), ImGui.GetColorU32(new Vector4(0.16f, 0.13f, 0.08f, 1f)), 3f);
+        draw.AddRectFilled(new Vector2(mid, min.Y), max, ImGui.GetColorU32(new Vector4(0.08f, 0.12f, 0.17f, 1f)), 3f);
+        float half = barW * 0.5f - 1f;
+        if (charging)
+        {
+            float f = maxCharge_kW > eps ? (float)Math.Clamp(battery_kW / maxCharge_kW, 0, 1) : 1f;
+            draw.AddRectFilled(new Vector2(mid, min.Y), new Vector2(mid + Math.Max(2f, half * f), max.Y), ImGui.GetColorU32(ChargeColour));
+        }
+        else if (discharging)
+        {
+            float f = maxDischarge_kW > eps ? (float)Math.Clamp(-battery_kW / maxDischarge_kW, 0, 1) : 1f;
+            draw.AddRectFilled(new Vector2(mid - Math.Max(2f, half * f), min.Y), new Vector2(mid, max.Y), ImGui.GetColorU32(DischargeColour));
+        }
+        draw.AddRect(min, max, ImGui.GetColorU32(ImGuiCol.Border), 3f);
+        draw.AddLine(new Vector2(mid, min.Y - 3f), new Vector2(mid, max.Y + 3f), ImGui.GetColorU32(MarkerColour), 2f);
+        // Small end labels inside the halves.
+        uint dim = ImGui.GetColorU32(ImGuiCol.TextDisabled);
+        float small = ImGui.GetFontSize();
+        if (!discharging)
+            draw.AddText(new Vector2(min.X + 4f, min.Y + (barH - small) * 0.5f), dim, "discharge");
+        if (!charging)
+        {
+            float cw = ImGui.CalcTextSize("charge").X;
+            draw.AddText(new Vector2(max.X - cw - 4f, min.Y + (barH - small) * 0.5f), dim, "charge");
+        }
+        // Charge level gauge under the bar.
+        var gMin = new Vector2(min.X, max.Y + 2f);
+        draw.AddRectFilled(gMin, new Vector2(max.X, gMin.Y + gaugeH), ImGui.GetColorU32(UnservedColour));
+        if (level > 0)
+            draw.AddRectFilled(gMin, new Vector2(min.X + barW * (float)level, gMin.Y + gaugeH), ImGui.GetColorU32(SourceColour("Battery") * new Vector4(1.2f, 1.2f, 1.2f, 1f)));
+
+        // Text beside the bar, on the bar's line.
+        ImGui.SameLine(0f, gap);
+        ImGui.SetCursorScreenPos(new Vector2(ImGui.GetCursorScreenPos().X, origin.Y + (barH - line) * 0.5f));
+        RightAligned(flow, flowW, charging ? ChargeColour : discharging ? DischargeColour : (Vector4?)null);
+        ImGui.SameLine(0f, gap);
+        RightAligned(pct, pctW, Styles.NeutralColor);
+        ImGui.SameLine(0f, gap);
+        Plain(note, charging ? ChargeColour : discharging ? DischargeColour : ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);
+        bool textHovered = ImGui.IsMouseHoveringRect(new Vector2(origin.X + barW, origin.Y - 2f),
+            new Vector2(origin.X + avail, origin.Y + barH + gaugeH + 4f));
+
+        if (hovered || textHovered)
+        {
+            ImGui.BeginTooltip();
+            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 32f);
+            ImGui.TextUnformatted($"Batteries: {Stringify.Energy(capacity_kJ * level)} of {Stringify.Energy(capacity_kJ)} ({level * 100:0.#}%)");
+            ImGui.TextUnformatted(charging ? $"Charging at {Stringify.Power(battery_kW)}"
+                : discharging ? $"Discharging at {Stringify.Power(-battery_kW)}" : "Idle: not charging or discharging");
+            if (when != "" && timeToFullOrEmpty_s is { } s2)
+                ImGui.TextUnformatted($"{(charging ? "Full" : "Empty")} in {LongDuration(s2)}");
+            ImGui.TextUnformatted($"Max charge {Stringify.Power(maxCharge_kW)}, max discharge {Stringify.Power(maxDischarge_kW)}");
+            if (detail is { Count: > 0 } && ImGui.BeginTable("##storageTipDetail", 2, ImGuiTableFlags.SizingFixedFit))
+            {
+                foreach (var (name, value) in detail)
+                {
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(name);
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(value);
+                }
+                ImGui.EndTable();
+            }
+            ImGui.PopTextWrapPos();
+            ImGui.EndTooltip();
+        }
+    }
+
+    /// <summary>The generation bar's battery slice while it discharges, or null.</summary>
+    public static PowerSegment? DischargeSegment(double battery_kW)
+        => battery_kW < -1e-6
+            ? new PowerSegment("Batteries", -battery_kW, 1, DischargeColour, $"Batteries: discharging {Stringify.Power(-battery_kW)}", ShowLabel: true)
+            : null;
+
+    /// <summary>The demand bar's battery slice while it charges, or null.</summary>
+    public static PowerSegment? ChargeSegment(double battery_kW)
+        => battery_kW > 1e-6
+            ? new PowerSegment("To batteries", battery_kW, 1, ChargeColour, $"Charging the batteries: {Stringify.Power(battery_kW)}", ShowLabel: true)
+            : null;
+
+    /// <summary>"15,210 y", "40 d", "5 h", "12 min".</summary>
+    public static string ShortDuration(double seconds)
+    {
+        if (!double.IsFinite(seconds) || seconds < 0) return "-";
+        double days = seconds / 86400.0;
+        if (days >= 730) return $"{days / 365.25:N0} y";
+        if (days >= 2) return $"{days:N0} d";
+        double hours = seconds / 3600.0;
+        return hours >= 1 ? $"{hours:N0} h" : $"{Math.Max(1, seconds / 60.0):N0} min";
+    }
+
+    /// <summary>"1.5 years", "40 days", "5.0 hours", "12 min".</summary>
+    public static string LongDuration(double seconds)
+    {
+        if (!double.IsFinite(seconds) || seconds < 0) return "-";
+        double days = seconds / 86400.0;
+        if (days >= 730) return $"{days / 365.25:N1} years";
+        if (days >= 2) return $"{days:N0} days";
+        double hours = seconds / 3600.0;
+        return hours >= 1 ? $"{hours:N1} hours" : $"{Math.Max(1, seconds / 60.0):N0} min";
     }
 
     /// <summary>"36%", "&lt;1%" for a small non-zero share, "-" with no total.</summary>

@@ -298,14 +298,14 @@ namespace Pulsar4X.Client
 
         /// <summary>
         /// The colony power grid: a summary beside 90 days of history, then a stacked demand bar by
-        /// tier with one compact row per tier, then a stacked generation bar with one row per plant
-        /// (PowerBars, shared with the ship Power tab).
+        /// tier with one compact row per tier, then a stacked generation bar with one row per plant, then
+        /// the Storage section's two-way charge bar (PowerBars, shared with the ship Power tab).
         /// </summary>
         private static void DisplayPower(ColonyPowerView power)
         {
             if (ImGui.BeginTable("PowerTop", 2, ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Summary", ImGuiTableColumnFlags.WidthFixed, 230f);
+                ImGui.TableSetupColumn("Summary", ImGuiTableColumnFlags.WidthFixed, 250f);
                 ImGui.TableSetupColumn("History", ImGuiTableColumnFlags.WidthStretch);
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
@@ -318,8 +318,13 @@ namespace Pulsar4X.Client
             ImGui.SeparatorText("Demand by tier (served top first)");
             PowerTiers(power);
 
-            ImGui.SeparatorText("Generation and storage");
+            ImGui.SeparatorText("Generation");
             PowerPlants(power);
+
+            var batteries = power.Plants.Where(p => p.Kind == "Battery").ToList();
+            PowerBars.Storage("##colonyStorage", power.Battery_kW, power.StoredFraction, power.StoreMax_kJ,
+                power.MaxCharge_kW, power.MaxDischarge_kW, power.TimeToFullOrEmpty_s,
+                batteries.Select(b => (b.Count > 1 ? $"{b.Count} x {b.Name}" : b.Name, Stringify.Energy(b.Store_kJ) + (b.Note != null ? " (" + b.Note + ")" : ""))).ToList());
         }
 
         private static void PowerSummary(ColonyPowerView power)
@@ -340,14 +345,20 @@ namespace Pulsar4X.Client
             DisplayHelpers.PrintRow("Demand", Stringify.Power(power.Demand_kW));
             DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW),
                 tooltipTwo: "What the plants can give now");
-            DisplayHelpers.PrintRow("Running at", Stringify.Power(power.Dispatched_kW),
-                tooltipTwo: "Average plant output in the last daily pass");
-            DisplayHelpers.PrintRow("Delivered", Stringify.Power(power.Delivered_kW),
-                tooltipTwo: $"After {(1 - power.GridEfficiency) * 100:0.#}%% grid loss");
+            if (power.HasDispatched)
+                DisplayHelpers.PrintRow("Running at", Stringify.Power(power.Dispatched_kW),
+                    tooltipTwo: "Average plant output in the last daily pass"
+                        + (power.LastDispatch is { } last ? $" ({last:yyyy-MM-dd HH:mm})" : ""));
+            else
+                DisplayHelpers.PrintRow("Running at", "awaiting daily pass",
+                    tooltipTwo: "The plants have not had their first daily pass yet");
+            DisplayHelpers.PrintRow("Available", Stringify.Power(power.Delivered_kW),
+                tooltipTwo: $"After grid loss ({(1 - power.GridEfficiency) * 100:0.#}%%)");
             DisplayHelpers.PrintRow("Balance", (power.Balance_kW < 0 ? "-" : "+") + Stringify.Power(Math.Abs(power.Balance_kW)),
                 separator: power.StoreMax_kJ > 0);
             if (power.StoreMax_kJ > 0)
-                DisplayHelpers.PrintRow("Grid storage", Stringify.Energy(power.StoreMax_kJ), separator: false);
+                DisplayHelpers.PrintRow("Grid storage", $"{Math.Clamp(power.StoredFraction, 0, 1) * 100:0}%% of {Stringify.Energy(power.StoreMax_kJ, "0.#")}",
+                    tooltipTwo: "Charge level and capacity; see Storage below", separator: false);
             ImGui.Columns(1);
             if (power.Balance_kW < 0)
             {
@@ -406,7 +417,10 @@ namespace Pulsar4X.Client
                 ImGui.TextDisabled("Nothing on this colony draws power.");
                 return;
             }
-            PowerBars.StackedBar("##colonyDemandBar", segments, power.Demand_kW);
+            // Charging is its own slice so the bar adds up to demand plus what goes into the batteries.
+            if (PowerBars.ChargeSegment(power.Battery_kW) is { } charge)
+                segments.Add(charge);
+            PowerBars.StackedBar("##colonyDemandBar", segments, power.Demand_kW + Math.Max(0, power.Battery_kW));
             PowerBars.Rows("##colonyTiers", rows);
         }
 
@@ -425,11 +439,14 @@ namespace Pulsar4X.Client
             foreach (var p in generators)
                 segments.Add(new PowerSegment(p.Name, p.Output_kW, 1, PowerBars.SourceColour(p.Kind),
                     $"{p.Name}: {Stringify.Power(p.Output_kW)} of {Stringify.Power(p.Nameplate_kW)}"));
+            if (PowerBars.DischargeSegment(power.Battery_kW) is { } discharge)
+                segments.Add(discharge);
             if (nameplate > output)
                 segments.Add(new PowerSegment("Idle", nameplate - output, 0, PowerBars.UnservedColour,
                     $"{Stringify.Power(nameplate - output)} installed but not available now"));
             if (generators.Count > 0)
-                PowerBars.StackedBar("##colonyGenBar", segments, Math.Max(nameplate, power.Demand_kW),
+                PowerBars.StackedBar("##colonyGenBar", segments,
+                    Math.Max(nameplate + Math.Max(0, -power.Battery_kW), power.Demand_kW + Math.Max(0, power.Battery_kW)),
                     marker_kW: power.Demand_kW > 0 ? power.Demand_kW : null, markerTooltip: $"Demand {Stringify.Power(power.Demand_kW)}");
 
             var rows = new List<PowerRow>();
@@ -437,19 +454,9 @@ namespace Pulsar4X.Client
             foreach (var p in power.Plants)
             {
                 string name = p.Count > 1 ? $"{p.Name} x{p.Count}" : p.Name;
+                // Batteries have their own Storage section below.
                 if (p.Kind == "Battery")
-                {
-                    rows.Add(new PowerRow
-                    {
-                        Id = p.DesignId,
-                        Chip = PowerBars.SourceColour(p.Kind),
-                        Name = name,
-                        Value = Stringify.Energy(p.Store_kJ),
-                        Trailing = "storage",
-                        Tooltip = $"{p.Name}: {Stringify.Energy(p.Store_kJ)} of grid storage" + (p.Note != null ? "\n" + p.Note : ""),
-                    });
                     continue;
-                }
                 var fuel = p.FuelName == null ? null : power.Fuel.FirstOrDefault(f => f.FuelName == p.FuelName);
                 if (fuel != null)
                     shownFuel.Add(fuel.FuelId);
@@ -508,7 +515,7 @@ namespace Pulsar4X.Client
             ImGui.SameLine();
             ImGui.TextColored(PowerGenerationColour, "- Generation");
             ImGui.SameLine();
-            ImGui.TextColored(PowerDeliveredColour, "- Delivered");
+            ImGui.TextColored(PowerDeliveredColour, "- Available");
             ImGui.SameLine();
             ImGui.TextColored(new Vector4(0.9f, 0.3f, 0.3f, 1f), "# Shortfall");
 
@@ -596,7 +603,7 @@ namespace Pulsar4X.Client
                 string tip = h.Date.ToString("yyyy-MM-dd")
                     + "\nDemand: " + Stringify.Power(h.Demand_kW)
                     + "\nGeneration: " + Stringify.Power(h.Generation_kW)
-                    + "\nDelivered: " + Stringify.Power(h.Delivered_kW);
+                    + "\nAvailable: " + Stringify.Power(h.Delivered_kW);
                 if (h.Delivered_kW < h.Demand_kW)
                     tip += "\nShort: " + Stringify.Power(h.Demand_kW - h.Delivered_kW);
                 ImGui.SetTooltip(tip);
@@ -642,7 +649,9 @@ namespace Pulsar4X.Client
                     PowerRing.Draw("##summaryPowerRing", power, Styles.DescriptiveColor);
                     ImGui.SameLine();
                     ImGui.BeginGroup();
-                    ImGui.TextUnformatted($"Delivered {Stringify.Power(power.Delivered_kW)}");
+                    ImGui.TextUnformatted($"Available {Stringify.Power(power.Delivered_kW)}");
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("After grid loss");
                     ImGui.TextUnformatted($"Demand {Stringify.Power(power.Demand_kW)}");
                     ImGui.PushStyleColor(ImGuiCol.Text, PowerRing.ColourFor(PowerRing.Share(power)));
                     ImGui.TextUnformatted(PowerRing.WordsFor(PowerRing.Share(power)));

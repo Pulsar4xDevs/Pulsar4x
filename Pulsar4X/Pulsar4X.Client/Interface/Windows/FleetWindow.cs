@@ -546,11 +546,22 @@ namespace Pulsar4X.Client
                     ImGui.SameLine();
                     ImGui.BeginGroup();
                     ImGui.PushTextWrapPos(0f);
-                    var (words, colour) = ShipPowerDisplay.State(shipPower);
+                    // The short form keeps "Charging batteries" from wrapping in this narrow column; the long form is on hover.
+                    var (words, colour, stateTip) = ShipPowerDisplay.ShortState(shipPower);
                     ImGui.PushStyleColor(ImGuiCol.Text, colour);
-                    ImGui.TextUnformatted(char.ToUpperInvariant(words[0]) + words.Substring(1));
+                    ImGui.TextUnformatted(words);
                     ImGui.PopStyleColor();
-                    ImGui.TextDisabled("Delivered");
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
+                        ImGui.TextUnformatted(stateTip);
+                        ImGui.PopTextWrapPos();
+                        ImGui.EndTooltip();
+                    }
+                    ImGui.TextDisabled("Available");
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("After grid loss: what reaches the loads, over all demand");
                     ImGui.TextUnformatted($"{Stringify.Power(shipPower.Delivered_kW)} / {Stringify.Power(shipPower.TotalDemand_kW)}");
                     ImGui.PopTextWrapPos();
                     ImGui.EndGroup();

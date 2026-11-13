@@ -10,8 +10,9 @@ namespace Pulsar4X.Client
 {
     /// <summary>
     /// The ship window's Power tab, laid out like the colony Power tab: a summary beside a short battery
-    /// history, then a stacked generation bar with one compact row per source, then a stacked demand
-    /// bar with one compact row per load group (PowerBars). The supply ring lives on the ship Summary
+    /// history, then a stacked generation bar with one compact row per source, then the Storage
+    /// section's two-way charge bar, then a stacked demand bar with one compact row per load group
+    /// (PowerBars). The supply ring lives on the ship Summary
     /// tab and the entity card. Reads only Api views (ShipPowerView, EnergyView); both are owner-only.
     /// </summary>
     public static class ShipPowerDisplay
@@ -26,7 +27,7 @@ namespace Pulsar4X.Client
         {
             if (ImGui.BeginTable("ShipPowerTop", 2, ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Summary", ImGuiTableColumnFlags.WidthFixed, 230f);
+                ImGui.TableSetupColumn("Summary", ImGuiTableColumnFlags.WidthFixed, 250f);
                 ImGui.TableSetupColumn("History", ImGuiTableColumnFlags.WidthStretch);
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
@@ -38,6 +39,9 @@ namespace Pulsar4X.Client
 
             ImGui.SeparatorText("Sources");
             Sources(power);
+
+            PowerBars.Storage("##shipStorage", power.Battery_kW, power.StoredFraction, power.StoreMax_kJ,
+                power.MaxCharge_kW, power.MaxDischarge_kW, power.TimeToFullOrEmpty_s);
 
             ImGui.SeparatorText("Loads");
             Loads(power);
@@ -53,6 +57,22 @@ namespace Pulsar4X.Client
             return (PowerRing.WordsFor(power.SupplyShare), PowerRing.ColourFor(power.SupplyShare));
         }
 
+        /// <summary>
+        /// The state for a narrow column (the ship Summary tab): one word or two that fit on one line,
+        /// with the long form for the hover. "Charging" instead of "charging batteries".
+        /// </summary>
+        public static (string Words, Vector4 Colour, string Tooltip) ShortState(ShipPowerView power)
+        {
+            var (words, colour) = State(power);
+            if (power.LoadsWaitOnCharge)
+            {
+                string tip = "Charging batteries: the plant runs flat out into the batteries, and sensors and other loads wait until they are full"
+                    + (power.Battery_kW > 0 && power.TimeToFullOrEmpty_s is { } full ? $" (full in {Duration(full)})" : "") + ".";
+                return ("Charging", colour, tip);
+            }
+            return (Capitalise(words), colour, Capitalise(words));
+        }
+
         static void Summary(ShipPowerView power)
         {
             var (words, colour) = State(power);
@@ -64,7 +84,7 @@ namespace Pulsar4X.Client
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(HowItWorks);
             if (power.LoadsWaitOnCharge)
-                ImGui.TextDisabled("Loads wait until full" + (power.FullIn_s is { } full ? ", " + Duration(full) : ""));
+                ImGui.TextDisabled("Loads wait until full" + (power.Battery_kW > 0 && power.TimeToFullOrEmpty_s is { } full ? ", " + Duration(full) : ""));
             if (!power.HasPlant)
                 ImGui.TextDisabled("No power plant");
 
@@ -73,14 +93,15 @@ namespace Pulsar4X.Client
             DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW), tooltipTwo: "What the sources can give now (an RTG after decay, a reactor or fuel cell only with fuel)");
             DisplayHelpers.PrintRow("Demand", Stringify.Power(power.TotalDemand_kW),
                 tooltipTwo: $"Warp {Stringify.Power(power.Demand_kW)}, other loads {Stringify.Power(power.AuxDemand_kW)}");
-            DisplayHelpers.PrintRow("Delivered", Stringify.Power(power.Delivered_kW), tooltipTwo: "To the loads: warp up to generation, plus the other loads served from spare output. Charging is not counted.");
-            if (power.Charging_kW > 0)
-                DisplayHelpers.PrintRow("To batteries", Stringify.Power(power.Charging_kW), tooltipTwo: "Output over warp demand while the batteries have room");
+            DisplayHelpers.PrintRow("Available", Stringify.Power(power.Delivered_kW), tooltipTwo: "After grid loss: what reaches the loads (warp up to generation, plus the other loads served from spare output). Charging is not counted.");
+            if (Math.Abs(power.Battery_kW) > 1e-6)
+                DisplayHelpers.PrintRow(power.Battery_kW > 0 ? "To batteries" : "Discharging", Stringify.Power(Math.Abs(power.Battery_kW)),
+                    tooltipTwo: power.Battery_kW > 0 ? "Output over warp demand while the batteries have room" : "The batteries cover what generation does not");
             // PrintRow draws with ImGui.Text, which reads printf formats: escape the percent signs.
-            DisplayHelpers.PrintRow("Share", $"{power.SupplyShare * 100:0}%%", tooltipTwo: "Delivered over demand");
+            DisplayHelpers.PrintRow("Share", $"{power.SupplyShare * 100:0}%%", tooltipTwo: "Available over demand");
             if (power.StoreMax_kJ > 0)
             {
-                double fraction = Math.Clamp(power.Stored_kJ / power.StoreMax_kJ, 0, 1);
+                double fraction = Math.Clamp(power.StoredFraction, 0, 1);
                 DisplayHelpers.PrintRow("Batteries", $"{fraction * 100:0.#}%% of {Stringify.Energy(power.StoreMax_kJ, "0.#")}",
                     tooltipTwo: $"{Stringify.Energy(Math.Max(0, power.Stored_kJ))} of {Stringify.Energy(power.StoreMax_kJ)}, as of the plant's last energy step", separator: false);
             }
@@ -103,10 +124,12 @@ namespace Pulsar4X.Client
             foreach (var s in power.Sources)
                 segments.Add(new PowerSegment(s.Kind, s.Output_kW, 1, PowerBars.SourceColour(s.Kind),
                     $"{s.Kind}: {Stringify.Power(s.Output_kW, "0.#")} of {Stringify.Power(power.Generation_kW, "0.#")} available"));
+            if (PowerBars.DischargeSegment(power.Battery_kW) is { } discharge)
+                segments.Add(discharge);
             if (nameplate > output)
                 segments.Add(new PowerSegment("Unavailable", nameplate - output, 0, PowerBars.UnservedColour,
                     $"{Stringify.Power(nameplate - output, "0.#")} installed but not available (decay, or no fuel)"));
-            double scale = Math.Max(nameplate, power.TotalDemand_kW);
+            double scale = Math.Max(nameplate + Math.Max(0, -power.Battery_kW), power.TotalDemand_kW + Math.Max(0, power.Battery_kW));
             PowerBars.StackedBar("##shipGenBar", segments, scale, marker_kW: power.TotalDemand_kW > 0 ? power.TotalDemand_kW : null,
                 markerTooltip: $"Demand {Stringify.Power(power.TotalDemand_kW)}");
 
@@ -190,7 +213,7 @@ namespace Pulsar4X.Client
                 float fill = g.State switch
                 {
                     "Idle" => 0f,
-                    "Charging" => power.StoreMax_kJ > 0 ? (float)Math.Clamp(power.Stored_kJ / power.StoreMax_kJ, 0, 1) : 0f,
+                    "Charging" => power.StoreMax_kJ > 0 ? (float)Math.Clamp(power.StoredFraction, 0, 1) : 0f,
                     _ => (float)share,
                 };
                 bool perDig = g.Kind == "Miners";
@@ -200,7 +223,7 @@ namespace Pulsar4X.Client
 
                 string tip = $"{g.Kind}: {(perDig ? "draws per dig" : Stringify.Power(g.Demand_kW) + " demand")}, {Stringify.Power(g.Served_kW)} served, {words}";
                 if (waiting && power.StoreMax_kJ > 0)
-                    tip += $"\nBatteries {Math.Clamp(power.Stored_kJ / power.StoreMax_kJ, 0, 1) * 100:0}% full" + (power.FullIn_s is { } full ? $", full in {Duration(full)}" : "");
+                    tip += $"\nBatteries {Math.Clamp(power.StoredFraction, 0, 1) * 100:0}% full" + (power.Battery_kW > 0 && power.TimeToFullOrEmpty_s is { } full ? $", full in {Duration(full)}" : "");
                 if (g.Note != null)
                     tip += "\n" + g.Note;
                 rows.Add(new PowerRow
@@ -220,8 +243,12 @@ namespace Pulsar4X.Client
                 });
             }
 
-            if (power.TotalDemand_kW > 0)
-                PowerBars.StackedBar("##shipDemandBar", segments, power.TotalDemand_kW);
+            // Charging is shown as its own slice so the bar adds up to demand plus what goes into the batteries.
+            if (PowerBars.ChargeSegment(power.Battery_kW) is { } charge)
+                segments.Add(charge);
+            double loadScale = power.TotalDemand_kW + Math.Max(0, power.Battery_kW);
+            if (loadScale > 0)
+                PowerBars.StackedBar("##shipDemandBar", segments, loadScale);
             else
                 ImGui.TextDisabled("Nothing draws power right now.");
             PowerBars.Rows("##shipLoads", rows);
@@ -304,15 +331,7 @@ namespace Pulsar4X.Client
         }
 
         /// <summary>"15,210 y", "40 d", "5 h", "12 min".</summary>
-        static string ShortDuration(double seconds)
-        {
-            if (!double.IsFinite(seconds)) return "-";
-            double days = seconds / 86400.0;
-            if (days >= 730) return $"{days / 365.25:N0} y";
-            if (days >= 2) return $"{days:N0} d";
-            double hours = seconds / 3600.0;
-            return hours >= 1 ? $"{hours:N0} h" : $"{seconds / 60.0:N0} min";
-        }
+        static string ShortDuration(double seconds) => PowerBars.ShortDuration(seconds);
 
         static string Capitalise(string s) => s.Length == 0 ? s : char.ToUpperInvariant(s[0]) + s.Substring(1);
     }
