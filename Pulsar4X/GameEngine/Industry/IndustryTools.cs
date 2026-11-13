@@ -113,12 +113,14 @@ namespace Pulsar4X.Industry
             // Infrastructure is the limiting factor on a colony's output: when the colony's
             // buildings exceed its infrastructure capacity, every production rate is scaled down.
             double infraEfficiency = InfrastructureProcessor.GetEfficiency(industryEntity);
+            // Power: industry runs at its tier's share of demand (1 with no grid or no shortage).
+            double powerEfficiency = Pulsar4X.Energy.ColonyPowerProcessor.Satisfaction(industryEntity, Pulsar4X.Energy.PowerTier.Industry);
 
             foreach (var (prodLineID, prodLine) in industryDB.ProductionLines.ToArray())
             {
                 var industryPointsRemaining = new Dictionary<string, int>();
                 foreach (var rate in prodLine.IndustryTypeRates)
-                    industryPointsRemaining[rate.Key] = (int)(rate.Value * infraEfficiency);
+                    industryPointsRemaining[rate.Key] = (int)(rate.Value * infraEfficiency * powerEfficiency);
 
                 foreach(var batchJob in prodLine.Jobs.ToArray())
                 {

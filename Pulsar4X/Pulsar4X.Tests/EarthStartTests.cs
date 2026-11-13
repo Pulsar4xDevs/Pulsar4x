@@ -58,7 +58,9 @@ public class EarthStartTests
         Assert.That(book.Listings.Keys, Does.Contain("stainless-steel"));
         foreach (var cargoId in book.Listings.Keys)
         {
-            Assert.That(book.Listings[cargoId].SellQuantity, Is.EqualTo(StockOf(colony, cargoId)));
+            // Plant fuel keeps its runway back from the market (energy phase 2).
+            long reserve = Pulsar4X.Energy.ColonyPowerProcessor.FuelReserveUnits(colony, cargoId);
+            Assert.That(book.Listings[cargoId].SellQuantity, Is.EqualTo(System.Math.Max(0, StockOf(colony, cargoId) - reserve)));
             Assert.That(book.Listings[cargoId].BuyQuantity, Is.EqualTo(0));
             Assert.That(book.Listings[cargoId].Ask, Is.EqualTo(0));
         }

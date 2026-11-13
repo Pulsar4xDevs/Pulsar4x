@@ -89,6 +89,9 @@ namespace Pulsar4X.Technology
             // Get the calculated total number of points to add
             var pointsToAdd = researcherDB.PointsPerDay.GetValue();
 
+            // Power: research is the last tier, so labs slow first in a shortage.
+            pointsToAdd = (int)(pointsToAdd * ResearchPowerEfficiency(entity, researcherDB));
+
             // Make sure the calculated total is > 0
             if(pointsToAdd <= 0)
                 return;
@@ -135,6 +138,14 @@ namespace Pulsar4X.Technology
 
                 PublishQueueChanged(entity);
             }
+        }
+
+        /// <summary>The research tier's power share at the lab's colony; 1 with no grid.</summary>
+        internal static double ResearchPowerEfficiency(Entity lab, ResearcherDB researcherDB)
+        {
+            if (lab.Manager == null || !lab.Manager.TryGetEntityById(researcherDB.LocationId, out var colony))
+                return 1;
+            return Pulsar4X.Energy.ColonyPowerProcessor.Satisfaction(colony, Pulsar4X.Energy.PowerTier.Research);
         }
 
         // The dequeue mutates the lab in place (no DataBlob add/remove), so signal the change

@@ -46,8 +46,12 @@
     "Payload": {
       "UniqueID": "colony-early-earth",
       "Name": "Early Tech Earth Start",
-      "StartingPopulation": 8200000000.0,
+      "StartingPopulation": 500000,
       "Installations": [
+        {
+          "Id": "default-design-thermal-plant-75",
+          "Amount": 1
+        },
         {
           "Id": "default-design-infrastructure-site",
           "Amount": 5
@@ -106,6 +110,10 @@
         }
       ],
       "Cargo": [
+        {
+          "Id": "hydrocarbons",
+          "Amount": 341298701
+        },
         {
           "Id": "iron",
           "Amount": 500000
@@ -256,6 +264,7 @@
         "infrastructure-site"
       ],
       "ComponentDesigns": [
+        "default-design-thermal-plant-75",
         "default-design-battery-2t",
         "default-design-cargo-hold-1t",
         "default-design-cargo-hold-5t",

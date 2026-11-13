@@ -60,6 +60,8 @@ namespace Pulsar4X.Industry
 
             // Mines are buildings too: scale their output by the colony's infrastructure capacity.
             double infraEfficiency = InfrastructureProcessor.GetEfficiency(colonyEntity);
+            // Power: mines run at the mining tier's share of demand (1 with no grid or no shortage).
+            double powerEfficiency = Pulsar4X.Energy.ColonyPowerProcessor.Satisfaction(colonyEntity, Pulsar4X.Energy.PowerTier.Mining);
 
             foreach (var kvp in actualMiningRates)
             {
@@ -70,7 +72,7 @@ namespace Pulsar4X.Industry
                     continue;
                 string cargoTypeID = mineral.CargoTypeID;
 
-                var unitsMinableThisTick = (long)Math.Min(kvp.Value * infraEfficiency, mineralDeposit.Amount.Actual);
+                var unitsMinableThisTick = (long)Math.Min(kvp.Value * infraEfficiency * powerEfficiency, mineralDeposit.Amount.Actual);
 
                 if(!stockpile.TypeStores.ContainsKey(cargoTypeID))
                 {

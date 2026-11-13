@@ -27,6 +27,8 @@ namespace Pulsar4X.Engine
             { EventType.GeoSurveyCompleted, true },
             { EventType.JumpPointSurveyCompleted, true },
             { EventType.FuelExhausted, true },
+            { EventType.PlantOutOfFuel, true },
+            { EventType.PowerShortage, false },
             { EventType.WarpExited, true },
             { EventType.OrdersCompleted, false },
         };

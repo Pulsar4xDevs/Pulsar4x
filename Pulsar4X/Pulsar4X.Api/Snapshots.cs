@@ -356,8 +356,10 @@ public sealed record InfrastructureView(
     bool HasInstalledInfrastructure = false) : IComponentView;
 
 /// <summary>
-/// A colony's power grid (advisory: nothing is enforced yet). Power in kW, storage in kJ,
-/// the same units as ship energy. Delivered = generation × grid efficiency.
+/// A colony's power grid. Power in kW, storage in kJ, the same units as ship energy.
+/// Delivered = generation × grid efficiency. Each tier's Satisfaction scales the output of
+/// what draws from it (industry, mining, research); Dispatched_kW is what the plants ran at
+/// in the last daily pass.
 /// </summary>
 public sealed record ColonyPowerView(
     string EnergyTypeId,
@@ -371,7 +373,8 @@ public sealed record ColonyPowerView(
     IReadOnlyList<ColonyPowerConsumerRow> Consumers,
     IReadOnlyList<ColonyPowerPlantRow> Plants,
     IReadOnlyList<ColonyPowerTierRow> Tiers,
-    IReadOnlyList<ColonyPowerFuelRow> Fuel) : IComponentView
+    IReadOnlyList<ColonyPowerFuelRow> Fuel,
+    double Dispatched_kW = 0) : IComponentView
 {
     public double Balance_kW => Delivered_kW - Demand_kW;
 }
@@ -384,11 +387,15 @@ public sealed record ColonyPowerPlantRow(
     string DesignId, string Name, string Kind, int Count, double Output_kW, double Nameplate_kW,
     string? FuelName, double FuelAtFull_kgPerDay, double Store_kJ, string? Note);
 
-/// <summary>Demand in one priority tier, and the share it would get if power ran short.</summary>
+/// <summary>Demand in one priority tier, and the share of it the grid supplies (0..1).</summary>
 public sealed record ColonyPowerTierRow(string Tier, int TierRank, double Demand_kW, double Satisfaction);
 
-/// <summary>Fuel the colony's plants would burn per day at their current output (not burnt in phase 1).</summary>
-public sealed record ColonyPowerFuelRow(string FuelId, string FuelName, double kgPerDay);
+/// <summary>
+/// One plant fuel: kg/day at the plants' current full output, kg burnt in the last daily pass,
+/// kg in the stockpile, and the runway in days at the last day's burn (null when nothing burnt).
+/// </summary>
+public sealed record ColonyPowerFuelRow(string FuelId, string FuelName, double kgPerDay,
+    double BurntLastDay_kg = 0, double Stock_kg = 0, double? RunwayDays = null);
 
 /// <summary>The installations on a colony (or components on a ship), grouped by design.</summary>
 public sealed record InstallationsView(IReadOnlyList<InstallationGroup> Installations) : IComponentView;

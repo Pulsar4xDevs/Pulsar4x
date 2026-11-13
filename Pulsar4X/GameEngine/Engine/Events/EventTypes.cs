@@ -47,6 +47,8 @@ namespace Pulsar4X.Events
         FuelExhausted,
         PopulationChanged,
         ColonyCreated,
+        PowerShortage,
+        PlantOutOfFuel,
         #endregion
 
         #region Combat

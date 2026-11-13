@@ -145,6 +145,8 @@ namespace Pulsar4X.Colonies
 
             // Add starting colony cargo
             LoadCargo(colonyEntity, factionInfo.Data, colonyBlueprint.Cargo);
+            // The plants were installed before their fuel arrived: recalc so they show as fuelled.
+            Pulsar4X.Energy.ColonyPowerProcessor.Recalc(colonyEntity);
 
             // Add starting launch queue entries
             if (colonyBlueprint.LaunchQueue != null && colonyEntity.TryGetDataBlob<LaunchComplexDB>(out var launchDB))

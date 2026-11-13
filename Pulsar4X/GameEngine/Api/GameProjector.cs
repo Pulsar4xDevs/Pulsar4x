@@ -494,13 +494,25 @@ namespace Pulsar4X.Engine.Api
                     power.DemandByTier.TryGetValue(t, out var d) ? d : 0,
                     power.TierSatisfaction.TryGetValue(t, out var s) ? s : 1))
                 .ToList();
-            var fuel = power.FuelAtFull_kgPerDay
-                .OrderBy(kv => kv.Key, StringComparer.Ordinal)
-                .Select(kv => new ColonyPowerFuelRow(kv.Key, FuelName(kv.Key), kv.Value))
+            var fuelIds = power.Plants
+                .Where(p => p.Kind == Pulsar4X.Energy.ColonyPowerPlantKind.Fuel && !string.IsNullOrEmpty(p.FuelId))
+                .Select(p => p.FuelId!)
+                .Distinct()
+                .OrderBy(id => id, StringComparer.Ordinal)
+                .ToList();
+            var fuel = fuelIds
+                .Select(id =>
+                {
+                    double atFull = power.FuelAtFull_kgPerDay.TryGetValue(id, out var f) ? f : 0;
+                    double burnt = power.FuelBurnt_kgLastDay.TryGetValue(id, out var b) ? b : 0;
+                    double stock = Pulsar4X.Energy.ColonyPowerProcessor.FuelAvailable_kg(e, power, id);
+                    double? runway = burnt > 0 ? stock / burnt : null;
+                    return new ColonyPowerFuelRow(id, FuelName(id), atFull, burnt, stock, runway);
+                })
                 .ToList();
             return new ColonyPowerView(power.EnergyTypeID, power.Demand_kW, power.Generation_kW, power.Delivered_kW,
                 power.GridEfficiency, power.StoreMax_kJ, power.LifeSupport_kW, power.LifeSupportColonists,
-                consumers, plants, tiers, fuel);
+                consumers, plants, tiers, fuel, power.Dispatched_kW);
         }
 
         private static bool HasInstalledInfrastructure(Entity colony)

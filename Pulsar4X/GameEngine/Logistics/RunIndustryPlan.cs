@@ -48,6 +48,10 @@ public class RunIndustryPlan : IGoalPlanner
                     continue;
 
                 long stock = StockOf(managedEntity, info, material.UniqueID);
+                // Power plant fuel kept for the runway is not a pile to top up; a fuel below
+                // its runway is refined first.
+                long reserve = Pulsar4X.Energy.ColonyPowerProcessor.FuelReserveUnits(managedEntity, material.UniqueID);
+                long net = stock - reserve;
                 if (managedEntity.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy)
                     && policy.Rows.TryGetValue(design.UniqueID, out var row))
                 {
@@ -59,9 +63,11 @@ public class RunIndustryPlan : IGoalPlanner
                 {
                     CargoId = material.UniqueID,
                     LineId = lineId,
-                    Stock = stock,
+                    Stock = net,
+                    RawStock = stock,
                     OutputAmount = material.OutputAmount,
-                    Batches = stock / material.OutputAmount,
+                    Batches = net / material.OutputAmount,
+                    FuelShort = reserve > 0 && net < 0,
                 });
             }
         }
@@ -73,11 +79,14 @@ public class RunIndustryPlan : IGoalPlanner
         // waits. Earth also unlocks plastic, ntp and fissile fuels with none
         // stored; stainless steel is the thinnest pile it does have.
         // When nothing refined is stored, every payable recipe stays in the list.
-        if (candidates.Exists(candidate => candidate.Stock > 0))
-            candidates.RemoveAll(candidate => candidate.Stock <= 0);
+        if (candidates.Exists(candidate => candidate.Stock > 0 || candidate.FuelShort))
+            candidates.RemoveAll(candidate => candidate.Stock <= 0 && !candidate.FuelShort);
 
         candidates.Sort(static (a, b) =>
         {
+            int byFuel = b.FuelShort.CompareTo(a.FuelShort);
+            if (byFuel != 0)
+                return byFuel;
             int byBatches = a.Batches.CompareTo(b.Batches);
             if (byBatches != 0)
                 return byBatches;
@@ -155,7 +164,7 @@ public class RunIndustryPlan : IGoalPlanner
         {
             CargoId = chosen.CargoId,
             Min = 0,
-            Max = chosen.Stock + chosen.OutputAmount,
+            Max = chosen.RawStock + chosen.OutputAmount,
             AutoProduce = false,
             Ask = 0,
             Bid = 0,
@@ -187,7 +196,9 @@ public class RunIndustryPlan : IGoalPlanner
         public string CargoId = "";
         public string LineId = "";
         public long Stock;
+        public long RawStock;
         public long OutputAmount;
+        public bool FuelShort;
         public long Batches;
     }
 }

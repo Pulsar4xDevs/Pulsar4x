@@ -673,5 +673,60 @@
         { "Key": "Class Length", "Value": 12 }
       ]
     }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-fission-plant-75",
+      "Name": "Fission Plant 75 MW",
+      "TemplateId": "fission-plant",
+      "Properties": [
+        { "Key": "Size", "Value": 75 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-fission-plant-200",
+      "Name": "Fission Plant 200 MW",
+      "TemplateId": "fission-plant",
+      "Properties": [
+        { "Key": "Size", "Value": 200 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-fission-plant-3",
+      "Name": "Fission Plant 3 MW",
+      "TemplateId": "fission-plant",
+      "Properties": [
+        { "Key": "Size", "Value": 3 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-fission-plant-2",
+      "Name": "Fission Plant 2 MW",
+      "TemplateId": "fission-plant",
+      "Properties": [
+        { "Key": "Size", "Value": 2 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-thermal-plant-75",
+      "Name": "Thermal Plant 75 MW",
+      "TemplateId": "thermal-plant",
+      "Properties": [
+        { "Key": "Size", "Value": 75 }
+      ]
+    }
   }
 ]

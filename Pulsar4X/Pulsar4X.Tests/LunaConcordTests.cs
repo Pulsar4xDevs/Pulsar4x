@@ -113,9 +113,15 @@ public class LunaConcordTests
 
         Assert.That(colony.GetDataBlob<GoalsDB>().ActiveGoal!.Type, Is.EqualTo(GoalType.OfferStock));
         Assert.That(colony.TryGetDataBlob<LogiBaseDB>(out var book), Is.True);
-        Assert.That(book!.Listings.Keys, Is.EquivalentTo(new[] { "iron", "titanium", "silicon", "methalox" }));
+        Assert.That(book!.Listings.Keys, Is.EquivalentTo(new[] { "iron", "titanium", "silicon", "methalox", "fissile-fuels" }),
+            "fissile fuel is the seeded reactor's runway (energy phase 2)");
         foreach (var listing in book.Listings.Values)
         {
+            if (listing.CargoId == "fissile-fuels")
+            {
+                Assert.That(listing.SellQuantity, Is.EqualTo(0), "the reactor's runway is held back");
+                continue;
+            }
             Assert.That(listing.SellQuantity, Is.GreaterThan(0), listing.CargoId);
             Assert.That(listing.BuyQuantity, Is.EqualTo(0));
             Assert.That(listing.Ask, Is.EqualTo(0));
@@ -125,7 +131,7 @@ public class LunaConcordTests
         Assert.That(view, Is.Not.Null);
         Assert.That(view!.CanEdit, Is.False);
         Assert.That(view.Goods.Select(good => good.CargoId), Is.EquivalentTo(book.Listings.Keys));
-        Assert.That(view.Goods.All(good => good.SellQuantity > 0));
+        Assert.That(view.Goods.Where(good => good.CargoId != "fissile-fuels").All(good => good.SellQuantity > 0));
         if (colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
             Assert.That(industry.ProductionLines.Values.All(line => line.Jobs.Count == 0), Is.True);
     }

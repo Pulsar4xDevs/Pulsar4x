@@ -289,16 +289,19 @@ namespace Pulsar4X.Client
             ImGui.EndChild();
         }
 
-        /// <summary>The colony power grid: demand by facility against generation. Advisory only.</summary>
+        /// <summary>The colony power grid: demand by facility against generation, tier shares and plant fuel.</summary>
         private static void DisplayPower(ColonyPowerView power)
         {
-            ImGui.TextWrapped("Advisory: the grid is not enforced yet. Nothing is slowed by a shortfall, no fuel is burnt and batteries are not charged.");
+            ImGui.TextWrapped("Plants burn fuel from the colony stockpile once a day. In a shortfall, higher tiers are served first and industry, mining and research slow to their tier's share. Batteries are not charged yet.");
             ImGui.Separator();
 
             if (ImGui.BeginTable("PowerSummary", 2, ImGuiTableFlags.SizingFixedFit))
             {
                 DisplayHelpers.PrintRow("Demand", Stringify.Power(power.Demand_kW));
-                DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW));
+                DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW),
+                    tooltipTwo: "What the plants can give now");
+                DisplayHelpers.PrintRow("Running at", Stringify.Power(power.Dispatched_kW),
+                    tooltipTwo: "Average plant output in the last daily pass");
                 DisplayHelpers.PrintRow("Delivered", Stringify.Power(power.Delivered_kW),
                     tooltipTwo: $"After {(1 - power.GridEfficiency) * 100:0.#}% grid loss");
                 DisplayHelpers.PrintRow("Balance", (power.Balance_kW < 0 ? "-" : "+") + Stringify.Power(Math.Abs(power.Balance_kW)));
@@ -307,7 +310,7 @@ namespace Pulsar4X.Client
                 ImGui.EndTable();
             }
             if (power.Balance_kW < 0)
-                ImGui.TextColored(new Vector4(1f, 0.6f, 0.2f, 1f), "Generation does not cover demand. Lower tiers would go short first.");
+                ImGui.TextColored(new Vector4(1f, 0.6f, 0.2f, 1f), "Generation does not cover demand. Lower tiers go short first.");
 
             ImGui.SeparatorText("Demand by facility");
             if (ImGui.BeginTable("PowerConsumers", 4, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
@@ -372,12 +375,12 @@ namespace Pulsar4X.Client
                 ImGui.EndTable();
             }
 
-            ImGui.SeparatorText("If power ran short");
+            ImGui.SeparatorText("Tier shares");
             if (ImGui.BeginTable("PowerTiers", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
             {
                 ImGui.TableSetupColumn("Tier (served in order)");
                 ImGui.TableSetupColumn("Demand");
-                ImGui.TableSetupColumn("Would get");
+                ImGui.TableSetupColumn("Supplied");
                 ImGui.TableHeadersRow();
                 foreach (var t in power.Tiers.Where(t => t.Demand_kW > 0))
                 {
@@ -390,6 +393,32 @@ namespace Pulsar4X.Client
                     ImGui.Text($"{t.Satisfaction * 100:0.#}%");
                 }
                 ImGui.EndTable();
+            }
+
+            if (power.Fuel.Count > 0)
+            {
+                ImGui.SeparatorText("Plant fuel");
+                if (ImGui.BeginTable("PowerFuel", 4, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+                {
+                    ImGui.TableSetupColumn("Fuel");
+                    ImGui.TableSetupColumn("In stock");
+                    ImGui.TableSetupColumn("Burnt last day");
+                    ImGui.TableSetupColumn("Lasts");
+                    ImGui.TableHeadersRow();
+                    foreach (var f in power.Fuel)
+                    {
+                        ImGui.TableNextRow();
+                        ImGui.TableNextColumn();
+                        ImGui.Text(f.FuelName);
+                        ImGui.TableNextColumn();
+                        ImGui.Text(Stringify.Mass(f.Stock_kg));
+                        ImGui.TableNextColumn();
+                        ImGui.Text(Stringify.Mass(f.BurntLastDay_kg));
+                        ImGui.TableNextColumn();
+                        ImGui.Text(f.RunwayDays is { } days ? $"{days:N0} days" : "-");
+                    }
+                    ImGui.EndTable();
+                }
             }
         }
 

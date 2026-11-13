@@ -32,6 +32,8 @@ namespace Pulsar4X.Client
                 ("ProductionCompleted", "Production completed"),
                 ("ShipRefitCompleted", "Ship refit completed"),
                 ("FuelExhausted", "Fuel exhausted"),
+                ("PlantOutOfFuel", "Power plant out of fuel"),
+                ("PowerShortage", "Power shortage"),
             }),
             ("Combat", new[]
             {

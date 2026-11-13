@@ -160,9 +160,10 @@ public class RunMarketPlan : IGoalPlanner
 
     static long Needed(Entity colony, string cargoId)
     {
+        // Power plant fuel is held back for the plants' runway, and bid for when short.
+        long sum = Pulsar4X.Energy.ColonyPowerProcessor.FuelReserveUnits(colony, cargoId);
         if (!colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
-            return 0;
-        long sum = 0;
+            return sum;
         foreach (var line in industry.ProductionLines.Values)
         {
             foreach (var job in line.Jobs)

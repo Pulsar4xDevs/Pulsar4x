@@ -171,6 +171,9 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         }
 
         instancesDB.RemoveComponentInstance(instance);
+
+        // Re-sum what depends on the installations (infrastructure, the power grid, max population).
+        ReCalcProcessor.ReCalcAbilities(this);
     }
 
     public void Destroy()
