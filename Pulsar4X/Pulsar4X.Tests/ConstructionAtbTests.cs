@@ -125,7 +125,7 @@ public class ConstructionAtbTests
         Assert.That(moduleDesign.ComponentMountType.HasFlag(ComponentMountType.ShipCargo), Is.True);
         Assert.That(moduleDesign.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation), Is.False);
         Assert.That(moduleDesign.CargoTypeID, Is.EqualTo("general-storage"));
-        Assert.That(moduleDesign.CrewReq, Is.EqualTo(100));
+        Assert.That(moduleDesign.CrewReq, Is.EqualTo(20), "crew plan phase 0: 20 per size (was 100)");
 
         var yard = info.ComponentDesigns["default-design-shipyard"];
         var refit = yard.GetAttribute<ConstructionAtb>();
@@ -139,7 +139,7 @@ public class ConstructionAtbTests
     }
 
     [Test]
-    public void Size2Module_HasTenPointsAndTwoHundredCrew()
+    public void Size2Module_HasTenPointsAndFortyCrew()
     {
         var modLoader = new ModLoader();
         var store = new ModDataStore();
@@ -174,7 +174,7 @@ public class ConstructionAtbTests
             var atb = design.GetAttribute<ConstructionAtb>();
             Assert.That(atb.ConstructionPoints["installation"], Is.EqualTo(10));
             Assert.That(atb.ConstructionPoints.ContainsKey("ship-refit"), Is.False);
-            Assert.That(design.CrewReq, Is.EqualTo(200));
+            Assert.That(design.CrewReq, Is.EqualTo(40), "linear in size: 20 per size (was 100)");
             Assert.That(design.MassPerUnit, Is.EqualTo(10_000));
         }
         finally

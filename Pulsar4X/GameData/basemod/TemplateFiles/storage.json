@@ -141,7 +141,7 @@
         "Mass": "PropertyValue('Size Efficiency') * 1.0",
         "Volume": "PropertyValue('Storage Volume') + PropertyValue('Size Efficiency')",
         "HTK": "0.5",
-        "CrewReq": "Max(1, PropertyValue('Size Efficiency') * 0.1)",
+        "CrewReq": "Max(1, 0.33 * Pow(PropertyValue('Size Efficiency'), 0.7))",
         "ResearchCost": "0",
         "CreditCost": "[Mass] * 0.12",
         "BuildPointCost": "[Mass] * 4.5"
@@ -193,7 +193,7 @@
         "Mass": "PropertyValue('Berths') * 0.1",
         "Volume": "PropertyValue('Berths') * 0.065",
         "HTK": "0.5",
-        "CrewReq": "Max(1, PropertyValue('Berths') * 0.01)",
+        "CrewReq": "Max(1, 0.06 * Pow(PropertyValue('Berths'), 0.7))",
         "ResearchCost": "0",
         "CreditCost": "[Mass] * 0.12",
         "BuildPointCost": "[Mass] * 4.5"
@@ -331,7 +331,7 @@
         "Mass": "PropertyValue('Size') * 1.5",
         "Volume": "PropertyValue('Size')",
         "HTK": "0.5",
-        "CrewReq": "Max(5, PropertyValue('Size') * 0.001)",
+        "CrewReq": "Max(5, 0.01 * Pow(PropertyValue('Size'), 0.7))",
         "ResearchCost": "0",
         "CreditCost": "[Mass] * 0.12",
         "BuildPointCost": "[Mass] * 4.5"

@@ -102,7 +102,7 @@ namespace Pulsar4X.Weapons
                 {
                     mass += component.design.MassPerUnit * component.count;
                     vol += component.design.VolumePerUnit * component.count;
-                    CreditCost += component.design.CreditCost;
+                    CreditCost += component.design.CreditCost * component.count;
 
                     if (ComponentCosts.ContainsKey(component.design.UniqueID))
                     {

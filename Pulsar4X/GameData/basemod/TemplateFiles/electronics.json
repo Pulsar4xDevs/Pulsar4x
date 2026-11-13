@@ -141,7 +141,7 @@
         "Mass": "PropertyValue('Mass')",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "[Mass]",
+        "CrewReq": "Max(1, 0.16 * Pow([Mass], 0.65))",
         "ResearchCost": "[Mass]",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
@@ -226,7 +226,7 @@
         "Mass": "PropertyValue('Mass')",
         "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "0.5",
-        "CrewReq": "8 * PropertyValue('Survey Speed')",
+        "CrewReq": "Max(2, 2 * Pow(PropertyValue('Survey Speed'), 0.7))",
         "ResearchCost": "PropertyValue('Survey Speed')",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
@@ -280,7 +280,7 @@
         "Mass": "PropertyValue('Mass')",
         "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "0.5",
-        "CrewReq": "8 * PropertyValue('Survey Speed')",
+        "CrewReq": "Max(2, 20 * Pow(PropertyValue('Survey Speed') / 10.0, 0.7))",
         "ResearchCost": "PropertyValue('Survey Speed')",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"

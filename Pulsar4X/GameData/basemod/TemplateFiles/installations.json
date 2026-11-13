@@ -1503,11 +1503,11 @@
       "UniqueID": "ship-construction",
       "Name": "Construction Bay",
       "Formulas": {
-        "Description": "A crew-heavy module for a colony ship. Installation points and crew both follow size.",
+        "Description": "A crew-heavy module for a colony ship: five installation points a day and 20 crew per size, both linear in size. Construction Automation cuts the crew.",
         "Mass": "PropertyValue('Size') * 5000",
         "Volume": "[Mass] * 0.1",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Size') * 100",
+        "CrewReq": "Max(1, PropertyValue('Size') * 20 * TechData('tech-construction-automation'))",
         "ResearchCost": "0",
         "CreditCost": "0",
         "BuildPointCost": "[Mass]"

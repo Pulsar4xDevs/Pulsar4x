@@ -320,11 +320,11 @@ public class EnergyPhase6Tests
     {
         var info = _faction.GetDataBlob<FactionInfoDB>();
         var drive = Design("alcubierre-warp-drive", ("Mass", 2000));
-        Assert.That(drive.CrewReq, Is.EqualTo(10), "0.5% of the mass, not one per kg");
+        Assert.That(drive.CrewReq, Is.EqualTo(8), "sub-linear in mass (0.0275 x mass^0.75), not one per kg");
         var bay = Design("ship-construction", ("Size", 1));
         var ship = new ShipDesign(info, "crew-test", new List<(ComponentDesign, int)> { (drive, 1), (bay, 3) },
             (Data.Armor.Values.Concat(Data.LockedArmor.Values).First(), 0f), "crew-test-" + Guid.NewGuid().ToString("N"));
-        Assert.That(ship.CrewReq, Is.EqualTo(10 + 3 * bay.CrewReq));
+        Assert.That(ship.CrewReq, Is.EqualTo(drive.CrewReq + 3 * bay.CrewReq));
     }
 
     // ---- stock ships ----

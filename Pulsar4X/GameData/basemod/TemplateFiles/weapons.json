@@ -9,7 +9,7 @@
         "Mass": "PropertyValue('Power Input') / 1000 + PropertyValue('Chamber Volume') + PropertyValue('Radiator Volume')",
         "Volume": "PropertyValue('Power Input') / 1000 + PropertyValue('Chamber Volume')",
         "HTK": "0.5",
-        "CrewReq": "[Mass]",
+        "CrewReq": "Max(2, 0.02 * Pow([Mass], 0.6))",
         "ResearchCost": "[Mass]",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"

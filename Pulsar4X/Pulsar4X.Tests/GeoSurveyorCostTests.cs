@@ -15,7 +15,8 @@ namespace Pulsar4X.Tests;
 /// <summary>
 /// Geological surveyor costs used to grow with the square or cube of survey speed, so the
 /// cheapest survey point was always the smallest component. They now scale with that same
-/// speed, and a speed of 1 keeps the old numbers.
+/// speed, and a speed of 1 keeps the old numbers. Crew is the exception: since crew plan phase 0
+/// it grows sub-linearly with speed.
 /// </summary>
 [TestFixture]
 public class GeoSurveyorCostTests
@@ -42,18 +43,21 @@ public class GeoSurveyorCostTests
         var mid = Design(faction, data, templateId, 2);
         var fast = Design(faction, data, templateId, 10);
 
-        AssertCosts(slow, 1);
-        AssertCosts(mid, 2);
-        AssertCosts(fast, 10);
+        // Crew is the one cost that grows sub-linearly (crew plan phase 0): about 2 a point at the
+        // stock size (geo 1, grav 10), fewer per point above it.
+        bool grav = templateId == "gravitational-surveyor";
+        AssertCosts(slow, 1, grav ? 3 : 2);
+        AssertCosts(mid, 2, grav ? 6 : 3);
+        AssertCosts(fast, 10, grav ? 20 : 10);
     }
 
-    static void AssertCosts(ComponentDesign design, int speed)
+    static void AssertCosts(ComponentDesign design, int speed, int crew)
     {
         uint actual = design.TryGetAttribute<GeoSurveyAtb>(out var geo) ? geo.Speed : design.GetAttribute<GravSurveyAtb>().Speed;
         Assert.That(actual, Is.EqualTo((uint)speed), "survey speed");
         Assert.That(design.MassPerUnit, Is.EqualTo(100L * speed), "mass");
         Assert.That(design.VolumePerUnit, Is.EqualTo(10d * speed).Within(1e-9), "volume");
-        Assert.That(design.CrewReq, Is.EqualTo(8 * speed), "crew");
+        Assert.That(design.CrewReq, Is.EqualTo(crew), "crew");
         Assert.That(design.ResearchCostValue, Is.EqualTo((long)speed), "research");
         Assert.That(design.CreditCost, Is.EqualTo(100 * speed), "credits");
         Assert.That(design.IndustryPointCosts, Is.EqualTo(100L * speed), "build points");

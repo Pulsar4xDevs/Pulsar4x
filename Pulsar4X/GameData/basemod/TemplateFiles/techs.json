@@ -555,6 +555,7 @@
           "tech-thermal-efficiency",
           "tech-grid-distribution",
           "tech-industrial-energy-efficiency",
+          "tech-construction-automation",
           "tech-fuel-cells",
           "tech-reactor-power-density",
           "tech-power-conversion",
@@ -746,6 +747,7 @@
           "tech-thermal-efficiency",
           "tech-grid-distribution",
           "tech-industrial-energy-efficiency",
+          "tech-construction-automation",
           "tech-fuel-cells"
         ]
       }
@@ -914,6 +916,18 @@
       "Category": "tech-category-construction-production",
       "MaxLevel": 8,
       "DataFormula": "1 - [Level] * 0.05",
+      "CostFormula": "(1 + [Level]) * 1000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-construction-automation",
+      "Name": "Construction Automation",
+      "Description": "Assembly robots, powered tools and machine-guided fitting. Multiplies the crew a ship's construction bay needs: x1 at level 0, x0.85 a level, to about x0.27 at level 8. Applies to bays designed after the research; existing designs keep their crew.",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 8,
+      "DataFormula": "Pow(0.85, [Level])",
       "CostFormula": "(1 + [Level]) * 1000"
     }
   },
