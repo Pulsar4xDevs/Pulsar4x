@@ -393,6 +393,51 @@ public class ColonyPowerTests
     }
 
     [Test]
+    public void History_FillsAGapWithInterpolatedDays()
+    {
+        var power = Power(_earthColony);
+        var day0 = new DateTime(2100, 1, 1, 6, 0, 0);
+        power.RecordDay(new ColonyPowerSample(day0, 100, 200, 50, 0));
+        power.RecordDay(new ColonyPowerSample(day0.AddDays(10), 300, 400, 250, 1000));
+
+        Assert.That(power.History, Has.Count.EqualTo(11), "the first sample, 9 filled days and the new sample");
+        for (int i = 0; i < power.History.Count; i++)
+            Assert.That(power.History[i].Date, Is.EqualTo(day0.AddDays(i)), "consecutive days");
+
+        var mid = power.History[5];
+        Assert.That(mid.Demand_kW, Is.EqualTo(200).Within(1e-9));
+        Assert.That(mid.Generation_kW, Is.EqualTo(300).Within(1e-9));
+        Assert.That(mid.Delivered_kW, Is.EqualTo(150).Within(1e-9));
+        Assert.That(mid.Stored_kJ, Is.EqualTo(500).Within(1e-9));
+
+        var third = power.History[3];
+        Assert.That(third.Demand_kW, Is.EqualTo(160).Within(1e-9));
+        Assert.That(third.Generation_kW, Is.EqualTo(260).Within(1e-9));
+        Assert.That(third.Delivered_kW, Is.EqualTo(110).Within(1e-9));
+        Assert.That(third.Stored_kJ, Is.EqualTo(300).Within(1e-9));
+
+        Assert.That(power.History[^1], Is.EqualTo(new ColonyPowerSample(day0.AddDays(10), 300, 400, 250, 1000)));
+    }
+
+    [Test]
+    public void History_GapLongerThanTheCap_KeepsTheLastNinetyDays()
+    {
+        var power = Power(_earthColony);
+        var day0 = new DateTime(2100, 1, 1);
+        power.RecordDay(new ColonyPowerSample(day0, 0, 0, 0, 0));
+        var end = day0.AddDays(1000);
+        power.RecordDay(new ColonyPowerSample(end, 1000, 2000, 3000, 4000));
+
+        Assert.That(power.History, Has.Count.EqualTo(ColonyPowerDB.HistoryDays));
+        for (int i = 0; i < power.History.Count; i++)
+            Assert.That(power.History[i].Date, Is.EqualTo(end.AddDays(i - (ColonyPowerDB.HistoryDays - 1))), "consecutive days ending at the new sample");
+        var first = power.History[0];
+        Assert.That(first.Demand_kW, Is.EqualTo(911).Within(1e-9), "day 911 of a 0→1000 ramp");
+        Assert.That(first.Stored_kJ, Is.EqualTo(3644).Within(1e-9));
+        Assert.That(power.History[^1].Demand_kW, Is.EqualTo(1000));
+    }
+
+    [Test]
     public void History_NullFromAnOldSave_IsTreatedAsEmpty()
     {
         var power = Power(_earthColony);

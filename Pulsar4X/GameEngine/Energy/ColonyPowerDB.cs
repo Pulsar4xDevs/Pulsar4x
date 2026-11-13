@@ -109,19 +109,50 @@ namespace Pulsar4X.Energy
 
         /// <summary>
         /// Adds a day's sample. A second pass on the same day replaces that day's sample,
-        /// so the history stays one sample per day.
+        /// so the history stays one sample per day. When the new sample is more than a day after
+        /// the last one (a background system runs its daily pass less often), each missing day is
+        /// filled with a sample linearly interpolated between the two. This is for display only.
+        /// Only the fills that the <see cref="HistoryDays"/> cap keeps are computed.
         /// </summary>
         internal void RecordDay(ColonyPowerSample sample)
         {
             // A save that wrote "History": null loads as null. Treat it as empty.
             History ??= new List<ColonyPowerSample>();
-            if (History.Count > 0 && History[History.Count - 1].Date.Date == sample.Date.Date)
-                History[History.Count - 1] = sample;
-            else
-                History.Add(sample);
+            if (History.Count > 0)
+            {
+                var last = History[History.Count - 1];
+                int gapDays = (sample.Date.Date - last.Date.Date).Days;
+                if (gapDays == 0)
+                {
+                    History[History.Count - 1] = sample;
+                    return;
+                }
+                if (gapDays > 1)
+                {
+                    // Fill days 1..gapDays-1 after the last sample. The new sample takes one slot, so
+                    // at most HistoryDays - 1 fills survive the cap: skip the older ones, and if any
+                    // are skipped, every existing sample would be dropped too.
+                    int firstFill = Math.Max(1, gapDays - (HistoryDays - 1));
+                    if (firstFill > 1)
+                        History.Clear();
+                    for (int k = firstFill; k < gapDays; k++)
+                    {
+                        double t = (double)k / gapDays;
+                        History.Add(new ColonyPowerSample(
+                            last.Date.AddDays(k),
+                            Lerp(last.Demand_kW, sample.Demand_kW, t),
+                            Lerp(last.Generation_kW, sample.Generation_kW, t),
+                            Lerp(last.Delivered_kW, sample.Delivered_kW, t),
+                            Lerp(last.Stored_kJ, sample.Stored_kJ, t)));
+                    }
+                }
+            }
+            History.Add(sample);
             if (History.Count > HistoryDays)
                 History.RemoveRange(0, History.Count - HistoryDays);
         }
+
+        private static double Lerp(double a, double b, double t) => a + (b - a) * t;
 
         public ColonyPowerDB() { }
 
