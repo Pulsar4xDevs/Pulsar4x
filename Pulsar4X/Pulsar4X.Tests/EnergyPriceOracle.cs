@@ -66,7 +66,8 @@ static class EnergyPriceOracle
         double au = game.Settings.DepotDeliveryDistance_AU;
         if (!(au > 0))
             return 0;
-        double speed = 42174 * 0.5;
+        // Crew plan phase 4: the miner's 4 t reactor (+2,000 kg dry, 49,422 kg) slows its drive from 42,174 m/s.
+        double speed = 40467 * 0.5;
         double legKJ = 4e6 / 3 + 15 * (au * UniversalConstants.Units.MetersPerAu / speed);
         // Energy phase 6: the turbine's fissile fuel for that energy (50 kW of heat per 15 kW,
         // 40e9 kJ per kg) at its embodied energy.

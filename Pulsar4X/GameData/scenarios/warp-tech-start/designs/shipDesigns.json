@@ -17,7 +17,7 @@
         { "Id": "default-design-cargo-hold-1t", "Amount": 1 },
         { "Id": "default-design-alcubierre-2k", "Amount": 1 },
         { "Id": "default-design-battery-2t", "Amount": 2 },
-        { "Id": "default-design-reactor-2t", "Amount": 1 },
+        { "Id": "default-design-reactor-4t", "Amount": 1 },
         { "Id": "default-design-rs-25", "Amount": 1 }
       ]
     }
@@ -42,7 +42,7 @@
         { "Id": "default-design-passenger-hold", "Amount": 1 },
         { "Id": "default-design-alcubierre-2k", "Amount": 1 },
         { "Id": "default-design-battery-2t", "Amount": 2 },
-        { "Id": "default-design-reactor-2t", "Amount": 1 },
+        { "Id": "default-design-reactor-5t", "Amount": 1 },
         { "Id": "default-design-raptor", "Amount": 2 }
       ]
     }
@@ -67,7 +67,7 @@
         { "Id": "default-design-cargo-hold-5t", "Amount": 1 },
         { "Id": "default-design-alcubierre-2k", "Amount": 1 },
         { "Id": "default-design-battery-2t", "Amount": 2 },
-        { "Id": "default-design-reactor-2t", "Amount": 1 },
+        { "Id": "default-design-reactor-7t", "Amount": 1 },
         { "Id": "default-design-raptor", "Amount": 2 }
       ]
     }
@@ -91,7 +91,7 @@
         { "Id": "default-design-fuel-tank-3000", "Amount": 1 },
         { "Id": "default-design-alcubierre-2k", "Amount": 1 },
         { "Id": "default-design-battery-2t", "Amount": 2 },
-        { "Id": "default-design-reactor-2t", "Amount": 2 },
+        { "Id": "default-design-reactor-3t", "Amount": 2 },
         { "Id": "default-design-raptor", "Amount": 2 }
       ]
     }
@@ -116,7 +116,7 @@
         { "Id": "default-design-alcubierre-500", "Amount": 4 },
         { "Id": "default-design_solarpanel", "Amount": 1 },
         { "Id": "default-design-battery-2t", "Amount": 3 },
-        { "Id": "default-design-reactor-2t", "Amount": 1 },
+        { "Id": "default-design-reactor-5t", "Amount": 1 },
         { "Id": "default-design-NTR1.8", "Amount": 4 }
       ]
     }
@@ -142,7 +142,7 @@
         { "Id": "default-design-fuel-tank-1000", "Amount": 2 },
         { "Id": "default-design-alcubierre-500", "Amount": 4 },
         { "Id": "default-design-battery-2t", "Amount": 3 },
-        { "Id": "default-design-reactor-2t", "Amount": 1 },
+        { "Id": "default-design-reactor-7t", "Amount": 1 },
         { "Id": "default-design-NTR1.8", "Amount": 3 }
         
       ]
@@ -160,10 +160,11 @@
       "Components": [
         { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
         { "Id": "default-design-bridge-well", "Amount": 1 },
-        { "Id": "default-design-crew-quarters-1", "Amount": 1 },
+        { "Id": "default-design-crew-quarters-1", "Amount": 3 },
         { "Id": "default-design-fuel-tank-1500", "Amount": 1 },
         { "Id": "default-design-cargo-hold-1t", "Amount": 1 },
-        { "Id": "default-design-raptor", "Amount": 3 }
+        { "Id": "default-design-raptor", "Amount": 3 },
+        { "Id": "default-design-reactor-2t", "Amount": 1 }
       ]
     }
   },
@@ -186,7 +187,7 @@
         { "Id": "default-design-fuel-tank-1000", "Amount": 2 },
         { "Id": "default-design-alcubierre-500", "Amount": 4 },
         { "Id": "default-design-battery-2t", "Amount": 3 },
-        { "Id": "default-design-reactor-2t", "Amount": 1 },
+        { "Id": "default-design-reactor-6t", "Amount": 1 },
         { "Id": "default-design-raptor", "Amount": 1 }
       ]
     }
@@ -209,7 +210,7 @@
         { "Id": "default-design-fuel-tank-1000", "Amount": 2 },
         { "Id": "default-design-alcubierre-500", "Amount": 4 },
         { "Id": "default-design-battery-2t", "Amount": 3 },
-        { "Id": "default-design-reactor-2t", "Amount": 1 },
+        { "Id": "default-design-reactor-4t", "Amount": 1 },
         { "Id": "default-design-raptor", "Amount": 1 }
       ]
     }
@@ -233,7 +234,7 @@
         { "Id": "default-design-fuel-tank-1000", "Amount": 2 },
         { "Id": "default-design-alcubierre-500", "Amount": 4 },
         { "Id": "default-design-battery-2t", "Amount": 3 },
-        { "Id": "default-design-reactor-2t", "Amount": 1 },
+        { "Id": "default-design-reactor-4t", "Amount": 1 },
         { "Id": "default-design-raptor", "Amount": 1 }
       ]
     }
@@ -257,7 +258,7 @@
         { "Id": "default-design-fuel-tank-1000", "Amount": 2 },
         { "Id": "default-design-alcubierre-500", "Amount": 4 },
         { "Id": "default-design-battery-2t", "Amount": 3 },
-        { "Id": "default-design-reactor-2t", "Amount": 1 },
+        { "Id": "default-design-reactor-3t", "Amount": 1 },
         { "Id": "default-design-raptor", "Amount": 1 }
       ]
     }

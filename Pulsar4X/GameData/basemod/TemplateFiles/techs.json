@@ -2,6 +2,18 @@
   {
     "Type": "Tech",
     "Payload": {
+      "UniqueID": "tech-life-support-efficiency",
+      "Name": "Closed-Loop Life Support",
+      "Description": "Better air and water recycling, heat recovery and lighting. Multiplies a ship's life support per crew aboard (1 kW at level 0) and the hostile-world term of a sealed colony's life support: x1 at level 0, x0.85 a level, to about x0.27 at level 8. Applies at once to every ship and colony.",
+      "Category": "tech-category-biology-genetics",
+      "MaxLevel": 8,
+      "DataFormula": "Pow(0.85, [Level])",
+      "CostFormula": "(1 + [Level]) * 1000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
       "UniqueID": "tech-infra-gravity-range",
       "Name": "Habitat Gravity Tolerance",
       "Description": "Widens the infrastructure window on the prefab and the site. It does not move the prefab track. Level 0 is 1.962 m/s² wide. Level 3 is about 6.7 m/s², enough to cover Earth and Mars in one window. Level 6 is about 11.4 m/s², enough to cover Luna through Earth.",
@@ -556,6 +568,7 @@
           "tech-grid-distribution",
           "tech-industrial-energy-efficiency",
           "tech-construction-automation",
+          "tech-life-support-efficiency",
           "tech-fuel-cells",
           "tech-reactor-power-density",
           "tech-power-conversion",
@@ -748,6 +761,7 @@
           "tech-grid-distribution",
           "tech-industrial-energy-efficiency",
           "tech-construction-automation",
+          "tech-life-support-efficiency",
           "tech-fuel-cells"
         ]
       }

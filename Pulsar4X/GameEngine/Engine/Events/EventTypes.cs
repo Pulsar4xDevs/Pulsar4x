@@ -78,6 +78,8 @@ namespace Pulsar4X.Events
         #region Crew (appended so saved ordinals stay put)
         CrewGraduated,
         ShipUnderCrewed,
+        /// <summary>A ship's batteries ran empty while its plant cannot carry its life support (crew plan phase 4).</summary>
+        LifeSupportFailing,
         #endregion
     }
 }

@@ -453,7 +453,7 @@ public sealed record ColonyPowerView(
     /// <summary>True when the world is sealed (colony cost above 0 for its people), so life support pays the hostility term.</summary>
     public bool LifeSupportSealed { get; init; }
 
-    /// <summary>The life-support rate for the Power tab, e.g. "Garden world: 0.05 kW per person" or "Sealed world: 1.85 kW per person". Empty with no colonists.</summary>
+    /// <summary>The life-support rate for the Power tab, e.g. "Garden world: 0.01 kW per person" or "Sealed world: 1.85 kW per person". Empty with no colonists.</summary>
     public string LifeSupportRateLabel { get; init; } = "";
 
     /// <summary>
@@ -622,6 +622,8 @@ public sealed record EnergyView(
 /// A ship's power supply against its current demand, for the entity card's power ring (owner-only).
 /// Projected for every owned ship. A ship with no power plant has HasPlant false and zeros.
 /// Generation_kW is what the plants can give now (a reactor out of fuel gives nothing).
+/// Demand_kW is the warp's demand only: ship life support (crew plan phase 4) is in the engine's must-run
+/// demand but is reported apart, in <see cref="LifeSupport_kW"/> and <see cref="LifeSupportServed_kW"/>.
 /// </summary>
 public sealed record ShipPowerView(double Generation_kW, double Demand_kW, double Stored_kJ, double StoreMax_kJ, bool HasPlant) : IComponentView
 {
@@ -652,16 +654,19 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
     /// </summary>
     // ---- Ship life support (crew plan phase 4) ----
 
-    /// <summary>True once ships draw life support (phase 4). While false the life support fields are 0 and the row should not show.</summary>
+    /// <summary>True for a ship that tracks crew (has a ShipCrewDB). While false the life support fields are 0 and the row should not show.</summary>
     public bool HasLifeSupport { get; init; }
 
     /// <summary>People aboard that life support keeps alive (the ship's crew aboard).</summary>
     public int LifeSupportCrew { get; init; }
 
-    /// <summary>Life support per crew aboard, kW (1 kW × the faction's life-support efficiency tech). 0 until phase 4.</summary>
+    /// <summary>Life support per crew aboard, kW (1 kW × the faction's life-support efficiency tech). 0 without crew tracking.</summary>
     public double LifeSupportPerCrew_kW { get; init; }
 
-    /// <summary>Life support draw, kW: <see cref="LifeSupportCrew"/> × <see cref="LifeSupportPerCrew_kW"/>. 0 until phase 4.</summary>
+    /// <summary>
+    /// Life support booked on the plant, kW: <see cref="LifeSupportCrew"/> × <see cref="LifeSupportPerCrew_kW"/>
+    /// (0 for a ship with no plant). Part of the engine's must-run demand, but not of <see cref="Demand_kW"/> or <see cref="TotalDemand_kW"/>.
+    /// </summary>
     public double LifeSupport_kW { get; init; }
 
     /// <summary>
@@ -669,6 +674,20 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
     /// not an aux load that waits for full batteries.
     /// </summary>
     public bool LifeSupportMustRun { get; init; } = true;
+
+    /// <summary>
+    /// Life support actually powered now, kW: <see cref="LifeSupport_kW"/> × <see cref="LifeSupportServedFraction"/>.
+    /// </summary>
+    public double LifeSupportServed_kW { get; init; }
+
+    /// <summary>
+    /// Share of life support powered now, 0..1; 1 with no life-support load. The engine serves its
+    /// must-run demand (warp plus life support, shared alike) from the plant's output and, while the
+    /// batteries hold charge, from them up to their discharge limit: (generation + battery discharge
+    /// limit if charged) / (warp + life support demand), capped at 1. Below 1 only when the batteries
+    /// are empty (or rate-limited) and the plant cannot carry the must-run load.
+    /// </summary>
+    public double LifeSupportServedFraction { get; init; } = 1;
 
     public double? FullIn_s
     {
@@ -684,7 +703,7 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
     /// <summary>True while the batteries charge and the other loads wait for them (not a shortage).</summary>
     public bool LoadsWaitOnCharge => Charging_kW > 0 && AuxDemand_kW > 0 && AuxServed_kW < AuxDemand_kW;
 
-    /// <summary>Warp demand plus the other loads, kW.</summary>
+    /// <summary>Warp demand plus the other loads, kW. Excludes ship life support (see <see cref="LifeSupport_kW"/>).</summary>
     public double TotalDemand_kW => Demand_kW + AuxDemand_kW;
 
     /// <summary>What the plants serve now, kW: warp demand up to generation, plus the served other loads.</summary>

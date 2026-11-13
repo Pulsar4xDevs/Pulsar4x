@@ -338,6 +338,9 @@ namespace Pulsar4X.Energy
 
             _energyGenDB.dateTimeLastProcess = atDateTime;
 
+            // Crew plan phase 4: life support is must-run; an empty store the plant cannot cover is an event.
+            Pulsar4X.Ships.ShipCrew.CheckLifeSupport(entity, _energyGenDB, nowStored, atDateTime);
+
             var histogram = _energyGenDB.Histogram;
             int hgFirstIdx = _energyGenDB.HistogramIndex;
             int hgLastIdx;

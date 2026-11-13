@@ -44,6 +44,13 @@ public record struct MoveCostShip
     public double EnergyStoreMax;
     public double EnergyOutputMax;
     /// <summary>
+    /// Life support booked on the plant, kW (crew plan phase 4). Must-run: the warp gets
+    /// <see cref="EnergyOutputMax"/> less this.
+    /// </summary>
+    public double LifeSupport_kW;
+    /// <summary>Plant output left for the warp after life support, kW.</summary>
+    public double WarpOutputMax => Math.Max(0, EnergyOutputMax - Math.Max(0, LifeSupport_kW));
+    /// <summary>
     /// kJ/s the store gains charging at full output with no other demand: the output up to the
     /// battery charge limit, after the charge loss. 0 means "same as EnergyOutputMax".
     /// </summary>
@@ -108,8 +115,10 @@ public record struct MoveCostShip
         if (ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power))
         {
             spec.EnergyOutputMax = power.TotalOutputMax;
+            spec.LifeSupport_kW = Pulsar4X.Ships.ShipCrew.LifeSupport(ship);
             spec.ChargeEfficiency = power.ChargeEfficiency;
-            spec.StoreChargeRate = Math.Min(power.TotalOutputMax, power.ChargeLimit_kW) * power.ChargeEfficiency;
+            // Life support runs first; the batteries charge from what is left.
+            spec.StoreChargeRate = Math.Min(spec.WarpOutputMax, power.ChargeLimit_kW) * power.ChargeEfficiency;
             spec.FreeOutputMax = power.MaxOutputFromSolar + power.DecayOutputMax;
             spec.ReactorOutputMax = power.ReactorOutputMax;
             spec.ReactorFuelType = power.TotalFuelUseAtMax.type;
@@ -179,14 +188,14 @@ public static class MoveCostCalculator
         // scale with cargo. No well flies at drive speed on the base sustain.
         double mass = ship.MassTotal_kg;
         var price = gravity_ms2 > 0 && double.IsFinite(gravity_ms2)
-            ? WarpMath.PriceInWell(ship.Coupling, ship.BleedFraction, ship.EnergyOutputMax, mass,
+            ? WarpMath.PriceInWell(ship.Coupling, ship.BleedFraction, ship.WarpOutputMax, mass,
                 gravity_ms2, radial, drive, ship.BubbleSustainCost)
             : (speed: drive, demandKW: ship.BubbleSustainCost, limitLine: "");
         double speed = price.speed > 0 && double.IsFinite(price.speed) ? price.speed : drive;
         double duration = Math.Max(0, distance_m) / speed;
         // Same gate as the live warp (WarpMath.PriceCruise): the plant holds the demand and the
         // speed reaches WarpMath.MinWarpSpeed_ms.
-        string refusal = WarpMath.WarpRefusal(speed, price.demandKW, ship.EnergyOutputMax);
+        string refusal = WarpMath.WarpRefusal(speed, price.demandKW, ship.WarpOutputMax, ship.LifeSupport_kW);
 
         // WarpMoveProcessor.TryStartWarp and FinishArrival book creation and collapse as one
         // second of that many kW; the sustain demand runs from entry to exit.
@@ -230,9 +239,19 @@ public static class MoveCostCalculator
         double cells = ship.CellFuelPerKJ > 0 ? Math.Max(0, ship.CellOutputMax) : 0;
         double reactorKJ = 0, cellKJ = 0;
 
-        double rest = Math.Max(0, demandKW - free);
-        double fromReactor = Math.Min(rest, reactor);
-        double fromCells = Math.Min(rest - fromReactor, cells);
+        // Crew plan phase 4: life support runs anyway and takes the cheapest sources first; the warp
+        // pays for what its sustain adds on top (free -> reactor -> cells, as dispatched).
+        double baseKW = Math.Max(0, ship.LifeSupport_kW);
+        (double reactor, double cells) Serve(double kw)
+        {
+            double rest = Math.Max(0, kw - free);
+            double r = Math.Min(rest, reactor);
+            return (r, Math.Min(rest - r, cells));
+        }
+        var withWarp = Serve(baseKW + Math.Max(0, demandKW));
+        var without = Serve(baseKW);
+        double fromReactor = withWarp.reactor - without.reactor;
+        double fromCells = withWarp.cells - without.cells;
         if (duration_s > 0 && double.IsFinite(duration_s))
         {
             reactorKJ += fromReactor * duration_s;

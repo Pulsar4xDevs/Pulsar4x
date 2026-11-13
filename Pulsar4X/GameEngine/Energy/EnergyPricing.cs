@@ -65,7 +65,7 @@ namespace Pulsar4X.Energy
         /// </summary>
         public static MoveCostShip ReferenceHauler => new()
         {
-            DryMass_kg = 47422, // crew plan phase 1: + crew quarters (10 + 1 berths)
+            DryMass_kg = 49422, // crew plan phase 1: + crew quarters (10 + 1 berths); phase 4: 4 t reactor
             FuelMass_kg = 2393601,
             FuelType = "methalox",
             ExhaustVelocity = 3615,
@@ -80,14 +80,19 @@ namespace Pulsar4X.Energy
             Coupling = 0.0025,
             BleedFraction = 0.5,
             EnergyStored = 0,
-            EnergyStoreMax = 3000015,
-            EnergyOutputMax = 15,
-            // Energy phase 6: the 2 t steam turbine, 50 kW of core heat at 30% for 15 kW,
-            // burns 50 / 40e9 kg/s of fissile fuel at full output.
-            ReactorOutputMax = 15,
+            EnergyStoreMax = 3000000 + ReferenceReactor_kW,
+            EnergyOutputMax = ReferenceReactor_kW,
+            // Crew plan phase 4: 17 crew aboard at 1 kW each, must-run.
+            LifeSupport_kW = 17,
+            // Energy phase 6: the steam turbine makes electricity at 30% of its core heat and
+            // burns heat / 40e9 kg/s of fissile fuel, so 1 / (0.3 × 40e9) kg per kJ at any size.
+            ReactorOutputMax = ReferenceReactor_kW,
             ReactorFuelType = "fissile-fuels",
             ReactorFuelPerKJ = 50.0 / 40e9 / 15,
         };
+
+        /// <summary>The miner's 4 t steam turbine at tech 0 (crew plan phase 4): 15 kW × (4 t / 2 t)^1.3.</summary>
+        public static readonly double ReferenceReactor_kW = 15 * Math.Pow(2, 1.3);
 
         /// <summary>The reference hauler's general hold, kg (1,000 t of cargo holds).</summary>
         public const double ReferenceHold_kg = 1_000_000;

@@ -29,9 +29,6 @@ namespace Pulsar4X.People
         public const int MaxRemoved = 2;
         public const int MaxAdded = 2;
 
-        /// <summary>Shown on every candidate until payroll exists. Nothing is charged.</summary>
-        public const int PlaceholderWage = 100;
-
         /// <summary>1 at the minimum, plus one per order of magnitude above it, capped at MaxPoolSize. 0 below the minimum.</summary>
         public static int PoolSize(long population)
         {

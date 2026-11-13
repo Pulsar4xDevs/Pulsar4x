@@ -82,7 +82,8 @@ public class DesignWarpWarningTests
         Assert.That(designSustain, Is.EqualTo(warp.BubbleSustainCost));
         Assert.That(designCreation, Is.EqualTo(warp.BubbleCreationCost));
         Assert.That(designOutput, Is.EqualTo(liveOutput));
-        Assert.That(designStore, Is.EqualTo(liveStore), "batteries plus one second of each reactor");
+        // Summed in a different order from installation, so allow float noise (the 3 t reactors are not round numbers).
+        Assert.That(designStore, Is.EqualTo(liveStore).Within(1e-6), "batteries plus one second of each reactor");
     }
 
     [Test]
@@ -90,17 +91,36 @@ public class DesignWarpWarningTests
     {
         var warnings = WarpMath.DesignWarpWarnings(Tanker(drives: 2, reactors: 1, batteries: 4));
         Assert.That(warnings, Has.Count.EqualTo(1));
-        Assert.That(warnings[0], Does.StartWith("Can't warp: bubble sustain needs"));
+        // Crew plan phase 4: the sustain line counts the crew's life support (1 kW per crew at tech 0).
+        Assert.That(warnings[0], Does.StartWith("Can't warp: bubble sustain"));
+        Assert.That(warnings[0], Does.Contain("plus life support"));
         Assert.That(warnings[0], Does.Contain("plant makes"));
     }
 
     [Test]
     public void TwoDrivesTwoBatteries_WarnsCreationOnly()
     {
-        var warnings = WarpMath.DesignWarpWarnings(Tanker(drives: 2, reactors: 2, batteries: 2));
+        // Three reactors: two drives' sustain plus the crew's life support fits the plant (crew plan phase 4).
+        var warnings = WarpMath.DesignWarpWarnings(Tanker(drives: 2, reactors: 3, batteries: 2));
         Assert.That(warnings, Has.Count.EqualTo(1));
         Assert.That(warnings[0], Does.StartWith("Can't warp: bubble creation needs"));
         Assert.That(warnings[0], Does.Contain("batteries hold"));
+    }
+
+    [Test]
+    public void LifeSupport_CountsInTheSustainCheck()
+    {
+        // Crew plan phase 4: one drive and one 3 t reactor (25.4 kW) holds the 15 kW bubble alone,
+        // but not with the crew's life support on top.
+        var parts = Tanker(drives: 1, reactors: 1, batteries: 4);
+        double output = parts.Where(p => p.design.HasAttribute<EnergyGenerationAtb>()).Sum(p => p.design.GetAttribute<EnergyGenerationAtb>().PowerOutputMax * p.count);
+        double sustain = parts.Where(p => p.design.HasAttribute<WarpDriveAtb>()).Sum(p => p.design.GetAttribute<WarpDriveAtb>().BubbleSustainCost * p.count);
+        int crew = ShipCrew.Split(parts).Capacity;
+        Assert.That(output, Is.GreaterThan(sustain));
+        Assert.That(output, Is.LessThan(sustain + crew * 1.0));
+        var warnings = WarpMath.DesignWarpWarnings(parts);
+        Assert.That(warnings, Has.Count.EqualTo(1));
+        Assert.That(warnings[0], Does.Contain("plus life support"));
     }
 
     [Test]

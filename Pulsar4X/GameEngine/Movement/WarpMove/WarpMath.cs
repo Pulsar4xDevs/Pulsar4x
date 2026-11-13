@@ -198,10 +198,17 @@ public static class WarpMath
     /// reach <see cref="MinWarpSpeed_ms"/>. One gate for WarpMoveAction, WarpMoveProcessor.TryStartWarp,
     /// MovePlanner.EvaluateWarp (all through <see cref="PriceCruise"/>) and MoveCostCalculator.Warp.
     /// </summary>
-    public static string WarpRefusal(double speed, double demandKW, double outputKW)
+    /// <param name="outputKW">Plant output left for the warp: total output less life support.</param>
+    /// <param name="lifeSupportKW">Life support already taken off <paramref name="outputKW"/> (crew plan phase 4), for the text.</param>
+    public static string WarpRefusal(double speed, double demandKW, double outputKW, double lifeSupportKW = 0)
     {
         if (demandKW > outputKW)
+        {
+            if (lifeSupportKW > 0)
+                return "Plant output " + Stringify.Power(outputKW + lifeSupportKW) + " less " + Stringify.Power(lifeSupportKW)
+                    + " of life support leaves " + Stringify.Power(outputKW) + ", which cannot hold the warp bubble's " + Stringify.Power(demandKW) + ".";
             return "Plant output " + Stringify.Power(outputKW) + " cannot hold the warp bubble's " + Stringify.Power(demandKW) + ".";
+        }
         if (!(speed >= MinWarpSpeed_ms))
             return "Warp speed " + Stringify.Velocity(speed) + " is below the " + Stringify.Velocity(MinWarpSpeed_ms) + " minimum.";
         return "";
@@ -252,8 +259,13 @@ public static class WarpMath
                 store += plant.PowerOutputMax * count;
         }
 
-        if (sustain > output)
-            warnings.Add("Can't warp: bubble sustain needs " + Stringify.Power(sustain) + ", plant makes " + Stringify.Power(output) + ".");
+        // Crew plan phase 4: life support is must-run, 1 kW per crew at tech 0 (min(required, berths) aboard).
+        double lifeSupport = Pulsar4X.Ships.ShipCrew.Split(components).Capacity * GameSettings.DefaultShipLifeSupport_kWPerCrew;
+        if (sustain + lifeSupport > output)
+            warnings.Add(lifeSupport > 0
+                ? "Can't warp: bubble sustain " + Stringify.Power(sustain) + " plus life support " + Stringify.Power(lifeSupport)
+                    + " needs " + Stringify.Power(sustain + lifeSupport) + ", plant makes " + Stringify.Power(output) + "."
+                : "Can't warp: bubble sustain needs " + Stringify.Power(sustain) + ", plant makes " + Stringify.Power(output) + ".");
         // WarpMoveAction.Execute: storeMax + 1e-6 >= creationCost or the warp fails.
         if (store + 1e-6 < creation)
             warnings.Add("Can't warp: bubble creation needs " + Stringify.Energy(creation) + ", batteries hold " + Stringify.Energy(store) + ".");
@@ -271,11 +283,13 @@ public static class WarpMath
         var warp = ship.GetDataBlob<WarpAbilityDB>();
         double drive = warp.MaxSpeed;
         double sustain = warp.BubbleSustainCost;
-        double outputKW = ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power) ? power.TotalOutputMax : 0;
+        // Crew plan phase 4: life support comes off the top; the bubble gets what is left.
+        double lifeSupportKW = Pulsar4X.Ships.ShipCrew.LifeSupport(ship);
+        double outputKW = ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power) ? Math.Max(0, power.TotalOutputMax - lifeSupportKW) : 0;
         var shipPos = ship.GetDataBlob<PositionDB>().AbsolutePosition;
 
         if (!(drive > 0) || !double.IsFinite(drive))
-            return (drive, sustain, "", shipPos, at, WarpRefusal(drive, sustain, outputKW));
+            return (drive, sustain, "", shipPos, at, WarpRefusal(drive, sustain, outputKW, lifeSupportKW));
 
         var first = GetInterceptPosition(shipPos, drive, target, at, offset);
         var firstPrice = PriceHeading(ship, shipPos, first.position, drive, sustain, outputKW);
@@ -290,7 +304,7 @@ public static class WarpMath
             exit = GetInterceptPosition(shipPos, cruise, target, at, offset);
 
         return (cruise, secondPrice.demandKW, secondPrice.limitLine ?? "", exit.position, exit.etiDateTime,
-            WarpRefusal(cruise, secondPrice.demandKW, outputKW));
+            WarpRefusal(cruise, secondPrice.demandKW, outputKW, lifeSupportKW));
     }
 
     static (double speed, double demandKW, string limitLine) PriceHeading(

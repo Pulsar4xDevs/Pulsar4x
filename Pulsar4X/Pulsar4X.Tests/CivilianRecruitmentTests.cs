@@ -358,7 +358,7 @@ public class CivilianRecruitmentApiTests : ApiTestBase
         Assert.That(view.EmptyReason, Is.Null);
         Assert.That(view.FactionCandidates, Has.Count.EqualTo(7));
         Assert.That(view.FactionCandidates.Count(c => c.ColonyId == b.Id), Is.EqualTo(5));
-        Assert.That(view.FactionCandidates.All(c => c.Wage == Recruitment.PlaceholderWage && !string.IsNullOrEmpty(c.Location)), Is.True);
+        Assert.That(view.FactionCandidates.All(c => c.Wage == (int)GameSettings.DefaultCrewWagePerDay && !string.IsNullOrEmpty(c.Location)), Is.True);
 
         Assert.That(_projector.ProjectEntity(a, other).GetView<RecruitmentView>(), Is.Null);
     }

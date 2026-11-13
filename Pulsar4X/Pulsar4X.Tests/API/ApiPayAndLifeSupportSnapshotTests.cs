@@ -100,10 +100,12 @@ public class ApiPayAndLifeSupportSnapshotTests
         {
             var power = _projector.ProjectEntity(ship, _player.Id).GetView<ShipPowerView>()!;
             Assert.That(power.LifeSupportCrew, Is.EqualTo(ship.GetDataBlob<ShipCrewDB>().Aboard));
-            Assert.That(power.HasLifeSupport, Is.False, "ship life support draws from phase 4");
-            Assert.That(power.LifeSupportPerCrew_kW, Is.EqualTo(0));
-            Assert.That(power.LifeSupport_kW, Is.EqualTo(0));
+            Assert.That(power.HasLifeSupport, Is.True, "crew plan phase 4: ship life support draws");
+            Assert.That(power.LifeSupportPerCrew_kW, Is.EqualTo(1.0).Within(1e-12), "1 kW per crew at life-support tech 0");
+            Assert.That(power.LifeSupport_kW, Is.EqualTo(power.LifeSupportCrew * power.LifeSupportPerCrew_kW).Within(1e-9));
             Assert.That(power.LifeSupportMustRun, Is.True);
+            var group = power.LoadGroups.Single(g => g.Kind == "Life support");
+            Assert.That(group.Demand_kW, Is.EqualTo(power.LifeSupport_kW).Within(1e-9));
         }
     }
 

@@ -24,18 +24,24 @@ namespace Pulsar4X.Energy
     public static class ColonyPowerProcessor
     {
         /// <summary>
-        /// Life support every colonist pays, kW per person, on any world: the survival half of a
-        /// household's electricity (refrigeration, water, minimum heating, cooling and lighting).
-        /// World-average household use is about 0.1 kW per person; the discretionary half is not modelled.
+        /// Life support per person on a garden world (colony cost 0), kW: the survival share of household power
+        /// (refrigeration, water, minimum heating, cooling and lighting). The game's
+        /// <see cref="GameSettings.ColonyGardenLifeSupport_kWPerPerson"/> overrides it.
         /// </summary>
-        public const double LifeSupportBase_kWPerColonist = 0.05;
+        public const double LifeSupportBase_kWPerColonist = GameSettings.DefaultColonyGardenLifeSupport_kWPerPerson;
+
+        /// <summary>
+        /// Base life support per person on a sealed world (colony cost above 0), kW, before the hostility term
+        /// (<see cref="GameSettings.ColonySealedLifeSupport_kWPerPerson"/>).
+        /// </summary>
+        public const double LifeSupportSealed_kWPerColonist = GameSettings.DefaultColonySealedLifeSupport_kWPerPerson;
 
         /// <summary>
         /// Extra life support per colonist per point of the species' colony cost on this body
-        /// (0 on a garden world, capped at 3), kW. Colony cost is what sets how much infrastructure
-        /// a person needs (PopulationProcessor: max pop = support / colony cost).
+        /// (0 on a garden world, capped at 3), kW, times the life-support tech factor. Colony cost is what
+        /// sets how much infrastructure a person needs (PopulationProcessor: max pop = support / colony cost).
         /// </summary>
-        public const double LifeSupportHostile_kWPerColonistPerCost = 0.6;
+        public const double LifeSupportHostile_kWPerColonistPerCost = GameSettings.DefaultColonyHostileLifeSupport_kWPerPersonPerCost;
 
         /// <summary>Solar farms see half a day of sun on average.</summary>
         public const double SolarDayFraction = 0.5;
@@ -735,12 +741,24 @@ namespace Pulsar4X.Energy
         /// </summary>
         internal static (double kW, long colonists) LifeSupport(Entity colonyEntity, ColonyInfoDB colonyInfo)
         {
+            var settings = colonyEntity.Manager?.Game?.Settings;
+            double garden = settings?.ColonyGardenLifeSupport_kWPerPerson ?? LifeSupportBase_kWPerColonist;
+            double sealedBase = settings?.ColonySealedLifeSupport_kWPerPerson ?? LifeSupportSealed_kWPerColonist;
+            double hostile = (settings?.ColonyHostileLifeSupport_kWPerPersonPerCost ?? LifeSupportHostile_kWPerColonistPerCost)
+                * Pulsar4X.Ships.CrewTech.LifeSupportFactor(colonyEntity);
             double kw = 0;
             long colonists = 0;
-            foreach (var (speciesId, people) in colonyInfo.Population)
+            // Trained crew waiting in the pool live at the colony too (crew plan phase 4).
+            var people = new Dictionary<int, long>();
+            foreach (var (speciesId, count) in colonyInfo.Population)
+                if (count > 0)
+                    people[speciesId] = count;
+            if (colonyEntity.TryGetDataBlob<Pulsar4X.Colonies.ColonyCrewPoolDB>(out var pool))
+                foreach (var (speciesId, count) in pool.Trained)
+                    if (count > 0)
+                        people[speciesId] = (people.TryGetValue(speciesId, out var have) ? have : 0) + count;
+            foreach (var (speciesId, count) in people)
             {
-                if (people <= 0)
-                    continue;
                 double cost = 0;
                 if (colonyEntity.Manager.TryGetGlobalEntityById(speciesId, out var speciesEntity)
                     && speciesEntity.TryGetDataBlob<SpeciesDB>(out var species)
@@ -755,8 +773,9 @@ namespace Pulsar4X.Energy
                     if (cost < 0 || double.IsNaN(cost) || cost > SpeciesDBExtensions.MAX_COST)
                         cost = SpeciesDBExtensions.MAX_COST;
                 }
-                kw += people * (LifeSupportBase_kWPerColonist + LifeSupportHostile_kWPerColonistPerCost * cost);
-                colonists += people;
+                double perPerson = cost > 0 ? sealedBase + hostile * cost : garden;
+                kw += count * perPerson;
+                colonists += count;
             }
             return (kw, colonists);
         }

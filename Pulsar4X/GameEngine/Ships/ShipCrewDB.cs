@@ -10,8 +10,20 @@ namespace Pulsar4X.Ships
     /// </summary>
     public class ShipCrewDB : BaseDataBlob
     {
-        [JsonProperty]
-        public int Aboard { get; internal set; }
+        /// <summary>People aboard. Setting it rebooks the ship's life support (crew plan phase 4); loading a save does not.</summary>
+        [JsonIgnore]
+        public int Aboard
+        {
+            get => _aboard;
+            internal set
+            {
+                _aboard = value;
+                if (OwningEntity != null)
+                    ShipCrew.RefreshLifeSupport(OwningEntity);
+            }
+        }
+
+        [JsonProperty("Aboard")] int _aboard;
 
         /// <summary>Fractions of a survey point the crew factor left over, so a slowed surveyor still adds up.</summary>
         [JsonProperty]
@@ -19,6 +31,14 @@ namespace Pulsar4X.Ships
 
         [JsonProperty]
         internal double GravSurveyCarry { get; set; }
+
+        /// <summary>Life support this ship has booked into its plant's must-run demand, kW (crew plan phase 4).</summary>
+        [JsonProperty]
+        public double LifeSupport_kW { get; internal set; }
+
+        /// <summary>True from a "life support failing" event until the plant carries life support again (one event per failure).</summary>
+        [JsonProperty]
+        public bool LifeSupportFailing { get; internal set; }
 
         // Crew split of the mounted parts, refreshed when the part count changes (ShipCrew.Split).
         [JsonIgnore] internal int CachedParts = -1;
@@ -28,14 +48,16 @@ namespace Pulsar4X.Ships
 
         public ShipCrewDB(int aboard)
         {
-            Aboard = aboard;
+            _aboard = aboard;
         }
 
         public ShipCrewDB(ShipCrewDB db)
         {
-            Aboard = db.Aboard;
+            _aboard = db.Aboard;
             GeoSurveyCarry = db.GeoSurveyCarry;
             GravSurveyCarry = db.GravSurveyCarry;
+            LifeSupport_kW = db.LifeSupport_kW;
+            LifeSupportFailing = db.LifeSupportFailing;
         }
 
         public override object Clone() => new ShipCrewDB(this);

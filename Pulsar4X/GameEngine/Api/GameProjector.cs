@@ -397,13 +397,20 @@ namespace Pulsar4X.Engine.Api
             }
             bool hasPlant = energy.MaxOutputFromReactor > 0 || energy.MaxOutputFromSolar > 0 || storeMax > 0
                 || energy.MaxOutputFromCells > 0 || (energy.DecaySources?.Count ?? 0) > 0;
-            double demand = Math.Max(0, energy.Demand);
+            // Crew plan phase 4: the engine's must-run demand is warp plus life support. The view's
+            // Demand_kW (and so TotalDemand_kW, Share, Delivered_kW) stays warp-only; life support has its own fields.
+            double mustRun = Math.Max(0, energy.Demand);
+            double lifeSupport = Math.Min(mustRun, ShipCrew.LifeSupport(ship));
+            double demand = Math.Max(0, mustRun - lifeSupport);
             double generation = energy.TotalOutputMax;
+            // Life support is served by the plant and, while there is charge, the batteries (up to their discharge limit).
+            double fromStore = stored > 1e-9 ? Math.Max(0, energy.DischargeLimit_kW) : 0;
+            double lifeSupportShare = mustRun > 0 ? Math.Clamp((generation + fromStore) / mustRun, 0, 1) : 1;
             double aux = Math.Max(0, energy.AuxDemand);
             double auxServed = Math.Clamp(energy.AuxServed, 0, aux);
             // The engine's step model (EnergyGenProcessor.Phases): with room in the store and output to
             // spare, the spare charges the batteries up to their charge limit; other loads get what is left.
-            double charging = storeMax - stored > 1e-9 ? Math.Min(Math.Max(0, generation - demand), energy.ChargeLimit_kW) : 0;
+            double charging = storeMax - stored > 1e-9 ? Math.Min(Math.Max(0, generation - mustRun), energy.ChargeLimit_kW) : 0;
             double battery = Pulsar4X.Energy.EnergyGenProcessor.BatteryRate(energy);
             double? timeTo = storeMax > 0 && battery > 0 ? (storeMax - Math.Max(0, stored)) / battery
                 : storeMax > 0 && battery < 0 ? Math.Max(0, stored) / -battery
@@ -421,12 +428,14 @@ namespace Pulsar4X.Engine.Api
                 HasDispatched = true,
                 LastDispatch = null,
                 Sources = ShipPowerSources(ship, energy),
-                LoadGroups = ShipPowerLoadGroups(ship, demand, generation, aux, auxServed, charging),
-                // Crew plan phase 4 makes ship life support draw; until then only the crew count is real.
-                HasLifeSupport = false,
+                LoadGroups = ShipPowerLoadGroups(ship, mustRun, lifeSupport, lifeSupportShare, generation, aux, auxServed, charging),
+                // Crew plan phase 4: life support is booked into the plant's must-run demand.
+                HasLifeSupport = ship.HasDataBlob<ShipCrewDB>(),
                 LifeSupportCrew = ShipCrew.Aboard(ship),
-                LifeSupportPerCrew_kW = 0,
-                LifeSupport_kW = 0,
+                LifeSupportPerCrew_kW = ship.HasDataBlob<ShipCrewDB>() ? ShipCrew.KWPerCrew(ship) : 0,
+                LifeSupport_kW = ShipCrew.LifeSupport(ship),
+                LifeSupportServed_kW = lifeSupport * lifeSupportShare,
+                LifeSupportServedFraction = lifeSupport > 0 ? lifeSupportShare : 1,
                 LifeSupportMustRun = true,
             };
         }
@@ -538,17 +547,31 @@ namespace Pulsar4X.Engine.Api
         /// so both groups get the same share. Miners draw per dig (ShipPower.DrawEnergy) and keep no kW
         /// load, so their state comes from the running mining order's report.
         /// </summary>
-        private static IReadOnlyList<ShipPowerLoadGroup> ShipPowerLoadGroups(Entity ship, double demand, double generation, double aux, double auxServed, double charging)
+        private static IReadOnlyList<ShipPowerLoadGroup> ShipPowerLoadGroups(Entity ship, double demand, double lifeSupport, double lifeSupportShare,
+            double generation, double aux, double auxServed, double charging)
         {
             var groups = new List<ShipPowerLoadGroup>();
+
+            // Crew plan phase 4: life support is part of the must-run demand; show it apart from the warp.
+            double mustRunShare = demand > 0 ? Math.Clamp(generation / demand, 0, 1) : 1;
+            if (lifeSupport > 0)
+            {
+                int aboard = ShipCrew.Aboard(ship);
+                groups.Add(new ShipPowerLoadGroup("Life support", lifeSupport, lifeSupport * lifeSupportShare, lifeSupportShare,
+                    StateFor(lifeSupportShare),
+                    new List<ShipPowerLoadRow> { new ShipPowerLoadRow("life-support", "Crew life support", aboard, lifeSupport,
+                        $"{ShipCrew.KWPerCrew(ship):0.###} kW per crew aboard; must run") },
+                    null));
+            }
+            demand = Math.Max(0, demand - lifeSupport);
 
             var drives = DesignsWith<Pulsar4X.Movement.WarpDriveAtb>(ship);
             if (drives.Count > 0 || demand > 0)
             {
-                double share = demand > 0 ? Math.Clamp(generation / demand, 0, 1) : 1;
+                double share = demand > 0 ? mustRunShare : 1;
                 var rows = drives.Select(d => new ShipPowerLoadRow(d.design.UniqueID, d.design.Name, d.count,
                     d.atb.BubbleSustainCost * d.count, "Bubble sustain; creating a bubble draws more for a moment")).ToList();
-                groups.Add(new ShipPowerLoadGroup("Engines and warp", demand, Math.Min(demand, generation), share,
+                groups.Add(new ShipPowerLoadGroup("Engines and warp", demand, demand * share, share,
                     demand > 0 ? StateFor(share) : "Idle", rows,
                     demand > 0 ? null : "Not warping; the drives draw nothing"));
             }
@@ -1582,7 +1605,7 @@ namespace Pulsar4X.Engine.Api
             {
                 string category = game.TechCategories.TryGetValue(candidate.LabCategory, out var cat) ? cat.Name : candidate.LabCategory;
                 var view = new CandidateView(candidate.Id, candidate.Name, candidate.Age, at.Id, at.GetName(factionId),
-                    Recruitment.PlaceholderWage, category, candidate.MaxLabs);
+                    (int)game.Settings.CrewWagePerDay, category, candidate.MaxLabs);
                 all.Add(view);
                 if (at.Id == colony.Id)
                     here.Add(view);

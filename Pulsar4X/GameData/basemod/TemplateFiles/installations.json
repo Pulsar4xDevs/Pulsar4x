@@ -655,10 +655,10 @@
           "Name": "Slip Size",
           "DescriptionFormula": "'Maximum ship mass this slip can work on (kg)'",
           "GuiHint": "GuiSelectionMaxMinInt",
-          "MaxFormula": "TechData('tech-shipyard-slip-max-size') + 29000",
+          "MaxFormula": "TechData('tech-shipyard-slip-max-size') + 33000",
           "MinFormula": "1000",
           "StepFormula": "1000",
-          "PropertyFormula": "34000"
+          "PropertyFormula": "38000"
         },
         {
           "Name": "Crew Size",
