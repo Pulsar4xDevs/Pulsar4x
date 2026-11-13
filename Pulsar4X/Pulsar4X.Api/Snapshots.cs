@@ -98,7 +98,61 @@ public sealed record FactionSnapshot(
     decimal Funds,
     IReadOnlyList<LedgerEntrySnapshot> Transactions,
     IReadOnlyDictionary<string, bool> EventHaltSettings = null!,
-    PauseReasonSnapshot? PauseReason = null);
+    PauseReasonSnapshot? PauseReason = null)
+{
+    // ---- Crew pay (crew plan phase 5). Money in credits (cr). ----
+
+    /// <summary>
+    /// The ledger category name of a crew pay line, as in <see cref="LedgerEntrySnapshot.Category"/>. The pay
+    /// processor books one such line per faction per day (amount negative). No lines are booked before phase 5.
+    /// </summary>
+    public const string WagesCategory = "Wages";
+
+    /// <summary>People the faction pays: crew aboard its ships plus trained crew in its colony pools (academy students are not paid).</summary>
+    public long CrewOnPayroll { get; init; }
+
+    /// <summary>Wage per crew per day, cr. 0 until crew pay is charged (phase 5).</summary>
+    public decimal CrewWagePerDay { get; init; }
+
+    /// <summary>Daily crew payroll, cr/day: <see cref="CrewOnPayroll"/> × <see cref="CrewWagePerDay"/>. 0 until crew pay is charged (phase 5).</summary>
+    public decimal PayrollPerDay { get; init; }
+
+    /// <summary>Research labs' running cost, cr/day: the labs that research today (a queued tech and points to spend).</summary>
+    public decimal LabCostsPerDay { get; init; }
+
+    /// <summary>All daily running costs, cr/day: <see cref="PayrollPerDay"/> + <see cref="LabCostsPerDay"/>. Income is not forecast.</summary>
+    public decimal RunningCostsPerDay { get; init; }
+
+    /// <summary>
+    /// Days until the funds run out at <see cref="RunningCostsPerDay"/>, income not counted: funds / running costs.
+    /// Null when nothing costs anything (show "∞"); 0 when funds are already 0 or negative.
+    /// </summary>
+    public double? DaysUntilBroke { get; init; }
+
+    /// <summary>Total of the last day's Wages lines, cr (negative, an expense). 0 when none was booked.</summary>
+    public decimal LastWages { get; init; }
+
+    /// <summary>Date of the last Wages line; null when none was booked.</summary>
+    public DateTime? LastWagesDate { get; init; }
+
+    /// <summary>True when <see cref="Funds"/> is below 0.</summary>
+    public bool FundsNegative { get; init; }
+
+    /// <summary>
+    /// True while spending is blocked because funds are negative (building, launches, new academy courses,
+    /// market and intel buys). False until the spending gate lands (phase 5).
+    /// </summary>
+    public bool SpendingBlocked { get; init; }
+
+    /// <summary>What the block stops, for the negative-balance banner, e.g. "Building", "Launches". Empty when not blocked.</summary>
+    public IReadOnlyList<string> BlockedSpending { get; init; } = Array.Empty<string>();
+}
+
+/// <summary>Shared text for things held because the faction's funds are negative (crew plan phase 5).</summary>
+public static class FundsText
+{
+    public const string PausedFundsNegative = "Paused: funds negative";
+}
 
 /// <summary>
 /// Why the clock stopped for this faction: the first event or one-shot order pause since time last
@@ -393,6 +447,15 @@ public sealed record ColonyPowerView(
     /// <summary>One sample per daily pass, oldest first, up to 90 days.</summary>
     public IReadOnlyList<ColonyPowerSampleView> History { get; init; } = Array.Empty<ColonyPowerSampleView>();
 
+    /// <summary>Life support per person, kW: <see cref="LifeSupport_kW"/> / <see cref="LifeSupportColonists"/>. 0 with no colonists.</summary>
+    public double LifeSupportPerPerson_kW { get; init; }
+
+    /// <summary>True when the world is sealed (colony cost above 0 for its people), so life support pays the hostility term.</summary>
+    public bool LifeSupportSealed { get; init; }
+
+    /// <summary>The life-support rate for the Power tab, e.g. "Garden world: 0.05 kW per person" or "Sealed world: 1.85 kW per person". Empty with no colonists.</summary>
+    public string LifeSupportRateLabel { get; init; } = "";
+
     /// <summary>
     /// The batteries' rate, kJ/s (kW): + charging (energy going into the store, after the charge
     /// loss), - discharging. Average over the last daily pass.
@@ -587,6 +650,26 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
     /// Seconds until the batteries are full, or null when not charging. Charging_kW is the plant
     /// side; the store fills at <see cref="Battery_kW"/> (after the charge loss) when that is set.
     /// </summary>
+    // ---- Ship life support (crew plan phase 4) ----
+
+    /// <summary>True once ships draw life support (phase 4). While false the life support fields are 0 and the row should not show.</summary>
+    public bool HasLifeSupport { get; init; }
+
+    /// <summary>People aboard that life support keeps alive (the ship's crew aboard).</summary>
+    public int LifeSupportCrew { get; init; }
+
+    /// <summary>Life support per crew aboard, kW (1 kW × the faction's life-support efficiency tech). 0 until phase 4.</summary>
+    public double LifeSupportPerCrew_kW { get; init; }
+
+    /// <summary>Life support draw, kW: <see cref="LifeSupportCrew"/> × <see cref="LifeSupportPerCrew_kW"/>. 0 until phase 4.</summary>
+    public double LifeSupport_kW { get; init; }
+
+    /// <summary>
+    /// True: life support is a must-run load, served before warp and charging and counted in the warp check,
+    /// not an aux load that waits for full batteries.
+    /// </summary>
+    public bool LifeSupportMustRun { get; init; } = true;
+
     public double? FullIn_s
     {
         get
@@ -927,6 +1010,9 @@ public sealed record NavalAcademyClassView(
 
     /// <summary>Why a crew course cannot start now (e.g. no free crew seats, too few colonists). Empty when it can.</summary>
     public string CrewCourseReason { get; init; } = "";
+
+    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while new courses are refused for negative funds. Empty otherwise; always empty until phase 5.</summary>
+    public string FundsReason { get; init; } = "";
 }
 
 /// <summary>One run. A class enrolls <see cref="Count"/> recruits. A command course is one officer.</summary>
@@ -969,6 +1055,9 @@ public sealed record LaunchPadStateView(long MaxTonnage, bool Free)
 
     /// <summary>The launch-short warning, e.g. "Launches with 12/28 crew; train crew at an academy". Empty when not short.</summary>
     public string CrewWarning { get; init; } = "";
+
+    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while launches are held for negative funds. Empty otherwise; always empty until phase 5.</summary>
+    public string FundsReason { get; init; } = "";
 }
 
 public sealed record ProductionLineView(
@@ -1097,6 +1186,9 @@ public sealed record IndustryJobView(
     /// "Pool 5 of 28 crew; the ship will launch under-crewed". Empty when not short.
     /// </summary>
     public string CrewWarning { get; init; } = "";
+
+    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while the job spends no points for negative funds. Empty otherwise; always empty until phase 5.</summary>
+    public string FundsReason { get; init; } = "";
 }
 
 public sealed record ResourceRequirement(string Name, long Amount);

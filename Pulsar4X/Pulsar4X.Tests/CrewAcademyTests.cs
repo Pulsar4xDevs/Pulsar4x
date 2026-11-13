@@ -69,7 +69,7 @@ public class CrewAcademyTests
     }
 
     [Test]
-    public void Seeds_Luna50_MarsAndCeresNone()
+    public void Seeds_EarthOnly_NpcLunaAndCeresAndMarsNone()
     {
         long PoolAt(string body)
         {
@@ -78,7 +78,7 @@ public class CrewAcademyTests
             return colony.TryGetDataBlob<ColonyCrewPoolDB>(out var pool) ? pool.Total : 0;
         }
         Assert.That(PoolAt("Earth"), Is.EqualTo(500));
-        Assert.That(PoolAt("Luna"), Is.EqualTo(50));
+        Assert.That(PoolAt("Luna"), Is.EqualTo(0), "Luna is an NPC colony: NPCs crew from population");
         Assert.That(PoolAt("Mars"), Is.EqualTo(0));
         Assert.That(PoolAt("Ceres"), Is.EqualTo(0));
     }
