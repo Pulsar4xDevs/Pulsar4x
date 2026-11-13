@@ -659,6 +659,11 @@ namespace Pulsar4X.Client
                     ImGui.EndGroup();
                 }
 
+                // Owner-only: CrewPool is filled for the owning faction only.
+                if(!readOnly && colonyView != null
+                    && ImGui.CollapsingHeader("Crew pool", ImGuiTreeNodeFlags.DefaultOpen))
+                    DisplayCrewPool(colonyView);
+
                 if(colony.GetView<InfrastructureView>() is { } infrastructure
                     && ImGui.CollapsingHeader("Infrastructure", ImGuiTreeNodeFlags.DefaultOpen))
                 {
@@ -889,6 +894,21 @@ namespace Pulsar4X.Client
             return person.Name + post;
         }
 
+        /// <summary>Trained crew waiting at this colony: a stacked bar by species, then one row per species.</summary>
+        private static void DisplayCrewPool(ColonyView colonyView)
+        {
+            ImGui.TextUnformatted(colonyView.CrewPool.ToString("N0") + " trained crew");
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Academy crew courses graduate into this pool. Launches here draw crew from it,\nand ships scrapped here return theirs.");
+            if (colonyView.CrewPool <= 0 || colonyView.CrewPoolBySpecies.Count == 0)
+            {
+                ImGui.TextDisabled("Train crew at a naval academy.");
+                return;
+            }
+            PowerBars.StackedBar("##crewPoolBar", CrewBars.PoolSegments(colonyView.CrewPoolBySpecies), colonyView.CrewPool, 12f);
+            CrewBars.CompactRows("##crewPoolRows", CrewBars.PoolRows(colonyView.CrewPoolBySpecies));
+        }
+
         private void DisplayNavalAcademy(int colonyId, NavalAcademyView academy)
         {
             ImGui.Text("The colony has " + Stringify.Quantity(academy.Population) + " people.");
@@ -920,6 +940,8 @@ namespace Pulsar4X.Client
             foreach (var cohort in row.Cohorts)
             {
                 string date = cohort.Graduation.ToShortDateString();
+                if (cohort.Course == AcademyCourseKind.Crew)
+                    continue; // Listed under the crew course below.
                 if (cohort.Course == AcademyCourseKind.Class)
                 {
                     string word = cohort.Count == 1 ? "recruit" : "recruits";
@@ -1030,8 +1052,40 @@ namespace Pulsar4X.Client
                     ImGui.SetTooltip("This academy has no free seats.");
             }
 
+            DisplayCrewCourse(colonyId, row);
+
             _academyRecruits[row.ComponentId] = recruits;
             _academyOfficer[row.ComponentId] = selected;
+        }
+
+        /// <summary>
+        /// The crew (ratings) course of one academy: a seats row in the Power tab look, the running crew cohorts
+        /// with Cancel (the shared cancel command takes any cohort), and Train, disabled until the engine command lands.
+        /// </summary>
+        private void DisplayCrewCourse(int colonyId, NavalAcademyClassView row)
+        {
+            PowerBars.Rows("##crewCourse-" + row.ComponentId, new[] { CrewBars.CourseRow(row) }, 56f);
+
+            foreach (var cohort in row.Cohorts)
+            {
+                if (cohort.Course != AcademyCourseKind.Crew)
+                    continue;
+                // Button first so the buttons line up whatever the counts and dates.
+                if (ImGui.SmallButton("Cancel###cancel-crew-" + row.ComponentId + "-" + cohort.CohortId))
+                    _uiState.GameClient?.SubmitCommandAsync(
+                        new CancelAcademyCourseCommand(colonyId, row.ComponentId, cohort.CohortId));
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Stop this course. The trainees go back to the colony.");
+                ImGui.SameLine();
+                ImGui.TextUnformatted(cohort.Count.ToString("N0") + " crew in training, graduating " + cohort.Graduation.ToString("yyyy-MM-dd") + " into the pool.");
+            }
+
+            if (row.CrewCourseReason.Length > 0)
+                CrewBars.Warning(row.CrewCourseReason);
+
+            string reason = CrewCommandsPending.TrainCrew
+                + (row.CrewCourseReason.Length > 0 ? "\n" + row.CrewCourseReason : "");
+            CrewBars.PendingButton("Train crew###train-crew-" + row.ComponentId, reason, new Vector2(-1, 0));
         }
 
         private static string OfficerLine(CommanderSnapshot officer)

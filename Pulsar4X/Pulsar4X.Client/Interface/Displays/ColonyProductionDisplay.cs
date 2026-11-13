@@ -3,6 +3,7 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Api;
+using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
@@ -165,8 +166,56 @@ namespace Pulsar4X.Client
                     }
                     ImGui.PopID();
                 }
+
+                LaunchPads(industry.Pads);
             }
             ImGui.EndChild();
+        }
+
+        /// <summary>
+        /// One compact row per launch pad: tonnage, what holds it and, for a ship that will go short of
+        /// crew, the boarding share as a thin amber bar plus the crew warning under the rows.
+        /// </summary>
+        private static void LaunchPads(IReadOnlyList<LaunchPadStateView> pads)
+        {
+            if (pads.Count == 0 || !ImGui.CollapsingHeader("Launch pads", ImGuiTreeNodeFlags.DefaultOpen))
+                return;
+            var rows = new List<PowerRow>();
+            for (int i = 0; i < pads.Count; i++)
+            {
+                var pad = pads[i];
+                // CrewToBoard is 0 until crew plan phase 3; show a boarding bar only once the engine says something.
+                bool crewKnown = pad.CrewShort || pad.CrewToBoard > 0;
+                string note = pad.Free ? "free" : pad.Reason.Length > 0 ? pad.Reason : pad.CrewShort ? "crew short" : "ready";
+                var detail = new List<(string, string)> { ("Fuel", pad.LaunchFuel.Length > 0 ? pad.LaunchFuel : "-") };
+                if (!pad.Free)
+                {
+                    detail.Add(("Crew needed", pad.CrewRequired.ToString("N0")));
+                    if (crewKnown)
+                        detail.Add(("Crew to board", pad.CrewToBoard.ToString("N0")));
+                }
+                rows.Add(new PowerRow
+                {
+                    Id = "pad-" + i,
+                    Chip = pad.Free ? PowerBars.UnservedColour : pad.CrewShort || pad.Reason.Length > 0 ? CrewBars.ShortColour : PowerRing.FullColour,
+                    Name = "Pad " + (i + 1) + "  " + pad.MaxTonnage.ToString("N0") + " t",
+                    Value = pad.Free ? "" : crewKnown
+                        ? pad.CrewToBoard.ToString("N0") + "/" + pad.CrewRequired.ToString("N0") + " crew"
+                        : pad.CrewRequired.ToString("N0") + " crew",
+                    Fill = !pad.Free && crewKnown ? CrewBars.Fill(pad.CrewToBoard, pad.CrewRequired) : null,
+                    FillColour = pad.CrewShort ? CrewBars.ShortColour : PowerRing.FullColour,
+                    Trailing = note,
+                    TrailingColour = !pad.Free && (pad.CrewShort || pad.Reason.Length > 0) ? CrewBars.ShortColour : null,
+                    Tooltip = pad.CrewWarning.Length > 0 ? pad.CrewWarning : null,
+                    Detail = detail,
+                });
+            }
+            PowerBars.Rows("##launchPads", rows, 48f);
+            foreach (var pad in pads)
+            {
+                if (!pad.Free && pad.CrewWarning.Length > 0)
+                    CrewBars.Warning(pad.CrewWarning);
+            }
         }
 
         private void JobsTable(int entityId, ProductionLineView line, GlobalUIState uiState)
@@ -204,8 +253,14 @@ namespace Pulsar4X.Client
                     else
                         ImGui.Text(job.Status);
                     ImGui.PopStyleColor();
+                    bool statusHovered = ImGui.IsItemHovered();
+                    if (job.CrewWarning.Length > 0)
+                    {
+                        ImGui.SameLine();
+                        CrewBars.Badge("crew", CrewBars.ShortColour, job.CrewWarning);
+                    }
 
-                    if (ImGui.IsItemHovered())
+                    if (statusHovered)
                     {
                         ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 0f);
                         ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 0f);
@@ -227,6 +282,13 @@ namespace Pulsar4X.Client
                                 ImGui.Text(requirement.Name);
                                 ImGui.TableNextColumn();
                                 ImGui.Text(requirement.Amount.ToString());
+                            }
+                            if (job.CrewRequired > 0)
+                            {
+                                ImGui.TableNextColumn();
+                                ImGui.Text("Crew per ship (from the pool)");
+                                ImGui.TableNextColumn();
+                                ImGui.Text(job.CrewRequired.ToString("N0"));
                             }
                             ImGui.EndTable();
                         }
@@ -335,6 +397,17 @@ namespace Pulsar4X.Client
                 ImGui.SetTooltip("The production line will move to the next job in the queue\nafter finishing the number of items requested.");
 
             CostsDisplay(selectedDesign);
+
+            if (selectedDesign.CrewRequired > 0 || selectedDesign.CrewBerths > 0)
+            {
+                bool ship = selectedDesign.CrewBerths > 0 || selectedDesign.CrewWarning.Length > 0;
+                ImGui.TextUnformatted(ship
+                    ? CrewBars.RequiredVsBerths(selectedDesign.CrewRequired, selectedDesign.CrewBerths)
+                    : selectedDesign.CrewRequired.ToString("N0") + " crew");
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Crew come from this colony's trained-crew pool when the ship launches.");
+                CrewBars.Warning(selectedDesign.CrewWarning);
+            }
 
             ImGui.Columns(1);
             ImGui.NewLine();

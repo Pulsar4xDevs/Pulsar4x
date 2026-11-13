@@ -381,7 +381,9 @@ public static class PowerBars
         ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthFixed, Math.Max(valueW, 1f));
         ImGui.TableSetupColumn("Share", ImGuiTableColumnFlags.WidthFixed, Math.Max(pctW, 1f));
         ImGui.TableSetupColumn("Bar", ImGuiTableColumnFlags.WidthFixed, barWidth);
-        ImGui.TableSetupColumn("Note", ImGuiTableColumnFlags.WidthFixed, Math.Max(trailW, 1f));
+        // The last cell keeps its inner padding on the right even without outer padding; leave room for it
+        // so a note in a narrow pane (launch pads, crew) does not lose its last letter.
+        ImGui.TableSetupColumn("Note", ImGuiTableColumnFlags.WidthFixed, Math.Max(trailW, 1f) + ImGui.GetStyle().CellPadding.X);
 
         float line = ImGui.GetTextLineHeight();
         foreach (var r in rows)
@@ -487,6 +489,10 @@ public static class PowerBars
         ImGui.TextUnformatted(text);
         ImGui.PopStyleColor();
     }
+
+    /// <summary>The rows' thin bar on its own, inline after text (SameLine). Hover with IsItemHovered.</summary>
+    public static void InlineBar(float fill, Vector4 colour, float width = 70f)
+        => ThinBar(fill, colour, false, width, ImGui.GetTextLineHeight());
 
     /// <summary>A thin satisfaction bar centred on the text line; the unmet part is hatched.</summary>
     static void ThinBar(float fill, Vector4 colour, bool waiting, float width, float line)

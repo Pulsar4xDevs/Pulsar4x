@@ -435,6 +435,15 @@ namespace Pulsar4X.Client
                     ImGui.EndTabItem();
                 }
 
+                // Owner-only: the projector fills the crew fields for the ship's owner. Next to Power.
+                if (orderShip != null
+                    && SubjectEntity(galaxy)?.GetView<ShipView>() is { } crewView
+                    && ImGui.BeginTabItem("Crew"))
+                {
+                    DisplayCrewTab(crewView);
+                    ImGui.EndTabItem();
+                }
+
                 // Owner-only: the projector sends ShipPowerView only to the ship's owner.
                 if (orderShip != null
                     && SubjectEntity(galaxy) is { } powerSubject
@@ -459,6 +468,88 @@ namespace Pulsar4X.Client
                 }
 
                 ImGui.EndTabBar();
+            }
+            ImGui.EndChild();
+        }
+
+        /// <summary>
+        /// The Summary's crew line: "Crew 9/17 aboard" (or "17 needed, 12 berths" until crew aboard is
+        /// tracked) plus the Under-crewed badge. The hover points at the Crew tab.
+        /// </summary>
+        private static void CrewIndicator(ShipView? shipView)
+        {
+            if (shipView == null)
+                return;
+            ImGui.BeginGroup();
+            ImGui.TextColored(Styles.DescriptiveColor, "Crew");
+            ImGui.SameLine();
+            ImGui.TextUnformatted(CrewBars.Indicator(shipView));
+            bool under = shipView.CrewTracked && shipView.UnderCrewed;
+            if (under)
+            {
+                // Same line when it fits; this column is narrow, so otherwise the badge goes just below.
+                float badgeW = ImGui.CalcTextSize("Under-crewed").X + 10f;
+                ImGui.SameLine();
+                if (ImGui.GetContentRegionAvail().X < badgeW)
+                    ImGui.NewLine();
+                CrewBars.Badge("Under-crewed", CrewBars.ShortColour);
+            }
+            ImGui.EndGroup();
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
+                if (under && shipView.CrewNote.Length > 0)
+                    ImGui.TextUnformatted(shipView.CrewNote);
+                ImGui.TextUnformatted("See the Crew tab for berths, crew fraction, engine crew and top-up.");
+                ImGui.PopTextWrapPos();
+                ImGui.EndTooltip();
+            }
+        }
+
+        /// <summary>
+        /// The Crew tab in the Power tab look. Left: the summary line, the Under-crewed badge, the Needed /
+        /// Berths / Aboard / Drives rows, the engine's note and the top-up buttons. Right: where the crew and
+        /// the berths come from, one row per part. Aboard and the fractions are hidden until the engine tracks
+        /// crew aboard (ShipView.CrewTracked, crew plan phase 3).
+        /// </summary>
+        private static void DisplayCrewTab(ShipView shipView)
+        {
+            var size = ImGui.GetContentRegionAvail();
+            var left = new Vector2(size.X * 0.35f, size.Y);
+            if (ImGui.BeginChild("ShipCrewSummary", left, ImGuiChildFlags.Borders))
+            {
+                ImGui.TextUnformatted(CrewBars.RequiredVsBerths(shipView.CrewRequired, shipView.CrewBerths));
+                if (!shipView.CrewTracked && ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Crew aboard and the crew fraction show once ships carry crew (crew plan phase 3).");
+                if (shipView.CrewTracked && shipView.UnderCrewed)
+                    CrewBars.Badge("Under-crewed", CrewBars.ShortColour,
+                        string.IsNullOrEmpty(shipView.CrewNote) ? "Fewer crew aboard than the design needs." : shipView.CrewNote);
+
+                CrewBars.CompactRows("##shipCrewRows", CrewBars.ShipRows(shipView));
+
+                if (shipView.CrewTracked && shipView.CrewNote.Length > 0)
+                    CrewBars.Warning(shipView.CrewNote);
+
+                ImGui.Spacing();
+                float half = (ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X) * 0.5f;
+                CrewBars.PendingButton("Top up###crewTopUp", CrewCommandsPending.TopUp, new Vector2(half, 0));
+                ImGui.SameLine();
+                CrewBars.PendingButton("To pool###crewToPool", CrewCommandsPending.ToPool, new Vector2(half, 0));
+            }
+            ImGui.EndChild();
+            ImGui.SameLine();
+            if (ImGui.BeginChild("ShipCrewParts", new Vector2(0, size.Y), ImGuiChildFlags.Borders))
+            {
+                DisplayHelpers.Header("Crew by part");
+                if (shipView.CrewByComponent.Count == 0)
+                    ImGui.TextDisabled("No part needs crew.");
+                PowerBars.Rows("##crewByPart", CrewBars.CrewByComponentRows(shipView), 30f);
+                ImGui.Spacing();
+                DisplayHelpers.Header("Berths by part");
+                if (shipView.BerthsByComponent.Count == 0)
+                    ImGui.TextDisabled("No crew quarters or bridge berths.");
+                PowerBars.Rows("##berthsByPart", CrewBars.BerthsByComponentRows(shipView), 30f);
             }
             ImGui.EndChild();
         }
@@ -503,34 +594,8 @@ namespace Pulsar4X.Client
                     ImGui.Columns(1);
                 }
 
-                if (ImGui.CollapsingHeader("Crew", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    var shipView = subject?.GetView<ShipView>();
-                    int required = shipView?.CrewRequired ?? 0;
-                    ImGui.Columns(2);
-                    DisplayHelpers.PrintRow("Required", required.ToString("N0"),
-                        tooltipTwo: "Each component's crew per copy, times its copies", separator: false);
-                    ImGui.Columns(1);
-                    if (shipView is { CrewByComponent.Count: > 0 }
-                        && ImGui.BeginTable("ShipCrewRows", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
-                    {
-                        ImGui.TableSetupColumn("Component");
-                        ImGui.TableSetupColumn("Per copy x copies");
-                        ImGui.TableSetupColumn("Crew");
-                        ImGui.TableHeadersRow();
-                        foreach (var row in shipView.CrewByComponent)
-                        {
-                            ImGui.TableNextRow();
-                            ImGui.TableNextColumn();
-                            ImGui.TextUnformatted(row.Name);
-                            ImGui.TableNextColumn();
-                            ImGui.TextUnformatted($"{row.CrewPerCopy:N0} x {row.Count:N0}");
-                            ImGui.TableNextColumn();
-                            ImGui.TextUnformatted(row.Crew.ToString("N0"));
-                        }
-                        ImGui.EndTable();
-                    }
-                }
+                // One line here; the full crew view is the Crew tab.
+                CrewIndicator(subject?.GetView<ShipView>());
 
                 // Output is the net added to the batteries this step. The old power window's Load
                 // is max output divided by that net, so it is not a percentage and is not shown.
@@ -3443,6 +3508,12 @@ namespace Pulsar4X.Client
             DisplayShipDropSource(ship, selectedFleetId == fleet.Id ? selectedShips : null);
             // A ship row accepts ships only. A fleet dropped here must not nest under this fleet.
             DisplayShipDropTarget(fleet);
+            if(ship.CrewTracked && ship.UnderCrewed)
+            {
+                ImGui.SameLine();
+                CrewBars.Badge("crew", CrewBars.ShortColour,
+                    "Under-crewed: " + ship.CrewAboard.ToString("N0") + " of " + ship.CrewRequired.ToString("N0") + " crew aboard.");
+            }
             ImGui.PopID();
         }
 
