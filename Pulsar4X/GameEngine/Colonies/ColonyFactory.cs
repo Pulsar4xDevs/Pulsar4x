@@ -143,6 +143,10 @@ namespace Pulsar4X.Colonies
                 );
             }
 
+            // Trained crew waiting for berths (crew plan phase 2).
+            if (colonyBlueprint.StartingCrewPool is long crewPool && crewPool > 0)
+                ColonyCrewPoolDB.Of(colonyEntity).Add(species.Id, crewPool);
+
             // Add starting colony cargo
             LoadCargo(colonyEntity, factionInfo.Data, colonyBlueprint.Cargo);
             // The plants were installed before their fuel arrived: recalc so they show as fuelled.

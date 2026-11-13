@@ -985,9 +985,27 @@
           "PropertyFormula": "12"
         },
         {
+          "Name": "Crew Seats",
+          "DescriptionFormula": "'How many ship crew can train at once, separate from the officer class. Each trainee is one colonist.'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "1000",
+          "MinFormula": "0",
+          "StepFormula": "10",
+          "PropertyFormula": "200"
+        },
+        {
+          "Name": "Crew Course Length",
+          "DescriptionFormula": "'How many months the crew course runs. Graduates join the colony crew pool.'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "12",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "3"
+        },
+        {
           "Name": "DBargs",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(PropertyValue('Class Size'), PropertyValue('Class Length'))",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Class Size'), PropertyValue('Class Length'), PropertyValue('Crew Seats'), PropertyValue('Crew Course Length'))",
           "AttributeType": "Pulsar4X.People.NavalAcademyAtb"
         }
       ]

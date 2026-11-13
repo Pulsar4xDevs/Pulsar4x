@@ -260,11 +260,11 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
 
     /// <summary>
     /// Owning faction only. Trained crew waiting in this colony's pool, people. Academy crew courses graduate
-    /// into it; launches draw from it; scrapped ships return to it. 0 until crew plan phase 2.
+    /// into it; launches draw from it; scrapped ships return to it.
     /// </summary>
     public long CrewPool { get; init; }
 
-    /// <summary>Owning faction only. <see cref="CrewPool"/> by species. Empty until crew plan phase 2.</summary>
+    /// <summary>Owning faction only. <see cref="CrewPool"/> by species. </summary>
     public IReadOnlyList<CrewPoolRow> CrewPoolBySpecies { get; init; } = Array.Empty<CrewPoolRow>();
 }
 
@@ -481,7 +481,7 @@ public sealed record ShipView(
     /// </summary>
     public IReadOnlyList<ShipCrewRow> CrewByComponent { get; init; } = Array.Empty<ShipCrewRow>();
 
-    /// <summary>Owner only. Crew the ship can house: quarters plus bridge berths, people. 0 until crew plan phase 1.</summary>
+    /// <summary>Owner only. Crew the ship can house: quarters plus bridge berths, people.</summary>
     public int CrewBerths { get; init; }
 
     /// <summary>Owner only. Where <see cref="CrewBerths"/> come from, one row per design that gives berths. Empty until phase 1.</summary>
@@ -908,13 +908,13 @@ public sealed record NavalAcademyClassView(
     int MeanCap,
     IReadOnlyList<AcademyCohortView> Cohorts)
 {
-    /// <summary>Crew-course seats, separate from the officer seats in <see cref="ClassSize"/>, people. 0 until crew plan phase 2.</summary>
+    /// <summary>Crew-course seats, separate from the officer seats in <see cref="ClassSize"/>, people.</summary>
     public int CrewSeats { get; init; }
 
-    /// <summary>Crew-course seats taken by running crew cohorts, people. 0 until crew plan phase 2.</summary>
+    /// <summary>Crew-course seats taken by running crew cohorts, people.</summary>
     public int CrewSeatsInUse { get; init; }
 
-    /// <summary>Length of a crew course, months. 0 until crew plan phase 2.</summary>
+    /// <summary>Length of a crew course, months.</summary>
     public int CrewCourseLengthMonths { get; init; }
 
     /// <summary>Date the next crew cohort graduates into the pool. Null when no crew course runs.</summary>
@@ -924,7 +924,7 @@ public sealed record NavalAcademyClassView(
     public int NextCrewGraduationCount { get; init; }
 
     /// <summary>Why a crew course cannot start now (e.g. no free crew seats, too few colonists). Empty when it can.</summary>
-    public string CrewCourseReason { get; init; } = "Crew courses are not available yet.";
+    public string CrewCourseReason { get; init; } = "";
 }
 
 /// <summary>One run. A class enrolls <see cref="Count"/> recruits. A command course is one officer.</summary>
@@ -1126,7 +1126,7 @@ public sealed record ConstructibleItemView(
     /// <summary>Crew one unit needs, people (a ship design's sum, or a component's own crew).</summary>
     public int CrewRequired { get; init; }
 
-    /// <summary>Ship designs: crew the design can house, people. 0 for components, and 0 until crew plan phase 1.</summary>
+    /// <summary>Ship designs: crew the design can house, people. 0 for components.</summary>
     public int CrewBerths { get; init; }
 
     /// <summary>Ship designs: the designer's crew warning, e.g. "10 berths for 28 crew". Empty when none.</summary>
@@ -1332,7 +1332,7 @@ public sealed record ComponentDesignSummary(string Id, string Name, string Templ
     public IReadOnlyList<DesignerInput> PropertyValues { get; init; } = Array.Empty<DesignerInput>();
     /// <summary>Crew one copy needs, people.</summary>
     public int CrewRequired { get; init; }
-    /// <summary>Berths one copy gives (crew quarters, bridge console space), people. 0 until crew plan phase 1.</summary>
+    /// <summary>Berths one copy gives (crew quarters, bridge console space), people.</summary>
     public int Berths { get; init; }
 }
 
@@ -1462,7 +1462,7 @@ public sealed record ShipSnapshot(
     /// <summary>Crew the design needs, people.</summary>
     public int CrewRequired { get; init; }
 
-    /// <summary>Crew the design can house, people. 0 until crew plan phase 1.</summary>
+    /// <summary>Crew the design can house, people.</summary>
     public int CrewBerths { get; init; }
 
     /// <summary>People aboard. 0 until crew plan phase 3 (see <see cref="CrewTracked"/>).</summary>

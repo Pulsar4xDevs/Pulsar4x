@@ -703,7 +703,9 @@
       "TemplateId": "naval-academy",
       "Properties": [
         { "Key": "Class Size", "Value": 2 },
-        { "Key": "Class Length", "Value": 12 }
+        { "Key": "Class Length", "Value": 12 },
+        { "Key": "Crew Seats", "Value": 200 },
+        { "Key": "Crew Course Length", "Value": 3 }
       ]
     }
   },

@@ -47,6 +47,7 @@
       "UniqueID": "colony-early-earth",
       "Name": "Early Tech Earth Start",
       "StartingPopulation": 500000,
+      "StartingCrewPool": 500,
       "Installations": [
         {
           "Id": "default-design-thermal-plant-75",
@@ -95,6 +96,10 @@
         {
           "Id": "default-design-research-lab",
           "Amount": 2
+        },
+        {
+          "Id": "default-design-naval-academy",
+          "Amount": 1
         },
         {
           "id": "default-design-city-hall",
@@ -244,6 +249,7 @@
         "space-crete",
         "admin-complex",
         "ship-command",
+        "naval-academy",
         "crew-quarters",
         "tech-panel-efficiency",
         "tech-panel-bandwidth",
@@ -308,7 +314,8 @@
         "default-design-local-construction-site",
         "default-design-logistics-office-site",
         "default-design-infrastructure-site",
-        "default-design-warehouse-prefab"
+        "default-design-warehouse-prefab",
+        "default-design-naval-academy"
       ],
       "ShipDesigns": [
         "early-ship-design-starship",

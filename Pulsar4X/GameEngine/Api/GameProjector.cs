@@ -901,9 +901,27 @@ namespace Pulsar4X.Engine.Api
                 }
             }
 
+            long crewPool = 0;
+            var crewRows = new List<CrewPoolRow>();
+            if (colony.FactionOwnerID == factionId && colony.TryGetDataBlob<ColonyCrewPoolDB>(out var pool))
+            {
+                foreach (var (speciesId, trained) in pool.Trained.OrderByDescending(p => p.Value).ThenBy(p => p.Key))
+                {
+                    if (trained <= 0)
+                        continue;
+                    crewPool += trained;
+                    string name = colony.Manager != null && colony.Manager.TryGetGlobalEntityById(speciesId, out var speciesEntity)
+                        ? speciesEntity.GetName(factionId)
+                        : "Unknown";
+                    crewRows.Add(new CrewPoolRow(name, trained));
+                }
+            }
+
             return new ColonyView(population, planetId)
             {
                 SpeciesPopulations = species,
+                CrewPool = crewPool,
+                CrewPoolBySpecies = crewRows,
                 CommandSpan = colony.FactionOwnerID == factionId ? SpanLabel(LogisticsSpan.Of(colony)) : "",
                 AdministratorId = administratorId,
                 AdministratorName = administratorName,
@@ -1521,6 +1539,7 @@ namespace Pulsar4X.Engine.Api
                         {
                             Pulsar4X.People.AcademyCourseKind.Class => Pulsar4X.Api.AcademyCourseKind.Class,
                             Pulsar4X.People.AcademyCourseKind.Command => Pulsar4X.Api.AcademyCourseKind.Command,
+                            Pulsar4X.People.AcademyCourseKind.Crew => Pulsar4X.Api.AcademyCourseKind.Crew,
                             _ => Pulsar4X.Api.AcademyCourseKind.Idle,
                         },
                         cohort.Count,
@@ -1534,7 +1553,16 @@ namespace Pulsar4X.Engine.Api
                     row.TrainingPeriodInMonths,
                     NavalAcademyCourse.SeatsUsed(row),
                     NavalAcademyCourse.SchoolMean(row.TrainingPeriodInMonths, instruction),
-                    cohorts));
+                    cohorts)
+                {
+                    CrewSeats = row.CrewSeats,
+                    CrewSeatsInUse = NavalAcademyCourse.CrewSeatsUsed(row),
+                    CrewCourseLengthMonths = row.CrewCourseMonths,
+                    NextCrewGraduation = NavalAcademyCourse.NextCrewCohort(row)?.GraduationDate,
+                    NextCrewGraduationCount = NavalAcademyCourse.NextCrewCohort(row)?.Count ?? 0,
+                    // Why one more trainee could not start now; empty when one can.
+                    CrewCourseReason = NavalAcademyCourse.CrewRefusal(colony, row, 1) ?? "",
+                });
             }
             return new NavalAcademyView(academies, population, NavalAcademyCourse.PeoplePerEnsign(colony));
         }

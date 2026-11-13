@@ -12,9 +12,14 @@ namespace Pulsar4X.People
         Idle = 0,
         Class = 1,
         Command = 2,
+        /// <summary>A crew course: Count colonists become trained crew in the colony's pool.</summary>
+        Crew = 3,
     }
 
-    /// <summary>One run using seats on a mounted academy. A class holds Count recruits. A command course holds one officer.</summary>
+    /// <summary>
+    /// One run using seats on a mounted academy. A class holds Count recruits. A command course holds one officer.
+    /// A crew course holds Count trainees in the separate crew seats.
+    /// </summary>
     public struct AcademyCohort
     {
         public int CohortId;
@@ -31,6 +36,10 @@ namespace Pulsar4X.People
         public int ComponentId;
         public int ClassSize;
         public int TrainingPeriodInMonths;
+        /// <summary>Crew-course seats, separate from the officer seats in ClassSize.</summary>
+        public int CrewSeats;
+        /// <summary>Length of a crew course, months.</summary>
+        public int CrewCourseMonths;
         public int NextCohortId;
         public List<AcademyCohort> Cohorts;
 

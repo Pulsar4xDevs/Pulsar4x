@@ -74,5 +74,10 @@ namespace Pulsar4X.Events
         #region Engine
         EngineError,
         #endregion
+
+        #region Crew (appended so saved ordinals stay put)
+        CrewGraduated,
+        ShipUnderCrewed,
+        #endregion
     }
 }

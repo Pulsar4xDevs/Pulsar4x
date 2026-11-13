@@ -6,6 +6,8 @@ public class ColonyBlueprint : Blueprint
 {
     public string Name { get; set; }
     public double? StartingPopulation { get; set; }
+    /// <summary>Trained ship crew waiting in the colony's crew pool at start, of the colony's species. Not part of the population.</summary>
+    public long? StartingCrewPool { get; set; }
 
     /// <summary>
     /// System body's display name (NameDB default), e.g. "Luna" or "Mars".

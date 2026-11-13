@@ -411,7 +411,10 @@ public class OfficersAndSpanTests
         Assert.That(academy.CrewReq, Is.EqualTo(42));
         Assert.That(academy.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation), Is.True);
         Assert.That(academy.ComponentMountType.HasFlag(ComponentMountType.ShipCargo), Is.False);
-        Assert.That(colony.HasDataBlob<NavalAcademyDB>(), Is.False);
+        Assert.That(atb.CrewSeats, Is.EqualTo(200), "crew plan phase 2: the crew course");
+        Assert.That(atb.CrewCourseMonths, Is.EqualTo(3));
+        // Crew plan phase 2: Earth starts with the academy mounted, so it can train ship crew.
+        Assert.That(colony.GetDataBlob<NavalAcademyDB>().Academies.Count, Is.EqualTo(1));
 
         Assert.That(info.ComponentDesigns["default-design-Cockpit"].GetAttribute<AdminSpaceAtb>().AdminLevel,
             Is.EqualTo(AdminLevel.Ship));

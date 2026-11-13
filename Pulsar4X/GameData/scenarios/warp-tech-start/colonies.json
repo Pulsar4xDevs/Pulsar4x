@@ -5,6 +5,7 @@
       "UniqueID": "colony-earth",
       "Name": "Default Earth Start",
       "StartingPopulation": 500000,
+      "StartingCrewPool": 500,
       "Installations": [
         { "Id": "default-design-infrastructure-site", "Amount": 5 },
         { "Id": "default-design-mine", "Amount": 1 },
@@ -16,6 +17,7 @@
         { "Id": "default-design-shipyard", "Amount": 1 },
         { "Id": "default-design-spaceport", "Amount": 1 },
         { "Id": "default-design-research-lab", "Amount": 2 },
+        { "Id": "default-design-naval-academy", "Amount": 1 },
         { "id": "default-design-city-hall", "amount": 1 },
         { "Id": "default-design-local-construction-site", "Amount": 5},
         { "Id": "default-design-launch-complex", "Amount": 1 },
@@ -293,6 +295,7 @@
       "UniqueID": "colony-luna-concord",
       "Name": "Luna Concord",
       "StartingPopulation": 80000,
+      "StartingCrewPool": 50,
       "Body": "Luna",
       "System": "system-sol",
       "OwnerFaction": "Luna Concord",

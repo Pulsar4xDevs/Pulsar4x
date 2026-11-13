@@ -2041,7 +2041,6 @@ namespace Pulsar4X.Engine.Api
 
         /// <summary>Refusal for crew commands whose engine half has not landed yet.</summary>
         internal const string CrewNotYet = "Not yet: crew aboard ships arrives in a later update.";
-        internal const string CrewCourseNotYet = "Not yet: crew courses arrive in a later update.";
 
         private CommandResult TranslateTrainAcademyCrew(Entity faction, Entity commanded, GameCommand command)
         {
@@ -2050,7 +2049,10 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject("Crew train at a colony's academy.");
             if (train.Count <= 0)
                 return CommandResult.Reject("Enrol at least one trainee.");
-            return CommandResult.Reject(CrewCourseNotYet);
+            var reason = NavalAcademyCourse.TryTrainCrew(commanded, train.ComponentId, train.Count, train.SpeciesId);
+            return reason == null
+                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                : CommandResult.Reject(reason);
         }
 
         private CommandResult TranslateTopUpCrew(Entity faction, Entity commanded, GameCommand command)

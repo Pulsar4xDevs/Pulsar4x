@@ -78,21 +78,19 @@ public class ApiCrewSnapshotTests
     {
         var earth = _game.Systems.SelectMany(s => s.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             .First(c => c.FactionOwnerID == _player.Id && c.HasDataBlob<Pulsar4X.Industry.IndustryAbilityDB>());
-        // The start has the academy design but none mounted: mount one to get the academy view.
-        if (!earth.HasDataBlob<Pulsar4X.People.NavalAcademyDB>())
-            earth.AddComponent(_player.GetDataBlob<FactionInfoDB>().ComponentDesigns["default-design-naval-academy"]);
+        Assert.That(earth.HasDataBlob<Pulsar4X.People.NavalAcademyDB>(), Is.True, "crew plan phase 2 mounts the Earth academy");
         var projected = _projector.ProjectEntity(earth, _player.Id);
 
         var colony = projected.GetView<ColonyView>()!;
-        Assert.That(colony.CrewPool, Is.EqualTo(0), "the pool arrives in phase 2");
-        Assert.That(colony.CrewPoolBySpecies, Is.Empty);
+        Assert.That(colony.CrewPool, Is.EqualTo(500), "the seeded Earth pool");
+        Assert.That(colony.CrewPoolBySpecies.Single().Trained, Is.EqualTo(500));
 
         var academy = projected.GetView<NavalAcademyView>()!.Academies.First();
-        Assert.That(academy.CrewSeats, Is.EqualTo(0));
+        Assert.That(academy.CrewSeats, Is.EqualTo(200));
         Assert.That(academy.CrewSeatsInUse, Is.EqualTo(0));
-        Assert.That(academy.CrewCourseLengthMonths, Is.EqualTo(0));
+        Assert.That(academy.CrewCourseLengthMonths, Is.EqualTo(3));
         Assert.That(academy.NextCrewGraduation, Is.Null);
-        Assert.That(academy.CrewCourseReason, Is.Not.Empty, "no crew course to start yet");
+        Assert.That(academy.CrewCourseReason, Is.Empty, "a crew course can start");
         Assert.That((int)AcademyCourseKind.Crew, Is.EqualTo(3), "after Idle, Class and Command, like the engine's planned value");
 
         var industry = projected.GetView<IndustryView>()!;

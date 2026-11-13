@@ -51,8 +51,101 @@ public static class NavalAcademyCourse
             return 0;
         int used = 0;
         foreach (var cohort in row.Cohorts)
+        {
+            if (cohort.Kind == AcademyCourseKind.Crew)
+                continue;
             used += cohort.Kind == AcademyCourseKind.Command ? 1 : cohort.Count;
+        }
         return used;
+    }
+
+    /// <summary>Crew-course seats taken. Crew seats are separate from the officer seats.</summary>
+    public static int CrewSeatsUsed(NavalAcademy row)
+    {
+        if (row.Cohorts == null)
+            return 0;
+        int used = 0;
+        foreach (var cohort in row.Cohorts)
+            if (cohort.Kind == AcademyCourseKind.Crew)
+                used += cohort.Count;
+        return used;
+    }
+
+    /// <summary>The next crew cohort to graduate, or null.</summary>
+    public static AcademyCohort? NextCrewCohort(NavalAcademy row)
+    {
+        AcademyCohort? next = null;
+        if (row.Cohorts == null)
+            return null;
+        foreach (var cohort in row.Cohorts)
+            if (cohort.Kind == AcademyCourseKind.Crew && (next == null || cohort.GraduationDate < next.Value.GraduationDate))
+                next = cohort;
+        return next;
+    }
+
+    /// <summary>Null when a crew course of <paramref name="count"/> may start; otherwise why not.</summary>
+    public static string? CrewRefusal(Entity colony, NavalAcademy row, int count, int speciesId = -1)
+    {
+        if (row.CrewSeats <= 0 || row.CrewCourseMonths <= 0)
+            return "This academy has no crew seats.";
+        if (count < 1)
+            return "Enrol at least one trainee.";
+        int free = row.CrewSeats - CrewSeatsUsed(row);
+        if (count > free)
+            return "This crew course needs " + count + " seats. " + free + " are free.";
+        if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))
+            return "The colony has no population.";
+        long people = speciesId >= 0
+            ? (info.Population.TryGetValue(speciesId, out long have) ? have : 0)
+            : PopulationOf(info);
+        if (people < count)
+            return "The colony has " + people + " people. This crew course needs " + count + ".";
+        return null;
+    }
+
+    /// <summary>
+    /// Starts a crew course: <paramref name="count"/> colonists leave the population now and join the
+    /// colony's crew pool when the course ends. One colonist per trainee. A species id of -1 takes the
+    /// largest population first.
+    /// </summary>
+    public static string? TryTrainCrew(Entity colony, int componentId, int count, int speciesId = -1)
+    {
+        if (!TryAcademy(colony, componentId, out var db, out int index, out var reason))
+            return reason;
+        var row = db.Academies[index];
+        var refusal = CrewRefusal(colony, row, count, speciesId);
+        if (refusal != null)
+            return refusal;
+        var info = colony.GetDataBlob<ColonyInfoDB>();
+
+        int species;
+        if (speciesId >= 0)
+        {
+            info.Population[speciesId] -= count;
+            if (info.Population[speciesId] <= 0)
+                info.Population.Remove(speciesId);
+            species = speciesId;
+        }
+        else
+        {
+            species = TakePeople(info, count);
+        }
+
+        var cohort = new AcademyCohort
+        {
+            CohortId = TakeId(ref row),
+            Kind = AcademyCourseKind.Crew,
+            Count = count,
+            PopulationTaken = count,
+            SpeciesId = species,
+            OfficerId = -1,
+            GraduationDate = colony.StarSysDateTime.AddDays(row.CrewCourseMonths * 30),
+        };
+        row.Cohorts.Add(cohort);
+        db.Academies[index] = row;
+        Schedule(colony, cohort.GraduationDate);
+        Publish(colony, personnel: false);
+        return null;
     }
 
     /// <summary>Null when the course may run. Otherwise the sentence the button shows.</summary>
@@ -92,6 +185,12 @@ public static class NavalAcademyCourse
             });
             if (row.NextCohortId <= 1)
                 row.NextCohortId = 2;
+        }
+        // A row saved before crew courses has no crew seats: give it the stock crew course.
+        if (row.CrewCourseMonths <= 0 && row.CrewSeats <= 0)
+        {
+            row.CrewSeats = NavalAcademyAtb.DefaultCrewSeats;
+            row.CrewCourseMonths = NavalAcademyAtb.DefaultCrewCourseMonths;
         }
         row.CourseKind = AcademyCourseKind.Idle;
         row.OfficerId = -1;
@@ -197,7 +296,7 @@ public static class NavalAcademyCourse
         }
 
         var cohort = row.Cohorts[found];
-        if (cohort.Kind == AcademyCourseKind.Class)
+        if (cohort.Kind == AcademyCourseKind.Class || cohort.Kind == AcademyCourseKind.Crew)
             ReturnPeople(colony, cohort.PopulationTaken, cohort.SpeciesId);
         row.Cohorts.RemoveAt(found);
         db.Academies[index] = row;
@@ -232,6 +331,8 @@ public static class NavalAcademyCourse
                     continue;
                 if (cohort.Kind == AcademyCourseKind.Class)
                     GraduateClass(colony, row, cohort, at);
+                else if (cohort.Kind == AcademyCourseKind.Crew)
+                    GraduateCrew(colony, cohort, at);
                 else
                     GraduateCommand(colony, row, cohort, at);
                 row.Cohorts.RemoveAt(i);
@@ -397,6 +498,20 @@ public static class NavalAcademyCourse
             }
             CommanderFactory.Create(colony.Manager, colony.FactionOwnerID, commander);
         }
+    }
+
+    static void GraduateCrew(Entity colony, AcademyCohort cohort, DateTime at)
+    {
+        ColonyCrewPoolDB.Of(colony).Add(cohort.SpeciesId, cohort.Count);
+        if (colony.Manager == null)
+            return;
+        EventManager.Instance.Publish(Event.Create(
+            EventType.CrewGraduated,
+            at,
+            cohort.Count + " crew graduated into the pool",
+            colony.FactionOwnerID,
+            colony.Manager.ManagerID,
+            colony.Id));
     }
 
     static void GraduateCommand(Entity colony, NavalAcademy row, AcademyCohort cohort, DateTime at)
