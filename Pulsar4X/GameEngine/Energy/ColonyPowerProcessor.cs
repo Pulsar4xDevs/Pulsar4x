@@ -273,6 +273,7 @@ namespace Pulsar4X.Energy
             var fuelAtFull = new Dictionary<string, double>();
             double generation = 0;
             double storeMax = 0;
+            double maxCharge = 0, maxDischarge = 0, chargeLoss = 0;
 
             Entity body = colonyInfo.PlanetEntity;
             double atmosphereFactor = SolarAtmosphereFactor(body);
@@ -340,6 +341,11 @@ namespace Pulsar4X.Energy
                 {
                     double store = battery.MaxStore * health;
                     storeMax += store;
+                    // An unrated battery (a design from before battery rates) can fill or empty
+                    // within a second: no practical limit and no loss.
+                    maxCharge += battery.IsRated ? battery.MaxCharge_kW * health : store;
+                    maxDischarge += battery.IsRated ? battery.MaxDischarge_kW * health : store;
+                    chargeLoss += store * (1 - battery.ChargeEfficiency);
                     plants.Add(new ColonyPowerPlant(design.UniqueID, design.Name, ColonyPowerPlantKind.Battery, count,
                         0, 0, null, 0, store, null));
                 }
@@ -369,11 +375,17 @@ namespace Pulsar4X.Energy
             power.FuelAtFull_kgPerDay = fuelAtFull;
             power.Generation_kW = generation;
             power.StoreMax_kJ = storeMax;
+            power.MaxCharge_kW = maxCharge;
+            power.MaxDischarge_kW = maxDischarge;
+            power.ChargeEfficiency = storeMax > 0 ? Math.Clamp(1 - chargeLoss / storeMax, 0.01, 1) : 1;
+            // Batteries taken out or damaged lose the charge they can no longer hold.
+            power.Stored_kJ = double.IsFinite(power.Stored_kJ) ? Math.Clamp(power.Stored_kJ, 0, storeMax) : 0;
             power.LifeSupport_kW = lifeSupport;
             power.LifeSupportColonists = colonists;
             power.Demand_kW = demandByTier.Values.Sum();
-            // Between daily passes, satisfaction follows what the plants can give now.
-            power.TierSatisfaction = ShareByTier(power.Delivered_kW, demandByTier);
+            // Between daily passes, satisfaction follows what the plants can give now, plus what the
+            // batteries can give on average over a day.
+            power.TierSatisfaction = ShareByTier(power.Delivered_kW + BatterySupply_kW(power, SecondsPerDay), demandByTier);
             power.IdleStateKey = IdleStateKey(colonyEntity);
             power.LastRecalc = colonyEntity.StarSysDateTime;
         }
@@ -444,9 +456,10 @@ namespace Pulsar4X.Energy
         /// The daily pass: recalc, then run the plants for one day against the demand.
         /// Solar is used first, then fuel plants share the rest at one load factor.
         /// Each fuel plant burns E / (η × LHV) from the colony stockpile; a fuel that runs
-        /// short gives only what its stock covers and its plants stop. Tier satisfaction is
-        /// set from what was actually delivered, and events are raised for a new shortage
-        /// and for a fuel that ran out.
+        /// short gives only what its stock covers and its plants stop. Spare delivered power
+        /// charges the grid batteries (up to their rate, less the charge loss) and a shortfall
+        /// draws them down first. Tier satisfaction is set from what was actually delivered plus
+        /// the batteries' share, and events are raised for a new shortage and for a fuel that ran out.
         /// </summary>
         public static void RunDay(Entity colonyEntity, double seconds = SecondsPerDay)
         {
@@ -455,8 +468,15 @@ namespace Pulsar4X.Energy
                 return;
 
             double demandGen = power.GridEfficiency > 0 ? power.Demand_kW / power.GridEfficiency : 0;
+            // The batteries ask for what they can take today: their charge rate, or less when the
+            // room left fills sooner. Charging comes after the demand: plants run for it only with
+            // capacity to spare, and it is not part of Demand_kW.
+            double room = Math.Max(0, power.StoreMax_kJ - power.Stored_kJ);
+            double eta = power.ChargeEfficiency > 0 ? power.ChargeEfficiency : 1;
+            double chargeWant = seconds > 0 ? Math.Min(Math.Max(0, power.MaxCharge_kW), room / (eta * seconds)) : 0;
+            double wantGen = demandGen + (power.GridEfficiency > 0 ? chargeWant / power.GridEfficiency : 0);
             double solar = power.Plants.Where(p => p.Kind == ColonyPowerPlantKind.Solar).Sum(p => p.Output_kW);
-            double remaining = Math.Max(0, demandGen - solar);
+            double remaining = Math.Max(0, wantGen - solar);
 
             // Fuel plants grouped by fuel. A group whose stock cannot cover its share is
             // capped at what the stock gives, and the others pick up the slack.
@@ -503,11 +523,29 @@ namespace Pulsar4X.Energy
                 }
             }
 
-            double generated = Math.Min(solar, demandGen) + fuelOutput;
+            double generated = Math.Min(solar, wantGen) + fuelOutput;
             power.Dispatched_kW = generated;
             power.FuelBurnt_kgLastDay = burnt;
             double delivered = generated * power.GridEfficiency;
-            power.TierSatisfaction = ShareByTier(delivered, power.DemandByTier);
+
+            // The batteries sit on the delivered side of the grid: they charge from what is left
+            // after the demand and give back (without further grid loss) what the demand lacks,
+            // before any tier goes short. Average kW over the pass, like the plants.
+            double chargeIn = 0, dischargeOut = 0;
+            if (seconds > 0)
+            {
+                double surplus = delivered - power.Demand_kW;
+                if (surplus > 0)
+                    chargeIn = Math.Min(surplus, chargeWant);
+                else if (surplus < 0)
+                    dischargeOut = Math.Min(-surplus, Math.Min(Math.Max(0, power.MaxDischarge_kW), power.Stored_kJ / seconds));
+                power.Stored_kJ = Math.Clamp(power.Stored_kJ + (chargeIn * eta - dischargeOut) * seconds, 0, power.StoreMax_kJ);
+            }
+            power.BatteryCharge_kW = chargeIn;
+            power.BatteryDischarge_kW = dischargeOut;
+            power.Battery_kW = chargeIn * eta - dischargeOut;
+            double supply = delivered - chargeIn + dischargeOut;
+            power.TierSatisfaction = ShareByTier(supply, power.DemandByTier);
             power.LastDispatch = colonyEntity.StarSysDateTime;
 
             RaiseEvents(colonyEntity, power, groups);
@@ -516,11 +554,22 @@ namespace Pulsar4X.Energy
             if (groups.Any(g => g.Short))
             {
                 Recalc(colonyEntity);
-                power.TierSatisfaction = ShareByTier(delivered, power.DemandByTier);
+                power.TierSatisfaction = ShareByTier(supply, power.DemandByTier);
             }
 
-            // Batteries are not charged yet, so nothing is stored.
-            power.RecordDay(new ColonyPowerSample(colonyEntity.StarSysDateTime, power.Demand_kW, power.Generation_kW, delivered, 0));
+            power.RecordDay(new ColonyPowerSample(colonyEntity.StarSysDateTime, power.Demand_kW, power.Generation_kW, delivered,
+                power.Stored_kJ, chargeIn, dischargeOut));
+        }
+
+        /// <summary>
+        /// What the batteries can give on average over <paramref name="seconds"/>, kW: their
+        /// discharge rate, or less when the charge runs out sooner.
+        /// </summary>
+        internal static double BatterySupply_kW(ColonyPowerDB power, double seconds)
+        {
+            if (!(seconds > 0) || !(power.Stored_kJ > 0))
+                return 0;
+            return Math.Min(Math.Max(0, power.MaxDischarge_kW), power.Stored_kJ / seconds);
         }
 
         /// <summary>

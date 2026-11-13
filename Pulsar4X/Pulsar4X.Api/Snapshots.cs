@@ -380,10 +380,42 @@ public sealed record ColonyPowerView(
 
     /// <summary>One sample per daily pass, oldest first, up to 90 days.</summary>
     public IReadOnlyList<ColonyPowerSampleView> History { get; init; } = Array.Empty<ColonyPowerSampleView>();
+
+    /// <summary>
+    /// The batteries' rate, kJ/s (kW): + charging (energy going into the store, after the charge
+    /// loss), - discharging. Average over the last daily pass.
+    /// </summary>
+    public double Battery_kW { get; init; }
+
+    /// <summary>Stored over capacity, 0..1; 0 when there is no storage.</summary>
+    public double StoredFraction { get; init; }
+
+    /// <summary>Highest power the batteries take in, kW (before the charge loss). 0 with no storage.</summary>
+    public double MaxCharge_kW { get; init; }
+
+    /// <summary>Highest power the batteries give out, kW. 0 with no storage.</summary>
+    public double MaxDischarge_kW { get; init; }
+
+    /// <summary>
+    /// Seconds until the store is full (Battery_kW &gt; 0) or empty (Battery_kW &lt; 0) at the
+    /// current Battery_kW; null when idle or with no storage.
+    /// </summary>
+    public double? TimeToFullOrEmpty_s { get; init; }
+
+    /// <summary>
+    /// False until the colony's first daily power pass: until then the battery figures (and
+    /// satisfaction) are estimates, so the UI can show "awaiting daily pass".
+    /// </summary>
+    public bool HasDispatched { get; init; }
+
+    /// <summary>When the battery figures were last set by a daily pass; null before the first (and always on ships).</summary>
+    public DateTime? LastDispatch { get; init; }
 }
 
 /// <summary>One day of the grid. Generation is before grid loss; Delivered is what reached the facilities.</summary>
-public sealed record ColonyPowerSampleView(DateTime Date, double Demand_kW, double Generation_kW, double Delivered_kW, double Stored_kJ);
+/// <remarks>Charge_kW is the day's average power into the batteries (from the grid, before loss); Discharge_kW what they gave.</remarks>
+public sealed record ColonyPowerSampleView(DateTime Date, double Demand_kW, double Generation_kW, double Delivered_kW, double Stored_kJ,
+    double Charge_kW = 0, double Discharge_kW = 0);
 
 /// <summary>
 /// One consumer line. Tier is the display name; TierRank 1 is served first. A production facility
@@ -497,8 +529,20 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
     /// </summary>
     public double Charging_kW { get; init; }
 
-    /// <summary>Seconds until the batteries are full at <see cref="Charging_kW"/>, or null when not charging.</summary>
-    public double? FullIn_s => Charging_kW > 0 && StoreMax_kJ > Stored_kJ ? (StoreMax_kJ - Math.Max(0, Stored_kJ)) / Charging_kW : null;
+    /// <summary>
+    /// Seconds until the batteries are full, or null when not charging. Charging_kW is the plant
+    /// side; the store fills at <see cref="Battery_kW"/> (after the charge loss) when that is set.
+    /// </summary>
+    public double? FullIn_s
+    {
+        get
+        {
+            if (!(Charging_kW > 0) || !(StoreMax_kJ > Stored_kJ))
+                return null;
+            double rate = Battery_kW > 0 ? Battery_kW : Charging_kW;
+            return (StoreMax_kJ - Math.Max(0, Stored_kJ)) / rate;
+        }
+    }
 
     /// <summary>True while the batteries charge and the other loads wait for them (not a shortage).</summary>
     public bool LoadsWaitOnCharge => Charging_kW > 0 && AuxDemand_kW > 0 && AuxServed_kW < AuxDemand_kW;
@@ -520,6 +564,36 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
 
     /// <summary>The ship's loads grouped by kind: engines and warp, sensors, other loads, miners.</summary>
     public IReadOnlyList<ShipPowerLoadGroup> LoadGroups { get; init; } = Array.Empty<ShipPowerLoadGroup>();
+
+    /// <summary>
+    /// The batteries' rate, kJ/s (kW): + charging (energy going into the store, after the charge
+    /// loss), - discharging. The rate now, as the engine integrates it (the cap set by the
+    /// battery charge and discharge limits).
+    /// </summary>
+    public double Battery_kW { get; init; }
+
+    /// <summary>Stored over capacity, 0..1; 0 when there is no storage.</summary>
+    public double StoredFraction { get; init; }
+
+    /// <summary>Highest power the batteries take in, kW (before the charge loss). 0 with no storage.</summary>
+    public double MaxCharge_kW { get; init; }
+
+    /// <summary>Highest power the batteries give out, kW. 0 with no storage.</summary>
+    public double MaxDischarge_kW { get; init; }
+
+    /// <summary>
+    /// Seconds until the store is full (Battery_kW &gt; 0) or empty (Battery_kW &lt; 0) at the
+    /// current Battery_kW; null when idle or with no storage.
+    /// </summary>
+    public double? TimeToFullOrEmpty_s { get; init; }
+
+    /// <summary>
+    /// Always true on ships: their power runs continuously, so there is no daily pass to wait for.
+    /// </summary>
+    public bool HasDispatched { get; init; } = true;
+
+    /// <summary>When the battery figures were last set by a daily pass; null before the first (and always on ships).</summary>
+    public DateTime? LastDispatch { get; init; }
 }
 
 /// <summary>

@@ -11,7 +11,8 @@ namespace Pulsar4X.Energy
     /// kW/kJ model per second in <see cref="EnergyGenAbilityDB"/>). Energy type and units are
     /// shared: kW for power, kJ for storage, 'electricity' as the energy type.
     /// The daily pass burns plant fuel from the colony stockpile and sets per-tier satisfaction,
-    /// which scales industry, mining and research. Batteries are not charged yet.
+    /// which scales industry, mining and research. Grid batteries charge from the day's spare
+    /// and cover a shortfall first.
     /// </summary>
     public class ColonyPowerDB : BaseDataBlob
     {
@@ -40,9 +41,43 @@ namespace Pulsar4X.Energy
         [JsonIgnore]
         public double Balance_kW => Delivered_kW - Demand_kW;
 
-        /// <summary>Grid battery capacity, kJ. Batteries are not charged in phase 1.</summary>
+        /// <summary>Grid battery capacity, kJ (installed batteries x health).</summary>
         [JsonProperty]
         public double StoreMax_kJ { get; internal set; }
+
+        /// <summary>Energy in the grid batteries, kJ, 0..<see cref="StoreMax_kJ"/>. Charged and drawn by the daily pass.</summary>
+        [JsonProperty]
+        public double Stored_kJ { get; internal set; }
+
+        /// <summary>Highest power the batteries take in, kW (grid side, before the charge loss). Set by Recalc.</summary>
+        [JsonProperty]
+        public double MaxCharge_kW { get; internal set; }
+
+        /// <summary>Highest power the batteries give out, kW. Set by Recalc.</summary>
+        [JsonProperty]
+        public double MaxDischarge_kW { get; internal set; }
+
+        /// <summary>
+        /// Share of the charging power the batteries keep, 0..1 (capacity-weighted). The whole
+        /// round-trip loss is taken while charging; discharge is lossless. Set by Recalc.
+        /// </summary>
+        [JsonProperty]
+        public double ChargeEfficiency { get; internal set; } = 1;
+
+        /// <summary>
+        /// The batteries' average rate over the last daily pass, kJ/s: + charging (energy stored,
+        /// after loss), - discharging.
+        /// </summary>
+        [JsonProperty]
+        public double Battery_kW { get; internal set; }
+
+        /// <summary>Average power the batteries took from the grid in the last daily pass, kW (before loss).</summary>
+        [JsonProperty]
+        public double BatteryCharge_kW { get; internal set; }
+
+        /// <summary>Average power the batteries gave the grid in the last daily pass, kW.</summary>
+        [JsonProperty]
+        public double BatteryDischarge_kW { get; internal set; }
 
         [JsonProperty]
         public double LifeSupport_kW { get; internal set; }
@@ -151,7 +186,9 @@ namespace Pulsar4X.Energy
                             Lerp(last.Demand_kW, sample.Demand_kW, t),
                             Lerp(last.Generation_kW, sample.Generation_kW, t),
                             Lerp(last.Delivered_kW, sample.Delivered_kW, t),
-                            Lerp(last.Stored_kJ, sample.Stored_kJ, t)));
+                            Lerp(last.Stored_kJ, sample.Stored_kJ, t),
+                            Lerp(last.Charge_kW, sample.Charge_kW, t),
+                            Lerp(last.Discharge_kW, sample.Discharge_kW, t)));
                     }
                 }
             }
@@ -171,6 +208,13 @@ namespace Pulsar4X.Energy
             Demand_kW = db.Demand_kW;
             Generation_kW = db.Generation_kW;
             StoreMax_kJ = db.StoreMax_kJ;
+            Stored_kJ = db.Stored_kJ;
+            MaxCharge_kW = db.MaxCharge_kW;
+            MaxDischarge_kW = db.MaxDischarge_kW;
+            ChargeEfficiency = db.ChargeEfficiency;
+            Battery_kW = db.Battery_kW;
+            BatteryCharge_kW = db.BatteryCharge_kW;
+            BatteryDischarge_kW = db.BatteryDischarge_kW;
             LifeSupport_kW = db.LifeSupport_kW;
             LifeSupportColonists = db.LifeSupportColonists;
             Consumers = db.Consumers.Select(c => c with { }).ToList();
@@ -194,9 +238,12 @@ namespace Pulsar4X.Energy
 
     /// <summary>
     /// One day of the grid: nameplate demand, generation available before grid loss, power actually
-    /// delivered after grid loss, and energy held in grid batteries. Power in kW, storage in kJ.
+    /// delivered after grid loss, and energy held in grid batteries at the end of the day, with
+    /// the day's average battery charge (taken from the grid, before loss) and discharge (given
+    /// to the grid). Power in kW, storage in kJ. Samples from before battery charging read 0 for both.
     /// </summary>
-    public sealed record ColonyPowerSample(DateTime Date, double Demand_kW, double Generation_kW, double Delivered_kW, double Stored_kJ);
+    public sealed record ColonyPowerSample(DateTime Date, double Demand_kW, double Generation_kW, double Delivered_kW, double Stored_kJ,
+        double Charge_kW = 0, double Discharge_kW = 0);
 
     /// <summary>
     /// One consumer line: a design (or life support) and its total draw. A production facility draws

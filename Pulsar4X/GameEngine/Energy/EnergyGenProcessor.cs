@@ -60,6 +60,29 @@ namespace Pulsar4X.Energy
         }
 
         /// <summary>
+        /// <see cref="EnergyGen"/> for warp's one-second bubble creation or collapse pulse. The pulse
+        /// draws the bubble cost from the store in one second, far above any continuous discharge
+        /// rate (a whole store in a second would be thousands of C), so the discharge limit is
+        /// lifted for this integration only. Batteries take short pulses well above their
+        /// continuous rating; holding the pulse to that rating would leave most of the bubble cost
+        /// unmet without any refusal, which is worse than either.
+        /// </summary>
+        internal static void EnergyGenPulse(Entity entity, DateTime atDateTime)
+        {
+            var db = entity.GetDataBlob<EnergyGenAbilityDB>();
+            bool was = db.PulseUnclamped;
+            db.PulseUnclamped = true;
+            try
+            {
+                EnergyGen(entity, atDateTime);
+            }
+            finally
+            {
+                db.PulseUnclamped = was;
+            }
+        }
+
+        /// <summary>
         /// Brings the blob up to the entity's current time before an install change,
         /// when it can be processed (an energy type and a store are set up).
         /// </summary>
@@ -75,9 +98,13 @@ namespace Pulsar4X.Energy
 
         /// <summary>
         /// A step has at most two phases. Phase A runs until the store fills (charging) or
-        /// empties (draining), at full output. Phase B follows the demand with a full store,
-        /// or stays at full output with an empty one. tA is phase A's length in seconds (0 if
-        /// none); pA and pB are the kW produced in each phase.
+        /// empties (draining). Phase B follows the demand with a full store, or stays at full
+        /// output with an empty one. tA is phase A's length in seconds (0 if none); pA and pB are
+        /// the kW produced in each phase.
+        /// The battery limits shape phase A: charging takes at most <see cref="EnergyGenAbilityDB.ChargeLimit_kW"/>
+        /// of the spare output and stores that times the charge efficiency, and the rest of the
+        /// spare serves the other loads; draining gives at most <see cref="EnergyGenAbilityDB.DischargeLimit_kW"/>
+        /// (the rest of the shortfall goes unmet). With no limits this is the plant flat out, as before.
         /// </summary>
         internal static (double tA, double pA, double pB) Phases(EnergyGenAbilityDB db)
         {
@@ -87,14 +114,55 @@ namespace Pulsar4X.Energy
             double freestore = Math.Max(0, storeMax - stored);
             double maxOutput = db.TotalOutputMax;
             double rate = maxOutput - db.Demand;
+            var (charge, chargeIn, discharge) = StoreRates(db);
 
             // A full store also serves the ship's other loads from the spare output.
             double pB = rate >= 0 ? Math.Max(0, db.Demand) + Math.Min(Math.Max(0, db.AuxDemand), rate) : maxOutput;
-            if (rate > 0 && freestore > 0)
-                return (freestore / rate, maxOutput, pB);
-            if (rate < 0 && stored > 0)
-                return (stored / -rate, maxOutput, pB);
+            if (rate > 0 && freestore > 0 && charge > 0)
+            {
+                double pA = chargeIn >= rate
+                    ? maxOutput
+                    : Math.Max(0, db.Demand) + chargeIn + Math.Min(Math.Max(0, db.AuxDemand), rate - chargeIn);
+                return (freestore / charge, pA, pB);
+            }
+            if (rate < 0 && stored > 0 && discharge > 0)
+                return (stored / discharge, maxOutput, pB);
             return (0, pB, pB);
+        }
+
+        /// <summary>
+        /// The store's rates at the current demand, whether or not it has room or charge:
+        /// charge, kJ/s into the store (after the charge loss); chargeIn, kW the plant puts into
+        /// charging; discharge, kJ/s out of the store toward an unmet demand.
+        /// </summary>
+        internal static (double charge, double chargeIn, double discharge) StoreRates(EnergyGenAbilityDB db)
+        {
+            double rate = db.TotalOutputMax - db.Demand;
+            if (rate > 0)
+            {
+                double chargeIn = Math.Min(rate, db.ChargeLimit_kW);
+                return (chargeIn * db.ChargeEfficiency, chargeIn, 0);
+            }
+            if (rate < 0)
+                return (0, 0, Math.Min(-rate, db.DischargeLimit_kW));
+            return (0, 0, 0);
+        }
+
+        /// <summary>
+        /// The battery's rate now, kJ/s: + while it charges (after loss), - while it drains, 0 when
+        /// it is full with spare output, empty with a shortfall, or idle.
+        /// </summary>
+        public static double BatteryRate(EnergyGenAbilityDB db)
+        {
+            if (db.EnergyType == null || !db.EnergyStored.TryGetValue(db.EnergyType.UniqueID, out double stored)
+                || !db.EnergyStoreMax.TryGetValue(db.EnergyType.UniqueID, out double storeMax))
+                return 0;
+            var (charge, _, discharge) = StoreRates(db);
+            if (charge > 0 && storeMax - stored > 1e-9)
+                return charge;
+            if (discharge > 0 && stored > 1e-9)
+                return -discharge;
+            return 0;
         }
 
         /// <summary>
@@ -206,8 +274,10 @@ namespace Pulsar4X.Energy
             double freestore = Math.Max(0, storeMax - stored);
 
             double maxOutput = db.TotalOutputMax;
-            double rate = maxOutput - db.Demand;
-            double delta = GeneralMath.Clamp(rate * dt, -stored, freestore);
+            var (charge, _, discharge) = StoreRates(db);
+            double delta = charge > 0 ? Math.Min(charge * dt, freestore)
+                : discharge > 0 ? -Math.Min(discharge * dt, stored)
+                : 0;
 
             var (tA, pA, pB) = Phases(db);
             double produced;
@@ -242,21 +312,21 @@ namespace Pulsar4X.Energy
             double freestore = Math.Max(0, storeMax - stored);
 
             double totaldemand = _energyGenDB.Demand + freestore;
-            double rate = _energyGenDB.TotalOutputMax - _energyGenDB.Demand;
+            var (charge, _, discharge) = StoreRates(_energyGenDB);
             var (delta, load, burn, cellBurn) = StepWithCells(_energyGenDB, dt);
             _energyGenDB.EnergyStored[energyType] = stored + delta;
 
             double nowStored = stored + delta;
             double nowFree = Math.Max(0, storeMax - nowStored);
-            if (rate > 0 && nowFree > 0)
+            if (charge > 0 && nowFree > 0)
             {
-                double timeToFill = Math.Max(1, Math.Ceiling(nowFree / rate));
+                double timeToFill = Math.Max(1, Math.Ceiling(nowFree / charge));
                 DateTime interuptTime = atDateTime + TimeSpan.FromSeconds(timeToFill);
                 entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
             }
-            else if (rate < 0 && nowStored > 0)
+            else if (discharge > 0 && nowStored > 0)
             {
-                double timeToEmpty = Math.Max(1, Math.Ceiling(nowStored / Math.Abs(rate)));
+                double timeToEmpty = Math.Max(1, Math.Ceiling(nowStored / discharge));
                 DateTime interuptTime = atDateTime + TimeSpan.FromSeconds(timeToEmpty);
                 entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
             }

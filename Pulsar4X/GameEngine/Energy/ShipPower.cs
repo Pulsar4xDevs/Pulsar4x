@@ -12,8 +12,8 @@ namespace Pulsar4X.Energy
         /// Draws up to <paramref name="kJ"/> spread over the last <paramref name="seconds"/>, ending at
         /// <paramref name="at"/>, and returns the kJ delivered.
         /// The plant's spare output over that span goes first (warp and the ship's other loads keep
-        /// theirs) and burns the matching reactor or fuel-cell fuel; the batteries cover the rest and
-        /// recharge afterwards. No plant or store: nothing.
+        /// theirs) and burns the matching reactor or fuel-cell fuel; the batteries cover the rest (up to
+        /// their discharge rate over the span) and recharge afterwards. No plant or store: nothing.
         /// The span is treated as steady (store full, today's demand), which is what a parked miner is.
         /// </summary>
         public static double DrawEnergy(Entity ship, double kJ, double seconds, DateTime at)
@@ -58,7 +58,10 @@ namespace Pulsar4X.Energy
             double stored = db.EnergyStored[id];
             if (rest > 0 && stored > 0)
             {
+                // The batteries give at most their discharge rate over the span.
                 double take = Math.Min(rest, stored);
+                if (seconds > 0 && double.IsFinite(seconds))
+                    take = Math.Min(take, db.DischargeLimit_kW * seconds);
                 db.EnergyStored[id] = stored - take;
                 delivered += take;
                 // Book the recharge.

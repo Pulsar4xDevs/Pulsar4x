@@ -28,7 +28,7 @@
         {
           "Name": "Power Draw",
           "Units": "kW",
-          "DescriptionFormula": "'0.1 W per cubic metre (automated, low light).'",
+          "DescriptionFormula": "'0.5 W per cubic metre of storage (automated, low light).'",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "PropertyValue('Storage Volume') * 0.0005"
         },
@@ -94,7 +94,7 @@
         {
           "Name": "Power Draw",
           "Units": "kW",
-          "DescriptionFormula": "'0.1 W per cubic metre (automated, low light).'",
+          "DescriptionFormula": "'0.5 W per cubic metre of storage (automated, low light).'",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "PropertyValue('Storage Volume') * 0.0005"
         },
@@ -256,7 +256,7 @@
         {
           "Name": "Power Draw",
           "Units": "kW",
-          "DescriptionFormula": "'Port cranes and transfer handling, 0.75 W per unit of size.'",
+          "DescriptionFormula": "'Port cranes and transfer handling, 20 W per unit of size.'",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "PropertyValue('Size') * 0.02"
         },

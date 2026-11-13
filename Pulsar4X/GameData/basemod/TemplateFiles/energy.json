@@ -122,10 +122,38 @@
           "PropertyFormula": "PropertyValue('Mass') * 500 * TechData('tech-battery-capacity')"
         },
         {
+          "Name": "C-Rate",
+          "Units": "C",
+          "DescriptionFormula": "'Lithium-ion pack: charges or discharges fully in about an hour (1C)'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "1"
+        },
+        {
+          "Name": "Charge Rate",
+          "Units": "kW",
+          "DescriptionFormula": "'Highest power the battery takes in: capacity times C-rate, per hour'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Energy Storage') * PropertyValue('C-Rate') / 3600"
+        },
+        {
+          "Name": "Discharge Rate",
+          "Units": "kW",
+          "DescriptionFormula": "'Highest power the battery gives out: capacity times C-rate, per hour'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Energy Storage') * PropertyValue('C-Rate') / 3600"
+        },
+        {
+          "Name": "Round-trip Efficiency",
+          "Units": "",
+          "DescriptionFormula": "'Share of the charging energy that comes back out. The loss is taken while charging'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.9"
+        },
+        {
           "Name": "DB",
           "DescriptionFormula": "''",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs('electricity', PropertyValue('Energy Storage'))",
+          "PropertyFormula": "AtbConstrArgs('electricity', PropertyValue('Energy Storage'), PropertyValue('Charge Rate'), PropertyValue('Discharge Rate'), PropertyValue('Round-trip Efficiency'))",
           "AttributeType": "Pulsar4X.Energy.EnergyStoreAtb"
         }
       ]
@@ -895,10 +923,38 @@
           "PropertyFormula": "PropertyValue('Mass') * 500 * TechData('tech-battery-capacity')"
         },
         {
+          "Name": "C-Rate",
+          "Units": "C",
+          "DescriptionFormula": "'Grid storage: charges or discharges fully in about 6.7 hours (0.15C)'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.15"
+        },
+        {
+          "Name": "Charge Rate",
+          "Units": "kW",
+          "DescriptionFormula": "'Highest power the battery takes in: capacity times C-rate, per hour'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Energy Storage') * PropertyValue('C-Rate') / 3600"
+        },
+        {
+          "Name": "Discharge Rate",
+          "Units": "kW",
+          "DescriptionFormula": "'Highest power the battery gives out: capacity times C-rate, per hour'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Energy Storage') * PropertyValue('C-Rate') / 3600"
+        },
+        {
+          "Name": "Round-trip Efficiency",
+          "Units": "",
+          "DescriptionFormula": "'Share of the charging energy that comes back out. The loss is taken while charging'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.9"
+        },
+        {
           "Name": "DB",
           "DescriptionFormula": "''",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs('electricity', PropertyValue('Energy Storage'))",
+          "PropertyFormula": "AtbConstrArgs('electricity', PropertyValue('Energy Storage'), PropertyValue('Charge Rate'), PropertyValue('Discharge Rate'), PropertyValue('Round-trip Efficiency'))",
           "AttributeType": "Pulsar4X.Energy.EnergyStoreAtb"
         }
       ]

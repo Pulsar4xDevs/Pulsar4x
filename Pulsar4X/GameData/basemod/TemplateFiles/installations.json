@@ -1022,7 +1022,7 @@
         {
           "Name": "Power Draw",
           "Units": "kW",
-          "DescriptionFormula": "'0.5 kW per crew.'",
+          "DescriptionFormula": "'Cargo handling, 20 kW per kg/s of transfer rate.'",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "PropertyValue('Cargo Transfer Rate') * 20"
         },

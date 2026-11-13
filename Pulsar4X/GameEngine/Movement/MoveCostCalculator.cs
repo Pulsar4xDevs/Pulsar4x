@@ -43,6 +43,13 @@ public record struct MoveCostShip
     public double EnergyStored;
     public double EnergyStoreMax;
     public double EnergyOutputMax;
+    /// <summary>
+    /// kJ/s the store gains charging at full output with no other demand: the output up to the
+    /// battery charge limit, after the charge loss. 0 means "same as EnergyOutputMax".
+    /// </summary>
+    public double StoreChargeRate;
+    /// <summary>Share of charging energy the store keeps, 0..1. 0 means 1 (no loss).</summary>
+    public double ChargeEfficiency;
 
     // Where that output comes from (energy phase 6), dispatched in this order: free sources
     // (solar, isotope generators), the reactor, then fuel cells. The fuel fields price the
@@ -101,6 +108,8 @@ public record struct MoveCostShip
         if (ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power))
         {
             spec.EnergyOutputMax = power.TotalOutputMax;
+            spec.ChargeEfficiency = power.ChargeEfficiency;
+            spec.StoreChargeRate = Math.Min(power.TotalOutputMax, power.ChargeLimit_kW) * power.ChargeEfficiency;
             spec.FreeOutputMax = power.MaxOutputFromSolar + power.DecayOutputMax;
             spec.ReactorOutputMax = power.ReactorOutputMax;
             spec.ReactorFuelType = power.TotalFuelUseAtMax.type;
@@ -198,7 +207,8 @@ public static class MoveCostCalculator
             }
             else
             {
-                wait = (ship.BubbleCreationCost - ship.EnergyStored) / ship.EnergyOutputMax;
+                double chargeRate = ship.StoreChargeRate > 0 ? ship.StoreChargeRate : ship.EnergyOutputMax;
+                wait = (ship.BubbleCreationCost - ship.EnergyStored) / chargeRate;
             }
         }
 
@@ -229,6 +239,9 @@ public static class MoveCostCalculator
             cellKJ += fromCells * duration_s;
         }
         double all = free + Math.Max(0, ship.ReactorOutputMax) + Math.Max(0, ship.CellOutputMax);
+        // The store is made back through the battery's charge loss.
+        if (ship.ChargeEfficiency > 0 && ship.ChargeEfficiency < 1)
+            storeKJ /= ship.ChargeEfficiency;
         if (storeKJ > 0 && all > 0)
         {
             reactorKJ += storeKJ * reactor / all;

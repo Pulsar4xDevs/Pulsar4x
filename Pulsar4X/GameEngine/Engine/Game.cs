@@ -327,6 +327,9 @@ namespace Pulsar4X.Engine
             foreach (var manager in loadedGame.GlobalManagerDictionary.Values)
                 RehydrateActions(loadedGame, manager);
 
+            // Power state saved under older rules (demand, battery limits) is brought up to date.
+            Pulsar4X.Energy.EnergyLoadRefresh.AfterLoad(loadedGame);
+
             foreach (var system in loadedGame.Systems)
                 system.UpdateActivityState();
 

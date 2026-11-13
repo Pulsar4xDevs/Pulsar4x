@@ -355,17 +355,35 @@ namespace Pulsar4X.Engine.Api
             double aux = Math.Max(0, energy.AuxDemand);
             double auxServed = Math.Clamp(energy.AuxServed, 0, aux);
             // The engine's step model (EnergyGenProcessor.Phases): with room in the store and output to
-            // spare, the plant runs flat out and the spare charges the batteries; other loads wait.
-            double charging = storeMax - stored > 1e-9 ? Math.Max(0, generation - demand) : 0;
+            // spare, the spare charges the batteries up to their charge limit; other loads get what is left.
+            double charging = storeMax - stored > 1e-9 ? Math.Min(Math.Max(0, generation - demand), energy.ChargeLimit_kW) : 0;
+            double battery = Pulsar4X.Energy.EnergyGenProcessor.BatteryRate(energy);
+            double? timeTo = storeMax > 0 && battery > 0 ? (storeMax - Math.Max(0, stored)) / battery
+                : storeMax > 0 && battery < 0 ? Math.Max(0, stored) / -battery
+                : null;
             return new ShipPowerView(generation, demand, stored, storeMax, hasPlant)
             {
                 AuxDemand_kW = aux,
                 AuxServed_kW = auxServed,
                 Charging_kW = charging,
+                Battery_kW = battery,
+                StoredFraction = storeMax > 0 ? Math.Clamp(stored / storeMax, 0, 1) : 0,
+                MaxCharge_kW = storeMax > 0 ? FiniteRate(energy.ChargeLimit_kW, storeMax) : 0,
+                MaxDischarge_kW = storeMax > 0 ? FiniteRate(energy.DischargeLimit_kW, storeMax) : 0,
+                TimeToFullOrEmpty_s = timeTo,
+                HasDispatched = true,
+                LastDispatch = null,
                 Sources = ShipPowerSources(ship, energy),
                 LoadGroups = ShipPowerLoadGroups(ship, demand, generation, aux, auxServed, charging),
             };
         }
+
+        /// <summary>
+        /// A store limit for the view: an unrated store (no limit) shows as its whole capacity per
+        /// second, which is what the engine can move in its shortest step.
+        /// </summary>
+        private static double FiniteRate(double limit_kW, double storeMax_kJ)
+            => double.IsFinite(limit_kW) ? Math.Max(0, limit_kW) : storeMax_kJ;
 
         /// <summary>The installed designs on a ship carrying attribute T, with their copy counts.</summary>
         private static List<(ComponentDesign design, int count, T atb)> DesignsWith<T>(Entity ship) where T : IComponentDesignAttribute
@@ -705,9 +723,30 @@ namespace Pulsar4X.Engine.Api
                 consumers, plants, tiers, fuel, power.Dispatched_kW)
             {
                 History = (power.History ?? new List<Pulsar4X.Energy.ColonyPowerSample>())
-                    .Select(h => new ColonyPowerSampleView(h.Date, h.Demand_kW, h.Generation_kW, h.Delivered_kW, h.Stored_kJ))
+                    .Select(h => new ColonyPowerSampleView(h.Date, h.Demand_kW, h.Generation_kW, h.Delivered_kW, h.Stored_kJ,
+                        h.Charge_kW, h.Discharge_kW))
                     .ToList(),
+                Battery_kW = power.StoreMax_kJ > 0 ? power.Battery_kW : 0,
+                StoredFraction = power.StoreMax_kJ > 0 ? Math.Clamp(power.Stored_kJ / power.StoreMax_kJ, 0, 1) : 0,
+                MaxCharge_kW = power.StoreMax_kJ > 0 ? Math.Max(0, power.MaxCharge_kW) : 0,
+                MaxDischarge_kW = power.StoreMax_kJ > 0 ? Math.Max(0, power.MaxDischarge_kW) : 0,
+                TimeToFullOrEmpty_s = ColonyBatteryTime(power),
+                HasDispatched = power.LastDispatch != default,
+                LastDispatch = power.LastDispatch != default ? power.LastDispatch : null,
             };
+        }
+
+        /// <summary>Seconds to full or empty at the last daily pass's battery rate; null when idle or with no storage.</summary>
+        private static double? ColonyBatteryTime(Pulsar4X.Energy.ColonyPowerDB power)
+        {
+            if (!(power.StoreMax_kJ > 0))
+                return null;
+            double stored = Math.Clamp(power.Stored_kJ, 0, power.StoreMax_kJ);
+            if (power.Battery_kW > 1e-9 && power.StoreMax_kJ - stored > 1e-9)
+                return (power.StoreMax_kJ - stored) / power.Battery_kW;
+            if (power.Battery_kW < -1e-9 && stored > 1e-9)
+                return stored / -power.Battery_kW;
+            return null;
         }
 
         private static bool HasInstalledInfrastructure(Entity colony)

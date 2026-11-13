@@ -131,7 +131,9 @@ namespace Pulsar4X.Energy
                 genDB.EnergyStored[EnergyTypeID] = 0;
                 genDB.EnergyStoreMax[EnergyTypeID] = PowerOutputMax;
             }
-
+            // The buffer takes and gives up to the generator's own output, without loss, so a
+            // generator-only ship charges and drains its buffer as before.
+            genDB.AddStoreRates(PowerOutputMax, PowerOutputMax, PowerOutputMax, 1, +1);
         }
 
         /// <summary>
@@ -156,6 +158,7 @@ namespace Pulsar4X.Energy
                 if (!anyLeft)
                     genDB.CellFuelDebt_kg = 0;
                 EnergyGenAbilityDB.RemoveStore(genDB, EnergyTypeID, PowerOutputMax);
+                genDB.AddStoreRates(PowerOutputMax, PowerOutputMax, PowerOutputMax, 1, -1);
                 return;
             }
             if (IsIsotope)
@@ -175,6 +178,7 @@ namespace Pulsar4X.Energy
                         sources.RemoveAt(idx);
                 }
                 EnergyGenAbilityDB.RemoveStore(genDB, EnergyTypeID, PowerOutputMax);
+                genDB.AddStoreRates(PowerOutputMax, PowerOutputMax, PowerOutputMax, 1, -1);
                 return;
             }
 
@@ -193,6 +197,7 @@ namespace Pulsar4X.Energy
 
             // And the 1 s of output it added to the store.
             EnergyGenAbilityDB.RemoveStore(genDB, EnergyTypeID, PowerOutputMax);
+            genDB.AddStoreRates(PowerOutputMax, PowerOutputMax, PowerOutputMax, 1, -1);
         }
 
         public string AtbName()

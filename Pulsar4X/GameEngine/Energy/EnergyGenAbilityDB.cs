@@ -129,10 +129,111 @@ namespace Pulsar4X.Energy
                 if (!EnergyStored.TryGetValue(id, out double stored) || !EnergyStoreMax.TryGetValue(id, out double max))
                     return 0;
                 double spare = TotalOutputMax - Demand;
-                if (!(spare > 0) || max - stored > 1e-9)
+                if (!(spare > 0))
                     return 0;
-                return Math.Min(AuxDemand, spare);
+                // While the store charges, the loads get only what the charge rate leaves over.
+                if (max - stored > 1e-9)
+                    spare -= Math.Min(spare, ChargeLimit_kW);
+                return Math.Min(AuxDemand, Math.Max(0, spare));
             }
+        }
+
+        /// <summary>
+        /// Sum of the rated stores' charge limits, kW: batteries at their design rate, and each
+        /// generator's one-second buffer at its own output (so a ship with no battery behaves as before).
+        /// </summary>
+        public double StoreCharge_kW;
+
+        /// <summary>Sum of the rated stores' discharge limits, kW.</summary>
+        public double StoreDischarge_kW;
+
+        /// <summary>
+        /// Capacity-weighted charge loss, kJ: the sum over stores of capacity x (1 - efficiency).
+        /// The store's charge efficiency is 1 - this / store max.
+        /// </summary>
+        public double StoreLoss_kJ;
+
+        /// <summary>Installed stores with no rates (designs from before battery rates). Any of these lifts the limits.</summary>
+        public int UnratedStores;
+
+        /// <summary>
+        /// Set only while warp books its one-second bubble creation or collapse pulse. Batteries are
+        /// rated for short pulses well above their continuous rate, so the pulse is not held to
+        /// <see cref="StoreDischarge_kW"/>. Not saved.
+        /// </summary>
+        [JsonIgnore]
+        internal bool PulseUnclamped;
+
+        /// <summary>
+        /// True when the stores carry limits: some rate is set and no unrated store is fitted. A
+        /// hand-built blob with no rates (and an old save before its load refresh) has none.
+        /// </summary>
+        [JsonIgnore]
+        internal bool StoreRated => UnratedStores <= 0 && StoreCharge_kW > 0 && StoreDischarge_kW > 0;
+
+        /// <summary>Highest power into the store now, kW (input side, before the charge loss). +infinity when unlimited.</summary>
+        [JsonIgnore]
+        public double ChargeLimit_kW => StoreRated ? StoreCharge_kW : double.PositiveInfinity;
+
+        /// <summary>Highest power out of the store now, kW. +infinity when unlimited or during a warp pulse.</summary>
+        [JsonIgnore]
+        public double DischargeLimit_kW => StoreRated && !PulseUnclamped ? StoreDischarge_kW : double.PositiveInfinity;
+
+        /// <summary>Share of the charging power that is stored, 0..1 (1 with no rated battery).</summary>
+        [JsonIgnore]
+        public double ChargeEfficiency
+        {
+            get
+            {
+                if (EnergyType == null || !EnergyStoreMax.TryGetValue(EnergyType.UniqueID, out double max) || !(max > 0))
+                    return 1;
+                double loss = Math.Max(0, StoreLoss_kJ);
+                return Math.Clamp(1 - loss / max, 0.01, 1);
+            }
+        }
+
+        /// <summary>Adds (sign +1) or takes off (sign -1) one battery's rates.</summary>
+        internal void AddStoreRates(EnergyStoreAtb battery, int sign)
+        {
+            if (!battery.IsRated)
+            {
+                UnratedStores = Math.Max(0, UnratedStores + sign);
+                return;
+            }
+            AddStoreRates(battery.MaxStore, battery.MaxCharge_kW, battery.MaxDischarge_kW, battery.ChargeEfficiency, sign);
+        }
+
+        /// <summary>Adds (sign +1) or takes off (sign -1) one rated store's limits and loss.</summary>
+        internal void AddStoreRates(double capacity_kJ, double charge_kW, double discharge_kW, double efficiency, int sign)
+        {
+            StoreCharge_kW = Math.Max(0, StoreCharge_kW + sign * Math.Max(0, charge_kW));
+            StoreDischarge_kW = Math.Max(0, StoreDischarge_kW + sign * Math.Max(0, discharge_kW));
+            StoreLoss_kJ = Math.Max(0, StoreLoss_kJ + sign * Math.Max(0, capacity_kJ) * (1 - Math.Clamp(efficiency, 0, 1)));
+        }
+
+        /// <summary>
+        /// Rebuilds the store limits from the installed components: each battery at its design rates,
+        /// each generator's buffer at its output. Run on load so a save from before battery rates
+        /// (or with changed designs) picks up the current limits.
+        /// </summary>
+        internal static void RecomputeStoreRates(Entity entity)
+        {
+            if (!entity.TryGetDataBlob<EnergyGenAbilityDB>(out var db) || !entity.TryGetDataBlob<ComponentInstancesDB>(out var instances))
+                return;
+            if (entity.HasDataBlob<Pulsar4X.Colonies.ColonyInfoDB>())
+                return;
+            db.StoreCharge_kW = 0;
+            db.StoreDischarge_kW = 0;
+            db.StoreLoss_kJ = 0;
+            db.UnratedStores = 0;
+            if (instances.TryGetComponentsByAttribute<EnergyStoreAtb>(out var batteries))
+                foreach (var instance in batteries)
+                    if (instance.Design.TryGetAttribute<EnergyStoreAtb>(out var atb))
+                        db.AddStoreRates(atb, +1);
+            if (instances.TryGetComponentsByAttribute<EnergyGenerationAtb>(out var generators))
+                foreach (var instance in generators)
+                    if (instance.Design.TryGetAttribute<EnergyGenerationAtb>(out var gen))
+                        db.AddStoreRates(gen.PowerOutputMax, gen.PowerOutputMax, gen.PowerOutputMax, 1, +1);
         }
         
         public (string type, double maxUse) TotalFuelUseAtMax = ("", 0.0);
@@ -218,6 +319,15 @@ namespace Pulsar4X.Energy
                 AuxDemand = 0;
             if (!double.IsFinite(CellFuelDebt_kg) || CellFuelDebt_kg < 0)
                 CellFuelDebt_kg = 0;
+            // Saves from before battery rates have none: no limits until the load refresh.
+            if (!double.IsFinite(StoreCharge_kW) || StoreCharge_kW < 0)
+                StoreCharge_kW = 0;
+            if (!double.IsFinite(StoreDischarge_kW) || StoreDischarge_kW < 0)
+                StoreDischarge_kW = 0;
+            if (!double.IsFinite(StoreLoss_kJ) || StoreLoss_kJ < 0)
+                StoreLoss_kJ = 0;
+            if (UnratedStores < 0)
+                UnratedStores = 0;
         }
 
         // The setter resizes Histogram. Save the field so load does not run that.
@@ -281,6 +391,10 @@ namespace Pulsar4X.Energy
             CellFuelDebt_kg = db.CellFuelDebt_kg;
             DecaySources = new List<DecaySource>(db.DecaySources ?? new());
             AuxDemand = db.AuxDemand;
+            StoreCharge_kW = db.StoreCharge_kW;
+            StoreDischarge_kW = db.StoreDischarge_kW;
+            StoreLoss_kJ = db.StoreLoss_kJ;
+            UnratedStores = db.UnratedStores;
             Demand = db.Demand;
             Load = db.Load;
         }

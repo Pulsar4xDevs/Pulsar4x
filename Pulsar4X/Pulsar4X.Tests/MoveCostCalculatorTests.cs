@@ -127,7 +127,12 @@ public class MoveCostCalculatorTests
             // Energy phase 6: no reaction mass, but the steam turbine burns fissile fuel for every kJ:
             // 50 kW of core heat at 1 kg per 40e9 kJ makes 15 kW, so 50 / 40e9 / 15 kg per kJ.
             Assert.That(cost.FuelUsed_kg.Keys, Is.EquivalentTo(new[] { "fissile-fuels" }));
-            Assert.That(cost.FuelUsed_kg["fissile-fuels"], Is.EqualTo(expected * 50 / 40e9 / 15).Within(1e-12));
+            // Bubble creation and collapse come out of the store and are made back through the
+            // battery's charge loss: the plant makes storeKJ / efficiency for them.
+            double storeKJ = ship.BubbleCreationCost + ship.BubbleCollapseCost;
+            Assert.That(ship.ChargeEfficiency, Is.InRange(0.9, 1.0));
+            double made = expected - storeKJ + storeKJ / ship.ChargeEfficiency;
+            Assert.That(cost.FuelUsed_kg["fissile-fuels"], Is.EqualTo(made * 50 / 40e9 / 15).Within(1e-12));
         }
         Assert.That(costs[1].EnergyUsed_kJ, Is.EqualTo(costs[0].EnergyUsed_kJ));
         Assert.That(costs[2].EnergyUsed_kJ, Is.EqualTo(costs[0].EnergyUsed_kJ));
@@ -222,7 +227,12 @@ public class MoveCostCalculatorTests
         var ship = Loaded(0) with { EnergyStored = 0 };
         var charging = MoveCostCalculator.Warp(ship, 1e9);
         Assert.That(charging.Feasible, Is.True, charging.Reason);
-        Assert.That(charging.ChargeWait_s, Is.EqualTo(ship.BubbleCreationCost / ship.EnergyOutputMax).Within(1e-6));
+        // The 15 kW plant is well under the battery's 1C charge limit, so it charges at its whole
+        // output, and the store keeps that times the charge efficiency (batteries 0.9, the
+        // turbine's one-second buffer lossless).
+        Assert.That(ship.ChargeEfficiency, Is.InRange(0.9, 0.9001));
+        Assert.That(ship.StoreChargeRate, Is.EqualTo(ship.EnergyOutputMax * ship.ChargeEfficiency).Within(1e-9));
+        Assert.That(charging.ChargeWait_s, Is.EqualTo(ship.BubbleCreationCost / (ship.EnergyOutputMax * ship.ChargeEfficiency)).Within(1e-6));
 
         var smallStore = ship with { EnergyStoreMax = ship.BubbleCreationCost / 2 };
         var cannot = MoveCostCalculator.Warp(smallStore, 1e9);

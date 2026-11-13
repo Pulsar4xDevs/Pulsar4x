@@ -275,7 +275,7 @@ namespace Pulsar4X.Movement
                 
                 EnergyGenProcessor.EnergyGen(entity, toDateTime - TimeSpan.FromSeconds(1));
                 powerDB.AddDemand(creationCost, toDateTime - TimeSpan.FromSeconds(1));
-                EnergyGenProcessor.EnergyGen(entity, toDateTime);
+                EnergyGenProcessor.EnergyGenPulse(entity, toDateTime);
                 powerDB.AddDemand(-creationCost, toDateTime);
                 powerDB.AddDemand(cruise.demandKW, toDateTime);
 
@@ -325,7 +325,7 @@ namespace Pulsar4X.Movement
             {
                 EnergyGenProcessor.EnergyGen(entity, toDateTime - TimeSpan.FromSeconds(1));
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, toDateTime - TimeSpan.FromSeconds(1));
-                EnergyGenProcessor.EnergyGen(entity, toDateTime);
+                EnergyGenProcessor.EnergyGenPulse(entity, toDateTime);
                 powerDB.AddDemand(-SustainToRemove(moveDB, warpDB), toDateTime);
                 powerDB.AddDemand(-warpDB.BubbleCollapseCost, toDateTime);
             }
@@ -626,7 +626,7 @@ namespace Pulsar4X.Movement
 
             EnergyGenProcessor.EnergyGen(entity, at - TimeSpan.FromSeconds(1));
             powerDB.AddDemand(warpDB.BubbleCollapseCost, at - TimeSpan.FromSeconds(1));
-            EnergyGenProcessor.EnergyGen(entity, at);
+            EnergyGenProcessor.EnergyGenPulse(entity, at);
             var bubble = entity.GetDataBlob<WarpMovingDB>();
             powerDB.AddDemand(-SustainToRemove(bubble, warpDB), at);
             powerDB.AddDemand(-warpDB.BubbleCollapseCost, at);
