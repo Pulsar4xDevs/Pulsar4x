@@ -76,8 +76,55 @@ namespace Pulsar4X.Engine.Api
                 foreach (var kv in eventLog.HaltSettings)
                     halts[kv.Key.ToString()] = kv.Value;
             }
-            return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds(), transactions, halts,
-                ProjectPauseReason(factionId));
+            decimal funds = info.Money.GetCurrentFunds();
+            var (payrollCrew, labCosts) = FactionRunningCosts(factionId);
+            // Crew plan phase 5 charges wages; until then the payroll is 0 and nothing is blocked.
+            decimal wage = 0;
+            decimal payroll = payrollCrew * wage;
+            decimal running = payroll + labCosts;
+            var lastWages = info.Money.GetAllTransactions().Where(t => t.Category == TransactionCategory.Wages)
+                .GroupBy(t => t.Date.Date).OrderByDescending(g => g.Key).FirstOrDefault();
+            return new FactionSnapshot(name, info.Abbreviation, funds, transactions, halts,
+                ProjectPauseReason(factionId))
+            {
+                CrewOnPayroll = payrollCrew,
+                CrewWagePerDay = wage,
+                PayrollPerDay = payroll,
+                LabCostsPerDay = labCosts,
+                RunningCostsPerDay = running,
+                DaysUntilBroke = running <= 0 ? null : funds <= 0 ? 0 : (double)(funds / running),
+                LastWages = lastWages?.Sum(t => t.Amount) ?? 0,
+                LastWagesDate = lastWages?.Key,
+                FundsNegative = funds < 0,
+            };
+        }
+
+        /// <summary>
+        /// Crew the faction would pay (aboard its ships and in its colony pools) and what its research labs cost
+        /// per day (labs with a queued tech and points to spend, as ResearchProcessor charges them).
+        /// </summary>
+        private (long crew, decimal labs) FactionRunningCosts(int factionId)
+        {
+            long crew = 0;
+            decimal labs = 0;
+            foreach (var system in _game.Systems)
+            {
+                foreach (var ship in system.GetAllEntitiesWithDataBlob<ShipCrewDB>())
+                    if (ship.FactionOwnerID == factionId)
+                        crew += ship.GetDataBlob<ShipCrewDB>().Aboard;
+                foreach (var colony in system.GetAllEntitiesWithDataBlob<ColonyCrewPoolDB>())
+                    if (colony.FactionOwnerID == factionId)
+                        crew += colony.GetDataBlob<ColonyCrewPoolDB>().Total;
+                foreach (var lab in system.GetAllEntitiesWithDataBlob<ResearcherDB>())
+                {
+                    if (lab.FactionOwnerID != factionId)
+                        continue;
+                    var r = lab.GetDataBlob<ResearcherDB>();
+                    if (r.TechQueue.Count > 0 && r.PointsPerDay.GetValue() > 0)
+                        labs += r.CostPerDay.GetValue();
+                }
+            }
+            return (crew, labs);
         }
 
         public PauseReasonSnapshot? ProjectPauseReason(int factionId)
@@ -375,6 +422,12 @@ namespace Pulsar4X.Engine.Api
                 LastDispatch = null,
                 Sources = ShipPowerSources(ship, energy),
                 LoadGroups = ShipPowerLoadGroups(ship, demand, generation, aux, auxServed, charging),
+                // Crew plan phase 4 makes ship life support draw; until then only the crew count is real.
+                HasLifeSupport = false,
+                LifeSupportCrew = ShipCrew.Aboard(ship),
+                LifeSupportPerCrew_kW = 0,
+                LifeSupport_kW = 0,
+                LifeSupportMustRun = true,
             };
         }
 
@@ -733,7 +786,20 @@ namespace Pulsar4X.Engine.Api
                 TimeToFullOrEmpty_s = ColonyBatteryTime(power),
                 HasDispatched = power.LastDispatch != default,
                 LastDispatch = power.LastDispatch != default ? power.LastDispatch : null,
+                LifeSupportPerPerson_kW = LifeSupportRate(power).perPerson,
+                LifeSupportSealed = LifeSupportRate(power).isSealed,
+                LifeSupportRateLabel = LifeSupportRate(power).label,
             };
+        }
+
+        /// <summary>Per-person life support and its label from the last life-support figure: above the base rate means a sealed world.</summary>
+        private static (double perPerson, bool isSealed, string label) LifeSupportRate(Pulsar4X.Energy.ColonyPowerDB power)
+        {
+            if (power.LifeSupportColonists <= 0)
+                return (0, false, "");
+            double perPerson = power.LifeSupport_kW / power.LifeSupportColonists;
+            bool isSealed = perPerson > Pulsar4X.Energy.ColonyPowerProcessor.LifeSupportBase_kWPerColonist + 1e-9;
+            return (perPerson, isSealed, $"{(isSealed ? "Sealed" : "Garden")} world: {perPerson:0.###} kW per person");
         }
 
         /// <summary>Seconds to full or empty at the last daily pass's battery rate; null when idle or with no storage.</summary>

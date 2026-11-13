@@ -9,7 +9,9 @@ public enum TransactionCategory
 {
     InitialInvestment,
     Research,
-    Trade
+    Trade,
+    /// <summary>Crew pay: one line per faction per day (crew plan phase 5).</summary>
+    Wages
 }
 
 public class Transaction
