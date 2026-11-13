@@ -463,6 +463,37 @@ namespace Pulsar4X.Client
             ImGui.EndChild();
         }
 
+        /// <summary>
+        /// Crew in the Power tab look: required / berths / aboard / engine crew rows with thin bars, an
+        /// under-crewed badge, the engine's note, and the top-up buttons. Aboard and the fractions are hidden
+        /// until the engine tracks crew aboard (ShipView.CrewTracked, crew plan phase 3).
+        /// </summary>
+        private static void DisplayCrew(ShipView? shipView, ShipSnapshot ship)
+        {
+            if (shipView == null)
+            {
+                ImGui.TextDisabled("Crew " + ship.CrewRequired.ToString("N0"));
+                return;
+            }
+            ImGui.TextUnformatted(CrewBars.RequiredVsBerths(shipView.CrewRequired, shipView.CrewBerths));
+            if (!shipView.CrewTracked && ImGui.IsItemHovered())
+                ImGui.SetTooltip("Crew aboard and the crew fraction show once ships carry crew (crew plan phase 3).");
+            // The badge has its own line: this column is narrow and may grow a scrollbar.
+            if (shipView.CrewTracked && shipView.UnderCrewed)
+                CrewBars.Badge("Under-crewed", CrewBars.ShortColour,
+                    string.IsNullOrEmpty(shipView.CrewNote) ? "Fewer crew aboard than the design needs." : shipView.CrewNote);
+
+            CrewBars.CompactRows("##shipCrewRows", CrewBars.ShipRows(shipView));
+
+            if (shipView.CrewTracked && shipView.CrewNote.Length > 0)
+                CrewBars.Warning(shipView.CrewNote);
+
+            float half = (ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X) * 0.5f;
+            CrewBars.PendingButton("Top up###crewTopUp", CrewCommandsPending.TopUp, new Vector2(half, 0));
+            ImGui.SameLine();
+            CrewBars.PendingButton("To pool###crewToPool", CrewCommandsPending.ToPool, new Vector2(half, 0));
+        }
+
         private void DisplayShipSummary(IClientGalaxy galaxy)
         {
             if (orderShip == null) return;
@@ -504,33 +535,7 @@ namespace Pulsar4X.Client
                 }
 
                 if (ImGui.CollapsingHeader("Crew", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    var shipView = subject?.GetView<ShipView>();
-                    int required = shipView?.CrewRequired ?? 0;
-                    ImGui.Columns(2);
-                    DisplayHelpers.PrintRow("Required", required.ToString("N0"),
-                        tooltipTwo: "Each component's crew per copy, times its copies", separator: false);
-                    ImGui.Columns(1);
-                    if (shipView is { CrewByComponent.Count: > 0 }
-                        && ImGui.BeginTable("ShipCrewRows", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
-                    {
-                        ImGui.TableSetupColumn("Component");
-                        ImGui.TableSetupColumn("Per copy x copies");
-                        ImGui.TableSetupColumn("Crew");
-                        ImGui.TableHeadersRow();
-                        foreach (var row in shipView.CrewByComponent)
-                        {
-                            ImGui.TableNextRow();
-                            ImGui.TableNextColumn();
-                            ImGui.TextUnformatted(row.Name);
-                            ImGui.TableNextColumn();
-                            ImGui.TextUnformatted($"{row.CrewPerCopy:N0} x {row.Count:N0}");
-                            ImGui.TableNextColumn();
-                            ImGui.TextUnformatted(row.Crew.ToString("N0"));
-                        }
-                        ImGui.EndTable();
-                    }
-                }
+                    DisplayCrew(subject?.GetView<ShipView>(), ship);
 
                 // Output is the net added to the batteries this step. The old power window's Load
                 // is max output divided by that net, so it is not a percentage and is not shown.
@@ -3443,6 +3448,12 @@ namespace Pulsar4X.Client
             DisplayShipDropSource(ship, selectedFleetId == fleet.Id ? selectedShips : null);
             // A ship row accepts ships only. A fleet dropped here must not nest under this fleet.
             DisplayShipDropTarget(fleet);
+            if(ship.CrewTracked && ship.UnderCrewed)
+            {
+                ImGui.SameLine();
+                CrewBars.Badge("crew", CrewBars.ShortColour,
+                    "Under-crewed: " + ship.CrewAboard.ToString("N0") + " of " + ship.CrewRequired.ToString("N0") + " crew aboard.");
+            }
             ImGui.PopID();
         }
 

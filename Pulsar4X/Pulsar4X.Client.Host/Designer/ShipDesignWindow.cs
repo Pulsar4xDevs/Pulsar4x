@@ -76,6 +76,9 @@ namespace Pulsar4X.Client
         private double _wspd;
         private double _wpow;
         private List<string> _warpWarnings = new();
+        private List<string> _crewWarnings = new();
+        private int _crewBerths;
+        private List<string> _berthRows = new();
         //newt
         private double _tn;
         private double _ttwr;
@@ -651,6 +654,9 @@ namespace Pulsar4X.Client
                             ImGui.Text("Mass: " + Stringify.Mass(AvailableShipComponents[i].MassPerUnit));
                             ImGui.Text("Volume: " + Stringify.Volume(AvailableShipComponents[i].VolumePerUnit));
                             ImGui.Text("Crew Required: " + AvailableShipComponents[i].CrewReq);
+                            int berthsPerCopy = ShipCrew.Berths(new[] { (AvailableShipComponents[i], 1) });
+                            if (berthsPerCopy > 0)
+                                ImGui.Text("Berths: " + berthsPerCopy);
                         }
 
                         DisplayHelpers.DescriptiveTooltip(AvailableShipComponents[i].Name, AvailableShipComponents[i].TemplateName, AvailableShipComponents[i].Description, TooltipExtension);
@@ -714,14 +720,33 @@ namespace Pulsar4X.Client
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.EnergyKwh(_buildEnergy));
 
-                // Crew: each component's crew per copy times its copies (ShipDesign.CrewReq counts the same).
+                // Crew vs berths: each component's crew per copy times its copies (ShipDesign.CrewReq counts the
+                // same) against the berths the parts give (ShipCrew.Berths: quarters plus bridge console space).
                 var crewRows = SelectedComponents.Where(c => c.design.CrewReq != 0 && c.count > 0).ToList();
+                int crewNeed = crewRows.Sum(c => c.design.CrewReq * c.count);
                 ImGui.TableNextColumn();
-                ImGui.Text("Crew");
+                ImGui.Text("Crew / berths");
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Crew the parts need, against the berths they give.\nA ship takes aboard at most its berths.");
                 ImGui.TableNextColumn();
-                ImGui.Text(crewRows.Sum(c => c.design.CrewReq * c.count).ToString(Styles.IntFormat));
-                if (crewRows.Count > 0 && ImGui.IsItemHovered())
-                    ImGui.SetTooltip(string.Join("\n", crewRows.Select(c => $"{c.design.Name}: {c.design.CrewReq} x {c.count} = {c.design.CrewReq * c.count}")));
+                bool berthShort = _crewBerths < crewNeed;
+                ImGui.PushStyleColor(ImGuiCol.Text, berthShort ? CrewBars.ShortColour : Styles.GoodColor);
+                ImGui.TextUnformatted(crewNeed.ToString(Styles.IntFormat) + " / " + _crewBerths.ToString(Styles.IntFormat));
+                ImGui.PopStyleColor();
+                bool crewHover = ImGui.IsItemHovered();
+                ImGui.SameLine();
+                PowerBars.InlineBar(CrewBars.Fill(_crewBerths, crewNeed), berthShort ? CrewBars.ShortColour : PowerRing.FullColour, 48f);
+                crewHover |= ImGui.IsItemHovered();
+                if (crewHover)
+                {
+                    var lines = crewRows.Select(c => $"{c.design.Name}: {c.design.CrewReq} crew x {c.count} = {c.design.CrewReq * c.count}").ToList();
+                    lines.AddRange(_berthRows);
+                    if (lines.Count == 0)
+                        lines.Add("No crew needed and no berths.");
+                    ImGui.BeginTooltip();
+                    ImGui.TextUnformatted(string.Join("\n", lines));
+                    ImGui.EndTooltip();
+                }
 
                 ImGui.TableNextColumn();
                 ImGui.Text("Total Thrust");
@@ -777,6 +802,14 @@ namespace Pulsar4X.Client
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
                     ImGui.TextWrapped(warning);
                     ImGui.PopStyleColor();
+                }
+
+                // Crew warnings sit with the warp warnings, in amber: an under-berthed ship still launches, under-crewed.
+                foreach (var warning in _crewWarnings)
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.TableNextColumn();
+                    CrewBars.Warning(warning);
                 }
 
                 ImGui.TableNextColumn();
@@ -1010,6 +1043,14 @@ namespace Pulsar4X.Client
             _wspd = WarpMath.MaxSpeedCalc(wp, mass);
             _wpow = wp;
             _warpWarnings = WarpMath.DesignWarpWarnings(SelectedComponents);
+            _crewWarnings = ShipCrew.DesignCrewWarnings(SelectedComponents);
+            _crewBerths = ShipCrew.Berths(SelectedComponents);
+            _berthRows = SelectedComponents
+                .Where(c => c.count > 0)
+                .Select(c => (c.design.Name, c.count, per: ShipCrew.Berths(new[] { (c.design, 1) })))
+                .Where(r => r.per > 0)
+                .Select(r => $"{r.Name}: {r.per} berths x {r.count} = {r.per * r.count}")
+                .ToList();
             _egen = egen;
             _solarArea = ShipDesign.GetSolarCollectionArea(SelectedComponents);
             _estor = estor;
