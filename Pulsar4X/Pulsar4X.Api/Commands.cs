@@ -296,8 +296,27 @@ public sealed record TrainAcademyClassCommand(int TargetEntityId, int ComponentI
 /// <summary>Send one unassigned officer through one academy's command course. Targets the colony.</summary>
 public sealed record AcademyCommandCourseCommand(int TargetEntityId, int ComponentId, int CommanderId) : GameCommand(TargetEntityId);
 
-/// <summary>Stop one cohort and return the people that cohort took. Targets the colony.</summary>
+/// <summary>Stop one cohort and return the people that cohort took. Targets the colony. Works for crew cohorts too.</summary>
 public sealed record CancelAcademyCourseCommand(int TargetEntityId, int ComponentId, int CohortId) : GameCommand(TargetEntityId);
+
+/// <summary>
+/// Start a crew (ratings) course at one mounted academy. Targets the colony. <see cref="Count"/> colonists
+/// enrol, one per trainee, on the academy's crew seats (not its officer seats); at graduation they join the
+/// colony's crew pool. <see cref="SpeciesId"/> picks whose people train; -1 takes the colony's largest species.
+/// </summary>
+public sealed record TrainAcademyCrewCommand(int TargetEntityId, int ComponentId, int Count, int SpeciesId = -1) : GameCommand(TargetEntityId);
+
+/// <summary>
+/// Take trained crew from a colony's pool aboard a ship in orbit of it. Targets the ship. <see cref="Count"/>
+/// -1 fills up to min(required, berths). Crew plan phase 3: refused as "not yet" until crew aboard is tracked.
+/// </summary>
+public sealed record TopUpCrewCommand(int TargetEntityId, int ColonyId, int Count = -1) : GameCommand(TargetEntityId);
+
+/// <summary>
+/// Send crew from a ship down into the pool of a colony it orbits. Targets the ship. <see cref="Count"/> -1 sends
+/// everyone aboard. Crew plan phase 3: refused as "not yet" until crew aboard is tracked.
+/// </summary>
+public sealed record CrewToPoolCommand(int TargetEntityId, int ColonyId, int Count = -1) : GameCommand(TargetEntityId);
 
 /// <summary>One posted haul between two colonies. Targets the ship. Both ends must sit inside its freight reach.</summary>
 public sealed record HaulPairCommand(int TargetEntityId, int SourceId, int DestId, string CargoId) : GameCommand(TargetEntityId);

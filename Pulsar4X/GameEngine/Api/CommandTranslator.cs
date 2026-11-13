@@ -88,6 +88,9 @@ namespace Pulsar4X.Engine.Api
                 [typeof(TrainAcademyClassCommand)] = TranslateTrainAcademyClass,
                 [typeof(AcademyCommandCourseCommand)] = TranslateAcademyCommandCourse,
                 [typeof(CancelAcademyCourseCommand)] = TranslateCancelAcademyCourse,
+                [typeof(TrainAcademyCrewCommand)] = TranslateTrainAcademyCrew,
+                [typeof(TopUpCrewCommand)] = TranslateTopUpCrew,
+                [typeof(CrewToPoolCommand)] = TranslateCrewToPool,
                 [typeof(HaulPairCommand)] = TranslateHaulPair,
                 [typeof(TradePairCommand)] = TranslateTradePair,
                 [typeof(SetStandingOrdersCommand)] = TranslateSetStandingOrders,
@@ -2034,6 +2037,36 @@ namespace Pulsar4X.Engine.Api
             return reason == null
                 ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                 : CommandResult.Reject(reason);
+        }
+
+        /// <summary>Refusal for crew commands whose engine half has not landed yet.</summary>
+        internal const string CrewNotYet = "Not yet: crew aboard ships arrives in a later update.";
+        internal const string CrewCourseNotYet = "Not yet: crew courses arrive in a later update.";
+
+        private CommandResult TranslateTrainAcademyCrew(Entity faction, Entity commanded, GameCommand command)
+        {
+            var train = (TrainAcademyCrewCommand)command;
+            if (!commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("Crew train at a colony's academy.");
+            if (train.Count <= 0)
+                return CommandResult.Reject("Enrol at least one trainee.");
+            return CommandResult.Reject(CrewCourseNotYet);
+        }
+
+        private CommandResult TranslateTopUpCrew(Entity faction, Entity commanded, GameCommand command)
+            => CrewTransferCheck(faction, commanded, ((TopUpCrewCommand)command).ColonyId) ?? CommandResult.Reject(CrewNotYet);
+
+        private CommandResult TranslateCrewToPool(Entity faction, Entity commanded, GameCommand command)
+            => CrewTransferCheck(faction, commanded, ((CrewToPoolCommand)command).ColonyId) ?? CommandResult.Reject(CrewNotYet);
+
+        /// <summary>A crew transfer is one owned ship and one owned colony. Null when the pair is valid.</summary>
+        private CommandResult? CrewTransferCheck(Entity faction, Entity ship, int colonyId)
+        {
+            if (!ship.HasDataBlob<ShipInfoDB>())
+                return CommandResult.Reject("Crew move to or from one ship.");
+            if (!TryResolve(colonyId, out var colony) || colony.FactionOwnerID != faction.Id || !colony.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject($"Colony {colonyId} not found.");
+            return null;
         }
 
         private CommandResult TranslateHaulPair(Entity faction, Entity commanded, GameCommand command)
