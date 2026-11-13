@@ -551,7 +551,14 @@
           "tech-infra-gravity-max-extension",
           "tech-infra-pressure-range",
           "tech-infra-pressure-min-extension",
-          "tech-infra-pressure-max-extension"
+          "tech-infra-pressure-max-extension",
+          "tech-thermal-efficiency",
+          "tech-grid-distribution",
+          "tech-industrial-energy-efficiency",
+          "tech-fuel-cells",
+          "tech-reactor-power-density",
+          "tech-power-conversion",
+          "tech-fission-power-plant"
         ]
       }
     }
@@ -735,7 +742,11 @@
           "tech-infra-pressure-range",
           "tech-infra-pressure-min-extension",
           "tech-infra-pressure-max-extension",
-          "tech-early-nuclear-power"
+          "tech-early-nuclear-power",
+          "tech-thermal-efficiency",
+          "tech-grid-distribution",
+          "tech-industrial-energy-efficiency",
+          "tech-fuel-cells"
         ]
       }
     }
@@ -755,11 +766,13 @@
           "steam-turbine-reactor",
           "rtg",
           "fissile-fuels",
-          "fission-plant",
           "scntr-engine",
           "ntp",
           "tech-early-directed-energy",
-          "tech-early-warp-drive"
+          "tech-early-warp-drive",
+          "tech-fission-power-plant",
+          "tech-reactor-power-density",
+          "tech-power-conversion"
         ]
       }
     }
@@ -808,6 +821,112 @@
           "tech-jumpoint-stabilization-time-reduction"
         ]
       }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-thermal-efficiency",
+      "Name": "Thermal Plant Efficiency",
+      "Description": "Better boilers, turbines and heat recovery. The share of fuel heat a thermal plant, methalox turbine or fission plant turns into electricity: 33% at level 0, +3 points a level. Simple-cycle plants stop at 45% (fission plants always do); Combined Cycle lifts the cap to 60%. New plant designs pick up the level; built plants keep the efficiency they were designed with.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 9,
+      "DataFormula": "0.33 + [Level] * 0.03",
+      "CostFormula": "(1 + [Level]) * 500",
+      "Unlocks": {
+        "4": [
+          "tech-combined-cycle"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-combined-cycle",
+      "Name": "Combined Cycle",
+      "Description": "A steam cycle on the gas turbine's exhaust. Raises the thermal plant efficiency cap from 45% to 60% (methalox turbines to 55%). Opened by Thermal Plant Efficiency level 4, where simple-cycle plants reach the 45% cap.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "4000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-fission-power-plant",
+      "Name": "Fission Power Plant",
+      "Description": "Grid-scale fission: a reactor and turbine hall for a colony. Unlocks the fission power plant. Needs Nuclear Power.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "3000",
+      "Unlocks": {
+        "1": [
+          "fission-plant"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-reactor-power-density",
+      "Name": "Reactor Power Density",
+      "Description": "Hotter cores and better fuel. Multiplies a ship reactor's heat per kg of fuel (and so its output and fuel burn): x1 at level 0, +0.25 a level. New reactor designs pick up the level.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 10,
+      "DataFormula": "1 + [Level] * 0.25",
+      "CostFormula": "(1 + [Level]) * 1000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-power-conversion",
+      "Name": "Reactor Power Conversion",
+      "Description": "Brayton and Stirling conversion for ship reactors: the share of reactor heat turned into electricity, 30% at level 0, +1.5 points a level. Ship reactors move onto this value with the realistic steam turbine (energy phase 6); until then the stock turbine keeps its own conversion.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 10,
+      "DataFormula": "0.30 + [Level] * 0.015",
+      "CostFormula": "(1 + [Level]) * 1000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-grid-distribution",
+      "Name": "Grid Distribution",
+      "Description": "Better transformers and lines. The share of generated power a colony grid delivers: 92% at level 0, +0.75 points a level, to 98%. Applies to every colony at once.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 8,
+      "DataFormula": "0.92 + [Level] * 0.0075",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-industrial-energy-efficiency",
+      "Name": "Industrial Energy Efficiency",
+      "Description": "Efficient motors, furnaces and heat recovery. Multiplies the build energy every industry point spends (refining, fabrication and assembly): x1 at level 0, -5% a level, to x0.6. Applies to running jobs at once; a design's listed build energy stays the level 0 figure.",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 8,
+      "DataFormula": "1 - [Level] * 0.05",
+      "CostFormula": "(1 + [Level]) * 1000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-fuel-cells",
+      "Name": "Fuel Cells",
+      "Description": "Hydrogen and methane fuel cells: non-nuclear ship power from tank propellant. The generator itself arrives with energy phase 6.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "1500"
     }
   }
 ]

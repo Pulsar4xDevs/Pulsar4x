@@ -283,9 +283,11 @@ public class ColonyPowerTests
     }
 
     [Test]
-    public void FissionPlant_IsUnlockedByEarlyNuclearPower()
+    public void FissionPlant_IsUnlockedByTheFissionPowerPlantTech_AfterEarlyNuclearPower()
     {
-        Assert.That(_store.Techs["tech-early-nuclear-power"].Unlocks.Values.SelectMany(ids => ids), Does.Contain("fission-plant"));
+        // Phase 4: the plant moved to its own unlock, which Nuclear Power opens.
+        Assert.That(_store.Techs["tech-early-nuclear-power"].Unlocks.Values.SelectMany(ids => ids), Does.Contain("tech-fission-power-plant"));
+        Assert.That(_store.Techs["tech-fission-power-plant"].Unlocks.Values.SelectMany(ids => ids), Does.Contain("fission-plant"));
         var fission = TemplateDesign("fission-plant", ("Size", 50));
         var atb = fission.GetAttribute<PowerPlantAtb>();
         Assert.That(atb.FuelId, Is.EqualTo("fissile-fuels"));

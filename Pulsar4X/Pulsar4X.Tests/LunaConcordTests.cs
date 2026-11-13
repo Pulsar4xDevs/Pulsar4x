@@ -13,6 +13,7 @@ using Pulsar4X.Modding;
 using Pulsar4X.Names;
 using Pulsar4X.People;
 using Pulsar4X.Sensors;
+using Pulsar4X.Storage;
 
 namespace Pulsar4X.Tests;
 
@@ -119,7 +120,14 @@ public class LunaConcordTests
         {
             if (listing.CargoId == "fissile-fuels")
             {
-                Assert.That(listing.SellQuantity, Is.EqualTo(0), "the reactor's runway is held back");
+                // The reactor's runway is held back. A placed faction starts with every tech at level 1,
+                // so since energy phase 4 its plant is designed at 36% (not 33%) and the seeded stock
+                // is a little over its runway; only that surplus may be listed.
+                var fuel = colony.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny("fissile-fuels")!;
+                long stock = colony.GetDataBlob<CargoStorageDB>().GetUnitsStored(fuel, false);
+                long reserve = Pulsar4X.Energy.ColonyPowerProcessor.FuelReserveUnits(colony, "fissile-fuels");
+                Assert.That(reserve, Is.GreaterThan(0));
+                Assert.That(stock - listing.SellQuantity, Is.GreaterThanOrEqualTo(reserve), "the reactor's runway is held back");
                 continue;
             }
             Assert.That(listing.SellQuantity, Is.GreaterThan(0), listing.CargoId);

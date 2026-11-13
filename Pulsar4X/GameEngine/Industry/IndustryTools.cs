@@ -126,6 +126,8 @@ namespace Pulsar4X.Industry
                 // facility's nameplate for the day (scaled by the power share), so a recipe hungrier
                 // than the nameplate runs slower instead of drawing more.
                 double energyBudget = LineEnergyBudget_kWh(industryEntity, prodLineID, powerEfficiency);
+                // Industrial Energy Efficiency scales every point's kWh (1 at level 0).
+                double energyFactor = Pulsar4X.Energy.EnergyTech.IndustrialEnergyFactor(factionInfo.Data);
                 double energyUsed = 0;
 
                 foreach(var batchJob in prodLine.Jobs.ToArray())
@@ -185,7 +187,7 @@ namespace Pulsar4X.Industry
                             pointsToUse = (int)Math.Floor(industryPointsToUse);
                         }
 
-                        double energyPerPoint = batchJob.EnergyPerPoint;
+                        double energyPerPoint = batchJob.EnergyPerPoint * energyFactor;
                         if (energyPerPoint > 0 && pointsToUse > 0)
                         {
                             double affordable = Math.Floor((energyBudget - energyUsed) / energyPerPoint + 1e-9);

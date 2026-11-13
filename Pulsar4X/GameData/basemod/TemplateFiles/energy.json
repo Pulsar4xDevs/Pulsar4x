@@ -333,8 +333,8 @@
         {
           "Name": "Heat per kg",
           "Units": "KW/kg",
-          "DescriptionFormula": "'Heat output per kg of fuel. 0.03125 makes the default 2 tonne plant 15 kW.'",
-          "PropertyFormula": "0.03125"
+          "DescriptionFormula": "'Heat output per kg of fuel. 0.03125 makes the default 2 tonne plant 15 kW at Reactor Power Density level 0; each level multiplies it.'",
+          "PropertyFormula": "0.03125 * TechData('tech-reactor-power-density')"
         },
         {
           "Name": "Core Efficiency",
@@ -514,9 +514,9 @@
         {
           "Name": "Efficiency",
           "Units": "",
-          "DescriptionFormula": "'Fuel heat to electricity'",
+          "DescriptionFormula": "'Fuel heat to electricity: Thermal Plant Efficiency, capped at 45% (60% with Combined Cycle)'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "0.33"
+          "PropertyFormula": "Min(TechData('tech-thermal-efficiency'), 0.45 + 0.15 * TechLevel('tech-combined-cycle'))"
         },
         {
           "Name": "Fuel Heating Value",
@@ -580,9 +580,9 @@
         {
           "Name": "Efficiency",
           "Units": "",
-          "DescriptionFormula": "'Fuel heat to electricity'",
+          "DescriptionFormula": "'Fuel heat to electricity: Thermal Plant Efficiency + 2 points, capped at 45% (55% with Combined Cycle)'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "0.35"
+          "PropertyFormula": "Min(0.35 + (TechData('tech-thermal-efficiency') - 0.33), 0.45 + 0.10 * TechLevel('tech-combined-cycle'))"
         },
         {
           "Name": "Fuel Heating Value",
@@ -646,9 +646,9 @@
         {
           "Name": "Efficiency",
           "Units": "",
-          "DescriptionFormula": "'Fuel heat to electricity'",
+          "DescriptionFormula": "'Fuel heat to electricity: Thermal Plant Efficiency, capped at 45% (a steam cycle; Combined Cycle does not apply)'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "0.33"
+          "PropertyFormula": "Min(TechData('tech-thermal-efficiency'), 0.45)"
         },
         {
           "Name": "Fuel Heating Value",

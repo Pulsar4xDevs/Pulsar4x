@@ -87,6 +87,8 @@ namespace Pulsar4X.Energy
 
             colonyEntity.TryGetDataBlob<Pulsar4X.Industry.IndustryAbilityDB>(out var industry);
             double infraEfficiency = Pulsar4X.Industry.InfrastructureProcessor.GetEfficiency(colonyEntity);
+            double energyFactor = EnergyTech.IndustrialEnergyFactor(colonyEntity);
+            power.GridEfficiency = EnergyTech.GridEfficiency(colonyEntity);
 
             foreach (var (design, _) in instancesDB.DesignsAndComponentCount.ToList())
             {
@@ -102,7 +104,7 @@ namespace Pulsar4X.Energy
                 {
                     double nameplate = consumer.Draw_kW * health;
                     double draw = industry != null
-                        ? enabled.Sum(c => ProductionDraw_kW(industry, c, consumer.Draw_kW, infraEfficiency))
+                        ? enabled.Sum(c => ProductionDraw_kW(industry, c, consumer.Draw_kW, infraEfficiency, energyFactor))
                         : nameplate;
                     consumers.Add(new ColonyPowerConsumer(design.UniqueID, design.Name, consumer.Tier, count, draw, nameplate));
                     Add(demandByTier, consumer.Tier, draw);
@@ -189,9 +191,10 @@ namespace Pulsar4X.Energy
         /// draws <see cref="IndustryIdleShare"/> of its nameplate plus what its head job of each industry
         /// type needs at the line's full rate (rate x infrastructure x kWh per point / 24 h), capped at
         /// the nameplate. The cap is also what the line can spend in a day (IndustryTools).
+        /// <paramref name="energyFactor"/> is Industrial Energy Efficiency's multiplier on kWh per point.
         /// </summary>
         internal static double ProductionDraw_kW(Pulsar4X.Industry.IndustryAbilityDB industry, ComponentInstance facility,
-            double nameplatePerUnit_kW, double infraEfficiency)
+            double nameplatePerUnit_kW, double infraEfficiency, double energyFactor = 1)
         {
             double nameplate = nameplatePerUnit_kW * Math.Clamp((double)facility.HealthPercent, 0, 1);
             if (!industry.ProductionLines.TryGetValue(facility.UniqueID, out var line))
@@ -204,7 +207,7 @@ namespace Pulsar4X.Energy
                     && j.Status != Pulsar4X.DataStructures.IndustryJobStatus.MissingResources);
                 if (job == null || job.EnergyPerPoint <= 0)
                     continue;
-                working_kWhPerDay += rate * infraEfficiency * job.EnergyPerPoint;
+                working_kWhPerDay += rate * infraEfficiency * job.EnergyPerPoint * energyFactor;
             }
             return Math.Min(nameplate, nameplate * IndustryIdleShare + working_kWhPerDay / 24);
         }
