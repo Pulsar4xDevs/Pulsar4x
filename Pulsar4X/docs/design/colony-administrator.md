@@ -56,6 +56,16 @@ A new installation waits until a seated administrator can place a bid, that bid 
 
 Mines already fill the warehouse on their processor. Population already grows against life support. Neither places an order.
 
+## When the office wakes
+
+Today the colony goal wakes on a timer and re-reads everything. `ScheduleAgent` re-arms it every `RecheckInterval`, 30 minutes of game time at average skill, whether or not anything moved. In a 365-day headless run with the stock Sol start, that was 17,521 wakes per colony, and 99.8% of them produced no action (Earth HQ: 39 wakes with a listing, 1 with an industry order). Wakes that changed anything lined up with a stock change, apart from one listing per run that moved with no stock change. Early Tech Start: 17,521 wakes, 38 with a listing.
+
+The timer does not need a patch in the processor. A processor-side gate would be a second rule about when the book is worth looking at, written before the administrator exists to say what it looks at. The administrator takes the wake with the rest of the office.
+
+- The wake is a heartbeat plus events. Events are a stock change on a pile the book lists, an edit to the policy or the book, an industry line going idle, and a seat change. The heartbeat is slow and still scales with the person.
+- A wake that finds the book already matches the want does nothing, and writes nothing to the colony log.
+- The log is a separate question. Standing jobs and routine listing posts stay out of the colony log whatever the wake rate is.
+
 ## When a plan is worth writing
 
 1. Personality on the person. Add specialization. Replace Greed with Patience. Attach `AgentDB` to commanders.
@@ -67,5 +77,6 @@ Mines already fill the warehouse on their processor. Population already grows ag
 
 - The bid number.
 - Whether a player edit sticks while the seated administrator rewrites policy each wake.
+- Which events wake the office, and how slow the heartbeat is. Until then the 30 minute timer stays.
 - What Patience and Specialization change at the high end, in slots and in reserve depth.
 - How the trade and freight weights move when Greed becomes Patience.
