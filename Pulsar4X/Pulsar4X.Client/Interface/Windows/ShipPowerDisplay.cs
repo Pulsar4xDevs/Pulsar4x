@@ -187,10 +187,13 @@ namespace Pulsar4X.Client
         /// <summary>A stacked demand bar split by load group (hatched where unmet), then one compact row per group.</summary>
         static void Loads(ShipPowerView power)
         {
-            // Life support (crew plan phase 4) is a must-run load: listed first, as it is served first.
-            double lifeSupport = power.HasLifeSupport && power.LoadGroups.All(g => g.Kind != LifeSupportRows.Kind) ? power.LifeSupport_kW : 0;
-            var lifeRow = LifeSupportRows.ShipRow(power, PowerBars.GroupColour(0), power.TotalDemand_kW + lifeSupport);
-            if (power.LoadGroups.Count == 0 && lifeRow == null)
+            // Life support (crew plan phase 4) is a must-run load: one row, listed first as it is served first,
+            // standing in for the engine's life-support group (left out of the loop below). TotalDemand_kW leaves
+            // life support out, so every share here is of demand plus life support.
+            double scale = LifeSupportRows.LoadScale_kW(power);
+            var lifeRow = LifeSupportRows.ShipRow(power, PowerBars.GroupColour(0), scale);
+            var others = LifeSupportRows.OtherGroups(power).ToList();
+            if (others.Count == 0 && lifeRow == null)
             {
                 ImGui.TextDisabled("Nothing on this ship draws power.");
                 return;
@@ -202,12 +205,13 @@ namespace Pulsar4X.Client
             if (lifeRow != null)
             {
                 index++;
-                double lifeShare = LifeSupportRows.ShipShare(power);
-                segments.Add(new PowerSegment(LifeSupportRows.Kind, power.LifeSupport_kW, lifeShare, lifeRow.Chip,
-                    $"{LifeSupportRows.Kind}: {Stringify.Power(power.LifeSupport_kW)}, {PowerRing.WordsFor(lifeShare)}"));
+                double lifeDemand = LifeSupportRows.Demand_kW(power);
+                double lifeShare = Math.Clamp(power.LifeSupportServedFraction, 0, 1);
+                segments.Add(new PowerSegment(LifeSupportRows.Kind, lifeDemand, lifeShare, lifeRow.Chip,
+                    $"{LifeSupportRows.Kind} (must-run): {Stringify.Power(lifeDemand)}, {PowerRing.WordsFor(lifeShare)}"));
                 rows.Add(lifeRow);
             }
-            foreach (var g in power.LoadGroups)
+            foreach (var g in others)
             {
                 Vector4 chip = PowerBars.GroupColour(index++);
                 Vector4 stateColour = g.State switch
@@ -243,7 +247,7 @@ namespace Pulsar4X.Client
                     Chip = chip,
                     Name = g.Kind,
                     Value = perDig ? "per dig" : Stringify.Power(g.Demand_kW),
-                    Percent = perDig ? "-" : PowerBars.Percent(g.Demand_kW, power.TotalDemand_kW + lifeSupport),
+                    Percent = perDig ? "-" : PowerBars.Percent(g.Demand_kW, scale),
                     Fill = fill,
                     FillColour = stateColour,
                     Waiting = waiting,
@@ -257,7 +261,7 @@ namespace Pulsar4X.Client
             // Charging is shown as its own slice so the bar adds up to demand plus what goes into the batteries.
             if (PowerBars.ChargeSegment(power.Battery_kW) is { } charge)
                 segments.Add(charge);
-            double loadScale = power.TotalDemand_kW + lifeSupport + Math.Max(0, power.Battery_kW);
+            double loadScale = scale + Math.Max(0, power.Battery_kW);
             if (loadScale > 0)
                 PowerBars.StackedBar("##shipDemandBar", segments, loadScale);
             else

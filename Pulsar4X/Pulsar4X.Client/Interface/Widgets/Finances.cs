@@ -130,39 +130,63 @@ public static class LifeSupportRows
         return text;
     }
 
-    /// <summary>Share of life support the plant and batteries can serve now, 0..1 (it is served first).</summary>
-    public static double ShipShare(ShipPowerView p)
+    /// <summary>The engine's row id for crew life support inside its load group.</summary>
+    public const string RowId = "life-support";
+
+    /// <summary>True for the engine's life-support load group (by kind, or by its "life-support" row).</summary>
+    public static bool IsLifeSupportGroup(ShipPowerLoadGroup g)
+        => g.Kind == Kind || g.Loads.Any(l => l.DesignId == RowId);
+
+    /// <summary>The load groups other than life support, which <see cref="ShipRow"/> lists on its own.</summary>
+    public static IEnumerable<ShipPowerLoadGroup> OtherGroups(ShipPowerView p)
+        => p.LoadGroups.Where(g => !IsLifeSupportGroup(g));
+
+    /// <summary>Life support demand, kW: the view's figure, or the engine group's when only that is set. 0 without one.</summary>
+    public static double Demand_kW(ShipPowerView p)
     {
-        if (p.LifeSupport_kW <= 0)
-            return 1;
-        double supply = p.Generation_kW + (p.StoredFraction > 0 ? p.MaxDischarge_kW : 0);
-        return Math.Clamp(supply / p.LifeSupport_kW, 0, 1);
+        if (p.LifeSupport_kW > 0)
+            return p.LifeSupport_kW;
+        return p.LoadGroups.FirstOrDefault(IsLifeSupportGroup)?.Demand_kW ?? 0;
     }
 
-    /// <summary>The ship's life support load row, or null when ships draw no life support yet or a load group already lists it.</summary>
+    /// <summary>
+    /// What the Loads shares are taken of: <see cref="ShipPowerView.TotalDemand_kW"/> (which leaves life
+    /// support out) plus life support, so the rows' percentages add up to 100% and the bar's slices to its total.
+    /// </summary>
+    public static double LoadScale_kW(ShipPowerView p) => p.TotalDemand_kW + Demand_kW(p);
+
+    /// <summary>
+    /// The ship's one life support row, or null when there is no life support load. It stands in for the
+    /// engine's life-support load group, which the caller leaves out (<see cref="OtherGroups"/>). The share
+    /// and served power are the engine's (<see cref="ShipPowerView.LifeSupportServedFraction"/>).
+    /// </summary>
     public static PowerRow? ShipRow(ShipPowerView p, Vector4 chip, double scale_kW)
     {
-        if (!p.HasLifeSupport || p.LoadGroups.Any(g => g.Kind == Kind))
+        double demand = Demand_kW(p);
+        bool group = p.LoadGroups.Any(IsLifeSupportGroup);
+        if (!group && (!p.HasLifeSupport || demand <= 0))
             return null;
-        double share = ShipShare(p);
+        double share = Math.Clamp(p.LifeSupportServedFraction, 0, 1);
         Vector4 colour = PowerRing.ColourFor(share);
         return new PowerRow
         {
-            Id = "life-support",
+            Id = RowId,
             Chip = chip,
             Name = Kind,
-            Value = Stringify.Power(p.LifeSupport_kW),
-            Percent = PowerBars.Percent(p.LifeSupport_kW, scale_kW),
+            Value = Stringify.Power(demand),
+            Percent = PowerBars.Percent(demand, scale_kW),
             Fill = (float)share,
             FillColour = colour,
             Trailing = (p.LifeSupportMustRun ? "must-run, " : "") + PowerRing.WordsFor(share),
             TrailingColour = colour,
-            Tooltip = ShipTooltip(p),
+            Tooltip = ShipTooltip(p) + "\nPowered now: " + Stringify.Power(p.LifeSupportServed_kW) + " of " + Stringify.Power(demand)
+                + " (" + PowerBars.Percent(share, 1) + ").",
             Detail = new List<(string, string)>
             {
                 ("Crew aboard", p.LifeSupportCrew.ToString("N0")),
                 ("Per crew", p.LifeSupportPerCrew_kW.ToString("0.##", CultureInfo.InvariantCulture) + " kW"),
-                ("Draw", Stringify.Power(p.LifeSupport_kW)),
+                ("Draw", Stringify.Power(demand)),
+                ("Powered", Stringify.Power(p.LifeSupportServed_kW)),
             },
         };
     }

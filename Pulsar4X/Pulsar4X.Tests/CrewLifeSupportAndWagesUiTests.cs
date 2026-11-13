@@ -22,24 +22,35 @@ public class CrewLifeSupportAndWagesUiTests
         return c;
     }
 
-    static ShipPowerView ShipPower(bool has, int crew = 12, double perCrew = 0.8, double gen = 20)
+    static ShipPowerView ShipPower(bool has, int crew = 12, double perCrew = 0.8, double gen = 20, double served = 1)
         => new ShipPowerView(gen, 5, 0, 0, true) with
         {
             HasLifeSupport = has,
             LifeSupportCrew = crew,
             LifeSupportPerCrew_kW = perCrew,
-            LifeSupport_kW = crew * perCrew,
+            LifeSupport_kW = has ? crew * perCrew : 0,
+            LifeSupportServedFraction = served,
+            LifeSupportServed_kW = has ? crew * perCrew * served : 0,
         };
 
+    static ShipPowerLoadGroup LifeGroup(double kW, double share)
+        => new("Life support", kW, kW * share, share, share >= 1 ? "Powered" : "Partial",
+            new[] { new ShipPowerLoadRow("life-support", "Crew life support", 12, kW, "0.8 kW per crew aboard; must run") });
+
+    static ShipPowerLoadGroup WarpGroup(double kW)
+        => new("Engines and warp", kW, kW, 1, kW > 0 ? "Powered" : "Idle", Array.Empty<ShipPowerLoadRow>());
+
     [Test]
-    public void ShipLifeSupportRow_HiddenUntilShipsDrawLifeSupport()
+    public void ShipLifeSupportRow_HiddenWithoutLifeSupport()
     {
         Assert.That(LifeSupportRows.ShipRow(ShipPower(false), Vector4.One, 10), Is.Null);
+        Assert.That(LifeSupportRows.ShipRow(ShipPower(true, crew: 0), Vector4.One, 10), Is.Null, "nobody aboard, no load, no engine group");
         var row = LifeSupportRows.ShipRow(ShipPower(true), Vector4.One, 14.6);
         Assert.That(row, Is.Not.Null);
-        Assert.That(row!.Name, Is.EqualTo("Life support"));
+        Assert.That(row!.Id, Is.EqualTo("life-support"));
+        Assert.That(row.Name, Is.EqualTo("Life support"));
         Assert.That(row.Value, Is.EqualTo(Stringify.Power(9.6)));
-        Assert.That(row.Fill, Is.EqualTo(1f), "20 kW generation covers 9.6 kW");
+        Assert.That(row.Fill, Is.EqualTo(1f));
         Assert.That(row.Trailing, Does.StartWith("must-run"));
         Assert.That(row.Tooltip, Does.Contain("0.8 kW per crew x 12 crew"));
         Assert.That(row.Tooltip, Does.Contain("20% less than the 1 kW per crew base"));
@@ -47,21 +58,43 @@ public class CrewLifeSupportAndWagesUiTests
     }
 
     [Test]
-    public void ShipLifeSupportRow_ShortWhenThePlantCannotCoverIt_AndBaseTextWithoutTech()
+    public void ShipLifeSupportRow_UsesTheEnginesServedFraction_NotGeneration()
     {
-        var row = LifeSupportRows.ShipRow(ShipPower(true, crew: 10, perCrew: 1, gen: 5), Vector4.One, 15)!;
-        Assert.That(row.Fill, Is.EqualTo(0.5f));
+        // 50 kW generation would cover 10 kW, but the engine says only 40% is served (warp shares the must-run supply).
+        var row = LifeSupportRows.ShipRow(ShipPower(true, crew: 10, perCrew: 1, gen: 50, served: 0.4), Vector4.One, 15)!;
+        Assert.That(row.Fill, Is.EqualTo(0.4f));
+        Assert.That(row.Tooltip, Does.Contain("Powered now: " + Stringify.Power(4) + " of " + Stringify.Power(10) + " (40%)"));
+        Assert.That(row.Detail.Single(d => d.Name == "Powered").Value, Is.EqualTo(Stringify.Power(4)));
         Assert.That(row.Tooltip, Does.Contain("Base 1 kW per crew"));
     }
 
     [Test]
-    public void ShipLifeSupportRow_NotDoubled_WhenTheEngineListsItAsALoadGroup()
+    public void ShipLifeSupport_ListedOnce_WhenTheEngineHasALifeSupportGroup()
     {
-        var power = ShipPower(true) with
-        {
-            LoadGroups = new[] { new ShipPowerLoadGroup("Life support", 9.6, 9.6, 1, "Powered", Array.Empty<ShipPowerLoadRow>()) },
-        };
-        Assert.That(LifeSupportRows.ShipRow(power, Vector4.One, 10), Is.Null);
+        var power = ShipPower(true) with { LoadGroups = new[] { LifeGroup(9.6, 1), WarpGroup(5) } };
+        Assert.That(LifeSupportRows.ShipRow(power, Vector4.One, LifeSupportRows.LoadScale_kW(power)), Is.Not.Null, "the group becomes the must-run row");
+        Assert.That(LifeSupportRows.OtherGroups(power).Select(g => g.Kind), Is.EqualTo(new[] { "Engines and warp" }),
+            "and leaves the generic loads list");
+
+        // Found by its row id too, whatever the group is called.
+        var renamed = power with { LoadGroups = new[] { LifeGroup(9.6, 1) with { Kind = "Crew" }, WarpGroup(5) } };
+        Assert.That(LifeSupportRows.OtherGroups(renamed).Select(g => g.Kind), Is.EqualTo(new[] { "Engines and warp" }));
+    }
+
+    [Test]
+    public void ShipLoadShares_AreOfDemandPlusLifeSupport()
+    {
+        // TotalDemand_kW (5 warp + 0 aux) leaves life support (9.6) out; the shares are of 14.6 and add to 100%.
+        var power = ShipPower(true) with { LoadGroups = new[] { LifeGroup(9.6, 1), WarpGroup(5) } };
+        Assert.That(power.TotalDemand_kW, Is.EqualTo(5));
+        double scale = LifeSupportRows.LoadScale_kW(power);
+        Assert.That(scale, Is.EqualTo(14.6).Within(1e-9));
+        Assert.That(LifeSupportRows.ShipRow(power, Vector4.One, scale)!.Percent, Is.EqualTo(PowerBars.Percent(9.6, 14.6)));
+
+        // The engine group's demand stands in when the view's life-support figure is 0.
+        var groupOnly = power with { LifeSupport_kW = 0 };
+        Assert.That(LifeSupportRows.Demand_kW(groupOnly), Is.EqualTo(9.6));
+        Assert.That(LifeSupportRows.LoadScale_kW(ShipPower(false)), Is.EqualTo(5));
     }
 
     [Test]
