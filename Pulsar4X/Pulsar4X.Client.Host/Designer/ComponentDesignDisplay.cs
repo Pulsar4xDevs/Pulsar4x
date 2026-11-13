@@ -431,7 +431,7 @@ namespace Pulsar4X.Client
                             ImGui.TableNextColumn();
                             ImGui.Text("");
                             ImGui.SameLine();
-                            ImGui.Text("Fuel Type");
+                            ImGui.Text(attribute.Name); // "Fuel Type" on engines, "Launch Fuel" on a launch complex
                             ImGui.TableNextColumn();
                             ImGui.Text(cargo.Name);
                             if(ImGui.IsItemHovered())

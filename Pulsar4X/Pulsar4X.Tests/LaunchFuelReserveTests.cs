@@ -79,7 +79,7 @@ public class LaunchFuelReserveTests
     }
 
     [Test]
-    public void Launch_LeavesThePlantFuelRunway_AndTakesNothingWhenShort()
+    public void Launch_OnAPlantFuel_LeavesTheRunway_AndTakesNothingWhenShort()
     {
         var modLoader = new ModLoader();
         var store = new ModDataStore();
@@ -98,36 +98,35 @@ public class LaunchFuelReserveTests
         var earth = ColonyFactory.CreateFromBlueprint(game, player, species, sol, planet, store.Colonies["colony-earth"]);
 
         var info = player.GetDataBlob<FactionInfoDB>();
-        var cargo = earth.GetDataBlob<CargoStorageDB>();
         var fissile = info.Data.CargoGoods.GetAny(Fissile)!;
-        var rp1 = info.Data.CargoGoods.GetAny("rp-1")!;
         long reserve = ColonyPowerProcessor.FuelReserveUnits(earth, Fissile);
         Assert.That(reserve, Is.GreaterThan(0));
-        Assert.That(ColonyPowerProcessor.FuelReserveUnits(earth, "rp-1"), Is.EqualTo(0), "rp-1 is plain propellant");
+
+        // The launch fuel is a design choice now. The designer only lists rocket propellants, but
+        // the runway guard still holds if a design (or modded data) picks the plant's fuel.
+        var pad = earth.GetDataBlob<LaunchComplexDB>().Pads.Values.Single();
+        pad.LaunchFuelId = Fissile;
 
         var hermes = earth.GetDataBlob<LaunchComplexDB>().LaunchQueue.Single(e => e.ShipName == "ISS Hermes");
         var design = info.ShipDesigns[hermes.DesignId];
         double cost = OrbitMath.FuelCostToOrbit(planet, design.MassPerUnit, OrbitMath.LowOrbitRadius(planet));
         Assert.That(cost, Is.GreaterThan(2000));
 
-        // Only plant fuel in the store: the reserve plus 1000 kg, well short of the launch.
-        foreach (var fuel in cargo.TypeStores["fuel-storage"].Cargoables.Values.ToArray())
-            CargoTransferProcessor.AddRemoveCargoMass(earth, fuel, -cargo.GetMassStored(fuel, false));
-        CargoTransferProcessor.AddRemoveCargoMass(earth, fissile, reserve + 1000);
+        // The reserve plus 1000 kg of fissile, well short of the launch.
+        CargoTransferProcessor.AddRemoveCargoMass(earth, fissile, reserve + 1000 - Stock(earth, fissile));
         Assert.That(Stock(earth, fissile), Is.EqualTo(reserve + 1000));
 
         int ships = sol.GetAllEntitiesWithDataBlob<ShipInfoDB>().Count;
         var processor = new LaunchComplexProcessor();
         processor.ProcessEntity(earth, 0);
-        Assert.That(sol.GetAllEntitiesWithDataBlob<ShipInfoDB>().Count, Is.EqualTo(ships), "not enough fuel: no launch");
+        Assert.That(sol.GetAllEntitiesWithDataBlob<ShipInfoDB>().Count, Is.EqualTo(ships), "not enough above the runway: no launch");
         Assert.That(Stock(earth, fissile), Is.EqualTo(reserve + 1000), "a launch that cannot go takes nothing");
+        Assert.That(LaunchComplexProcessor.PadHoldReason(earth, pad), Is.EqualTo(LaunchComplexProcessor.NotEnoughOf("Fissile fuels")));
 
-        // Propellant 500 kg short of the cost: the 1000 kg of fissile above the runway covers it,
-        // propellant first, and the runway stays.
-        CargoTransferProcessor.AddRemoveCargoMass(earth, rp1, Math.Ceiling(cost) - 500);
+        // Enough above the runway, 500 kg to spare: the launch goes and the runway stays.
+        CargoTransferProcessor.AddRemoveCargoMass(earth, fissile, Math.Ceiling(cost) - 500);
         processor.ProcessEntity(earth, 0);
         Assert.That(sol.GetAllEntitiesWithDataBlob<ShipInfoDB>().Count, Is.EqualTo(ships + 1), "the launch goes");
-        Assert.That(Stock(earth, rp1), Is.LessThanOrEqualTo(1), "propellant is burned first");
         Assert.That(Stock(earth, fissile), Is.GreaterThanOrEqualTo(reserve));
         Assert.That(Stock(earth, fissile), Is.EqualTo(reserve + 500).Within(2));
     }

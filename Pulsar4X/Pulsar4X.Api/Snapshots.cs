@@ -707,7 +707,14 @@ public sealed record IndustryView(IReadOnlyList<ProductionLineView> ProductionLi
     public IReadOnlyList<LaunchPadStateView> Pads { get; init; } = Array.Empty<LaunchPadStateView>();
 }
 
-public sealed record LaunchPadStateView(long MaxTonnage, bool Free);
+public sealed record LaunchPadStateView(long MaxTonnage, bool Free)
+{
+    /// <summary>Display name of the propellant this pad burns, from its launch complex design.</summary>
+    public string LaunchFuel { get; init; } = "";
+
+    /// <summary>Why the ship on this pad has not launched, e.g. "Not enough RP-1". Empty when it can go or the pad is free.</summary>
+    public string Reason { get; init; } = "";
+}
 
 public sealed record ProductionLineView(
     string Id,

@@ -97,6 +97,45 @@ public class SaveRoundTripTests
     }
 
     [Test]
+    public void LaunchPadFuel_RoundTrips_AndAnOldSaveFallsBackToRp1()
+    {
+        var game = BuildEarth();
+        var sol = game.Systems.Single(s => s.ID == "system-sol");
+        var colony = sol.GetAllEntitiesWithDataBlob<Pulsar4X.Ships.LaunchComplexDB>().Single();
+        int colonyId = colony.Id;
+        colony.GetDataBlob<Pulsar4X.Ships.LaunchComplexDB>().Pads.Values.Single().LaunchFuelId = "methalox";
+
+        string json = Game.Save(game);
+        Assert.That(json, Does.Contain("\"LaunchFuelId\""));
+        EntityIDGenerator.NextId = 0;
+        Game.EntityIDCounter = 0;
+        var loaded = Game.Load(json);
+        var loadedColony = SolEntity(loaded, colonyId);
+        Assert.That(loadedColony.GetDataBlob<Pulsar4X.Ships.LaunchComplexDB>().Pads.Values.Single().LaunchFuel, Is.EqualTo("methalox"));
+
+        // A save from before the launch fuel choice has no LaunchFuelId on pads or designs.
+        string old = System.Text.RegularExpressions.Regex.Replace(json, @",\s*""LaunchFuelId""\s*:\s*(""[^""]*""|null)", "");
+        Assert.That(old, Does.Not.Contain("LaunchFuelId"));
+        EntityIDGenerator.NextId = 0;
+        Game.EntityIDCounter = 0;
+        var oldLoaded = Game.Load(old);
+        var oldPad = SolEntity(oldLoaded, colonyId).GetDataBlob<Pulsar4X.Ships.LaunchComplexDB>().Pads.Values.Single();
+        Assert.That(oldPad.LaunchFuelId, Is.Null);
+        Assert.That(oldPad.LaunchFuel, Is.EqualTo(Pulsar4X.Ships.LaunchComplexAtb.DefaultLaunchFuel));
+        Assert.That(Pulsar4X.Ships.LaunchComplexAtb.DefaultLaunchFuel, Is.EqualTo("rp-1"));
+        var faction = oldLoaded.Factions[oldLoaded.LocalHumanFactionId].GetDataBlob<FactionInfoDB>();
+        if (faction.ComponentDesigns.TryGetValue("default-design-launch-complex", out var design))
+            Assert.That(design.GetAttribute<Pulsar4X.Ships.LaunchComplexAtb>().LaunchFuel, Is.EqualTo("rp-1"));
+    }
+
+    static Entity SolEntity(Game game, int id)
+    {
+        var sol = game.Systems.Single(s => s.ID == "system-sol");
+        Assert.That(sol.TryGetEntityById(id, out var entity), Is.True);
+        return entity!;
+    }
+
+    [Test]
     public void EarthColony_LoadAcceptReadsTheHumanFaction()
     {
         var game = BuildEarth();
