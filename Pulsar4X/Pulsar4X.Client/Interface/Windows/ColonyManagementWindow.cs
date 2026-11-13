@@ -361,6 +361,12 @@ namespace Pulsar4X.Client
                 DisplayHelpers.PrintRow("Grid storage", $"{Math.Clamp(power.StoredFraction, 0, 1) * 100:0}%% of {Stringify.Energy(power.StoreMax_kJ, "0.#")}",
                     tooltipTwo: "Charge level and capacity; see Storage below", separator: false);
             ImGui.Columns(1);
+            if (LifeSupportRows.ColonyLine(power) is { Length: > 0 } lifeLine)
+            {
+                ImGui.PushTextWrapPos(0f);
+                Finances.ColouredText(Styles.DescriptiveColor, lifeLine);
+                ImGui.PopTextWrapPos();
+            }
             if (power.Balance_kW < 0)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, PowerDemandColour);
@@ -390,8 +396,10 @@ namespace Pulsar4X.Client
                     $"{tier.Tier}: {Stringify.Power(tier.Demand_kW)}, {words}"));
 
                 string tip = $"{tier.Tier}: {Stringify.Power(tier.Demand_kW)} demand, {words} (tier {tier.TierRank})";
-                if (consumers.Any(c => c.DesignId == "life-support"))
-                    tip += $"\n{power.LifeSupportColonists:N0} colonists: a base draw per person, more on hostile worlds";
+                bool lifeTier = consumers.Any(c => c.DesignId == "life-support");
+                if (lifeTier)
+                    tip += $"\n{power.LifeSupportColonists:N0} colonists: a base draw per person, more on hostile worlds"
+                        + (power.LifeSupportRateLabel.Length > 0 ? "\n" + power.LifeSupportRateLabel : "");
                 if (consumers.Any(c => c.Nameplate_kW > c.Draw_kW + 1e-6))
                     tip += "\nProduction draws its jobs' build energy, up to the nameplate. Idle, it draws a tenth of the nameplate.";
                 if (consumers.Any(c => c.DesignId == "scrapping"))
@@ -405,7 +413,7 @@ namespace Pulsar4X.Client
                     Percent = PowerBars.Percent(tier.Demand_kW, power.Demand_kW),
                     Fill = (float)share,
                     FillColour = state,
-                    Trailing = words,
+                    Trailing = lifeTier && power.LifeSupportRateLabel.Length > 0 ? words + "  " + power.LifeSupportRateLabel : words,
                     TrailingColour = state,
                     Tooltip = tip,
                     Detail = consumers.Select(c => (
@@ -658,6 +666,12 @@ namespace Pulsar4X.Client
                     ImGui.TextUnformatted(PowerRing.WordsFor(PowerRing.Share(power)));
                     ImGui.PopStyleColor();
                     ImGui.EndGroup();
+                    if (LifeSupportRows.ColonyLine(power) is { Length: > 0 } lifeLine)
+                    {
+                        ImGui.PushTextWrapPos(0f);
+                        Finances.ColouredText(Styles.DescriptiveColor, lifeLine);
+                        ImGui.PopTextWrapPos();
+                    }
                 }
 
                 // Owner-only: CrewPool is filled for the owning faction only.
@@ -1033,7 +1047,7 @@ namespace Pulsar4X.Client
             }
 
             bool command = selected >= 0 && recruits == 0;
-            bool canRun = free > 0 && (recruits > 0 || command);
+            bool canRun = free > 0 && (recruits > 0 || command) && row.FundsReason.Length == 0;
             string caption = command ? "Run command course" : "Run class";
             if (!canRun)
                 ImGui.BeginDisabled();
@@ -1049,8 +1063,13 @@ namespace Pulsar4X.Client
             if (!canRun)
             {
                 ImGui.EndDisabled();
-                if (free <= 0 && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                    ImGui.SetTooltip("This academy has no free seats.");
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                {
+                    if (row.FundsReason.Length > 0)
+                        ImGui.SetTooltip(row.FundsReason.Replace("%", "%%"));
+                    else if (free <= 0)
+                        ImGui.SetTooltip("This academy has no free seats.");
+                }
             }
 
             DisplayCrewCourse(colonyId, row, academy.Population);
@@ -1082,7 +1101,9 @@ namespace Pulsar4X.Client
                 ImGui.TextUnformatted(cohort.Count.ToString("N0") + " crew in training, graduating " + cohort.Graduation.ToString("yyyy-MM-dd") + " into the pool.");
             }
 
-            if (row.CrewCourseReason.Length > 0)
+            if (row.FundsReason.Length > 0)
+                CrewBars.Warning(row.FundsReason);
+            else if (row.CrewCourseReason.Length > 0)
                 CrewBars.Warning(row.CrewCourseReason);
 
             string? refusal = CrewActions.TrainRefusal(row, population);
@@ -1102,7 +1123,7 @@ namespace Pulsar4X.Client
             if (refusal != null)
                 ImGui.EndDisabled();
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                ImGui.SetTooltip(refusal ?? "Trainees, 1 to " + max.ToString("N0") + ". One colonist per seat.");
+                ImGui.SetTooltip((refusal ?? "Trainees, 1 to " + max.ToString("N0") + ". One colonist per seat.").Replace("%", "%%"));
             ImGui.SameLine();
             string tip = "Enrol " + count.ToString("N0") + " colonists. They graduate into the crew pool in "
                 + row.CrewCourseLengthMonths.ToString("N0") + " months.";

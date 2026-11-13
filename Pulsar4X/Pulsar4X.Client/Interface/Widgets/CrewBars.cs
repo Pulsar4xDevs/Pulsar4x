@@ -29,6 +29,8 @@ public static class CrewActions
     /// <summary>Null when a crew course can start at this academy.</summary>
     public static string? TrainRefusal(NavalAcademyClassView row, long population)
     {
+        if (row.FundsReason.Length > 0)
+            return row.FundsReason;
         if (row.CrewSeats <= 0 || row.CrewCourseLengthMonths <= 0)
             return "This academy has no crew seats.";
         if (row.CrewSeats - row.CrewSeatsInUse <= 0)

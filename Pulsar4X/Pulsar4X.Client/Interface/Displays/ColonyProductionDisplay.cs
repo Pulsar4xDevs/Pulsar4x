@@ -186,7 +186,8 @@ namespace Pulsar4X.Client
                 var pad = pads[i];
                 // CrewToBoard is 0 until crew plan phase 3; show a boarding bar only once the engine says something.
                 bool crewKnown = pad.CrewShort || pad.CrewToBoard > 0;
-                string note = pad.Free ? "free" : pad.Reason.Length > 0 ? pad.Reason : pad.CrewShort ? "crew short" : "ready";
+                string note = pad.Free ? "free" : pad.FundsReason.Length > 0 ? pad.FundsReason : pad.Reason.Length > 0 ? pad.Reason : pad.CrewShort ? "crew short" : "ready";
+                bool held = !pad.Free && (pad.CrewShort || pad.Reason.Length > 0 || pad.FundsReason.Length > 0);
                 var detail = new List<(string, string)> { ("Fuel", pad.LaunchFuel.Length > 0 ? pad.LaunchFuel : "-") };
                 if (!pad.Free)
                 {
@@ -197,7 +198,7 @@ namespace Pulsar4X.Client
                 rows.Add(new PowerRow
                 {
                     Id = "pad-" + i,
-                    Chip = pad.Free ? PowerBars.UnservedColour : pad.CrewShort || pad.Reason.Length > 0 ? CrewBars.ShortColour : PowerRing.FullColour,
+                    Chip = pad.Free ? PowerBars.UnservedColour : held ? CrewBars.ShortColour : PowerRing.FullColour,
                     Name = "Pad " + (i + 1) + "  " + pad.MaxTonnage.ToString("N0") + " t",
                     Value = pad.Free ? "" : crewKnown
                         ? pad.CrewToBoard.ToString("N0") + "/" + pad.CrewRequired.ToString("N0") + " crew"
@@ -205,14 +206,16 @@ namespace Pulsar4X.Client
                     Fill = !pad.Free && crewKnown ? CrewBars.Fill(pad.CrewToBoard, pad.CrewRequired) : null,
                     FillColour = pad.CrewShort ? CrewBars.ShortColour : PowerRing.FullColour,
                     Trailing = note,
-                    TrailingColour = !pad.Free && (pad.CrewShort || pad.Reason.Length > 0) ? CrewBars.ShortColour : null,
-                    Tooltip = pad.CrewWarning.Length > 0 ? pad.CrewWarning : null,
+                    TrailingColour = held ? CrewBars.ShortColour : null,
+                    Tooltip = string.Join("\n", new[] { pad.FundsReason, pad.CrewWarning }.Where(t => t.Length > 0)) is { Length: > 0 } padTip ? padTip : null,
                     Detail = detail,
                 });
             }
             PowerBars.Rows("##launchPads", rows, 48f);
             foreach (var pad in pads)
             {
+                if (!pad.Free && pad.FundsReason.Length > 0)
+                    CrewBars.Warning(pad.FundsReason);
                 if (!pad.Free && pad.CrewWarning.Length > 0)
                     CrewBars.Warning(pad.CrewWarning);
             }
@@ -254,6 +257,11 @@ namespace Pulsar4X.Client
                         ImGui.Text(job.Status);
                     ImGui.PopStyleColor();
                     bool statusHovered = ImGui.IsItemHovered();
+                    if (job.FundsReason.Length > 0)
+                    {
+                        ImGui.SameLine();
+                        CrewBars.Badge("funds", CrewBars.ShortColour, job.FundsReason);
+                    }
                     if (job.CrewWarning.Length > 0)
                     {
                         ImGui.SameLine();

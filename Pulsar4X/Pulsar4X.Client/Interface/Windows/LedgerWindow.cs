@@ -46,7 +46,12 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
         }
 
         ImGui.TextUnformatted(faction.Name);
-        ImGui.TextUnformatted("Balance " + faction.Funds.ToString("C2", CultureInfo.CurrentCulture));
+        if (faction.Funds < 0)
+            Finances.ColouredText(Finances.BannerColour, "Balance " + faction.Funds.ToString("C2", CultureInfo.CurrentCulture));
+        else
+            ImGui.TextUnformatted("Balance " + faction.Funds.ToString("C2", CultureInfo.CurrentCulture));
+        // The galaxy's faction is the player's own; NPC factions pay no wages and have no books here.
+        Finances.Draw(faction);
         ImGui.Separator();
 
         var rows = faction.Transactions;
@@ -99,6 +104,7 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
         "InitialInvestment" => "Initial investment",
         "Research" => "Research",
         "Trade" => "Trade",
+        FactionSnapshot.WagesCategory => "Wages",
         _ => category
     };
 }

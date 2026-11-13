@@ -211,11 +211,20 @@ namespace Pulsar4X.Client
                 padding = new string(' ', Math.Max(0, spacesNeeded));
             }
 
+            bool negative = faction.Funds < 0;
+            if (negative)
+                ImGui.PushStyleColor(ImGuiCol.Text, Finances.BannerColour);
             if (ImGui.Selectable($"{label}{padding}{value}###corp-funds"))
                 LedgerWindow.GetInstance().SetActive(true);
+            if (negative)
+                ImGui.PopStyleColor();
             if (ImGui.IsItemHovered())
             {
                 ImGui.BeginTooltip();
+                if (Finances.BannerText(faction) is { Length: > 0 } banner)
+                    Finances.ColouredText(Finances.BannerColour, banner);
+                ImGui.TextUnformatted("Running costs " + Finances.RunningCostsText(faction));
+                ImGui.TextUnformatted("Days until broke: " + Finances.DaysUntilBrokeText(faction.DaysUntilBroke));
                 ImGui.TextUnformatted("Transaction history");
                 ImGui.EndTooltip();
             }
