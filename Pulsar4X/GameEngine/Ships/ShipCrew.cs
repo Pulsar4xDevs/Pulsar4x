@@ -21,8 +21,8 @@ namespace Pulsar4X.Ships
     /// Crew capacity, crew aboard and what a short crew does (crew plan phases 1-3).
     /// <para>Berths come from parts with a CrewQuartersAtb: crew quarters, and a few on every bridge.</para>
     /// <para>
-    /// Crew aboard (ShipCrewDB) fill the engines first, then the bridge, then the work parts. An engine
-    /// (warp drive or reaction engine) below its own crew runs at aboard / engine crew. The work parts
+    /// Crew aboard (ShipCrewDB) fill the engines first, then the bridge, then the work parts. The warp
+    /// drives below their own crew run at aboard / engine crew (reaction engines need no crew and are not counted). The work parts
     /// (geo and grav surveyors, asteroid miners, shuttlebays, construction bays) share what is left:
     /// F = clamp((aboard - engine crew - bridge crew) / work crew, 0, 1), and they run at F².
     /// Nothing else degrades: lasers, fire control, sensors, reactors and the bridge run at full.
@@ -65,8 +65,8 @@ namespace Pulsar4X.Ships
 
         // ---- phase 3: who does what ----
 
-        public static bool IsEngine(ComponentDesign d)
-            => d.HasAttribute<WarpDriveAtb>() || d.HasAttribute<NewtonionThrustAtb>();
+        /// <summary>Engines whose crew fill first and whose power scales by crew: warp drives only (reaction engines need no crew).</summary>
+        public static bool IsEngine(ComponentDesign d) => d.HasAttribute<WarpDriveAtb>();
 
         public static bool IsBridge(ComponentDesign d) => d.HasAttribute<AdminSpaceAtb>();
 
@@ -238,14 +238,26 @@ namespace Pulsar4X.Ships
         }
 
         /// <summary>
-        /// Puts crew into the colony's pool. Crew aboard is not tracked by species, so they join the
-        /// pool's largest species, or the colony's largest population species when the pool is empty.
+        /// Gives crew back to the colony. A player's crew join the colony's pool: crew aboard is not tracked
+        /// by species, so they join the pool's largest species, or the colony's largest population species
+        /// when the pool is empty. An NPC's crew came from the population (<see cref="CrewsFromPopulation"/>),
+        /// so they go back to it, as its largest species (to the pool only if the colony has no people left).
         /// TODO(crew): return the species that boarded.
         /// </summary>
         public static void Return(Entity colony, int count)
         {
             if (count <= 0)
                 return;
+            if (CrewsFromPopulation(colony) && colony.TryGetDataBlob<ColonyInfoDB>(out var npcInfo))
+            {
+                int npcSpecies = npcInfo.Population.Where(p => p.Value > 0).OrderByDescending(p => p.Value).ThenBy(p => p.Key)
+                    .Select(p => p.Key).DefaultIfEmpty(-1).First();
+                if (npcSpecies >= 0)
+                {
+                    NavalAcademyCourse.ReturnPeople(colony, count, npcSpecies);
+                    return;
+                }
+            }
             var pool = ColonyCrewPoolDB.Of(colony);
             int species = pool.Trained.Where(p => p.Value > 0).OrderByDescending(p => p.Value).ThenBy(p => p.Key).Select(p => p.Key).DefaultIfEmpty(-1).First();
             if (species < 0 && colony.TryGetDataBlob<ColonyInfoDB>(out var info))

@@ -312,6 +312,38 @@ public class CrewAboardTests
         Assert.That(NavalAcademyCourse.PopulationOf(info), Is.EqualTo(before - design.CrewReq));
         Assert.That(ColonyCrewPoolDB.Of(npcColony).Total, Is.EqualTo(poolBefore), "no pool for NPCs");
         Assert.That(ShipCrew.Note(ship), Is.Empty, "shown fully crewed");
+
+        // Crew going back go to the population, not a pool: crew-down, refit excess, scrap.
+        Assert.That(ShipCrew.ToPool(ship, npcColony, 3), Is.EqualTo(3));
+        Assert.That(NavalAcademyCourse.PopulationOf(info), Is.EqualTo(before - design.CrewReq + 3));
+        Assert.That(ShipCrew.TopUp(ship, npcColony), Is.EqualTo(3), "a top-up takes them from the population again");
+        Assert.That(NavalAcademyCourse.PopulationOf(info), Is.EqualTo(before - design.CrewReq));
+
+        var quarters = ship.GetDataBlob<ComponentInstancesDB>().AllComponents.Values
+            .First(i => i.Design.UniqueID == "default-design-crew-quarters-10");
+        ship.RemoveComponent(quarters);
+        int excess = ShipCrew.AfterRefit(ship, npcColony);
+        Assert.That(excess, Is.GreaterThan(0));
+        Assert.That(NavalAcademyCourse.PopulationOf(info), Is.EqualTo(before - design.CrewReq + excess));
+
+        int aboard = ShipCrew.Aboard(ship);
+        Assert.That(ShipCrew.Scrap(ship, npcColony), Is.EqualTo(aboard));
+        Assert.That(NavalAcademyCourse.PopulationOf(info), Is.EqualTo(before));
+        Assert.That(ColonyCrewPoolDB.Of(npcColony).Total, Is.EqualTo(poolBefore), "still no pool");
+    }
+
+    [Test]
+    public void OnlyWarpDrives_CountAsCrewedEngines()
+    {
+        var warp = Info.InternalComponentDesigns.Values.First(d => d.HasAttribute<WarpDriveAtb>());
+        var newton = Info.InternalComponentDesigns.Values.First(d => d.HasAttribute<Pulsar4X.Movement.NewtonionThrustAtb>());
+        Assert.That(ShipCrew.IsEngine(warp), Is.True);
+        Assert.That(ShipCrew.IsEngine(newton), Is.False, "reaction engines need no crew and are not scaled");
+
+        // A reaction engine given crew counts as a plain crewed part, not engine crew.
+        var split = ShipCrew.Split(new[] { (warp, 1), (newton, 2) });
+        Assert.That(split.Engine, Is.EqualTo(warp.CrewReq));
+        Assert.That(split.Required, Is.EqualTo(warp.CrewReq + 2 * newton.CrewReq));
     }
 
     [Test]
