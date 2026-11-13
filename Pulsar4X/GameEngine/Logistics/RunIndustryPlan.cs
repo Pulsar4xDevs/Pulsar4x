@@ -70,8 +70,8 @@ public class RunIndustryPlan : IGoalPlanner
             return PlanResult.Continue(new List<EntityAction>());
 
         // Top up a refined good already in the warehouse. A recipe with no pile
-        // waits. Earth also unlocks plastic, ntp, fissile fuels, and electricity
-        // with none stored; stainless steel is the thinnest pile it does have.
+        // waits. Earth also unlocks plastic, ntp and fissile fuels with none
+        // stored; stainless steel is the thinnest pile it does have.
         // When nothing refined is stored, every payable recipe stays in the list.
         if (candidates.Exists(candidate => candidate.Stock > 0))
             candidates.RemoveAll(candidate => candidate.Stock <= 0);

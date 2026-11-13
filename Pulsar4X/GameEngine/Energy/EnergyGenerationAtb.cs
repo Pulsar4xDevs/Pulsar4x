@@ -31,7 +31,7 @@ namespace Pulsar4X.Energy
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             string resourceID = EnergyTypeID;
-            ICargoable? energyCargoable = parentEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(resourceID);
+            ICargoable? energyCargoable = EnergyGenAbilityDB.FindEnergyType(parentEntity, resourceID);
             EnergyGenAbilityDB genDB;
             if (!parentEntity.HasDataBlob<EnergyGenAbilityDB>())
             {
@@ -57,7 +57,8 @@ namespace Pulsar4X.Energy
             genDB.MaxOutputFromReactor += PowerOutputMax;
             double maxUse = genDB.TotalFuelUseAtMax.maxUse + FuelUsedAtMax;
             genDB.TotalFuelUseAtMax = (FuelType, maxUse);
-            genDB.LocalFuel = maxUse * Lifetime;
+            // Each reactor brings its own fuel: FuelUsedAtMax kg/s for Lifetime s.
+            genDB.LocalFuel = EnergyGenAbilityDB.SaneFuel(genDB.LocalFuel) + ReactorFuel();
 
             //add enough energy store for 1s of running.
             if (genDB.EnergyStoreMax.ContainsKey(EnergyTypeID))
@@ -72,9 +73,32 @@ namespace Pulsar4X.Energy
 
         }
 
+        /// <summary>
+        /// Fuel built into one reactor, in kg.
+        /// </summary>
+        internal double ReactorFuel() => EnergyGenAbilityDB.SaneFuel(FuelUsedAtMax * Lifetime);
+
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
+            if (!parentEntity.TryGetDataBlob<EnergyGenAbilityDB>(out var genDB))
+                return;
+            EnergyGenProcessor.CatchUp(parentEntity, genDB);
 
+            // The reactor takes its share of the fuel left. Reactors burn in proportion to
+            // FuelUsedAtMax, so that is its share.
+            double maxUseBefore = genDB.TotalFuelUseAtMax.maxUse;
+            double maxUse = Math.Max(0, maxUseBefore - FuelUsedAtMax);
+            double fuel = EnergyGenAbilityDB.SaneFuel(genDB.LocalFuel);
+            if (maxUseBefore > 0 && maxUse > 0)
+                genDB.LocalFuel = fuel * (maxUse / maxUseBefore);
+            else
+                genDB.LocalFuel = 0;
+
+            genDB.MaxOutputFromReactor = Math.Max(0, genDB.MaxOutputFromReactor - PowerOutputMax);
+            genDB.TotalFuelUseAtMax = (maxUse > 0 ? genDB.TotalFuelUseAtMax.type : "", maxUse);
+
+            // And the 1 s of output it added to the store.
+            EnergyGenAbilityDB.RemoveStore(genDB, EnergyTypeID, PowerOutputMax);
         }
 
         public string AtbName()
@@ -85,7 +109,7 @@ namespace Pulsar4X.Energy
         public string AtbDescription()
         {
             //string fuelName = StaticRefLib.StaticData.CargoGoods.GetAny(FuelType).Name;
-            return "Generates " + PowerOutputMax + " Mw, using: " + FuelUsedAtMax + "kg/s of ";// + fuelName;
+            return "Generates " + PowerOutputMax + " kW, using: " + FuelUsedAtMax + "kg/s of ";// + fuelName;
         }
     }
 }

@@ -172,14 +172,21 @@
           "Units": "Kw",
           "DescriptionFormula": "'Max output of this unit when new, output will degrade over lifetime of the unit'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Fuel') * PropertyValue('Efficiency') * PropertyValue('Fuel Consumption')"
+          "PropertyFormula": "PropertyValue('Fuel') * PropertyValue('Heat per kg') * PropertyValue('Efficiency') * 0.01"
+        },
+        {
+          "Name": "Heat per kg",
+          "Units": "kW/kg",
+          "DescriptionFormula": "'Decay heat of the fuel. A shorter lived isotope runs hotter'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.1 / PropertyValue('Operational Lifetime')"
         },
         {
           "Name": "Fuel Consumption",
           "Units": "kg/s",
           "DescriptionFormula": "'Fuel Consumption kg per second at Max Output'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "0.001 / PropertyValue('Operational Lifetime')"
+          "PropertyFormula": "PropertyValue('Fuel') / (PropertyValue('Operational Lifetime') * 31557600)"
         },
         {
           "Name": "Operational Lifetime",
@@ -237,7 +244,7 @@
           "Name": "DB",
           "DescriptionFormula": "''",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(UniqueID('fissile-fuels'), PropertyValue('Fuel Consumption'), UniqueID('electricity'), PropertyValue('Power Output'), PropertyValue('Operational Lifetime'))",
+          "PropertyFormula": "AtbConstrArgs(UniqueID('fissile-fuels'), PropertyValue('Fuel Consumption'), UniqueID('electricity'), PropertyValue('Power Output'), PropertyValue('Operational Lifetime') * 31557600)",
           "AttributeType": "Pulsar4X.Energy.EnergyGenerationAtb"
         },
         {

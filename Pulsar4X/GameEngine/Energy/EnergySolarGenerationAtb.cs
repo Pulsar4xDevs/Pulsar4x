@@ -44,7 +44,7 @@ public class EnergySolarGenerationAtb : IComponentDesignAttribute
     public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
         string resourceID = EnergyTypeID;
-        ICargoable? energyCargoable = parentEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(resourceID);
+        ICargoable? energyCargoable = EnergyGenAbilityDB.FindEnergyType(parentEntity, resourceID);
         EnergyGenAbilityDB genDB;
         if (!parentEntity.HasDataBlob<EnergyGenAbilityDB>())
         {
@@ -70,8 +70,13 @@ public class EnergySolarGenerationAtb : IComponentDesignAttribute
 
     public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        var genDB = parentEntity.GetDataBlob<EnergyGenAbilityDB>();
+        if (!parentEntity.TryGetDataBlob<EnergyGenAbilityDB>(out var genDB))
+            return;
+        EnergyGenProcessor.CatchUp(parentEntity, genDB);
         genDB.SolarPanels.Remove(this);
+        // The hourly solar pass sets MaxOutputFromSolar. With no panels left there is nothing to wait for.
+        if (genDB.SolarPanels.Count == 0)
+            genDB.MaxOutputFromSolar = 0;
     }
 
     public string AtbName()

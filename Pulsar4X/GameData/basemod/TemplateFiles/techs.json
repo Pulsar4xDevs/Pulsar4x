@@ -752,7 +752,6 @@
       "CostFormula": "(1 + [Level]) * 2000",
       "Unlocks": {
         "1": [
-          "reactor",
           "steam-turbine-reactor",
           "rtg",
           "fissile-fuels",

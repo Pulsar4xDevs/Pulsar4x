@@ -45,7 +45,10 @@ namespace Pulsar4X.Energy
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-
+            if (!parentEntity.TryGetDataBlob<EnergyGenAbilityDB>(out var genDB))
+                return;
+            EnergyGenProcessor.CatchUp(parentEntity, genDB);
+            EnergyGenAbilityDB.RemoveStore(genDB, EnergyTypeID, MaxStore);
         }
 
         public string AtbName()

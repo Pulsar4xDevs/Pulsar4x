@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using System;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Factions;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Energy
@@ -14,8 +17,25 @@ namespace Pulsar4X.Energy
         [JsonIgnore]
         public double TotalOutputMax 
         {
-            get =>  MaxOutputFromReactor + MaxOutputFromSolar;
+            get =>  ReactorOutputMax + MaxOutputFromSolar;
         }  
+
+        /// <summary>
+        /// Reactor output the plant can give now, in kW. A plant that tracks fuel
+        /// (TotalFuelUseAtMax.maxUse > 0) gives 0 once LocalFuel is spent.
+        /// MaxOutputFromReactor keeps the installed nameplate.
+        /// </summary>
+        [JsonIgnore]
+        public double ReactorOutputMax
+        {
+            get => ReactorOutOfFuel ? 0 : MaxOutputFromReactor;
+        }
+
+        [JsonIgnore]
+        public bool ReactorOutOfFuel
+        {
+            get => TotalFuelUseAtMax.maxUse > 0 && !(LocalFuel > 0);
+        }
         public double MaxOutputFromReactor = 0;
         public double MaxOutputFromSolar = 0;
         
@@ -48,7 +68,55 @@ namespace Pulsar4X.Energy
         /// In Kjoules
         /// </summary>
         public Dictionary<string, double > EnergyStoreMax = new ();
+        /// <summary>
+        /// Reactor fuel left, in kg. The sum over installed reactors of FuelUsedAtMax * Lifetime.
+        /// </summary>
         public double LocalFuel;
+
+        /// <summary>
+        /// Old saves can hold a negative, NaN or infinite LocalFuel. Negative and NaN become 0
+        /// (spent) and +infinity becomes double.MaxValue.
+        /// </summary>
+        internal static double SaneFuel(double fuel)
+        {
+            if (double.IsNaN(fuel) || fuel < 0)
+                return 0;
+            if (double.IsPositiveInfinity(fuel))
+                return double.MaxValue;
+            return fuel;
+        }
+
+        /// <summary>
+        /// The faction's energy cargo type. Electricity is not a starting unlock (it is not
+        /// buildable), so a locked type is used too.
+        /// </summary>
+        internal static ICargoable? FindEnergyType(Entity parentEntity, string energyTypeID)
+        {
+            var data = parentEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
+            return data.CargoGoods.GetAny(energyTypeID) ?? data.LockedCargoGoods.GetAny(energyTypeID);
+        }
+
+        /// <summary>
+        /// Takes kJ of capacity off the store for energyTypeID (an uninstall). Stored energy
+        /// above the new cap is lost.
+        /// </summary>
+        internal static void RemoveStore(EnergyGenAbilityDB genDB, string energyTypeID, double capacity)
+        {
+            if (!genDB.EnergyStoreMax.TryGetValue(energyTypeID, out double max))
+                return;
+            double newMax = Math.Max(0, max - capacity);
+            genDB.EnergyStoreMax[energyTypeID] = newMax;
+            if (genDB.EnergyStored.TryGetValue(energyTypeID, out double stored))
+                genDB.EnergyStored[energyTypeID] = Math.Min(stored, newMax);
+        }
+
+        [OnDeserialized]
+        private void ClampSavedFuel(StreamingContext context)
+        {
+            LocalFuel = SaneFuel(LocalFuel);
+            if (double.IsNaN(TotalFuelUseAtMax.maxUse) || TotalFuelUseAtMax.maxUse < 0)
+                TotalFuelUseAtMax = (TotalFuelUseAtMax.type, 0);
+        }
 
         // The setter resizes Histogram. Save the field so load does not run that.
         [JsonProperty]
@@ -105,6 +173,7 @@ namespace Pulsar4X.Energy
             MaxOutputFromReactor = db.MaxOutputFromReactor;
             MaxOutputFromSolar = db.MaxOutputFromSolar;
             TotalFuelUseAtMax = db.TotalFuelUseAtMax;
+            LocalFuel = db.LocalFuel;
             Demand = db.Demand;
             Load = db.Load;
         }

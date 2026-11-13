@@ -577,7 +577,9 @@ public class EarlyTechStartTests
 
         data.IncrementTechLevel("tech-early-nuclear-power");
 
-        Assert.That(data.ComponentTemplates.ContainsKey("reactor"), Is.True);
+        Assert.That(data.ComponentTemplates.ContainsKey("steam-turbine-reactor"), Is.True);
+        // The generic 50 kW/kg reactor is retired from new games.
+        Assert.That(data.ComponentTemplates.ContainsKey("reactor"), Is.False);
         Assert.That(data.IsResearchable("tech-early-warp-drive"), Is.True);
         Assert.That(data.IsResearchable("tech-early-directed-energy"), Is.True);
 
@@ -611,7 +613,6 @@ public class EarlyTechStartTests
 
     [TestCase("steam-turbine-reactor")]
     [TestCase("rtg")]
-    [TestCase("reactor")]
     public void ResearchingNuclearPower_MakesItsTemplatesDesignableWithTheirFuel(string templateId)
     {
         var (_, faction) = StartGameLikeTheMenu(EarlyTech);

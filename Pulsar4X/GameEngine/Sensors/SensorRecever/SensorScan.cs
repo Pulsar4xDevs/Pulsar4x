@@ -52,8 +52,8 @@ namespace Pulsar4X.Sensors
                             
                             if (sensorAtb.IsEnergyGen)//if solar array not sensor
                             {
-                                var genAbil = entity.GetDataBlob<EnergyGenAbilityDB>();
-                                genAbil.LocalFuel = genAbil.TotalFuelUseAtMax.maxUse * sensorAtb.ScanTime;
+                                // A solar array is not a sensor and makes no contacts. Its output is
+                                // set by EnergyGenHotloopProcessor; it has no fuel.
                             }
                             else if (sensorMgr.SensorContactExists(detectableEntity.Id))
                             {

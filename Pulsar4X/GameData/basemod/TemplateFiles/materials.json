@@ -173,16 +173,13 @@
     "Payload": {
       "UniqueID": "electricity",
       "Name": "Electricity",
-      "Description": "Electrical Energy",
+      "Description": "Electrical Energy. Made by generators, not by industry.",
       "CargoTypeID": "battery-storage",
       "MassPerUnit": 0.0,
       "VolumePerUnit": 0,
       "ResourceCosts": {
       },
-      "IndustryPointCosts": 10,
-      "IndustryTypeID": "refining",
-      "WealthCost": 0,
-      "OutputAmount": 100
+      "WealthCost": 0
     }
   },
   {
