@@ -22,20 +22,20 @@ public static class CeresStart
     public const string WaterId = "water";
 
     /// <summary>The depot's methalox ask (3 before phase 5).</summary>
-    public static decimal FuelAsk(Game? game, FactionDataStore data) => EnergyPricing.SeedAsk(game, data, FuelId);
+    public static decimal FuelAsk(Game? game, FactionDataStore data) => EnergyPricing.DepotSeedAsk(game, data, FuelId);
 
     /// <summary>The depot's iron ask (2 before phase 5).</summary>
-    public static decimal IronAsk(Game? game, FactionDataStore data) => EnergyPricing.SeedAsk(game, data, IronId);
+    public static decimal IronAsk(Game? game, FactionDataStore data) => EnergyPricing.DepotSeedAsk(game, data, IronId);
 
     /// <summary>The depot's iron bid (1 before phase 5).</summary>
-    public static decimal IronBid(Game? game, FactionDataStore data) => EnergyPricing.SeedBid(game, data, IronId);
+    public static decimal IronBid(Game? game, FactionDataStore data) => EnergyPricing.DepotSeedBid(game, data, IronId);
 
     /// <summary>The depot's water ask (1 before phase 5).</summary>
-    public static decimal WaterAsk(Game? game, FactionDataStore data) => EnergyPricing.SeedAsk(game, data, WaterId);
+    public static decimal WaterAsk(Game? game, FactionDataStore data) => EnergyPricing.DepotSeedAsk(game, data, WaterId);
 
     /// <summary>
-    /// One rate for every mineral in a direct offer: half the iron bid (every mineral carries the
-    /// same extraction energy by default), at least 0.01.
+    /// One rate for every mineral in a direct offer: half the iron bid, at least 0.01. A mixed lot
+    /// is paid at one flat rate anchored on iron, the bulk ore, as before.
     /// </summary>
     public static decimal LotPrice(Game? game, FactionDataStore data)
     {

@@ -12,8 +12,8 @@ namespace Pulsar4X.Energy
     /// Embodied energy (§5 of the energy plan): what a good or design took to make, kWh. Computed,
     /// never hand-set: E = direct energy + mining energy + Σ inputs' E.
     /// <list type="bullet">
-    /// <item>A mineral is extraction only: <see cref="Mineral.ExtractionEnergy"/> kWh/kg (default
-    /// <see cref="DefaultExtraction_kWhPerKg"/>, the mine's own draw). Ore-to-metal energy belongs to
+    /// <item>A mineral is extraction only: <see cref="Mineral.ExtractionEnergy"/> kWh/kg, set per
+    /// mineral in minerals.json (default <see cref="DefaultExtraction_kWhPerKg"/>, the mine's own draw). Ore-to-metal energy belongs to
     /// the refinery recipe (Jon's decision 1).</item>
     /// <item>A material: (batch EnergyCost, or IP x EnergyPerPoint, + Σ inputs) / OutputAmount, per unit.</item>
     /// <item>A component, ordnance or installation design: its build EnergyCost + Σ its resources, per item.</item>
@@ -27,7 +27,7 @@ namespace Pulsar4X.Energy
     /// </summary>
     public sealed class EmbodiedEnergy
     {
-        /// <summary>Extraction energy of a mineral without its own figure, kWh/kg. Matches the mine's draw.</summary>
+        /// <summary>Extraction energy of a mineral without its own figure in the data, kWh/kg. Matches the mine's draw.</summary>
         public const double DefaultExtraction_kWhPerKg = 0.05;
 
         /// <summary>The energy type cargo. One unit is one kJ.</summary>

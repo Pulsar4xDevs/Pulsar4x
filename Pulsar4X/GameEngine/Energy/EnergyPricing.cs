@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
+using Pulsar4X.Interfaces;
 using Pulsar4X.Movement;
+using Pulsar4X.Orbital;
+using Pulsar4X.Storage;
 
 namespace Pulsar4X.Energy
 {
@@ -32,6 +35,88 @@ namespace Pulsar4X.Energy
         /// <summary>Seed bid for one unit of a good: <see cref="BidShare"/> of the unrounded ask.</summary>
         public static decimal SeedBid(Game? game, FactionDataStore data, string cargoId)
             => Round(Credits(game, EmbodiedEnergy.For(data).PerUnit(cargoId)) * BidShare(game));
+
+        /// <summary>Seed ask at a depot: (E + <see cref="DepotDeliveryKWhPerKg"/> x kg per unit) priced, to the cent.</summary>
+        public static decimal DepotSeedAsk(Game? game, FactionDataStore data, string cargoId)
+            => Round(Credits(game, DeliveredKWh(game, data, cargoId)));
+
+        /// <summary>Seed bid at a depot: <see cref="BidShare"/> of the unrounded delivered ask.</summary>
+        public static decimal DepotSeedBid(Game? game, FactionDataStore data, string cargoId)
+            => Round(Credits(game, DeliveredKWh(game, data, cargoId)) * BidShare(game));
+
+        /// <summary>Embodied energy of one unit plus its delivery to the depot, kWh.</summary>
+        public static double DeliveredKWh(Game? game, FactionDataStore data, string cargoId)
+        {
+            var energy = EmbodiedEnergy.For(data);
+            double e = energy.PerUnit(cargoId);
+            double perKg = DepotDeliveryKWhPerKg(game, data);
+            if (perKg > 0 && data.CargoGoods.GetAny(cargoId) is ICargoable good && good.MassPerUnit > 0)
+                e += perKg * good.MassPerUnit;
+            else if (perKg > 0 && data.LockedCargoGoods.GetAny(cargoId) is ICargoable locked && locked.MassPerUnit > 0)
+                e += perKg * locked.MassPerUnit;
+            return e;
+        }
+
+        /// <summary>
+        /// The stock asteroid miner (default-ship-design-miner, "Prospector I" in the warp-tech start)
+        /// as move-cost numbers, with its starting methalox: what hauls belt ore to a depot. Kept as
+        /// numbers because a depot is priced before any ship exists; a test checks them against the
+        /// live ship.
+        /// </summary>
+        public static MoveCostShip ReferenceHauler => new()
+        {
+            DryMass_kg = 45394,
+            FuelMass_kg = 2393601,
+            FuelType = "methalox",
+            ExhaustVelocity = 3615,
+            FuelBurnRate = 600,
+            ThrustInNewtons = 2169000,
+            HasWarp = true,
+            WarpPower = 2000000,
+            WarpEnergyType = EmbodiedEnergy.ElectricityId,
+            BubbleCreationCost = 4000000.0 / 3,
+            BubbleSustainCost = 15,
+            BubbleCollapseCost = 0,
+            Coupling = 0.0025,
+            BleedFraction = 0.5,
+            EnergyStored = 0,
+            EnergyStoreMax = 3000015,
+            EnergyOutputMax = 15,
+        };
+
+        /// <summary>The reference hauler's general hold, kg (1,000 t of cargo holds).</summary>
+        public const double ReferenceHold_kg = 1_000_000;
+
+        /// <summary>
+        /// The legs of the reference delivery (game settings DepotDelivery*): a warp of
+        /// <see cref="GameSettings.DepotDeliveryDistance_AU"/> in the Sun's pull at
+        /// <see cref="GameSettings.DepotDeliverySunDistance_AU"/>, back with a full hold, and the same
+        /// leg out empty when it is a round trip. Empty with no distance.
+        /// </summary>
+        public static List<MoveCost> DepotDeliveryLegs(Game? game)
+        {
+            var legs = new List<MoveCost>();
+            var settings = game?.Settings;
+            double au = NonNegative(settings?.DepotDeliveryDistance_AU, 0.2);
+            if (!(au > 0))
+                return legs;
+            double sunAu = NonNegative(settings?.DepotDeliverySunDistance_AU, 2.77);
+            double radial = settings?.DepotDeliveryRadial is double r && double.IsFinite(r) ? Math.Clamp(r, -1, 1) : 0;
+            double g = sunAu > 0
+                ? GeneralMath.StandardGravitationalParameter(UniversalConstants.Units.SolarMassInKG)
+                  / Math.Pow(sunAu * UniversalConstants.Units.MetersPerAu, 2)
+                : 0;
+            double distance = au * UniversalConstants.Units.MetersPerAu;
+            var full = ReferenceHauler with { CargoMass_kg = ReferenceHold_kg };
+            legs.Add(MoveCostCalculator.Warp(full, distance, g, radial));
+            if (settings?.DepotDeliveryRoundTrip ?? true)
+                legs.Add(MoveCostCalculator.Warp(ReferenceHauler, distance, g, radial));
+            return legs;
+        }
+
+        /// <summary>Delivery to a depot per kg of cargo, kWh/kg: <see cref="FreightKWhPerKg(IEnumerable{MoveCost}, double, FactionDataStore)"/> of <see cref="DepotDeliveryLegs"/> over a full hold.</summary>
+        public static double DepotDeliveryKWhPerKg(Game? game, FactionDataStore data)
+            => FreightKWhPerKg(DepotDeliveryLegs(game), ReferenceHold_kg, data);
 
         /// <summary>
         /// Freight energy of a move per kg of cargo, kWh/kg (the move-cost hook): reaction fuel burnt x

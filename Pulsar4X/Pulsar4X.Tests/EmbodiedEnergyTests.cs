@@ -59,34 +59,39 @@ public class EmbodiedEnergyTests
     FactionInfoDB Info => _player.GetDataBlob<FactionInfoDB>();
     EmbodiedEnergy E => EmbodiedEnergy.For(Info.Data);
 
-    /// <summary>Hand-worked kWh per unit of every good a stock design uses (materials.json, 0.05 kWh/kg mining).</summary>
+    static double X(string mineral) => EnergyPriceOracle.Ext(mineral);
+    static double Plastic => (12 + 1 * X("hydrocarbons")) / 2;
+
+    /// <summary>Hand-worked kWh per unit of every good a stock design uses (materials.json recipes, minerals.json extraction).</summary>
     static readonly Dictionary<string, double> HandE = new()
     {
-        ["stainless-steel"] = EnergyPriceOracle.Steel_kWh,                          // (70 + 100 x 0.05) / 100
-        ["methalox"] = EnergyPriceOracle.Methalox_kWh,                              // (4250 + 4250 x 0.05) / 8500
-        ["rp-1"] = (2975 + 4250 * 0.05) / 8500,
-        ["hydrolox"] = (19550 + 4250 * 0.05) / 8500,
-        ["ntp"] = (1200 + 101 * 0.05) / 100,
-        ["plastic"] = (12 + 1 * 0.05) / 2,
-        ["fissile-fuels"] = (400 + 110 * 0.05) / 1,
-        ["electronics"] = (1000 + 2 * 0.05 + 2 * ((12 + 0.05) / 2) + 1 * 0.05 + 1 * 0.05) / 5,
-        ["space-crete"] = (50 + 100 * 0.05) / 100,
+        ["stainless-steel"] = EnergyPriceOracle.Steel_kWh,     // (70 + 88 Fe + 11 Cr + 1 HC) / 100
+        ["methalox"] = EnergyPriceOracle.Methalox_kWh,         // (4250 + 4250 HC) / 8500
+        ["rp-1"] = (2975 + 4250 * X("hydrocarbons")) / 8500,
+        ["hydrolox"] = (19550 + 4250 * X("hydrocarbons")) / 8500,
+        ["ntp"] = (1200 + 100 * X("hydrocarbons") + 1 * X("fissionables")) / 100,
+        ["plastic"] = Plastic,
+        ["fissile-fuels"] = (400 + 100 * X("fissionables") + 10 * X("hydrocarbons")) / 1,
+        ["electronics"] = (1000 + 2 * X("copper") + 2 * Plastic + 1 * X("aluminium") + 1 * X("silicon")) / 5,
+        ["space-crete"] = (50 + 70 * X("regolith") + 10 * X("silicon") + 10 * X("aluminium") + 5 * X("iron") + 5 * X("water")) / 100,
     };
 
-    static double Hand(string id) => HandE.TryGetValue(id, out var e) ? e : EnergyPriceOracle.Mineral_kWh;
+    static double Hand(string id) => HandE.TryGetValue(id, out var e) ? e : X(id);
 
     // ---- E by hand ----
 
     [Test]
     public void SteelAndMethalox_MatchTheHandCalculation()
     {
-        Assert.That(E.PerUnit("stainless-steel"), Is.EqualTo(0.75).Within(1e-12), "(70 kWh + 100 kg ore x 0.05) / 100");
-        Assert.That(E.PerUnit("methalox"), Is.EqualTo(0.525).Within(1e-12), "(4,250 kWh + 4,250 kg hydrocarbons x 0.05) / 8,500");
-        Assert.That(E.PerUnit("iron"), Is.EqualTo(0.05).Within(1e-12), "extraction only");
-        Assert.That(E.PerUnit("water"), Is.EqualTo(0.05).Within(1e-12));
+        // (70 kWh + 88 x 0.388 iron + 11 x 0.8 chromium + 1 x 0.3 hydrocarbons) / 100
+        Assert.That(E.PerUnit("stainless-steel"), Is.EqualTo(1.13244).Within(1e-12));
+        // (4,250 kWh + 4,250 kg hydrocarbons x 0.3) / 8,500
+        Assert.That(E.PerUnit("methalox"), Is.EqualTo(0.65).Within(1e-12));
+        Assert.That(E.PerUnit("iron"), Is.EqualTo(0.388).Within(1e-12), "extraction only");
+        Assert.That(E.PerUnit("water"), Is.EqualTo(0.188).Within(1e-12));
         foreach (var (id, e) in HandE)
             Assert.That(E.PerUnit(id), Is.EqualTo(e).Within(1e-9), id);
-        Assert.That(E.PerKg("methalox"), Is.EqualTo(0.525).Within(1e-12), "1 kg a unit");
+        Assert.That(E.PerKg("methalox"), Is.EqualTo(0.65).Within(1e-12), "1 kg a unit");
         Assert.That(E.PerUnit(EmbodiedEnergy.ElectricityId), Is.EqualTo(1 / 3600.0).Within(1e-15), "a unit of electricity is 1 kJ");
         Assert.That(E.PerUnit("no-such-good"), Is.EqualTo(0));
         Assert.That(E.Unknown, Does.Contain("no-such-good"));
@@ -160,10 +165,10 @@ public class EmbodiedEnergyTests
         // Locked goods are priced too (a faction can be offered what it cannot make yet).
         var locked = new FactionDataStore(_store);
         Assert.That(locked.CargoGoods.Contains("methalox"), Is.False);
-        Assert.That(EmbodiedEnergy.For(locked).PerUnit("methalox"), Is.EqualTo(0.525).Within(1e-12));
-        // A mineral may carry its own extraction energy.
+        Assert.That(EmbodiedEnergy.For(locked).PerUnit("methalox"), Is.EqualTo(EnergyPriceOracle.Methalox_kWh).Within(1e-12));
+        // A mineral's extraction energy comes from the data and can be changed.
         var water = (Mineral)locked.LockedCargoGoods.GetAny("water")!;
-        Assert.That(water.ExtractionEnergy, Is.Null);
+        Assert.That(water.ExtractionEnergy, Is.EqualTo(EnergyPriceOracle.Water_kWh));
         water.ExtractionEnergy = 0.1;
         EmbodiedEnergy.Invalidate(locked);
         Assert.That(EmbodiedEnergy.For(locked).PerUnit("water"), Is.EqualTo(0.1).Within(1e-12));
@@ -177,49 +182,101 @@ public class EmbodiedEnergyTests
         Assert.That(_game.Settings.CreditsPerKWh, Is.EqualTo(1.0));
         Assert.That(_game.Settings.PriceMarkup, Is.EqualTo(4.0));
         Assert.That(_game.Settings.SeedBidShare, Is.EqualTo(0.5));
-        Assert.That(EnergyPricing.SeedAsk(_game, Info.Data, "stainless-steel"), Is.EqualTo(3.75m), "0.75 kWh x 1 x 5");
-        Assert.That(EnergyPricing.SeedAsk(_game, Info.Data, "methalox"), Is.EqualTo(2.63m), "0.525 x 5 = 2.625");
+        Assert.That(EnergyPricing.SeedAsk(_game, Info.Data, "stainless-steel"), Is.EqualTo(5.66m), "1.13244 kWh x 1 x 5");
+        Assert.That(EnergyPricing.SeedAsk(_game, Info.Data, "methalox"), Is.EqualTo(3.25m), "0.65 x 5, no delivery off a depot");
 
         _game.Settings.CreditsPerKWh = 2;
         _game.Settings.PriceMarkup = 0;
-        Assert.That(EnergyPricing.SeedAsk(_game, Info.Data, "stainless-steel"), Is.EqualTo(1.5m));
-        Assert.That(EnergyPricing.SeedBid(_game, Info.Data, "stainless-steel"), Is.EqualTo(0.75m));
+        Assert.That(EnergyPricing.SeedAsk(_game, Info.Data, "stainless-steel"), Is.EqualTo(2.26m), "1.13244 x 2");
+        Assert.That(EnergyPricing.SeedBid(_game, Info.Data, "stainless-steel"), Is.EqualTo(1.13m));
         _game.Settings.CreditsPerKWh = double.NaN;
         Assert.That(EnergyPricing.CreditsPerKWh(_game), Is.EqualTo(1.0), "a bad setting falls back");
     }
 
-    /// <summary>Today's (pre phase 5) hand-set Ceres prices, CeresStart.cs before this change.</summary>
-    static readonly (string good, string side, decimal before, double kWh)[] CeresBefore =
+    /// <summary>Ceres seeds: the original hand-set price, then phase 5 (3afb7b5c, 0.05 kWh/kg minerals, no delivery).</summary>
+    static readonly (string good, string side, decimal original, decimal phase5)[] CeresBefore =
     {
-        ("methalox", "ask", 3m, EnergyPriceOracle.Methalox_kWh),
-        ("iron", "ask", 2m, EnergyPriceOracle.Mineral_kWh),
-        ("iron", "bid", 1m, EnergyPriceOracle.Mineral_kWh),
-        ("water", "ask", 1m, EnergyPriceOracle.Mineral_kWh),
+        ("methalox", "ask", 3m, 2.63m),
+        ("iron", "ask", 2m, 0.25m),
+        ("iron", "bid", 1m, 0.13m),
+        ("water", "ask", 1m, 0.25m),
     };
 
     [Test]
-    public void CeresSeeds_ComeFromE_MethaloxInTheBand_MineralsBelowIt()
+    public void CeresSeeds_ComeFromE_PlusDelivery_AllInTheBand()
     {
         var (game, depot, data) = PlacedDepot();
         var policy = depot.GetDataBlob<ColonyMarketPolicyDB>();
-        var outside = new List<string>();
-        foreach (var (good, side, before, kWh) in CeresBefore)
+        double delivery = EnergyPriceOracle.Delivery_kWhPerKg(game);
+        Assert.That(delivery, Is.GreaterThan(0));
+        foreach (var (good, side, original, phase5) in CeresBefore)
         {
+            double kWh = (good == "methalox" ? EnergyPriceOracle.Methalox_kWh : EnergyPriceOracle.Ext(good)) + delivery;
             decimal expected = side == "ask" ? EnergyPriceOracle.Ask(game, kWh) : EnergyPriceOracle.Bid(game, kWh);
             decimal now = side == "ask" ? policy.Rows[good].Ask : policy.Rows[good].Bid;
             Assert.That(now, Is.EqualTo(expected), $"{good} {side}");
-            double change = (double)(now / before) - 1;
-            TestContext.Out.WriteLine($"Ceres {good} {side}: E {kWh} kWh, before {before}, after {now} ({change:+0.0%;-0.0%})");
-            if (Math.Abs(change) > 0.5)
-                outside.Add($"{good} {side}");
+            double change = (double)(now / original) - 1;
+            TestContext.Out.WriteLine($"Ceres {good} {side}: E {kWh - delivery:0.####} + delivery {delivery:0.######} kWh; original {original}, phase 5 {phase5}, now {now} ({change:+0.0%;-0.0%})");
+            Assert.That(Math.Abs(change), Is.LessThanOrEqualTo(0.5), $"{good} {side} within +/-50% of the original");
         }
         Assert.That(policy.Rows["methalox"].Bid, Is.EqualTo(0));
         Assert.That(policy.Rows["water"].Bid, Is.EqualTo(0));
-        // Minerals carry extraction energy only (Jon's decision 1 puts ore-to-metal energy in the
-        // refinery), 0.05 kWh/kg against the plan's 3.5 for iron, so they fall well below today's.
-        Assert.That(outside, Is.EquivalentTo(new[] { "iron ask", "iron bid", "water ask" }));
-        Assert.That(CeresStart.LotPrice(game, data), Is.EqualTo(EnergyPriceOracle.LotPrice(game)));
-        TestContext.Out.WriteLine($"Ceres lot price per mineral: before 0.5, after {CeresStart.LotPrice(game, data)}");
+        decimal lot = CeresStart.LotPrice(game, data);
+        Assert.That(lot, Is.EqualTo(EnergyPriceOracle.LotPrice(game)));
+        Assert.That(Math.Abs((double)(lot / 0.5m) - 1), Is.LessThanOrEqualTo(0.5));
+        TestContext.Out.WriteLine($"Ceres lot price per mineral: original 0.5, phase 5 0.065, now {lot}");
+    }
+
+    [Test]
+    public void ExtractionEnergy_ComesFromTheData_PerMineral()
+    {
+        var data = new FactionDataStore(_store);
+        var e = EmbodiedEnergy.For(data);
+        var fromData = EnergyPriceOracle.ExtractionFromData;
+        Assert.That(fromData.Keys, Is.EquivalentTo(_store.Minerals.Keys), "every mineral has a figure");
+        foreach (var (id, kWh) in fromData)
+        {
+            Assert.That(e.PerUnit(id), Is.EqualTo(kWh).Within(1e-12), id);
+            TestContext.Out.WriteLine($"{id}: {kWh} kWh/kg");
+        }
+        // Loose and shallow is cheap, lean and hard is dear.
+        Assert.That(fromData["regolith"], Is.LessThan(fromData["silicon"]));
+        Assert.That(fromData["water"], Is.LessThan(fromData["iron"]));
+        Assert.That(fromData["water"], Is.GreaterThan(fromData["regolith"]), "ice is cheap, not free: it has to be melted");
+        Assert.That(fromData["iron"], Is.LessThan(fromData["copper"]));
+        Assert.That(fromData["copper"], Is.LessThan(fromData["fissionables"]));
+        Assert.That(fromData["fissionables"], Is.LessThan(fromData["tungsten"]));
+        Assert.That(e.Unknown, Is.Empty);
+    }
+
+    [Test]
+    public void DepotDelivery_IsTheReferenceHaulByHand_AndTunable()
+    {
+        var data = Info.Data;
+        double hand = EnergyPriceOracle.Delivery_kWhPerKg(_game);
+        // 2 x (4e6/3 kJ + 15 kW x 0.2 AU / 22,029 m/s) / 3600 / 1e6 kg
+        Assert.That(hand, Is.EqualTo(0.012059).Within(1e-6));
+        Assert.That(EnergyPricing.DepotDeliveryKWhPerKg(_game, data), Is.EqualTo(hand).Within(1e-12));
+        var legs = EnergyPricing.DepotDeliveryLegs(_game);
+        Assert.That(legs, Has.Count.EqualTo(2));
+        Assert.That(legs.All(l => l.Feasible), Is.True);
+        Assert.That(legs.All(l => l.Mode == MoveCostMode.Warp && l.FuelUsed_kg.Count == 0), Is.True, "warped, no reaction fuel");
+        TestContext.Out.WriteLine($"Delivery: {legs[0].EnergyUsed_kJ / 3600:N1} kWh back full + {legs[1].EnergyUsed_kJ / 3600:N1} kWh out empty"
+            + $" over {EnergyPricing.ReferenceHold_kg:N0} kg = {hand:0.######} kWh/kg = {EnergyPricing.Credits(_game, hand):0.####} credits/kg"
+            + $", {legs[0].Duration_s / 86400:0.0} days a leg");
+
+        // Delivered price = E + delivery, priced once.
+        Assert.That(EnergyPricing.DepotSeedAsk(_game, data, "iron"), Is.EqualTo(EnergyPriceOracle.Ask(_game, 0.388 + hand)));
+
+        _game.Settings.DepotDeliveryRoundTrip = false;
+        Assert.That(EnergyPricing.DepotDeliveryKWhPerKg(_game, data), Is.EqualTo(EnergyPriceOracle.Delivery_kWhPerKg(_game)).Within(1e-12));
+        Assert.That(EnergyPricing.DepotDeliveryKWhPerKg(_game, data), Is.EqualTo(hand / 2).Within(1e-12), "one way, same leg");
+        _game.Settings.DepotDeliveryRoundTrip = true;
+        _game.Settings.DepotDeliveryDistance_AU = 0.4;
+        Assert.That(EnergyPricing.DepotDeliveryKWhPerKg(_game, data), Is.EqualTo(EnergyPriceOracle.Delivery_kWhPerKg(_game)).Within(1e-12));
+        _game.Settings.DepotDeliveryDistance_AU = 0;
+        Assert.That(EnergyPricing.DepotDeliveryKWhPerKg(_game, data), Is.EqualTo(0), "made at the depot: no delivery");
+        Assert.That(EnergyPricing.DepotSeedAsk(_game, data, "iron"), Is.EqualTo(EnergyPricing.SeedAsk(_game, data, "iron")));
     }
 
     [Test]
@@ -228,7 +285,8 @@ public class EmbodiedEnergyTests
         var (game, depot, _) = PlacedDepot();
         MarketHistory.SeedPriorDays(depot);
         var book = depot.GetDataBlob<LogiBaseDB>();
-        foreach (var (good, kWh) in new[] { ("methalox", EnergyPriceOracle.Methalox_kWh), ("iron", EnergyPriceOracle.Mineral_kWh) })
+        double delivery = EnergyPriceOracle.Delivery_kWhPerKg(game);
+        foreach (var (good, kWh) in new[] { ("methalox", EnergyPriceOracle.Methalox_kWh + delivery), ("iron", EnergyPriceOracle.Iron_kWh + delivery) })
         {
             decimal ask = EnergyPriceOracle.Ask(game, kWh);
             decimal bid = good == "iron" ? EnergyPriceOracle.Bid(game, kWh) : 0;
@@ -240,8 +298,6 @@ public class EmbodiedEnergyTests
             foreach (var day in days)
             {
                 Assert.That(day.Close, Is.InRange(Math.Max(0.01m, 0.69m * anchor), 1.31m * anchor + 0.01m), good);
-                if (good == "iron")
-                    Assert.That(day.Close, Is.LessThan(1m), "iron no longer charts in the old 1-2 credit band");
             }
         }
     }
@@ -253,8 +309,9 @@ public class EmbodiedEnergyTests
     {
         var cost = new MoveCost(MoveCostMode.Burn, true, "", "",
             new Dictionary<string, double> { ["methalox"] = 1000 }, 3.6e6, 0, 0, 0, 0, 0);
-        // (1,000 kg x 0.525 kWh/kg + 3.6e6 kJ / 3600) / 10,000 kg
-        double perKg = (1000 * 0.525 + 1000) / 10000.0;
+        // (1,000 kg x E(methalox) kWh/kg + 3.6e6 kJ / 3600) / 10,000 kg
+        double perKg = (1000 * EnergyPriceOracle.Methalox_kWh + 1000) / 10000.0;
+        Assert.That(perKg, Is.EqualTo(0.165).Within(1e-12));
         Assert.That(EnergyPricing.FreightKWhPerKg(cost, 10000, Info.Data), Is.EqualTo(perKg).Within(1e-12));
         Assert.That(EnergyPricing.FreightPerKg(_game, cost, 10000, Info.Data), Is.EqualTo(perKg * 5).Within(1e-12));
         Assert.That(EnergyPricing.FreightKWhPerKg(cost, 0, Info.Data), Is.EqualTo(0), "no cargo, no rate");
@@ -296,9 +353,29 @@ public class EmbodiedEnergyTests
                 + $", warp {cost.EnergyUsed_kJ / 3600:N1} kWh -> {perKg:0.######} kWh/kg = {EnergyPricing.FreightPerKg(game, cost, hold_kg, data):0.######} credits/kg"
                 + $" ({EnergyPricing.FreightPerKg(game, cost, hold_kg, data) * 1000:0.###} credits/t)");
         }
-        // Burn fuel is methalox at 0.525 kWh/kg.
         var burn = MoveCostCalculator.Burn(full, 3000);
         Assert.That(burn.FuelUsed_kg.Keys, Does.Contain("methalox").Or.Contain("rp-1").Or.Contain("hydrolox"));
+
+        // The depot's reference hauler is this ship as it starts, with a full 1,000 t hold.
+        var live = MoveCostShip.FromEntity(prospector);
+        var reference = EnergyPricing.ReferenceHauler;
+        Assert.That(prospector.GetDataBlob<ShipInfoDB>().Design.UniqueID, Is.EqualTo("default-ship-design-miner"));
+        Assert.That(hold_kg, Is.EqualTo(EnergyPricing.ReferenceHold_kg));
+        Assert.That(reference.DryMass_kg, Is.EqualTo(live.DryMass_kg).Within(1e-6));
+        Assert.That(reference.FuelMass_kg, Is.EqualTo(live.FuelMass_kg).Within(1));
+        Assert.That(reference.FuelType, Is.EqualTo(live.FuelType));
+        Assert.That(reference.ExhaustVelocity, Is.EqualTo(live.ExhaustVelocity).Within(1e-6));
+        Assert.That(reference.HasWarp, Is.EqualTo(live.HasWarp));
+        Assert.That(reference.WarpPower, Is.EqualTo(live.WarpPower).Within(1e-6));
+        Assert.That(reference.BubbleCreationCost, Is.EqualTo(live.BubbleCreationCost).Within(1e-6));
+        Assert.That(reference.BubbleSustainCost, Is.EqualTo(live.BubbleSustainCost).Within(1e-9));
+        Assert.That(reference.BubbleCollapseCost, Is.EqualTo(live.BubbleCollapseCost).Within(1e-9));
+        Assert.That(reference.Coupling, Is.EqualTo(live.Coupling).Within(1e-12));
+        Assert.That(reference.BleedFraction, Is.EqualTo(live.BleedFraction).Within(1e-12));
+        Assert.That(reference.EnergyOutputMax, Is.EqualTo(live.EnergyOutputMax).Within(1e-9));
+        Assert.That(reference.EnergyStoreMax, Is.EqualTo(live.EnergyStoreMax).Within(1e-6));
+        var leg = MoveCostCalculator.Warp(full, 0.2 * UniversalConstants.Units.MetersPerAu, sun(2.77), 0);
+        Assert.That(EnergyPricing.DepotDeliveryLegs(game)[0].EnergyUsed_kJ, Is.EqualTo(leg.EnergyUsed_kJ).Within(1e-6 * leg.EnergyUsed_kJ));
     }
 
     (Game game, Entity depot, FactionDataStore data) PlacedDepot()

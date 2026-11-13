@@ -80,6 +80,26 @@ namespace Pulsar4X.Engine
         /// <summary>A seeded bid as a share of its ask (the depot's spread).</summary>
         public double SeedBidShare { get; set; } = 0.5;
 
+        /// <summary>
+        /// Delivery term of a depot's seed prices: the reference hauler's warp leg from the nearest
+        /// plausible source, AU. 0.2 AU is the nearest belt neighbours of Ceres at the start (Sidonia
+        /// 0.15, Princetonia 0.17, Miriam and Adeona 0.18 AU), where asteroid miners fetch ore.
+        /// 0 prices goods produced at the depot itself (no delivery).
+        /// </summary>
+        public double DepotDeliveryDistance_AU { get; set; } = 0.2;
+
+        /// <summary>The Sun's distance the delivery leg is flown at, AU, for the well's pull (Ceres' semi-major axis).</summary>
+        public double DepotDeliverySunDistance_AU { get; set; } = 2.77;
+
+        /// <summary>
+        /// The delivery leg's heading against the outward line (cosine). 0: along the belt, as between
+        /// neighbouring belt bodies at nearly the same distance from the Sun.
+        /// </summary>
+        public double DepotDeliveryRadial { get; set; } = 0.0;
+
+        /// <summary>The hauler flies out empty as well as back full, so delivery is priced as a round trip.</summary>
+        public bool DepotDeliveryRoundTrip { get; set; } = true;
+
         #endregion
 
         #region Network Settings
