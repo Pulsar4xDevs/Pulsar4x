@@ -90,8 +90,9 @@ public static class FactionSpending
         // Background systems run hotloop processors at a tenth of the rate, so the pay run can be days
         // apart: book one line for each unpaid day (at today's crew), never two on one day.
         DateTime first = info.LastCrewPayday.HasValue ? info.LastCrewPayday.Value.Date.AddDays(1) : at.Date;
-        if ((at.Date - first).TotalDays > MaxCatchUpDays)
-            first = at.Date.AddDays(-MaxCatchUpDays);
+        // The loop below is inclusive of both ends, so cap the span at MaxCatchUpDays lines.
+        if ((at.Date - first).TotalDays > MaxCatchUpDays - 1)
+            first = at.Date.AddDays(-(MaxCatchUpDays - 1));
         info.LastCrewPayday = at.Date;
         decimal wage = WagePerDay(game, id);
         long crew = CrewOnPayroll(game, id);

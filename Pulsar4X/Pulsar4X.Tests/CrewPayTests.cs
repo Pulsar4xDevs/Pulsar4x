@@ -115,6 +115,17 @@ public class CrewPayTests
         Assert.That(Wages(Info).Skip(lines).Select(w => w.Date.Date), Is.EqualTo(new[] { Now.Date.AddDays(1), Now.Date.AddDays(2), Now.Date.AddDays(3) }));
     }
 
+    [TestCase(31, 31)]
+    [TestCase(32, 31)]
+    [TestCase(40, 31)]
+    public void PayDay_CatchUp_IsCappedAtMaxCatchUpDays(int gap, int billedDays)
+    {
+        decimal day = FactionSpending.PayDay(_game, Now);
+        int lines = Wages(Info).Count;
+        Assert.That(FactionSpending.PayDay(_game, Now.AddDays(gap)), Is.EqualTo(billedDays * day));
+        Assert.That(Wages(Info).Count - lines, Is.EqualTo(billedDays));
+    }
+
     [Test]
     public void Wages_TakeTheBalanceNegative_WithNoDesertion()
     {
