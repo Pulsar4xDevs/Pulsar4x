@@ -54,6 +54,79 @@ namespace Pulsar4X.Tests
             Assert.That(view.Histogram.Select(h => h.Seconds), Is.EqualTo(new[] { 0, 60 }).AsCollection);
         }
 
+        private Entity AddShip(int factionId, Pulsar4X.Energy.EnergyGenAbilityDB? generator)
+        {
+            var ship = Entity.Create(factionId);
+            var blobs = new List<BaseDataBlob>
+            {
+                new Pulsar4X.Movement.PositionDB { AbsolutePosition = Vector3.Zero },
+                new MassVolumeDB { MassDry = 1000 },
+                new NameDB("Powered", factionId, "Powered"),
+                new Pulsar4X.Ships.ShipInfoDB(),
+            };
+            if (generator != null)
+                blobs.Add(generator);
+            _game.Systems[0].AddEntity(ship, blobs);
+            return ship;
+        }
+
+        [Test]
+        public void ShipPowerView_ShowsGenerationAgainstDemand_ToTheOwnerOnly()
+        {
+            var session = Connect();
+            Assert.That(_game.Factions[session.FactionId].TryGetDataBlob<Pulsar4X.Factions.FactionInfoDB>(out var info), Is.True);
+            var data = info!.Data;
+            var energyGood = data.CargoGoods.GetAll().Values.Concat(data.LockedCargoGoods.GetAll().Values).First();
+
+            var generator = new Pulsar4X.Energy.EnergyGenAbilityDB(_game.TimePulse.GameGlobalDateTime)
+            {
+                EnergyType = energyGood,
+                MaxOutputFromReactor = 300,
+                MaxOutputFromSolar = 100,
+                EnergyStored = new Dictionary<string, double> { [energyGood.UniqueID] = 750 },
+                EnergyStoreMax = new Dictionary<string, double> { [energyGood.UniqueID] = 1000 },
+            };
+            var ship = AddShip(session.FactionId, generator);
+            // Same instant as the generator's last process, so this adds demand without integrating any time.
+            generator.AddDemand(800, _game.TimePulse.GameGlobalDateTime);
+
+            var view = _projector.ProjectEntity(ship, session.FactionId).GetView<ShipPowerView>();
+            Assert.That(view, Is.Not.Null);
+            Assert.That(view!.HasPlant, Is.True);
+            Assert.That(view.Generation_kW, Is.EqualTo(400), "reactor plus solar");
+            Assert.That(view.Demand_kW, Is.EqualTo(800));
+            Assert.That(view.Stored_kJ, Is.EqualTo(750));
+            Assert.That(view.StoreMax_kJ, Is.EqualTo(1000));
+            Assert.That(view.Share, Is.EqualTo(0.5).Within(1e-9));
+
+            Assert.That(_projector.ProjectEntity(ship, _game.GameMasterFaction.Id).GetView<ShipPowerView>(), Is.Null,
+                "ship power must not leak to other factions");
+        }
+
+        [Test]
+        public void ShipPowerView_NoPlantOrNoDraw_ShowsFull()
+        {
+            var session = Connect();
+            Assert.That(_game.Factions[session.FactionId].TryGetDataBlob<Pulsar4X.Factions.FactionInfoDB>(out var info), Is.True);
+            var data = info!.Data;
+            var energyGood = data.CargoGoods.GetAll().Values.Concat(data.LockedCargoGoods.GetAll().Values).First();
+
+            var bare = _projector.ProjectEntity(AddShip(session.FactionId, null), session.FactionId).GetView<ShipPowerView>();
+            Assert.That(bare, Is.EqualTo(new ShipPowerView(0, 0, 0, 0, false)), "an owned ship with no plant still gets a view");
+            Assert.That(bare!.Share, Is.EqualTo(1), "nothing draws power, so the ring shows full");
+
+            var idle = _projector.ProjectEntity(AddShip(session.FactionId, new Pulsar4X.Energy.EnergyGenAbilityDB(_game.TimePulse.GameGlobalDateTime)
+            {
+                EnergyType = energyGood,
+                MaxOutputFromReactor = 50,
+                EnergyStored = new Dictionary<string, double> { [energyGood.UniqueID] = 0 },
+                EnergyStoreMax = new Dictionary<string, double> { [energyGood.UniqueID] = 0 },
+            }), session.FactionId).GetView<ShipPowerView>();
+            Assert.That(idle!.HasPlant, Is.True);
+            Assert.That(idle.Demand_kW, Is.EqualTo(0));
+            Assert.That(idle.Share, Is.EqualTo(1));
+        }
+
         [Test]
         public void EnergyView_is_owner_only()
         {

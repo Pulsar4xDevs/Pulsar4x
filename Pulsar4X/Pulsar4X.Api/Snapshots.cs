@@ -462,6 +462,20 @@ public sealed record EnergyView(
     public IReadOnlyList<EnergyHistogramPoint> Histogram { get; init; } = Array.Empty<EnergyHistogramPoint>();
 }
 
+/// <summary>
+/// A ship's power supply against its current demand, for the entity card's power ring (owner-only).
+/// Projected for every owned ship. A ship with no power plant has HasPlant false and zeros.
+/// Generation_kW is what the plants can give now (a reactor out of fuel gives nothing).
+/// </summary>
+public sealed record ShipPowerView(double Generation_kW, double Demand_kW, double Stored_kJ, double StoreMax_kJ, bool HasPlant) : IComponentView
+{
+    /// <summary>
+    /// Generation over demand, 0..1. A ship that draws nothing (including one with no plant) counts
+    /// as fully powered, the same rule as the colony ring.
+    /// </summary>
+    public double Share => Demand_kW > 0 ? Math.Clamp(Generation_kW / Demand_kW, 0, 1) : 1;
+}
+
 /// <summary>One sample of the energy history; <see cref="Seconds"/> is relative to the start of
 /// the sampling window.</summary>
 public sealed record EnergyHistogramPoint(int Seconds, double Output, double Demand, double Stored);

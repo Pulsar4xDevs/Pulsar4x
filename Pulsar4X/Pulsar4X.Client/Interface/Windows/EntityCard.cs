@@ -830,7 +830,10 @@ namespace Pulsar4X.Client
                     dvValue = Math.Clamp((float)(dv / thrust.MaxDeltaVMps), 0f, 1f);
             }
 
-            float span = indicatorWidth * 4f + radius * 2f;
+            // Owner-only: the projector sends ShipPowerView only to the ship's owner.
+            var power = _entity.GetView<ShipPowerView>();
+            int rings = power != null ? 6 : 5;
+            float span = indicatorWidth * (rings - 1) + radius * 2f;
             float x0 = cursorPos.X + Math.Max(0f, (availWidth - span) * 0.5f) + radius;
 
             DrawRadialIndicator(drawList, new Vector2(x0, centerY),
@@ -843,6 +846,9 @@ namespace Pulsar4X.Client
                 radius, ringThickness, armorValue, "ARMOR", armorText, armorPlaceholder);
             DrawRadialIndicator(drawList, new Vector2(x0 + indicatorWidth * 4f, centerY),
                 radius, ringThickness, 0f, "SHIELD", "N/A", true);
+            if (power != null)
+                PowerRing.DrawAt(drawList, new Vector2(x0 + indicatorWidth * 5f, centerY), radius, ringThickness,
+                    power.Share, _accentColor, PowerRing.TooltipFor(power));
 
             ImGui.InvisibleButton("##statusRow", new Vector2(availWidth, radius * 2f + 24f));
         }

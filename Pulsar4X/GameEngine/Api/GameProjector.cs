@@ -244,6 +244,7 @@ namespace Pulsar4X.Engine.Api
                 ? new WarpAbilityView(wa.MaxSpeed) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Energy.EnergyGenAbilityDB>(out var eg)
                 ? ToEnergyView(eg) : null,
+            (e, f) => e.FactionOwnerID == f && e.HasDataBlob<ShipInfoDB>() ? ToShipPowerView(e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.WarpMovingDB>(out var wm)
                 ? new WarpMovingView(wm.CurrentNonNewtonionVectorMS.Length())
                 {
@@ -334,6 +335,22 @@ namespace Pulsar4X.Engine.Api
                 Epoch = ke.Epoch,
                 StandardGravParameter = ke.StandardGravParameter,
             };
+
+        /// <summary>The ship's power ring: generation the plants can give now against current demand.</summary>
+        private static ShipPowerView ToShipPowerView(Entity ship)
+        {
+            if (!ship.TryGetDataBlob<Pulsar4X.Energy.EnergyGenAbilityDB>(out var energy))
+                return new ShipPowerView(0, 0, 0, 0, false);
+
+            double stored = 0, storeMax = 0;
+            if (energy.EnergyType?.UniqueID is { } energyType)
+            {
+                energy.EnergyStored.TryGetValue(energyType, out stored);
+                energy.EnergyStoreMax.TryGetValue(energyType, out storeMax);
+            }
+            bool hasPlant = energy.MaxOutputFromReactor > 0 || energy.MaxOutputFromSolar > 0 || storeMax > 0;
+            return new ShipPowerView(energy.TotalOutputMax, Math.Max(0, energy.Demand), stored, storeMax, hasPlant);
+        }
 
         private static EnergyView? ToEnergyView(Pulsar4X.Energy.EnergyGenAbilityDB energy)
         {

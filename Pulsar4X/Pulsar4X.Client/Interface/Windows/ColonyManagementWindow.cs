@@ -399,7 +399,6 @@ namespace Pulsar4X.Client
                     DisplayHelpers.PrintRow("Grid storage", Stringify.Energy(power.StoreMax_kJ));
                 ImGui.EndTable();
             }
-            PowerRing.Draw("##powerTabRing", power, Styles.DescriptiveColor);
             if (power.Balance_kW < 0)
                 ImGui.TextColored(PowerDemandColour, "Generation does not cover demand. Lower tiers go short first.");
         }
@@ -600,6 +599,21 @@ namespace Pulsar4X.Client
                 }
 
                 colonyView?.Display(colony.Id);
+
+                // Owner-only: the projector only sends ColonyPowerView to the owner.
+                if(colony.GetView<ColonyPowerView>() is { } power
+                    && ImGui.CollapsingHeader("Power", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    PowerRing.Draw("##summaryPowerRing", power, Styles.DescriptiveColor);
+                    ImGui.SameLine();
+                    ImGui.BeginGroup();
+                    ImGui.TextUnformatted($"Delivered {Stringify.Power(power.Delivered_kW)}");
+                    ImGui.TextUnformatted($"Demand {Stringify.Power(power.Demand_kW)}");
+                    ImGui.PushStyleColor(ImGuiCol.Text, PowerRing.ColourFor(PowerRing.Share(power)));
+                    ImGui.TextUnformatted(PowerRing.WordsFor(PowerRing.Share(power)));
+                    ImGui.PopStyleColor();
+                    ImGui.EndGroup();
+                }
 
                 if(colony.GetView<InfrastructureView>() is { } infrastructure
                     && ImGui.CollapsingHeader("Infrastructure", ImGuiTreeNodeFlags.DefaultOpen))

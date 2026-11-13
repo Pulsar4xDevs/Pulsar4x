@@ -6,8 +6,9 @@ using Pulsar4X.Api;
 namespace Pulsar4X.Client.Interface.Widgets;
 
 /// <summary>
-/// One supply ring for a colony grid: delivered power against demand, in the entity card's
-/// radial style. The colours and words match the Power tab's tier bars.
+/// One supply ring: a colony grid's delivered power against demand, or a ship's generation against
+/// its current demand, in the entity card's radial style. The colours and words match the Power
+/// tab's tier bars. Anything that draws nothing shows full.
 /// </summary>
 public static class PowerRing
 {
@@ -26,7 +27,7 @@ public static class PowerRing
     public static double Share(ColonyPowerView power)
         => power.Demand_kW > 0 ? Math.Clamp(power.Delivered_kW / power.Demand_kW, 0, 1) : 1;
 
-    /// <summary>Draws the ring at the cursor and reserves its space.</summary>
+    /// <summary>Draws a colony's ring at the cursor and reserves its space.</summary>
     public static void Draw(string id, ColonyPowerView power, Vector4 accentColor, float radius = 22f, float ringThickness = 4f)
     {
         double share = Share(power);
@@ -35,8 +36,28 @@ public static class PowerRing
         string tooltip = power.Demand_kW > 0
             ? $"Delivered {Stringify.Power(power.Delivered_kW)} of {Stringify.Power(power.Demand_kW)} demand, {WordsFor(share)}"
             : "Nothing draws power";
-        RadialIndicator.Draw(ImGui.GetWindowDrawList(), center, radius, ringThickness,
-            (float)share, "POWER", $"{share * 100:0}%", false, accentColor, ColourFor(share), tooltip);
+        DrawAt(ImGui.GetWindowDrawList(), center, radius, ringThickness, share, accentColor, tooltip);
         ImGui.InvisibleButton(id, new Vector2((radius + ringThickness) * 2f, (radius + ringThickness) * 2f + ImGui.GetTextLineHeight() + 2f));
+    }
+
+    /// <summary>Hover text for a ship's ring.</summary>
+    public static string TooltipFor(ShipPowerView power)
+    {
+        if (!power.HasPlant)
+            return "No power plant. Nothing draws power";
+        if (power.Demand_kW <= 0)
+            return $"Generation {Stringify.Power(power.Generation_kW)}. Nothing draws power";
+        string text = $"Generation {Stringify.Power(power.Generation_kW)} of {Stringify.Power(power.Demand_kW)} demand, {WordsFor(power.Share)}";
+        if (power.Share < 1 && power.Stored_kJ > 0)
+            text += $"\nBatteries cover the gap while they last ({Stringify.Energy(power.Stored_kJ)} stored)";
+        return text;
+    }
+
+    /// <summary>Draws a ring centred on a point, without reserving space (for a row of gauges).</summary>
+    public static void DrawAt(ImDrawListPtr drawList, Vector2 center, float radius, float ringThickness,
+        double share, Vector4 accentColor, string tooltip)
+    {
+        RadialIndicator.Draw(drawList, center, radius, ringThickness,
+            (float)share, "POWER", $"{share * 100:0}%", false, accentColor, ColourFor(share), tooltip);
     }
 }
