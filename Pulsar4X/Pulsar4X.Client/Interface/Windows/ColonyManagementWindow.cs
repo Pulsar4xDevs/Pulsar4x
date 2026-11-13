@@ -294,7 +294,7 @@ namespace Pulsar4X.Client
         static readonly Vector4 PowerDeliveredColour = PowerRing.FullColour;
         static readonly Vector4 PowerShortfallColour = new(0.9f, 0.2f, 0.2f, 0.35f);
 
-        const string ColonyPowerHowItWorks = "Plants burn fuel from the colony stockpile once a day. In a shortfall, higher tiers are served first and industry, mining and research slow to their tier's share. Batteries are not charged yet.";
+        const string ColonyPowerHowItWorks = "Plants burn fuel from the colony stockpile once a day. In a shortfall, higher tiers are served first and industry, mining and research slow to their tier's share. Grid batteries charge from spare power and cover a shortfall before any tier goes short.";
 
         /// <summary>
         /// The colony power grid: a summary beside 90 days of history, then a stacked demand bar by
