@@ -534,8 +534,28 @@ namespace Pulsar4X.Client
 
                 // Output is the net added to the batteries this step. The old power window's Load
                 // is max output divided by that net, so it is not a percentage and is not shown.
-                if (subject?.GetView<EnergyView>() is { } energy
-                    && ImGui.CollapsingHeader("Power", ImGuiTreeNodeFlags.DefaultOpen))
+                var shipPower = subject?.GetView<ShipPowerView>();
+                var energy = subject?.GetView<EnergyView>();
+                bool powerOpen = (energy != null || shipPower != null)
+                    && ImGui.CollapsingHeader("Power", ImGuiTreeNodeFlags.DefaultOpen);
+                // Owner-only: the projector sends ShipPowerView only to the ship's owner. The ring
+                // lives here and on the entity card; the Power tab shows the bars instead.
+                if (powerOpen && shipPower != null)
+                {
+                    PowerRing.Draw("##shipSummaryPowerRing", shipPower, Styles.DescriptiveColor);
+                    ImGui.SameLine();
+                    ImGui.BeginGroup();
+                    ImGui.PushTextWrapPos(0f);
+                    var (words, colour) = ShipPowerDisplay.State(shipPower);
+                    ImGui.PushStyleColor(ImGuiCol.Text, colour);
+                    ImGui.TextUnformatted(char.ToUpperInvariant(words[0]) + words.Substring(1));
+                    ImGui.PopStyleColor();
+                    ImGui.TextDisabled("Delivered");
+                    ImGui.TextUnformatted($"{Stringify.Power(shipPower.Delivered_kW)} / {Stringify.Power(shipPower.TotalDemand_kW)}");
+                    ImGui.PopTextWrapPos();
+                    ImGui.EndGroup();
+                }
+                if (powerOpen && energy != null)
                 {
                     bool full = energy.StoreMax > 0 && energy.Stored >= energy.StoreMax * 0.999;
                     // The last charge step can leave Output positive after the battery is already full.

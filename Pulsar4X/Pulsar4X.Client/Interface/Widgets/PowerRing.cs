@@ -40,6 +40,26 @@ public static class PowerRing
         ImGui.InvisibleButton(id, new Vector2((radius + ringThickness) * 2f, (radius + ringThickness) * 2f + ImGui.GetTextLineHeight() + 2f));
     }
 
+    /// <summary>
+    /// Draws a ship's Power-tab ring at the cursor and reserves its space: delivered over all demand
+    /// (warp and other loads), amber while the batteries charge and the other loads wait for them.
+    /// </summary>
+    public static void Draw(string id, ShipPowerView power, Vector4 accentColor, float radius = 22f, float ringThickness = 4f)
+    {
+        bool charging = power.LoadsWaitOnCharge;
+        double share = power.SupplyShare;
+        var cursor = ImGui.GetCursorScreenPos();
+        var center = new Vector2(cursor.X + radius + ringThickness, cursor.Y + radius + ringThickness);
+        string tooltip = charging
+            ? $"{Stringify.Power(power.Charging_kW)} is charging the batteries; {Stringify.Power(power.AuxDemand_kW)} of other loads wait until they are full"
+            : power.TotalDemand_kW > 0
+                ? $"Delivered {Stringify.Power(power.Delivered_kW)} of {Stringify.Power(power.TotalDemand_kW)} demand, {WordsFor(share)}"
+                : power.HasPlant ? "Nothing draws power" : "No power plant. Nothing draws power";
+        RadialIndicator.Draw(ImGui.GetWindowDrawList(), center, radius, ringThickness, (float)share,
+            "POWER", $"{share * 100:0}%", false, accentColor, charging ? PartialColour : ColourFor(share), tooltip);
+        ImGui.InvisibleButton(id, new Vector2((radius + ringThickness) * 2f, (radius + ringThickness) * 2f + ImGui.GetTextLineHeight() + 2f));
+    }
+
     /// <summary>Hover text for a ship's ring.</summary>
     public static string TooltipFor(ShipPowerView power)
     {

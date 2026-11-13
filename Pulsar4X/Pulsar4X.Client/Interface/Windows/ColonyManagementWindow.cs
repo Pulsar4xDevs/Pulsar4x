@@ -294,174 +294,209 @@ namespace Pulsar4X.Client
         static readonly Vector4 PowerDeliveredColour = PowerRing.FullColour;
         static readonly Vector4 PowerShortfallColour = new(0.9f, 0.2f, 0.2f, 0.35f);
 
+        const string ColonyPowerHowItWorks = "Plants burn fuel from the colony stockpile once a day. In a shortfall, higher tiers are served first and industry, mining and research slow to their tier's share. Batteries are not charged yet.";
+
         /// <summary>
-        /// The colony power grid: a summary beside 90 days of history, then demand grouped by tier
-        /// in serving order, then generation and storage, and plant fuel.
+        /// The colony power grid: a summary beside 90 days of history, then a stacked demand bar by
+        /// tier with one compact row per tier, then a stacked generation bar with one row per plant
+        /// (PowerBars, shared with the ship Power tab).
         /// </summary>
         private static void DisplayPower(ColonyPowerView power)
         {
-            ImGui.TextWrapped("Plants burn fuel from the colony stockpile once a day. In a shortfall, higher tiers are served first and industry, mining and research slow to their tier's share. Batteries are not charged yet.");
-            ImGui.Separator();
-
             if (ImGui.BeginTable("PowerTop", 2, ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Summary", ImGuiTableColumnFlags.WidthFixed, 260f);
+                ImGui.TableSetupColumn("Summary", ImGuiTableColumnFlags.WidthFixed, 230f);
                 ImGui.TableSetupColumn("History", ImGuiTableColumnFlags.WidthStretch);
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
                 PowerSummary(power);
                 ImGui.TableNextColumn();
-                PowerHistoryChart(power.History, new Vector2(Math.Max(200f, ImGui.GetContentRegionAvail().X), 180f));
+                PowerHistoryChart(power.History, new Vector2(Math.Max(200f, ImGui.GetContentRegionAvail().X), 150f));
                 ImGui.EndTable();
             }
 
-            ImGui.SeparatorText("Demand by tier (served in this order)");
+            ImGui.SeparatorText("Demand by tier (served top first)");
             PowerTiers(power);
 
             ImGui.SeparatorText("Generation and storage");
-            if (power.Plants.Count == 0)
-                ImGui.TextDisabled("No power plants.");
-            else if (ImGui.BeginTable("PowerPlants", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
-            {
-                ImGui.TableSetupColumn("Plant");
-                ImGui.TableSetupColumn("Kind");
-                ImGui.TableSetupColumn("Count");
-                ImGui.TableSetupColumn("Output");
-                ImGui.TableSetupColumn("Fuel");
-                ImGui.TableHeadersRow();
-                foreach (var p in power.Plants)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TableNextColumn();
-                    ImGui.Text(p.Name);
-                    ImGui.TableNextColumn();
-                    ImGui.Text(p.Kind);
-                    ImGui.TableNextColumn();
-                    ImGui.Text(p.Count.ToString());
-                    ImGui.TableNextColumn();
-                    if (p.Kind == "Battery")
-                        ImGui.Text(Stringify.Energy(p.Store_kJ));
-                    else
-                        ImGui.Text($"{Stringify.Power(p.Output_kW)} / {Stringify.Power(p.Nameplate_kW)}");
-                    if (p.Note != null)
-                    {
-                        ImGui.SameLine();
-                        ImGui.TextColored(new Vector4(1f, 0.6f, 0.2f, 1f), "(!)");
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(p.Note);
-                    }
-                    ImGui.TableNextColumn();
-                    ImGui.Text(p.FuelName == null ? "" : $"{p.FuelName}, {Stringify.Mass(p.FuelAtFull_kgPerDay)}/day");
-                }
-                ImGui.EndTable();
-            }
-
-            if (power.Fuel.Count > 0)
-            {
-                ImGui.SeparatorText("Plant fuel");
-                if (ImGui.BeginTable("PowerFuel", 4, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
-                {
-                    ImGui.TableSetupColumn("Fuel");
-                    ImGui.TableSetupColumn("In stock");
-                    ImGui.TableSetupColumn("Burnt last day");
-                    ImGui.TableSetupColumn("Lasts");
-                    ImGui.TableHeadersRow();
-                    foreach (var f in power.Fuel)
-                    {
-                        ImGui.TableNextRow();
-                        ImGui.TableNextColumn();
-                        ImGui.Text(f.FuelName);
-                        ImGui.TableNextColumn();
-                        ImGui.Text(Stringify.Mass(f.Stock_kg));
-                        ImGui.TableNextColumn();
-                        ImGui.Text(Stringify.Mass(f.BurntLastDay_kg));
-                        ImGui.TableNextColumn();
-                        ImGui.Text(f.RunwayDays is { } days ? $"{days:N0} days" : "-");
-                    }
-                    ImGui.EndTable();
-                }
-            }
+            PowerPlants(power);
         }
 
         private static void PowerSummary(ColonyPowerView power)
         {
-            if (ImGui.BeginTable("PowerSummary", 2, ImGuiTableFlags.SizingFixedFit))
-            {
-                DisplayHelpers.PrintRow("Demand", Stringify.Power(power.Demand_kW));
-                DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW),
-                    tooltipTwo: "What the plants can give now");
-                DisplayHelpers.PrintRow("Running at", Stringify.Power(power.Dispatched_kW),
-                    tooltipTwo: "Average plant output in the last daily pass");
-                DisplayHelpers.PrintRow("Delivered", Stringify.Power(power.Delivered_kW),
-                    tooltipTwo: $"After {(1 - power.GridEfficiency) * 100:0.#}% grid loss");
-                DisplayHelpers.PrintRow("Balance", (power.Balance_kW < 0 ? "-" : "+") + Stringify.Power(Math.Abs(power.Balance_kW)));
-                if (power.StoreMax_kJ > 0)
-                    DisplayHelpers.PrintRow("Grid storage", Stringify.Energy(power.StoreMax_kJ));
-                ImGui.EndTable();
-            }
+            double share = PowerRing.Share(power);
+            ImGui.PushStyleColor(ImGuiCol.Text, PowerRing.ColourFor(share));
+            string words = PowerRing.WordsFor(share);
+            ImGui.TextUnformatted(char.ToUpperInvariant(words[0]) + words.Substring(1));
+            ImGui.PopStyleColor();
+            ImGui.SameLine();
+            ImGui.TextDisabled("[?]");
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(ColonyPowerHowItWorks);
+
+            // PrintRow uses the Columns API (a nested table would not show it).
+            ImGui.Columns(2, "PowerSummaryCols", false);
+            ImGui.SetColumnWidth(0, 96f);
+            DisplayHelpers.PrintRow("Demand", Stringify.Power(power.Demand_kW));
+            DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW),
+                tooltipTwo: "What the plants can give now");
+            DisplayHelpers.PrintRow("Running at", Stringify.Power(power.Dispatched_kW),
+                tooltipTwo: "Average plant output in the last daily pass");
+            DisplayHelpers.PrintRow("Delivered", Stringify.Power(power.Delivered_kW),
+                tooltipTwo: $"After {(1 - power.GridEfficiency) * 100:0.#}%% grid loss");
+            DisplayHelpers.PrintRow("Balance", (power.Balance_kW < 0 ? "-" : "+") + Stringify.Power(Math.Abs(power.Balance_kW)),
+                separator: power.StoreMax_kJ > 0);
+            if (power.StoreMax_kJ > 0)
+                DisplayHelpers.PrintRow("Grid storage", Stringify.Energy(power.StoreMax_kJ), separator: false);
+            ImGui.Columns(1);
             if (power.Balance_kW < 0)
-                ImGui.TextColored(PowerDemandColour, "Generation does not cover demand. Lower tiers go short first.");
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, PowerDemandColour);
+                ImGui.PushTextWrapPos(0f);
+                ImGui.TextUnformatted("Generation does not cover demand. Lower tiers go short first.");
+                ImGui.PopTextWrapPos();
+                ImGui.PopStyleColor();
+            }
         }
 
-        /// <summary>One header per tier with a supply bar, then that tier's facilities.</summary>
+        /// <summary>One stacked bar of demand by tier (hatched where unmet), then one compact row per tier; facilities on hover or click.</summary>
         private static void PowerTiers(ColonyPowerView power)
         {
-            bool any = false;
+            var segments = new List<PowerSegment>();
+            var rows = new List<PowerRow>();
             foreach (var tier in power.Tiers.OrderBy(t => t.TierRank))
             {
                 var consumers = power.Consumers.Where(c => c.TierRank == tier.TierRank).ToList();
                 if (tier.Demand_kW <= 0 && consumers.Count == 0)
                     continue;
-                any = true;
 
                 double share = Math.Clamp(tier.Satisfaction, 0, 1);
-                Vector4 colour = PowerRing.ColourFor(share);
+                Vector4 chip = PowerBars.GroupColour(tier.TierRank - 1);
+                Vector4 state = PowerRing.ColourFor(share);
+                string words = PowerRing.WordsFor(share);
+                segments.Add(new PowerSegment(tier.Tier, tier.Demand_kW, share, chip,
+                    $"{tier.Tier}: {Stringify.Power(tier.Demand_kW)}, {words}"));
 
-                ImGui.PushStyleColor(ImGuiCol.PlotHistogram, colour);
-                ImGui.ProgressBar((float)share, new Vector2(80f, 0f), "");
-                ImGui.PopStyleColor();
-                ImGui.SameLine();
-                ImGui.TextUnformatted($"{tier.Tier} · {Stringify.Power(tier.Demand_kW)} · ");
-                ImGui.SameLine(0f, 0f);
-                ImGui.PushStyleColor(ImGuiCol.Text, colour);
-                ImGui.TextUnformatted(PowerRing.WordsFor(share));
-                ImGui.PopStyleColor();
-
-                if (consumers.Count == 0)
-                    continue;
-                if (ImGui.BeginTable("PowerTier" + tier.TierRank, 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+                string tip = $"{tier.Tier}: {Stringify.Power(tier.Demand_kW)} demand, {words} (tier {tier.TierRank})";
+                if (consumers.Any(c => c.DesignId == "life-support"))
+                    tip += $"\n{power.LifeSupportColonists:N0} colonists: a base draw per person, more on hostile worlds";
+                if (consumers.Any(c => c.Nameplate_kW > c.Draw_kW + 1e-6))
+                    tip += "\nProduction draws its jobs' build energy, up to the nameplate. Idle, it draws a tenth of the nameplate.";
+                if (consumers.Any(c => c.DesignId == "scrapping"))
+                    tip += "\nScrapping: facility upgrades taking a site-built facility apart.";
+                rows.Add(new PowerRow
                 {
-                    ImGui.TableSetupColumn("Facility");
-                    ImGui.TableSetupColumn("Count");
-                    ImGui.TableSetupColumn("Draw");
-                    ImGui.TableHeadersRow();
-                    foreach (var c in consumers)
-                    {
-                        ImGui.TableNextRow();
-                        ImGui.TableNextColumn();
-                        ImGui.Text(c.Name);
-                        if (c.DesignId == "life-support" && ImGui.IsItemHovered())
-                            ImGui.SetTooltip($"{power.LifeSupportColonists:N0} colonists: a base draw per person, more on hostile worlds");
-                        ImGui.TableNextColumn();
-                        ImGui.Text(c.DesignId == "life-support" ? "" : c.Count.ToString());
-                        ImGui.TableNextColumn();
-                        ImGui.Text(Stringify.Power(c.Draw_kW));
-                        if (c.Nameplate_kW > c.Draw_kW + 1e-6)
-                        {
-                            ImGui.SameLine();
-                            ImGui.TextDisabled("of " + Stringify.Power(c.Nameplate_kW));
-                            if (ImGui.IsItemHovered())
-                                ImGui.SetTooltip("Production draws its jobs' build energy, up to the nameplate.\nIdle, it draws a tenth of the nameplate.");
-                        }
-                        if (c.DesignId == "scrapping" && ImGui.IsItemHovered())
-                            ImGui.SetTooltip("Facility upgrades taking a site-built facility apart.");
-                    }
-                    ImGui.EndTable();
-                }
+                    Id = tier.TierRank.ToString(),
+                    Chip = chip,
+                    Name = tier.Tier,
+                    Value = Stringify.Power(tier.Demand_kW),
+                    Percent = PowerBars.Percent(tier.Demand_kW, power.Demand_kW),
+                    Fill = (float)share,
+                    FillColour = state,
+                    Trailing = words,
+                    TrailingColour = state,
+                    Tooltip = tip,
+                    Detail = consumers.Select(c => (
+                        c.DesignId == "life-support" ? c.Name : $"{c.Count} x {c.Name}",
+                        Stringify.Power(c.Draw_kW) + (c.Nameplate_kW > c.Draw_kW + 1e-6 ? " of " + Stringify.Power(c.Nameplate_kW) : ""))).ToList(),
+                });
             }
-            if (!any)
+            if (rows.Count == 0)
+            {
                 ImGui.TextDisabled("Nothing on this colony draws power.");
+                return;
+            }
+            PowerBars.StackedBar("##colonyDemandBar", segments, power.Demand_kW);
+            PowerBars.Rows("##colonyTiers", rows);
         }
+
+        /// <summary>A stacked bar of plant output (grey for idle capacity) with a demand marker, then one row per plant with its fuel inline.</summary>
+        private static void PowerPlants(ColonyPowerView power)
+        {
+            if (power.Plants.Count == 0)
+            {
+                ImGui.TextDisabled("No power plants.");
+                return;
+            }
+            var generators = power.Plants.Where(p => p.Kind != "Battery").ToList();
+            double nameplate = generators.Sum(p => p.Nameplate_kW);
+            double output = generators.Sum(p => p.Output_kW);
+            var segments = new List<PowerSegment>();
+            foreach (var p in generators)
+                segments.Add(new PowerSegment(p.Name, p.Output_kW, 1, PowerBars.SourceColour(p.Kind),
+                    $"{p.Name}: {Stringify.Power(p.Output_kW)} of {Stringify.Power(p.Nameplate_kW)}"));
+            if (nameplate > output)
+                segments.Add(new PowerSegment("Idle", nameplate - output, 0, PowerBars.UnservedColour,
+                    $"{Stringify.Power(nameplate - output)} installed but not available now"));
+            if (generators.Count > 0)
+                PowerBars.StackedBar("##colonyGenBar", segments, Math.Max(nameplate, power.Demand_kW),
+                    marker_kW: power.Demand_kW > 0 ? power.Demand_kW : null, markerTooltip: $"Demand {Stringify.Power(power.Demand_kW)}");
+
+            var rows = new List<PowerRow>();
+            var shownFuel = new HashSet<string>();
+            foreach (var p in power.Plants)
+            {
+                string name = p.Count > 1 ? $"{p.Name} x{p.Count}" : p.Name;
+                if (p.Kind == "Battery")
+                {
+                    rows.Add(new PowerRow
+                    {
+                        Id = p.DesignId,
+                        Chip = PowerBars.SourceColour(p.Kind),
+                        Name = name,
+                        Value = Stringify.Energy(p.Store_kJ),
+                        Trailing = "storage",
+                        Tooltip = $"{p.Name}: {Stringify.Energy(p.Store_kJ)} of grid storage" + (p.Note != null ? "\n" + p.Note : ""),
+                    });
+                    continue;
+                }
+                var fuel = p.FuelName == null ? null : power.Fuel.FirstOrDefault(f => f.FuelName == p.FuelName);
+                if (fuel != null)
+                    shownFuel.Add(fuel.FuelId);
+                string tip = $"{p.Name} ({p.Kind}): {Stringify.Power(p.Output_kW)} of {Stringify.Power(p.Nameplate_kW)}";
+                if (p.FuelName != null)
+                    tip += $"\n{p.FuelName}: {Stringify.Mass(p.FuelAtFull_kgPerDay)}/day at full output";
+                if (fuel != null)
+                    tip += "\n" + FuelLongText(fuel);
+                if (p.Note != null)
+                    tip += "\n" + p.Note;
+                rows.Add(new PowerRow
+                {
+                    Id = p.DesignId,
+                    Chip = PowerBars.SourceColour(p.Kind),
+                    Name = name,
+                    Value = Stringify.Power(p.Output_kW),
+                    Percent = PowerBars.Percent(p.Output_kW, power.Generation_kW),
+                    Fill = p.Nameplate_kW > 0 ? (float)Math.Clamp(p.Output_kW / p.Nameplate_kW, 0, 1) : 0f,
+                    FillColour = PowerBars.SourceColour(p.Kind),
+                    Trailing = p.Note ?? (fuel != null ? FuelShortText(fuel) : p.Kind == "Solar" ? "sunlight" : p.FuelName ?? ""),
+                    TrailingColour = p.Note != null ? PowerDemandColour : null,
+                    Tooltip = tip,
+                });
+            }
+            // A stocked fuel no plant names (e.g. after the plant was removed).
+            foreach (var f in power.Fuel.Where(f => !shownFuel.Contains(f.FuelId)))
+            {
+                rows.Add(new PowerRow
+                {
+                    Id = "fuel-" + f.FuelId,
+                    Chip = Styles.DescriptiveColor,
+                    Name = f.FuelName,
+                    Value = Stringify.Mass(f.Stock_kg),
+                    Trailing = "in stock",
+                    Tooltip = FuelLongText(f),
+                });
+            }
+            PowerBars.Rows("##colonyPlants", rows);
+        }
+
+        /// <summary>"Fissile fuels, 359 kg, 730 d" for the row.</summary>
+        private static string FuelShortText(ColonyPowerFuelRow f)
+            => $"{f.FuelName}, {Stringify.Mass(f.Stock_kg, "0.#")}" + (f.RunwayDays is { } d ? $", {d:N0} d" : "");
+
+        private static string FuelLongText(ColonyPowerFuelRow f)
+            => $"In stock {Stringify.Mass(f.Stock_kg)}; burnt last day {Stringify.Mass(f.BurntLastDay_kg)}; "
+               + (f.RunwayDays is { } d ? $"lasts {d:N0} days at that burn" : "nothing burnt, so no runway");
 
         /// <summary>
         /// Demand, generation and delivered power over the stored days, drawn with the window draw list.

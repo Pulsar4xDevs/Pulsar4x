@@ -9,9 +9,10 @@ using Pulsar4X.Client.Interface.Widgets;
 namespace Pulsar4X.Client
 {
     /// <summary>
-    /// The ship window's Power tab, laid out like the colony Power tab: a summary with the supply ring
-    /// beside a short battery history, then the sources, then the loads by kind with a supply bar each.
-    /// Reads only Api views (ShipPowerView, EnergyView); both are owner-only.
+    /// The ship window's Power tab, laid out like the colony Power tab: a summary beside a short battery
+    /// history, then a stacked generation bar with one compact row per source, then a stacked demand
+    /// bar with one compact row per load group (PowerBars). The supply ring lives on the ship Summary
+    /// tab and the entity card. Reads only Api views (ShipPowerView, EnergyView); both are owner-only.
     /// </summary>
     public static class ShipPowerDisplay
     {
@@ -19,63 +20,53 @@ namespace Pulsar4X.Client
         static readonly Vector4 FlowColour = new(1f, 0.6f, 0.2f, 1f);
         static readonly Vector4 WarnColour = new(1f, 0.6f, 0.2f, 1f);
 
+        const string HowItWorks = "Solar and RTGs carry the load first, then the reactor, then fuel cells. Warp and charging are served first; sensors and other loads run on spare output once the batteries are full.";
+
         public static void Display(ShipPowerView power, EnergyView? energy, Vector4 accentColour)
         {
-            ImGui.TextWrapped("Solar and RTGs carry the load first, then the reactor, then fuel cells. Warp and charging are served first; sensors and other loads run on spare output once the batteries are full.");
-            ImGui.Separator();
-
             if (ImGui.BeginTable("ShipPowerTop", 2, ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Summary", ImGuiTableColumnFlags.WidthFixed, 280f);
+                ImGui.TableSetupColumn("Summary", ImGuiTableColumnFlags.WidthFixed, 230f);
                 ImGui.TableSetupColumn("History", ImGuiTableColumnFlags.WidthStretch);
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                Summary(power, accentColour);
+                Summary(power);
                 ImGui.TableNextColumn();
-                History(energy, new Vector2(Math.Max(200f, ImGui.GetContentRegionAvail().X), 150f));
+                History(energy, new Vector2(Math.Max(160f, ImGui.GetContentRegionAvail().X), 150f));
                 ImGui.EndTable();
             }
 
-            ImGui.SeparatorText("Sources (in dispatch order)");
+            ImGui.SeparatorText("Sources");
             Sources(power);
 
-            ImGui.SeparatorText("Loads by kind");
+            ImGui.SeparatorText("Loads");
             Loads(power);
         }
 
-        static void Summary(ShipPowerView power, Vector4 accentColour)
+        /// <summary>State words and colour for the whole ship: charging with loads waiting is amber, not "no power".</summary>
+        public static (string Words, Vector4 Colour) State(ShipPowerView power)
         {
             // Charging with the loads waiting is not a shortage: the plant runs flat out into the
             // batteries, and the engine serves sensors and other loads once they are full.
-            bool charging = power.LoadsWaitOnCharge;
-            Vector4 ringColour = charging ? PowerRing.PartialColour : PowerRing.ColourFor(power.SupplyShare);
-            string words = charging ? "charging batteries" : PowerRing.WordsFor(power.SupplyShare);
+            if (power.LoadsWaitOnCharge)
+                return ("charging batteries", PowerRing.PartialColour);
+            return (PowerRing.WordsFor(power.SupplyShare), PowerRing.ColourFor(power.SupplyShare));
+        }
 
-            const float radius = 26f, thickness = 5f;
-            var cursor = ImGui.GetCursorScreenPos();
-            var centre = new Vector2(cursor.X + radius + thickness, cursor.Y + radius + thickness);
-            string tooltip = charging
-                ? $"{Stringify.Power(power.Charging_kW)} is charging the batteries; {Stringify.Power(power.AuxDemand_kW)} of other loads wait until they are full"
-                : power.TotalDemand_kW > 0
-                    ? $"Delivered {Stringify.Power(power.Delivered_kW)} of {Stringify.Power(power.TotalDemand_kW)} demand, {words}"
-                    : power.HasPlant ? "Nothing draws power" : "No power plant. Nothing draws power";
-            RadialIndicator.Draw(ImGui.GetWindowDrawList(), centre, radius, thickness, (float)power.SupplyShare,
-                "POWER", $"{power.SupplyShare * 100:0}%", false, accentColour, ringColour, tooltip);
-            ImGui.InvisibleButton("##shipPowerRing", new Vector2((radius + thickness) * 2f, (radius + thickness) * 2f + ImGui.GetTextLineHeight() + 2f));
-            ImGui.SameLine();
-            ImGui.BeginGroup();
-            ImGui.PushStyleColor(ImGuiCol.Text, ringColour);
+        static void Summary(ShipPowerView power)
+        {
+            var (words, colour) = State(power);
+            ImGui.PushStyleColor(ImGuiCol.Text, colour);
             ImGui.TextUnformatted(Capitalise(words));
             ImGui.PopStyleColor();
-            if (charging)
-            {
-                ImGui.TextDisabled("Loads wait until full");
-                if (power.FullIn_s is { } full)
-                    ImGui.TextDisabled("Full in " + Duration(full));
-            }
+            ImGui.SameLine();
+            ImGui.TextDisabled("[?]");
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(HowItWorks);
+            if (power.LoadsWaitOnCharge)
+                ImGui.TextDisabled("Loads wait until full" + (power.FullIn_s is { } full ? ", " + Duration(full) : ""));
             if (!power.HasPlant)
                 ImGui.TextDisabled("No power plant");
-            ImGui.EndGroup();
 
             ImGui.Columns(2, "ShipPowerSummaryCols", false);
             ImGui.SetColumnWidth(0, 96f);
@@ -98,6 +89,7 @@ namespace Pulsar4X.Client
                 ImGui.TextWrapped("Generation is below warp demand. The batteries cover the gap while they last.");
         }
 
+        /// <summary>A stacked bar of what each source can give now, grey for decayed or idle capacity, then one row per source.</summary>
         static void Sources(ShipPowerView power)
         {
             if (power.Sources.Count == 0)
@@ -105,41 +97,43 @@ namespace Pulsar4X.Client
                 ImGui.TextDisabled("No power sources on this ship.");
                 return;
             }
-            if (!ImGui.BeginTable("ShipPowerSources", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingFixedFit))
-                return;
-            ImGui.TableSetupColumn("Source", ImGuiTableColumnFlags.WidthStretch, 1.4f);
-            ImGui.TableSetupColumn("Kind");
-            ImGui.TableSetupColumn("#");
-            ImGui.TableSetupColumn("Now / max");
-            ImGui.TableSetupColumn("Fuel or decay", ImGuiTableColumnFlags.WidthStretch, 1f);
-            ImGui.TableHeadersRow();
+            double nameplate = power.Sources.Sum(s => s.Nameplate_kW);
+            double output = power.Sources.Sum(s => s.Output_kW);
+            var segments = new List<PowerSegment>();
+            foreach (var s in power.Sources)
+                segments.Add(new PowerSegment(s.Kind, s.Output_kW, 1, PowerBars.SourceColour(s.Kind),
+                    $"{s.Kind}: {Stringify.Power(s.Output_kW, "0.#")} of {Stringify.Power(power.Generation_kW, "0.#")} available"));
+            if (nameplate > output)
+                segments.Add(new PowerSegment("Unavailable", nameplate - output, 0, PowerBars.UnservedColour,
+                    $"{Stringify.Power(nameplate - output, "0.#")} installed but not available (decay, or no fuel)"));
+            double scale = Math.Max(nameplate, power.TotalDemand_kW);
+            PowerBars.StackedBar("##shipGenBar", segments, scale, marker_kW: power.TotalDemand_kW > 0 ? power.TotalDemand_kW : null,
+                markerTooltip: $"Demand {Stringify.Power(power.TotalDemand_kW)}");
+
+            var rows = new List<PowerRow>();
             foreach (var s in power.Sources)
             {
-                ImGui.TableNextRow();
-                ImGui.TableNextColumn();
-                ImGui.TextWrapped(s.Name);
-                ImGui.TableNextColumn();
-                ImGui.TextUnformatted(s.Kind);
-                if (s.Kind == "Reactor" && ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Fission reactor or steam turbine");
-                ImGui.TableNextColumn();
-                ImGui.TextUnformatted(s.Count.ToString());
-                ImGui.TableNextColumn();
-                ImGui.TextUnformatted($"{Stringify.Power(s.Output_kW, "0.#")} / {Stringify.Power(s.Nameplate_kW, "0.#")}");
+                string tip = s.Name + (s.Kind == "Reactor" ? " (fission reactor or steam turbine)" : "")
+                    + $"\nNow {Stringify.Power(s.Output_kW, "0.#")} of {Stringify.Power(s.Nameplate_kW, "0.#")} installed";
+                if (FuelDetail(s) is { } detail)
+                    tip += "\n" + detail;
                 if (s.Note != null)
+                    tip += "\n" + s.Note;
+                rows.Add(new PowerRow
                 {
-                    ImGui.SameLine();
-                    ImGui.TextColored(WarnColour, "(!)");
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip(s.Note);
-                }
-                ImGui.TableNextColumn();
-                ImGui.TextWrapped(FuelText(s));
-                string? detail = FuelDetail(s);
-                if (detail != null && ImGui.IsItemHovered())
-                    ImGui.SetTooltip(detail);
+                    Id = s.Kind,
+                    Chip = PowerBars.SourceColour(s.Kind),
+                    Name = s.Count > 1 ? $"{s.Kind} x{s.Count}" : s.Kind,
+                    Value = Stringify.Power(s.Output_kW, "0.#"),
+                    Percent = PowerBars.Percent(s.Output_kW, power.Generation_kW),
+                    Fill = s.Nameplate_kW > 0 ? (float)Math.Clamp(s.Output_kW / s.Nameplate_kW, 0, 1) : 0f,
+                    FillColour = PowerBars.SourceColour(s.Kind),
+                    Trailing = s.Note ?? FuelText(s),
+                    TrailingColour = s.Note != null ? WarnColour : null,
+                    Tooltip = tip,
+                });
             }
-            ImGui.EndTable();
+            PowerBars.Rows("##shipSources", rows);
         }
 
         /// <summary>The short cell text, e.g. "600 kg, 15,210 y" or "50% left, t1/2 88 y".</summary>
@@ -167,6 +161,7 @@ namespace Pulsar4X.Client
             return text;
         }
 
+        /// <summary>A stacked demand bar split by load group (hatched where unmet), then one compact row per group.</summary>
         static void Loads(ShipPowerView power)
         {
             if (power.LoadGroups.Count == 0)
@@ -174,10 +169,14 @@ namespace Pulsar4X.Client
                 ImGui.TextDisabled("Nothing on this ship draws power.");
                 return;
             }
+
+            var segments = new List<PowerSegment>();
+            var rows = new List<PowerRow>();
+            int index = 0;
             foreach (var g in power.LoadGroups)
             {
-                double share = g.Satisfaction ?? (g.State == "Partial" ? 0.5 : g.State == "No power" ? 0 : 1);
-                Vector4 colour = g.State switch
+                Vector4 chip = PowerBars.GroupColour(index++);
+                Vector4 stateColour = g.State switch
                 {
                     "Powered" => PowerRing.FullColour,
                     "Partial" => PowerRing.PartialColour,
@@ -185,54 +184,47 @@ namespace Pulsar4X.Client
                     "Charging" => PowerRing.PartialColour,
                     _ => Styles.DescriptiveColor,
                 };
-                ImGui.PushStyleColor(ImGuiCol.PlotHistogram, colour);
-                // Waiting on a charge: the bar shows how full the batteries are, in amber.
+                double share = g.Satisfaction ?? (g.State == "Partial" ? 0.5 : g.State == "No power" ? 0 : 1);
+                bool waiting = g.State == "Charging";
+                // Waiting on a charge: the row's bar shows how full the batteries are, in amber.
                 float fill = g.State switch
                 {
                     "Idle" => 0f,
                     "Charging" => power.StoreMax_kJ > 0 ? (float)Math.Clamp(power.Stored_kJ / power.StoreMax_kJ, 0, 1) : 0f,
                     _ => (float)share,
                 };
-                ImGui.ProgressBar(fill, new Vector2(80f, 0f), "");
-                ImGui.PopStyleColor();
-                ImGui.SameLine();
-                string demand = g.Kind == "Miners" ? "per dig" : Stringify.Power(g.Demand_kW);
-                ImGui.TextUnformatted($"{g.Kind} · {demand} · ");
-                ImGui.SameLine(0f, 0f);
-                ImGui.PushStyleColor(ImGuiCol.Text, colour);
-                ImGui.TextUnformatted(Words(g));
-                ImGui.PopStyleColor();
-                if (g.Note != null)
-                {
-                    ImGui.SameLine();
-                    ImGui.TextDisabled("[?]");
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip(g.Note);
-                }
+                bool perDig = g.Kind == "Miners";
+                string words = Words(g);
+                segments.Add(new PowerSegment(g.Kind, g.Demand_kW, waiting ? 0 : share, chip,
+                    $"{g.Kind}: {Stringify.Power(g.Demand_kW)}, {words}", waiting));
 
-                if (g.Loads.Count == 0)
-                    continue;
-                if (ImGui.BeginTable("ShipLoads" + g.Kind, 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+                string tip = $"{g.Kind}: {(perDig ? "draws per dig" : Stringify.Power(g.Demand_kW) + " demand")}, {Stringify.Power(g.Served_kW)} served, {words}";
+                if (waiting && power.StoreMax_kJ > 0)
+                    tip += $"\nBatteries {Math.Clamp(power.Stored_kJ / power.StoreMax_kJ, 0, 1) * 100:0}% full" + (power.FullIn_s is { } full ? $", full in {Duration(full)}" : "");
+                if (g.Note != null)
+                    tip += "\n" + g.Note;
+                rows.Add(new PowerRow
                 {
-                    ImGui.TableSetupColumn("Component");
-                    ImGui.TableSetupColumn("Count");
-                    ImGui.TableSetupColumn("Draw");
-                    ImGui.TableHeadersRow();
-                    foreach (var l in g.Loads)
-                    {
-                        ImGui.TableNextRow();
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(l.Name);
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(l.Count.ToString());
-                        ImGui.TableNextColumn();
-                        ImGui.TextUnformatted(l.Draw_kW > 0 ? Stringify.Power(l.Draw_kW) : (l.Note ?? "-"));
-                        if (l.Draw_kW > 0 && l.Note != null && ImGui.IsItemHovered())
-                            ImGui.SetTooltip(l.Note);
-                    }
-                    ImGui.EndTable();
-                }
+                    Id = g.Kind,
+                    Chip = chip,
+                    Name = g.Kind,
+                    Value = perDig ? "per dig" : Stringify.Power(g.Demand_kW),
+                    Percent = perDig ? "-" : PowerBars.Percent(g.Demand_kW, power.TotalDemand_kW),
+                    Fill = fill,
+                    FillColour = stateColour,
+                    Waiting = waiting,
+                    Trailing = words,
+                    TrailingColour = stateColour,
+                    Tooltip = tip,
+                    Detail = g.Loads.Select(l => ($"{l.Count} x {l.Name}", l.Draw_kW > 0 ? Stringify.Power(l.Draw_kW) : (l.Note ?? "-"))).ToList(),
+                });
             }
+
+            if (power.TotalDemand_kW > 0)
+                PowerBars.StackedBar("##shipDemandBar", segments, power.TotalDemand_kW);
+            else
+                ImGui.TextDisabled("Nothing draws power right now.");
+            PowerBars.Rows("##shipLoads", rows);
         }
 
         /// <summary>The colony tiers' words; a miner that only reports "short" says so without a number.</summary>
@@ -251,8 +243,8 @@ namespace Pulsar4X.Client
         static void History(EnergyView? energy, Vector2 size)
         {
             ImGui.TextColored(StoredColour, "- Batteries");
-            ImGui.SameLine();
-            ImGui.TextDisabled("(last energy steps; hover for the net flow)");
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Stored energy over the plant's last energy steps. Hover the chart for each step's net flow.");
             var history = energy?.Histogram ?? Array.Empty<EnergyHistogramPoint>();
             if (energy == null || energy.StoreMax <= 0 || history.Count < 2)
             {
@@ -262,7 +254,7 @@ namespace Pulsar4X.Client
 
             double max = Math.Max(energy.StoreMax, history.Max(h => h.Stored));
             if (max <= 0) max = 1;
-            float axisLeft = ImGui.CalcTextSize(Stringify.Energy(max)).X + 8f;
+            float axisLeft = ImGui.CalcTextSize(Stringify.Energy(max, "0.#")).X + 8f;
             const float axisBottom = 18f;
             var draw = ImGui.GetWindowDrawList();
             var origin = ImGui.GetCursorScreenPos();
@@ -281,7 +273,7 @@ namespace Pulsar4X.Client
             {
                 float y = Y(max * f);
                 draw.AddLine(new Vector2(x0, y), new Vector2(x1, y), grid);
-                string label = Stringify.Energy(max * f);
+                string label = Stringify.Energy(max * f, "0.#");
                 var ls = ImGui.CalcTextSize(label);
                 draw.AddText(new Vector2(x0 - ls.X - 4f, y - ls.Y / 2), axis, label);
             }
