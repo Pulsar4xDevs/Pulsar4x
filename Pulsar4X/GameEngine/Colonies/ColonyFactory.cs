@@ -191,11 +191,14 @@ namespace Pulsar4X.Colonies
                     var shipEntity = ShipFactory.CreateShip(factionInfo.ShipDesigns[ship.DesignId], faction, systemBody, randomRadian, ship.Name);
                     fleetDB.AddChild(shipEntity);
 
-                    var commanderDB = CommanderFactory.CreateShipCaptain(game);
-                    commanderDB.CommissionedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365.25 * 10);
-                    commanderDB.RankedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365);
-                    var commander = CommanderFactory.Create(startingSystem, faction.Id, commanderDB);
-                    shipEntity.GetDataBlob<ShipInfoDB>().CommanderID = commander.Id;
+                    if (!ship.NoCaptain)
+                    {
+                        var commanderDB = CommanderFactory.CreateShipCaptain(game);
+                        commanderDB.CommissionedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365.25 * 10);
+                        commanderDB.RankedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365);
+                        var commander = CommanderFactory.Create(startingSystem, faction.Id, commanderDB);
+                        shipEntity.GetDataBlob<ShipInfoDB>().CommanderID = commander.Id;
+                    }
 
                     if(fleetDB.FlagShipID < 0)
                         fleetDB.FlagShipID = shipEntity.Id;

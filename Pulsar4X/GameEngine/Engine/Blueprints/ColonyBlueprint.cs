@@ -58,6 +58,8 @@ public class ColonyBlueprint : Blueprint
         public string DesignId { get; set; }
         public string Name { get; set; }
         public List<StartingItemBlueprint>? Cargo { get; set; }
+        /// <summary>True for a starting ship that flies without a captain (e.g. the Sensor Sat, which has no spare berth).</summary>
+        public bool NoCaptain { get; set; }
     }
 
     public struct LaunchQueueBlueprint

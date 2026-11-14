@@ -44,10 +44,10 @@
           "Units": "m^2",
           "DescriptionFormula": "'Gives an effective area of:  '",
           "GuiHint": "GuiSelectionMaxMin",
-          "MaxFormula": "5000",
+          "MaxFormula": "50000",
           "MinFormula": "1",
           "StepFormula": "1",
-          "PropertyFormula": "1.25"
+          "PropertyFormula": "5.5"
         },
         {
           "Name": "Effective Size",

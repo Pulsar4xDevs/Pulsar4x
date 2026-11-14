@@ -814,6 +814,17 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-grid-battery-900t",
+      "Name": "Grid Battery 900 t",
+      "TemplateId": "grid-battery",
+      "Properties": [
+        { "Key": "Mass", "Value": 900000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-grid-battery-1000t",
       "Name": "Grid Battery 1000 t",
       "TemplateId": "grid-battery",

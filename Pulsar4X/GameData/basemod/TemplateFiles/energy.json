@@ -610,10 +610,10 @@
         "Mass": "PropertyValue('Size') * 5000.0",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "Max(10, PropertyValue('Size') * 0.5 * Pow(PropertyValue('Size') / 10, -0.25))",
+        "CrewReq": "Max(10, PropertyValue('Size') * 0.5 * Pow(PropertyValue('Size') / 75, -0.25))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.1 * Pow(PropertyValue('Size') / 10, 0.1)",
-        "BuildPointCost": "[Mass] * 0.2 * Pow(PropertyValue('Size') / 10, 0.15)"
+        "CreditCost": "[Mass] * 0.1 * Pow(PropertyValue('Size') / 75, 0.1)",
+        "BuildPointCost": "[Mass] * 0.2 * Pow(PropertyValue('Size') / 75, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.4",
@@ -633,7 +633,7 @@
           "MaxFormula": "2000",
           "MinFormula": "1",
           "StepFormula": "1",
-          "PropertyFormula": "10"
+          "PropertyFormula": "75"
         },
         {
           "Name": "Efficiency",
@@ -742,10 +742,10 @@
         "Mass": "PropertyValue('Size') * 20000.0",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "Max(20, PropertyValue('Size') * 0.5 * Pow(PropertyValue('Size') / 50, -0.25))",
+        "CrewReq": "Max(20, PropertyValue('Size') * 0.5 * Pow(PropertyValue('Size') / 75, -0.25))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.1 * Pow(PropertyValue('Size') / 50, 0.1)",
-        "BuildPointCost": "[Mass] * 0.2 * Pow(PropertyValue('Size') / 50, 0.15)"
+        "CreditCost": "[Mass] * 0.1 * Pow(PropertyValue('Size') / 75, 0.1)",
+        "BuildPointCost": "[Mass] * 0.2 * Pow(PropertyValue('Size') / 75, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.5",
@@ -765,7 +765,7 @@
           "MaxFormula": "2000",
           "MinFormula": "1",
           "StepFormula": "1",
-          "PropertyFormula": "50"
+          "PropertyFormula": "75"
         },
         {
           "Name": "Efficiency",
@@ -890,8 +890,8 @@
         "HTK": "0.5",
         "CrewReq": "2",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 100000, 0.1)",
-        "BuildPointCost": "[Mass] * 0.5 * Pow(PropertyValue('Mass') / 100000, 0.15)"
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 1000000, 0.1)",
+        "BuildPointCost": "[Mass] * 0.5 * Pow(PropertyValue('Mass') / 1000000, 0.15)"
       },
       "ResourceCost": {
         "plastic": "[Mass] * 0.2",
@@ -913,7 +913,7 @@
           "MaxFormula": "10000000",
           "MinFormula": "10000",
           "StepFormula": "10000",
-          "PropertyFormula": "100000"
+          "PropertyFormula": "1000000"
         },
         {
           "Name": "Energy Storage",

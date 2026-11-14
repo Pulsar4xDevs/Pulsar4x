@@ -72,20 +72,18 @@ public class ColonyPowerTests
         Assert.That(PerUnit("default-design-mine"), Is.EqualTo(140).Within(5), "extraction ~140 kW at full accessibility");
         Assert.That(PerUnit("default-design-refinery-site"), Is.InRange(100, 200), "refinery-site ~100-200 kW");
         Assert.That(PerUnit("default-design-factory-site"), Is.EqualTo(125).Within(1e-6), "factory-site 125 kW");
-        // The 85 t slip (2026-11-15) scales the 50 kW hotel by (85/38)^0.85.
-        Assert.That(PerUnit("default-design-shipyard"), Is.EqualTo(167 + 50 * System.Math.Pow(85.0 / 38.0, 0.85)).Within(1), "shipyard 167 kW + ~99 kW hotel");
+        Assert.That(PerUnit("default-design-shipyard"), Is.EqualTo(167 + 50).Within(1), "shipyard 167 kW + 50 kW hotel");
         var sites = Line(power, "default-design-local-construction-site");
         Assert.That(sites.Nameplate_kW, Is.EqualTo(5 * 8 * 10 / 24.0).Within(1e-6), "5 sites ~17 kW nameplate");
         Assert.That(sites.Draw_kW, Is.EqualTo(0.1 * 5 * 8 * 10 / 24.0).Within(1e-6), "an empty queue: 10 % of it");
         var labs = Line(power, "default-design-research-lab");
         Assert.That(labs.Nameplate_kW, Is.EqualTo(1 * 3000).Within(1e-6), "1 lab, 3 MW");
         Assert.That(labs.Draw_kW, Is.EqualTo(0.2 * 1 * 3000).Within(1e-6), "no project yet: 20 % of it");
-        // Size pass (2026-11-15): power x (size / template default)^-0.15 on top of linear.
-        Assert.That(PerUnit("default-design-city-hall"), Is.EqualTo(125 * System.Math.Pow(10, -0.15)).Within(1e-6), "City Hall 1000 m2 office ~88 kW");
+        Assert.That(PerUnit("default-design-city-hall"), Is.EqualTo(125).Within(1e-6), "City Hall 125 kW");
         Assert.That(PerUnit("default-design-logistics-office-site"), Is.EqualTo(20).Within(1e-6), "logistics site 20 kW");
         Assert.That(PerUnit("default-design-spaceport"), Is.EqualTo(2000).Within(1e-6), "spaceport 1e5 m2 x 20 W/m2 = 2 MW");
         Assert.That(PerUnit("default-design-launch-complex"), Is.EqualTo(25).Within(1e-6), "launch complex 25 kW");
-        Assert.That(PerUnit("default-design-warehouse"), Is.EqualTo(500 * System.Math.Pow(10, -0.15)).Within(1e-6), "1e6 m3 warehouse: 500 kW x 10^-0.15 ~354 kW");
+        Assert.That(PerUnit("default-design-warehouse"), Is.EqualTo(500).Within(1e-6), "1e6 m3 warehouse x 0.5 W/m3 = 500 kW");
         Assert.That(PerUnit("default-design-passive-sensor"), Is.EqualTo(50).Within(1e-6), "planet scanner 50 kW");
 
         Assert.That(power.Consumers.Any(c => c.DesignId.Contains("fuel-farm")), Is.False, "fuel farms draw later (cryogenic)");

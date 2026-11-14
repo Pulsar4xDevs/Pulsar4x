@@ -613,8 +613,8 @@
         "HTK": "0.5",
         "CrewReq": "PropertyValue('Crew Size')",
         "ResearchCost": "0",
-        "CreditCost": "120 * Pow(PropertyValue('Slip Size') / 38000, 1.1)",
-        "BuildPointCost": "20000 * Pow(PropertyValue('Slip Size') / 38000, 1.15)"
+        "CreditCost": "120 * Pow(PropertyValue('Slip Size') / 85000, 1.1)",
+        "BuildPointCost": "20000 * Pow(PropertyValue('Slip Size') / 85000, 1.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.50",
@@ -632,7 +632,7 @@
           "Units": "kW",
           "DescriptionFormula": "'10 kWh per component point, 5 kWh per assembly point, plus 50 kW yard hotel load. Refits share the yard and add nothing.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "(PropertyValue('Component Construction Points') * 10 + PropertyValue('Ship Assembly Points') * 5) / 24 + 50 * Pow(PropertyValue('Slip Size') / 38000, 0.85)"
+          "PropertyFormula": "(PropertyValue('Component Construction Points') * 10 + PropertyValue('Ship Assembly Points') * 5) / 24 + 50 * Pow(PropertyValue('Slip Size') / 85000, 0.85)"
         },
         {
           "Name": "DBargsPower",
@@ -658,7 +658,7 @@
           "MaxFormula": "TechData('tech-shipyard-slip-max-size') + 80000",
           "MinFormula": "1000",
           "StepFormula": "1000",
-          "PropertyFormula": "38000"
+          "PropertyFormula": "85000"
         },
         {
           "Name": "Crew Size",
@@ -1334,10 +1334,10 @@
         "Mass": "PropertyValue('Office Space') * 100",
         "Volume": "[Mass] * 0.1",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Office Space') * 0.25 * Pow(PropertyValue('Office Space') / 100, -0.25)",
-        "ResearchCost": "PropertyValue('Office Space') * 0.5 * Pow(PropertyValue('Office Space') / 100, 0.3)",
-        "CreditCost": "120 * Pow(PropertyValue('Office Space') / 100, 1.1)",
-        "BuildPointCost": "[Mass] * 0.1 * Pow(PropertyValue('Office Space') / 100, 0.15)"
+        "CrewReq": "PropertyValue('Office Space') * 0.25 * Pow(PropertyValue('Office Space') / 1000, -0.25)",
+        "ResearchCost": "PropertyValue('Office Space') * 0.5 * Pow(PropertyValue('Office Space') / 1000, 0.3)",
+        "CreditCost": "120 * Pow(PropertyValue('Office Space') / 1000, 1.1)",
+        "BuildPointCost": "[Mass] * 0.1 * Pow(PropertyValue('Office Space') / 1000, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.5",
@@ -1356,7 +1356,7 @@
           "Units": "kW",
           "DescriptionFormula": "'0.5 kW per crew.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "(0.5 * PropertyValue('Office Space') * 0.25) * Pow(PropertyValue('Office Space') / 100, -0.15)"
+          "PropertyFormula": "(0.5 * PropertyValue('Office Space') * 0.25) * Pow(PropertyValue('Office Space') / 1000, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -1382,7 +1382,7 @@
           "MaxFormula": "10000",
           "MinFormula": "10",
           "StepFormula": "100",
-          "PropertyFormula": "100"
+          "PropertyFormula": "1000"
         },
         {
           "Name": "DBargs",

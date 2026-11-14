@@ -56,9 +56,8 @@ public class ScenarioBatteryTests
             Assert.That(power.Demand_kW, Is.GreaterThan(0), name);
             double hours = power.StoreMax_kJ / 3600 / power.Demand_kW;
             // Crew plan phase 4 cut garden-world life support to 0.01 kW a head, so Earth's demand fell
-            // (~30 MW -> ~10 MW) and its unchanged bank now covers ~15 h; the 2026-11-15 size pass trimmed
-            // the big City Hall and warehouse draws, so ~16.5 h. The sealed outposts keep 2-6 h.
-            double maxHours = name == "Earth HQ" ? 18.0 : 6.0;
+            // (~30 MW -> ~10 MW) and its unchanged bank now covers ~15 h. The sealed outposts keep 2-6 h.
+            double maxHours = name == "Earth HQ" ? 16.0 : 6.0;
             Assert.That(hours, Is.InRange(2.0, maxHours), name + $" bank covers 2-{maxHours} h of its demand");
         }
     }

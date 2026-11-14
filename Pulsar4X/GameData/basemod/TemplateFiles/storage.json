@@ -75,10 +75,10 @@
         "Mass": "PropertyValue('Size Efficiency') * 4",
         "Volume": "PropertyValue('Storage Volume') + PropertyValue('Size Efficiency')",
         "HTK": "0.5",
-        "CrewReq": "Max(10, PropertyValue('Size Efficiency') * 0.25 * Pow(PropertyValue('Storage Volume') / 100000, -0.25))",
+        "CrewReq": "Max(10, PropertyValue('Size Efficiency') * 0.25 * Pow(PropertyValue('Storage Volume') / 1000000, -0.25))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.12 * Pow(PropertyValue('Storage Volume') / 100000, 0.1)",
-        "BuildPointCost": "8000 * Pow(PropertyValue('Storage Volume') / 100000, 1.15)"
+        "CreditCost": "[Mass] * 0.12 * Pow(PropertyValue('Storage Volume') / 1000000, 0.1)",
+        "BuildPointCost": "8000 * Pow(PropertyValue('Storage Volume') / 1000000, 1.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.50",
@@ -96,7 +96,7 @@
           "Units": "kW",
           "DescriptionFormula": "'0.5 W per cubic metre of storage (automated, low light).'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "(PropertyValue('Storage Volume') * 0.0005) * Pow(PropertyValue('Storage Volume') / 100000, -0.15)"
+          "PropertyFormula": "(PropertyValue('Storage Volume') * 0.0005) * Pow(PropertyValue('Storage Volume') / 1000000, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -110,10 +110,10 @@
           "DescriptionFormula": "'Larger cargo holds store more goods'",
           "GuiHint": "GuiSelectionMaxMinInt",
           "DataDict": {},
-          "MaxFormula": "2000000",
+          "MaxFormula": "10000000",
           "MinFormula": "10000",
           "StepFormula": "10000",
-          "PropertyFormula": "100000"
+          "PropertyFormula": "1000000"
         },
         {
           "Name": "Size Efficiency",

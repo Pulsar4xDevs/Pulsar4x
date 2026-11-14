@@ -146,9 +146,20 @@ public class CrewBerthTests
             TestContext.Out.WriteLine($"{design.Name} ({faction.GetDataBlob<NameDB>().DefaultName}): crew {design.CrewReq}, berths {design.CrewBerths}, mass {design.MassPerUnit}");
             Assert.That(design.CrewBerths, Is.EqualTo(ShipCrew.Berths(design.Components)), design.Name);
             Assert.That(design.CrewBerths, Is.GreaterThanOrEqualTo(design.CrewReq), design.Name);
-            if (design.Name != "Sensor Sat")
-                Assert.That(design.CrewBerths, Is.GreaterThanOrEqualTo(design.CrewReq + 1), design.Name + ": a berth for the captain");
             Assert.That(ShipCrew.DesignCrewWarnings(design.Components), Is.Empty, design.Name);
+        }
+
+        // Every starting ship berths everyone it carries: its crew, plus its captain when it has one.
+        // The Sensor Sat (one berth, one crew) starts uncaptained rather than carrying spare quarters.
+        var ships = game.Systems.SelectMany(s => s.GetAllEntitiesWithDataBlob<ShipInfoDB>()).ToList();
+        Assert.That(ships, Is.Not.Empty);
+        foreach (var ship in ships)
+        {
+            var design = ship.GetDataBlob<ShipInfoDB>().Design;
+            int captain = ShipCrew.HasCaptain(ship) ? 1 : 0;
+            Assert.That(design.CrewBerths, Is.GreaterThanOrEqualTo(design.CrewReq + captain), design.Name + ": a berth for everyone aboard");
+            if (design.Name == "Sensor Sat")
+                Assert.That(captain, Is.Zero, "the Sensor Sat starts without a captain");
         }
 
         if (scenario.EndsWith("WarpTechStart"))

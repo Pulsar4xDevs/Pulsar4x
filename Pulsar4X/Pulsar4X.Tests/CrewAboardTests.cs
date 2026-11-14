@@ -90,12 +90,13 @@ public class CrewAboardTests
         {
             var design = ship.GetDataBlob<ShipInfoDB>().Design;
             Assert.That(ShipCrew.Tracked(ship), Is.True, design.Name);
-            Assert.That(ShipCrew.HasCaptain(ship), Is.True, design.Name + ": scenario ships come with a captain");
-            Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(design.CrewReq + 1), design.Name + ": crew plus the captain");
-            Assert.That(ShipCrew.SplitOf(ship).Required, Is.EqualTo(design.CrewReq + 1), design.Name);
-            // The Sensor Sat has one berth for its one crew; its captain boards over the berths (no quarters to spare on a 433 kg sat).
-            if (design.Name != "Sensor Sat")
-                Assert.That(ShipCrew.Aboard(ship), Is.LessThanOrEqualTo(design.CrewBerths), design.Name + ": the captain has a berth");
+            // Every scenario ship comes with a captain except the Sensor Sat, which flies uncaptained (no spare berth).
+            bool captained = design.Name != "Sensor Sat";
+            Assert.That(ShipCrew.HasCaptain(ship), Is.EqualTo(captained), design.Name + ": scenario captain");
+            int captain = captained ? 1 : 0;
+            Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(design.CrewReq + captain), design.Name + ": crew plus any captain");
+            Assert.That(ShipCrew.SplitOf(ship).Required, Is.EqualTo(design.CrewReq + captain), design.Name);
+            Assert.That(ShipCrew.Aboard(ship), Is.LessThanOrEqualTo(design.CrewBerths), design.Name + ": everyone aboard, captain included, has a berth");
             Assert.That(ShipCrew.WorkFactor(ship), Is.EqualTo(1), design.Name);
             Assert.That(ShipCrew.EngineFactor(ship), Is.EqualTo(1), design.Name);
             Assert.That(ShipCrew.Note(ship), Is.Empty, design.Name);

@@ -88,11 +88,11 @@ public class BatteryTests
         Assert.That(pack.ChargeEfficiency, Is.EqualTo(0.9).Within(1e-12));
         Assert.That(pack.IsRated, Is.True);
 
-        // grid-battery: 100 t default, 0.15C.
+        // grid-battery: 1000 t default (the stock bank's size since 2026-11-15; 100 t before), 0.15C.
         var grid = TemplateDesign("grid-battery").GetAttribute<EnergyStoreAtb>();
-        Assert.That(grid.MaxStore, Is.EqualTo(100000 * 500).Within(1e-9));
-        Assert.That(grid.MaxCharge_kW, Is.EqualTo(100000 * 500 * 0.15 / 3600).Within(1e-9));
-        Assert.That(grid.MaxDischarge_kW, Is.EqualTo(100000 * 500 * 0.15 / 3600).Within(1e-9));
+        Assert.That(grid.MaxStore, Is.EqualTo(1000000.0 * 500).Within(1e-9));
+        Assert.That(grid.MaxCharge_kW, Is.EqualTo(1000000.0 * 500 * 0.15 / 3600).Within(1e-9));
+        Assert.That(grid.MaxDischarge_kW, Is.EqualTo(1000000.0 * 500 * 0.15 / 3600).Within(1e-9));
         Assert.That(grid.ChargeEfficiency, Is.EqualTo(0.9).Within(1e-12));
     }
 
@@ -266,7 +266,7 @@ public class BatteryTests
     [Test]
     public void Colony_SurplusCharges_HeldToTheRate_WithTheLoss()
     {
-        _earth.AddComponent(TemplateDesign("grid-battery"));
+        _earth.AddComponent(TemplateDesign("grid-battery", ("Mass", 100000)));   // a 100 t pack
         var power = Power;
         double rate = 100000 * 500 * 0.15 / 3600;          // 2,083 kW
         Assert.That(power.MaxCharge_kW, Is.EqualTo(rate).Within(1e-9));
@@ -351,7 +351,7 @@ public class BatteryTests
     [Test]
     public void SaveRoundTrip_KeepsTheCharge_AndRefreshesDemandAndRatesOnLoad()
     {
-        _earth.AddComponent(TemplateDesign("grid-battery"));
+        _earth.AddComponent(TemplateDesign("grid-battery", ("Mass", 100000)));   // a 100 t pack
         ColonyPowerProcessor.RunDay(_earth);
         var power = Power;
         double stored = power.Stored_kJ;
@@ -429,7 +429,7 @@ public class BatteryTests
     [Test]
     public void ColonyPowerView_HasTheBatteryFields_AndAwaitsTheFirstPass()
     {
-        _earth.AddComponent(TemplateDesign("grid-battery"));
+        _earth.AddComponent(TemplateDesign("grid-battery", ("Mass", 100000)));   // a 100 t pack
         var projector = new GameProjector(_game);
         var view = projector.ProjectEntity(_earth, _player.Id).GetView<ColonyPowerView>()!;
         double rate = 100000 * 500 * 0.15 / 3600;
