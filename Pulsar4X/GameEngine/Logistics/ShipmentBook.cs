@@ -376,6 +376,10 @@ public static class ShipmentBook
             return false;
         }
 
+        // Multi-faction phase 2: same body, instant and free. No shipment, no haul row, no fee.
+        if (SameBody.Is(buyer, seller))
+            return SettleSameBody(buyer, seller, fillBid, picked, prices, listings, buyerInfo, sellerInfo, out reason);
+
         if (!Build(seller, buyer, picked, prices, "", buyer.FactionOwnerID, seller.FactionOwnerID, fillBid, 0m,
                 out made, out reason))
             return false;
@@ -420,6 +424,42 @@ public static class ShipmentBook
             IntelBook.PostHaul(buyer, shipment.UniqueID, shipment.Fee, seller.Id, buyer.Id);
         }
         return true;
+    }
+
+    /// <summary>
+    /// A market seal between two colonies on one body: the goods move into the buyer's warehouse now (clamped to its
+    /// free space), the listing counts down, history and the ledger pair are written at the line price, and the fee is 0.
+    /// </summary>
+    static bool SettleSameBody(
+        Entity buyer, Entity seller, bool fillBid, List<(ICargoable item, long units)> picked, List<decimal> prices,
+        List<MarketListing> listings, FactionInfoDB buyerInfo, FactionInfoDB sellerInfo, out string reason)
+    {
+        reason = "";
+        var moved = SameBody.Move(seller, buyer, picked);
+        var now = buyer.StarSysDateTime;
+        bool any = false;
+        for (int i = 0; i < picked.Count; i++)
+        {
+            long units = moved[i];
+            if (units <= 0)
+                continue;
+            any = true;
+            if (fillBid)
+                listings[i].BuyQuantity -= units;
+            else
+                listings[i].SellQuantity -= units;
+            var listingHolder = fillBid ? buyer : seller;
+            MarketHistory.RecordTrade(listingHolder, listings[i], fillBid ? listings[i].Bid : listings[i].Ask, units);
+            if (prices[i] <= 0)
+                continue;
+            decimal amount = prices[i] * units;
+            string item = picked[i].item.UniqueID;
+            buyerInfo.Money.AddExpense(now, TransactionCategory.Trade, $"same-body {item} {seller.FactionOwnerID}", amount);
+            sellerInfo.Money.AddIncome(now, TransactionCategory.Trade, $"same-body {item} {buyer.FactionOwnerID}", amount);
+        }
+        if (!any)
+            reason = "No room in the buyer's warehouse.";
+        return any;
     }
 
     // ------------------------------------------------------------------ cancel

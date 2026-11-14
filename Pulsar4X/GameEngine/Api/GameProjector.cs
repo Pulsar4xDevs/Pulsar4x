@@ -1194,7 +1194,17 @@ namespace Pulsar4X.Engine.Api
                 CanEdit = canEdit,
                 ExchangeOpen = exchangeOpen,
                 Addable = canEdit ? AddableCargo(owner, book) : Array.Empty<MarketGoodChoice>(),
+                SameBodyColonyIds = SameBodyOwnColonies(entity, factionId),
             };
+        }
+
+        static IReadOnlyList<int> SameBodyOwnColonies(Entity office, int factionId)
+        {
+            if (!office.TryGetDataBlob<ColonyInfoDB>(out var info) || !info.PlanetEntity.IsValid)
+                return Array.Empty<int>();
+            return info.PlanetEntity.ColoniesOnBody()
+                .Where(c => c.Id != office.Id && c.FactionOwnerID == factionId)
+                .Select(c => c.Id).ToList();
         }
 
         const int MaxGoodsInView = 64;
@@ -1594,15 +1604,21 @@ namespace Pulsar4X.Engine.Api
                 bool canMine = mining != null && mining.ActualMiningRate.ContainsKey(mineralId);
                 long annualProduction = canMine ? 365 * mining!.ActualMiningRate[mineralId] : 0;
 
+                long? available = deposit.Amount.For(factionMask);
+                long bodyAnnual = MiningHelper.BodyAnnualProduction(colonyInfo.PlanetEntity, mineralId);
                 rows.Add(new MineralMiningRow(
                     mineralId,
                     mineral.Name,
                     mineral.Description,
                     stockpile,
-                    deposit.Amount.For(factionMask),
+                    available,
                     deposit.Accessibility,
                     annualProduction,
-                    canMine));
+                    canMine)
+                {
+                    BodyAnnualProduction = bodyAnnual,
+                    YearsToDepletion = MiningHelper.YearsToDepletion(available, bodyAnnual),
+                });
             }
 
             return new ColonyMiningView(mining?.NumberOfMines ?? 0)

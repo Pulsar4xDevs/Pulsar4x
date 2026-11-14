@@ -89,6 +89,9 @@ public class FreighterPlan : IGoalPlanner
                 {
                     if (to.Id == from.Id)
                         continue;
+                    // Same body settles instantly through the market seal (multi-faction phase 2): no ship.
+                    if (SameBody.Is(from, to))
+                        continue;
                     if (!LogisticsSpan.ContractReaches(ship, from, to))
                         continue;
                     if (!MarketBook.TryGet(to, sell.CargoId, out var buy) || buy.BuyQuantity <= 0)

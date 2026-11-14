@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Colonies;
 using Pulsar4X.Orbital;
@@ -38,6 +39,26 @@ namespace Pulsar4X.Industry
 
             return mineRates;
         }
+
+        /// <summary>
+        /// Annual production of one mineral by every colony on the body (all factions), at each colony's
+        /// current actual rate. The figure is the true sum, not limited by what a viewer can see.
+        /// </summary>
+        public static long BodyAnnualProduction(Entity body, int mineralId)
+        {
+            long total = 0;
+            foreach (var colony in body.ColoniesOnBody())
+            {
+                if (colony.TryGetDataBlob<MiningDB>(out var mining)
+                    && mining.ActualMiningRate.TryGetValue(mineralId, out var rate))
+                    total += 365 * rate;
+            }
+            return total;
+        }
+
+        /// <summary>Years until <paramref name="amount"/> runs out at <paramref name="annual"/>; null if nothing mines it.</summary>
+        public static double? YearsToDepletion(long? amount, long annual)
+            => amount is long a && annual > 0 ? (double)a / annual : null;
 
         /// <summary>
         /// Subtract mined units and cube accessibility down the same way the colony mine does.

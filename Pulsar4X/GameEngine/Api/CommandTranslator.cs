@@ -62,6 +62,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(FleetFreighterCommand)] = TranslateFleetFreighter,
                 [typeof(FleetHaulContractCommand)] = TranslateFleetHaulContract,
                 [typeof(MoveGoodsCommand)] = TranslateMoveGoods,
+                [typeof(MoveGoodsSameBodyCommand)] = TranslateMoveGoodsSameBody,
                 [typeof(BootstrapColonyCommand)] = TranslateBootstrapColony,
                 [typeof(FleetBootstrapCommand)] = TranslateFleetBootstrap,
                 [typeof(QueueMoveGoodsCommand)] = TranslateQueueMoveGoods,
@@ -748,6 +749,37 @@ namespace Pulsar4X.Engine.Api
             return null;
         }
 
+        /// <summary>
+        /// Multi-faction phase 2: own warehouse goods between two of the faction's colonies on one body move now,
+        /// with no ship and no fee. Lines clamp to the source's stock and the destination's free space.
+        /// </summary>
+        private CommandResult TranslateMoveGoodsSameBody(Entity faction, Entity commanded, GameCommand command)
+        {
+            var move = (MoveGoodsSameBodyCommand)command;
+            if (RejectWarehouse(faction, commanded) is { } sourceBad)
+                return sourceBad;
+            if (!TryResolve(move.DestId, out var dest))
+                return CommandResult.Reject("the colony is gone.");
+            if (RejectWarehouse(faction, dest) is { } destBad)
+                return destBad;
+            if (dest.Id == commanded.Id)
+                return CommandResult.Reject("Pick two different colonies.");
+            if (!SameBody.Is(commanded, dest))
+                return CommandResult.Reject("The colonies are not on the same body.");
+            if (RejectLines(commanded, move.Items, aboard: false, out _) is { } linesBad)
+                return linesBad;
+            var lines = new List<(ICargoable item, long units)>();
+            foreach (var item in move.Items)
+            {
+                MoveGoodsPlan.TryCargo(commanded, item.CargoItemId, out var cargo);
+                lines.Add((cargo, item.Units));
+            }
+            var moved = SameBody.Move(commanded, dest, lines);
+            if (moved.Sum() <= 0)
+                return CommandResult.Reject("Nothing moved: no stock or no room.");
+            return CommandResult.Ok("");
+        }
+
         static CommandResult? RejectWarehouse(Entity faction, Entity colony)
         {
             if (!colony.HasDataBlob<ColonyInfoDB>() || !colony.HasDataBlob<CargoStorageDB>())
@@ -910,7 +942,8 @@ namespace Pulsar4X.Engine.Api
             }
             if (!ShipmentBook.TrySealMarket(commanded, seller, seal.FillBid, wanted, seal.Fee, out var made, out var reason))
                 return CommandResult.Reject(reason);
-            return CommandResult.Ok(made[0].UniqueID);
+            // A same-body buy settles at once and posts no shipment (multi-faction phase 2).
+            return CommandResult.Ok(made.Count > 0 ? made[0].UniqueID : "");
         }
 
         static bool TryCargoByUniqueId(Entity holder, string cargoId, out ICargoable cargo)

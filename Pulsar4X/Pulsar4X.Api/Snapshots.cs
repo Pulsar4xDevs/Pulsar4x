@@ -400,6 +400,10 @@ public sealed record MarketView(
 
     /// <summary>Unlocked cargo the owner can add. Empty for a friendly viewer.</summary>
     public IReadOnlyList<MarketGoodChoice> Addable { get; init; } = Array.Empty<MarketGoodChoice>();
+
+    /// <summary>The viewer's own colonies on the same body as this office (multi-faction phase 2). A buy into one
+    /// of them settles at once with fee 0 and no haul ("Buy, delivered here"). Empty when none.</summary>
+    public IReadOnlyList<int> SameBodyColonyIds { get; init; } = Array.Empty<int>();
 }
 
 /// <summary>One day's bucket at an office for one cargo id.</summary>
@@ -1004,7 +1008,16 @@ public sealed record MineralMiningRow(
     long? AvailableToMine,     // null when the faction's survey data can't resolve the amount
     double Accessibility,
     long AnnualProduction,     // 0 when the colony can't mine this mineral
-    bool CanMine);
+    bool CanMine)
+{
+    /// <summary>Annual production of this mineral by every colony on the body, all factions included
+    /// (multi-faction phase 1). Equals <see cref="AnnualProduction"/> for a lone colony.</summary>
+    public long BodyAnnualProduction { get; init; }
+
+    /// <summary>Years until <see cref="AvailableToMine"/> runs out at <see cref="BodyAnnualProduction"/>.
+    /// Null when nothing on the body mines it or the amount is not surveyed.</summary>
+    public double? YearsToDepletion { get; init; }
+}
 
 /// <summary>A cohort's kind. A cohort is never idle. Idle remains so an old snapshot still reads.</summary>
 public enum AcademyCourseKind

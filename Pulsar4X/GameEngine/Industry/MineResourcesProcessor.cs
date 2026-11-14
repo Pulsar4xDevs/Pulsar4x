@@ -45,7 +45,11 @@ namespace Pulsar4X.Industry
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
+            // Shared deposits (multi-faction phase 0/1): every colony on a body mines the same MineralsDB.
+            // Process in entity-id order so the lower id takes its rate first and the next is capped by
+            // what is left.
             var entities = manager.GetAllEntitiesWithDataBlob<MiningDB>();
+            entities.Sort((a, b) => a.Id.CompareTo(b.Id));
             foreach(var entity in entities)
             {
                 ProcessEntity(entity, deltaSeconds);

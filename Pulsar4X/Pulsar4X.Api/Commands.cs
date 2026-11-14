@@ -97,6 +97,14 @@ public sealed record MoveGoodsCommand(
     int DestId,
     IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
 
+/// <summary>
+/// Multi-faction phase 2: move warehouse piles from the targeted colony to another of the faction's colonies on the
+/// same body, at once and for free (no ship). Rejected when the two colonies are on different bodies.
+/// </summary>
+public sealed record MoveGoodsSameBodyCommand(
+    int TargetEntityId,
+    int DestId,
+    IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
 /// <summary>This many finished crates of one component design.</summary>
 public sealed record BootstrapCrateRequest(string DesignId, int Count);
 
