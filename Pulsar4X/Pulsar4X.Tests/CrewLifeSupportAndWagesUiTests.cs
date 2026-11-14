@@ -182,7 +182,7 @@ public class CrewLifeSupportAndWagesUiTests
             DaysInMonth = 30, PayrollPerMonth = 74_040m, LabCostsPerMonth = 960m, RunningCostsPerMonth = 75_000m,
         };
         Assert.That(Finances.PayrollText(f, Inv), Is.EqualTo("1,234 crew x ¤2.00 a day = ¤74,040.00 a month"));
-        Assert.That(Finances.RunningCostsText(f, Inv), Is.EqualTo("¤75,000.00 a month (wages ¤74,040.00, labs ¤960.00)"));
+        Assert.That(Finances.RunningCostsText(f, Inv), Is.EqualTo("¤75,000.00 a month (wages ¤74,040.00, staff ¤0.00, labs ¤960.00)"));
         Assert.That(Finances.PayrollText(f with { CrewWagePerDay = 0, PayrollPerDay = 0 }, Inv), Is.EqualTo("1,234 crew, no wages charged yet"));
         Assert.That(Finances.DaysUntilBrokeText(null), Is.EqualTo("∞"));
         Assert.That(Finances.DaysUntilBrokeText(0), Is.EqualTo("now"));
@@ -199,10 +199,12 @@ public class CrewLifeSupportAndWagesUiTests
         Assert.That(Finances.AccruedText(f, Inv), Is.EqualTo("nothing yet"));
         Assert.That(Finances.NextPaydayText(f), Is.EqualTo("-"));
         var owing = f with { AccruedThisMonth = 12_000m, AccruedWagesThisMonth = 10_000m, AccruedResearchThisMonth = 2_000m, NextPayday = new DateTime(2050, 2, 1) };
-        Assert.That(Finances.AccruedText(owing, Inv), Is.EqualTo("¤12,000.00 (wages ¤10,000.00, research ¤2,000.00)"));
+        Assert.That(Finances.AccruedText(owing, Inv), Is.EqualTo("¤12,000.00 (wages ¤10,000.00, staff ¤0.00, research ¤2,000.00)"));
         Assert.That(Finances.NextPaydayText(owing), Is.EqualTo("1 Feb 2050"));
         Assert.That(Finances.PerMonthText(100m, 31, Inv), Is.EqualTo("¤3,100.00 a month"));
         Assert.That(LedgerWindow.CategoryLabel(FactionSnapshot.WagesCategory), Is.EqualTo("Wages (monthly)"));
+        Assert.That(LedgerWindow.CategoryLabel(FactionSnapshot.StaffWagesCategory), Is.EqualTo("Staff wages (monthly)"));
+        Assert.That(LedgerWindow.CategoryLabel(FactionSnapshot.TaxCategory), Is.EqualTo("Tax"));
         Assert.That(LedgerWindow.CategoryLabel("Research"), Is.EqualTo("Research (monthly)"));
         Assert.That(LedgerWindow.CategoryLabel("Trade"), Is.EqualTo("Trade"));
     }
@@ -218,6 +220,26 @@ public class CrewLifeSupportAndWagesUiTests
             { DaysInMonth = 31, CostPerMonth = 310_000m, NextPayday = new DateTime(2050, 2, 1) };
         string tip = ResearchWindow.LabCostTooltip(lab);
         Assert.That(tip, Does.Contain("31 days this month").And.Contain("1 Feb 2050"));
+    }
+
+    [Test]
+    public void StaffWages_TaxIncome_AndBidReserve()
+    {
+        var f = Faction(10_000m) with
+        {
+            StaffOnPayroll = 5210, CommutersOnPayroll = 1000, StaffWagePerDay = 2m, StaffWagesPerDay = 12_420m,
+            DaysInMonth = 30, StaffWagesPerMonth = 372_600m, AccruedStaffWagesThisMonth = 8_000m,
+            AccruedThisMonth = 8_000m, TaxIncomePerMonth = 2_000_000m, BidReserve = 9_000m,
+        };
+        Assert.That(Finances.StaffWagesText(f, Inv), Is.EqualTo("6,210 staff (5,210 own, 1,000 commuters) x ¤2.00 a day = ¤372,600.00 a month"));
+        Assert.That(Finances.StaffWagesText(f with { StaffWagePerDay = 0, StaffWagesPerDay = 0, CommutersOnPayroll = 0, StaffOnPayroll = 6210 }, Inv),
+            Is.EqualTo("6,210 staff, no wages charged yet"));
+        Assert.That(Finances.TaxIncomeText(f, Inv), Is.EqualTo("¤2,000,000.00 a month"));
+        Assert.That(Finances.BidReserveText(f, Inv), Is.EqualTo("¤9,000.00"));
+        Assert.That(Finances.TaxIncomeText(Faction(1m), Inv), Is.EqualTo("¤0.00 a month"));
+        Assert.That(Finances.RunningCostsText(f with { PayrollPerMonth = 74_040m, LabCostsPerMonth = 960m, RunningCostsPerMonth = 447_600m }, Inv),
+            Is.EqualTo("¤447,600.00 a month (wages ¤74,040.00, staff ¤372,600.00, labs ¤960.00)"));
+        Assert.That(Finances.AccruedText(f, Inv), Is.EqualTo("¤8,000.00 (wages ¤0.00, staff ¤8,000.00, research ¤0.00)"));
     }
 
     [Test]

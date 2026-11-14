@@ -247,13 +247,15 @@ namespace Pulsar4X.Tests
                 new ColonyMiningView(2),
                 new NavalAcademyView(Array.Empty<NavalAcademyClassView>(), 1000, 10000),
                 new RecruitmentView(Array.Empty<CandidateView>(), null, Array.Empty<CandidateView>()),
-                EmptyPower());
+                EmptyPower(),
+                new WorkforceView());
             Assert.AreEqual(
                 ownedBase
                 | ForeignEntities.ColonyTabs.Mining
                 | ForeignEntities.ColonyTabs.NavalAcademy
                 | ForeignEntities.ColonyTabs.Recruitment
-                | ForeignEntities.ColonyTabs.Power,
+                | ForeignEntities.ColonyTabs.Power
+                | ForeignEntities.ColonyTabs.Workforce,
                 ForeignEntities.ColonyTabsFor(ownedFull));
 
             var foreignFull = With(
@@ -272,6 +274,7 @@ namespace Pulsar4X.Tests
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Recruitment));
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Log));
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Power));
+            Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Workforce));
 
             Assert.AreEqual(foreignTabs, ForeignEntities.ColonyTabsFor(Colony(8, OwnerRelation.Neutral, 8, 6, "Luna Concord")));
             Assert.AreEqual(foreignTabs, ForeignEntities.ColonyTabsFor(Colony(9, OwnerRelation.Hostile, 3, 3, "Raid Camp")));

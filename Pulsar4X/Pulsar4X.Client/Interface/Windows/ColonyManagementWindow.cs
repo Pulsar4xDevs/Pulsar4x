@@ -207,6 +207,12 @@ namespace Pulsar4X.Client
                     DisplaySummary(selectedColony, selectedSystem);
                     ImGui.EndTabItem();
                 }
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Workforce)
+                    && selectedColony.GetView<WorkforceView>() is { } workforce && ImGui.BeginTabItem("Workforce"))
+                {
+                    ColonyWorkforceDisplay.Display(selectedColony.Id, workforce, _uiState);
+                    ImGui.EndTabItem();
+                }
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Production) && ImGui.BeginTabItem("Production"))
                 {
                     _productionDisplay ??= new ColonyProductionDisplay();

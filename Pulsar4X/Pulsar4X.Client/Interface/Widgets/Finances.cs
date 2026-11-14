@@ -38,15 +38,39 @@ public static class Finances
             ? f.CrewOnPayroll.ToString("N0", culture) + " crew, no wages charged yet"
             : f.CrewOnPayroll.ToString("N0", culture) + " crew x " + Money(f.CrewWagePerDay, culture) + " a day = " + Money(f.PayrollPerMonth, culture) + " a month";
 
-    /// <summary>"$75,000.00 a month (wages $74,040.00, labs $960.00)".</summary>
+    /// <summary>"$75,000.00 a month (wages $74,040.00, staff $372,600.00, labs $960.00)".</summary>
     public static string RunningCostsText(FactionSnapshot f, CultureInfo? culture = null)
-        => Money(f.RunningCostsPerMonth, culture) + " a month (wages " + Money(f.PayrollPerMonth, culture) + ", labs " + Money(f.LabCostsPerMonth, culture) + ")";
+        => Money(f.RunningCostsPerMonth, culture) + " a month (wages " + Money(f.PayrollPerMonth, culture)
+            + ", staff " + Money(f.StaffWagesPerMonth, culture) + ", labs " + Money(f.LabCostsPerMonth, culture) + ")";
 
-    /// <summary>"$12,000.00 (wages $10,000.00, research $2,000.00)", or "nothing yet".</summary>
+    /// <summary>"$12,000.00 (wages $10,000.00, staff $0.00, research $2,000.00)", or "nothing yet".</summary>
     public static string AccruedText(FactionSnapshot f, CultureInfo? culture = null)
         => f.AccruedThisMonth <= 0
             ? "nothing yet"
-            : Money(f.AccruedThisMonth, culture) + " (wages " + Money(f.AccruedWagesThisMonth, culture) + ", research " + Money(f.AccruedResearchThisMonth, culture) + ")";
+            : Money(f.AccruedThisMonth, culture) + " (wages " + Money(f.AccruedWagesThisMonth, culture)
+                + ", staff " + Money(f.AccruedStaffWagesThisMonth, culture)
+                + ", research " + Money(f.AccruedResearchThisMonth, culture) + ")";
+
+    /// <summary>"6,210 staff x $2.00 a day = $372,600.00 a month", or "6,210 staff, no wages charged yet".</summary>
+    public static string StaffWagesText(FactionSnapshot f, CultureInfo? culture = null)
+    {
+        long n = f.StaffOnPayroll + f.CommutersOnPayroll;
+        string who = f.CommutersOnPayroll > 0
+            ? n.ToString("N0", culture) + " staff (" + f.StaffOnPayroll.ToString("N0", culture) + " own, "
+                + f.CommutersOnPayroll.ToString("N0", culture) + " commuters)"
+            : n.ToString("N0", culture) + " staff";
+        return f.StaffWagePerDay <= 0 && f.StaffWagesPerDay <= 0
+            ? who + ", no wages charged yet"
+            : who + " x " + Money(f.StaffWagePerDay, culture) + " a day = " + Money(f.StaffWagesPerMonth, culture) + " a month";
+    }
+
+    /// <summary>"$2,000.00 a month" (bloc tax; 0 for the company).</summary>
+    public static string TaxIncomeText(FactionSnapshot f, CultureInfo? culture = null)
+        => Money(f.TaxIncomePerMonth, culture) + " a month";
+
+    /// <summary>"$9,000.00" (three months of running costs a bloc keeps back before it bids; 0 when it doesn't bid).</summary>
+    public static string BidReserveText(FactionSnapshot f, CultureInfo? culture = null)
+        => Money(f.BidReserve, culture);
 
     /// <summary>"2050-02-01", or "-" when unknown.</summary>
     public static string NextPaydayText(FactionSnapshot f)
@@ -112,8 +136,11 @@ public static class Finances
         {
             Row("Last wage bill", LastWagesText(f), "The last monthly crew pay line (ledger category " + FactionSnapshot.WagesCategory + "), booked on the 1st for the month before.");
             Row("Payroll", PayrollText(f), "Crew aboard the faction's ships plus trained crew in its colony pools. Academy students are not paid.\nWages accrue daily and are billed once, on the 1st of each month.");
-            Row("Running costs", RunningCostsText(f), "Per month (" + f.DaysInMonth + " days this month): crew payroll plus the research labs that research today. Income is not forecast.");
-            Row("Owed this month", AccruedText(f), "Wages and research accrued so far this month, not yet billed. Labs can only spend funds less this.");
+            Row("Staff wages", StaffWagesText(f), "Own staff and commuters, at the staff wage (default 2 cr a day). Commuter wages are paid into their bloc's funds.\nBilled on the 1st with crew wages (ledger category " + FactionSnapshot.StaffWagesCategory + ").");
+            Row("Tax income", TaxIncomeText(f), "Bloc tax: residents × tax per person per month. 0 for the company.");
+            Row("Bid reserve", BidReserveText(f), "Funds a bloc keeps back before it bids: three months of running costs. 0 for factions that do not bid.");
+            Row("Running costs", RunningCostsText(f), "Per month (" + f.DaysInMonth + " days this month): crew payroll, staff wages and the research labs that research today. Income is not forecast.");
+            Row("Owed this month", AccruedText(f), "Crew wages, staff wages and research accrued so far this month, not yet billed. Labs can only spend funds less this.");
             Row("Next payday", NextPaydayText(f), "The month's wages and research are billed on the 1st. If funds can't cover the bill, the balance goes negative and spending is blocked.");
             Row("Days until broke", DaysUntilBrokeText(f.DaysUntilBroke), "(Funds - owed this month) / daily running costs, income not counted.");
             ImGui.EndTable();

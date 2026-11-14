@@ -105,6 +105,8 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
         "Research" => "Research (monthly)",
         "Trade" => "Trade",
         FactionSnapshot.WagesCategory => "Wages (monthly)",
+        FactionSnapshot.StaffWagesCategory => "Staff wages (monthly)",
+        FactionSnapshot.TaxCategory => "Tax",
         _ => category
     };
 }
