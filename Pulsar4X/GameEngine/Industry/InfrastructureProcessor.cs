@@ -37,6 +37,8 @@ namespace Pulsar4X.Industry
 
             infrastructureDB.CapacityProvided = SumProvidedCapacity(instancesDB, colonyInfo.PlanetEntity);
             infrastructureDB.CapacityRequired = SumRequiredCapacity(instancesDB);
+            // Multi-faction phase 5: an installation change moves Required at once (disabling one lays its staff off).
+            Workforce.Recalc(colonyEntity);
         }
 
         /// <summary>

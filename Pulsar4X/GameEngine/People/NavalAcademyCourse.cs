@@ -103,6 +103,10 @@ public static class NavalAcademyCourse
             : PopulationOf(info);
         if (people < count)
             return "The colony has " + people + " people. This crew course needs " + count + ".";
+        // Multi-faction phase 5: trainees come from civilians, not from staff at work.
+        long civilians = Pulsar4X.Colonies.Workforce.Civilians(colony);
+        if (civilians < count)
+            return "The colony has " + civilians + " civilians free (the rest are at work). This crew course needs " + count + ".";
         return null;
     }
 

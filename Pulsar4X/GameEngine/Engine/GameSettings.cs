@@ -136,6 +136,14 @@ namespace Pulsar4X.Engine
         /// </summary>
         public decimal CrewWagePerDay { get; set; } = DefaultCrewWagePerDay;
 
+        /// <summary>Multi-faction phase 6 (plan §7.2): wage per employee (own staff and commuters) per day, cr.</summary>
+        public const decimal DefaultStaffWagePerDay = 2m;
+        public decimal StaffWagePerDay { get; set; } = DefaultStaffWagePerDay;
+
+        /// <summary>Multi-faction phase 6: bloc tax income per resident per month, cr (blocs only).</summary>
+        public const decimal DefaultBlocTaxPerPersonPerMonth = 2m;
+        public decimal BlocTaxPerPersonPerMonth { get; set; } = DefaultBlocTaxPerPersonPerMonth;
+
         #endregion
 
         #region Network Settings

@@ -548,6 +548,68 @@ public sealed record ColonyPowerPlantRow(
     string? FuelName, double FuelAtFull_kgPerDay, double Store_kJ, string? Note);
 
 /// <summary>Demand in one priority tier, and the share of it the grid supplies (0..1).</summary>
+/// <summary>
+/// A colony's workforce (multi-faction phase 5, plan §7.1 / §7.6): residents at work vs civilians, contract staff
+/// from same-body blocs, and staffing by priority tier. Staff counts are people.
+/// </summary>
+public sealed record WorkforceView : IComponentView
+{
+    /// <summary>Σ CrewReq × count over enabled installations.</summary>
+    public long Required { get; init; }
+    /// <summary>Own residents at work.</summary>
+    public long Employed { get; init; }
+    /// <summary>Contract staff from blocs on the same body (they stay bloc residents).</summary>
+    public long Commuters { get; init; }
+    /// <summary>Residents not at work: the academy, recruitment and NPC crews draw only from these.</summary>
+    public long Civilians { get; init; }
+    /// <summary>Wanted headcount (own + contract); equals Required unless the player set one.</summary>
+    public long Target { get; init; }
+    /// <summary>True when the player set a target below or above Required.</summary>
+    public bool TargetSet { get; init; }
+    /// <summary>Staff wage per employee per day, cr (phase 6; own staff and commuters alike).</summary>
+    public decimal StaffWagePerDay { get; init; }
+    /// <summary>(Employed + Commuters) × wage × days in the month, cr.</summary>
+    public decimal StaffWagesPerMonth { get; init; }
+    public IReadOnlyList<WorkforceTierRow> Tiers { get; init; } = Array.Empty<WorkforceTierRow>();
+    public IReadOnlyList<WorkforceFacilityRow> Facilities { get; init; } = Array.Empty<WorkforceFacilityRow>();
+    /// <summary>One row per other faction with a colony on this body: its labour pool and this colony's contract.</summary>
+    public IReadOnlyList<WorkforceContractRow> Contracts { get; init; } = Array.Empty<WorkforceContractRow>();
+}
+
+/// <summary>One staffing tier: what it needs and the staffed share (0..1). Tier rank 1 is staffed first.</summary>
+public sealed record WorkforceTierRow
+{
+    public string Tier { get; init; } = "";
+    public int TierRank { get; init; }
+    public long Required { get; init; }
+    public double Staffed { get; init; } = 1;
+}
+
+/// <summary>One installation design at the colony: enabled count, staff it needs, its tier and that tier's staffed share.</summary>
+public sealed record WorkforceFacilityRow
+{
+    public string DesignId { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string Tier { get; init; } = "";
+    public int TierRank { get; init; }
+    public int Count { get; init; }
+    public long Required { get; init; }
+    public double Staffed { get; init; } = 1;
+}
+
+/// <summary>A bloc on the same body: its labour pool (5% of its people there, less contracted staff) and this colony's contract.</summary>
+public sealed record WorkforceContractRow
+{
+    public int FactionId { get; init; }
+    public string FactionName { get; init; } = "";
+    /// <summary>A colony of that faction on this body, the counterparty for hire / relocate commands.</summary>
+    public int ColonyId { get; init; }
+    public long Contracted { get; init; }
+    public long LabourPool { get; init; }
+    /// <summary>False when relations are below Friendly (no contracts possible).</summary>
+    public bool CanContract { get; init; }
+}
+
 public sealed record ColonyPowerTierRow(string Tier, int TierRank, double Demand_kW, double Satisfaction);
 
 /// <summary>

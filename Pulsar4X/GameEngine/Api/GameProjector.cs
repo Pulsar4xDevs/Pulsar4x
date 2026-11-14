@@ -340,6 +340,7 @@ namespace Pulsar4X.Engine.Api
                 : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Energy.ColonyPowerDB>(out var power) ? ToColonyPowerView(power, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ComponentInstancesDB>(out var ci) ? ToInstallationsView(ci, e) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyWorkforceDB>(out var wf) ? ToWorkforceView(wf, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyInfoDB>(out var col) ? ToColonyMiningView(col, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<NavalAcademyDB>(out var na) ? ToNavalAcademyView(na, e) : null,
             (e, f) => e.FactionOwnerID == f && e.HasDataBlob<ColonyInfoDB>() ? ToRecruitmentView(e, f) : null,
@@ -767,6 +768,60 @@ namespace Pulsar4X.Engine.Api
             var hash = value.GetHashCode();
             var factor = (hash % 41 - 20) / 100.0;
             return (long)(value * (1 + factor));
+        }
+
+        private static WorkforceView ToWorkforceView(ColonyWorkforceDB db, Entity e)
+        {
+            var game = e.Manager!.Game;
+            var rows = new List<WorkforceFacilityRow>();
+            if (e.TryGetDataBlob<ComponentInstancesDB>(out var instances))
+            {
+                foreach (var (design, _) in instances.DesignsAndComponentCount)
+                {
+                    if (design.CrewReq <= 0)
+                        continue;
+                    int enabled = instances.GetComponentsBySpecificDesign(design.UniqueID).Count(c => c.IsEnabled);
+                    if (enabled == 0)
+                        continue;
+                    var tier = Workforce.TierOf(design);
+                    rows.Add(new WorkforceFacilityRow
+                    {
+                        DesignId = design.UniqueID, Name = design.Name, Tier = tier.ToString(), TierRank = (int)tier,
+                        Count = enabled, Required = (long)design.CrewReq * enabled, Staffed = Workforce.Share(e, tier),
+                    });
+                }
+            }
+            var tiers = Enum.GetValues(typeof(StaffTier)).Cast<StaffTier>().Select(t => new WorkforceTierRow
+            {
+                Tier = t.ToString(), TierRank = (int)t,
+                Required = db.RequiredByTier.TryGetValue(t, out var r) ? r : 0, Staffed = Workforce.Share(e, t),
+            }).ToList();
+            var contracts = new List<WorkforceContractRow>();
+            if (e.TryGetDataBlob<ColonyInfoDB>(out var info) && info.PlanetEntity.IsValid)
+            {
+                foreach (var other in info.PlanetEntity.ColoniesOnBody().Where(c => c.FactionOwnerID != e.FactionOwnerID)
+                             .GroupBy(c => c.FactionOwnerID).Select(g => g.OrderBy(c => c.Id).First()).OrderBy(c => c.FactionOwnerID))
+                {
+                    string name = game.Factions.TryGetValue(other.FactionOwnerID, out var fe) ? fe.GetDataBlob<NameDB>().DefaultName : "";
+                    contracts.Add(new WorkforceContractRow
+                    {
+                        FactionId = other.FactionOwnerID, FactionName = name, ColonyId = other.Id,
+                        Contracted = db.Commuters.TryGetValue(other.FactionOwnerID, out var n) ? n : 0,
+                        LabourPool = Workforce.LabourPool(info.PlanetEntity, other.FactionOwnerID),
+                        CanContract = Workforce.FriendlyBothWays(game, e.FactionOwnerID, other.FactionOwnerID),
+                    });
+                }
+            }
+            decimal wage = Pulsar4X.Factions.FactionSpending.StaffWagePerDay(game, e.FactionOwnerID);
+            int days = Pulsar4X.Factions.FactionSpending.DaysInMonth(game.TimePulse.GameGlobalDateTime);
+            return new WorkforceView
+            {
+                Required = db.Required, Employed = db.Employed, Commuters = db.CommuterTotal, Civilians = Workforce.Civilians(e),
+                Target = db.Target ?? db.Required, TargetSet = db.Target.HasValue,
+                StaffWagePerDay = wage, StaffWagesPerMonth = (db.Employed + db.CommuterTotal) * wage * days,
+                Tiers = tiers, Facilities = rows.OrderBy(r => r.TierRank).ThenBy(r => r.Name, StringComparer.Ordinal).ToList(),
+                Contracts = contracts,
+            };
         }
 
         private static ColonyPowerView ToColonyPowerView(Pulsar4X.Energy.ColonyPowerDB power, Entity e)

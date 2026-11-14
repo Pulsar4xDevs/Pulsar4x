@@ -63,6 +63,9 @@ namespace Pulsar4X.Engine.Api
                 [typeof(FleetHaulContractCommand)] = TranslateFleetHaulContract,
                 [typeof(MoveGoodsCommand)] = TranslateMoveGoods,
                 [typeof(MoveGoodsSameBodyCommand)] = TranslateMoveGoodsSameBody,
+                [typeof(ContractStaffCommand)] = TranslateStaff,
+                [typeof(RelocateCommutersCommand)] = TranslateStaff,
+                [typeof(SetStaffTargetCommand)] = TranslateStaff,
                 [typeof(BootstrapColonyCommand)] = TranslateBootstrapColony,
                 [typeof(FleetBootstrapCommand)] = TranslateFleetBootstrap,
                 [typeof(QueueMoveGoodsCommand)] = TranslateQueueMoveGoods,
@@ -778,6 +781,35 @@ namespace Pulsar4X.Engine.Api
             if (moved.Sum() <= 0)
                 return CommandResult.Reject("Nothing moved: no stock or no room.");
             return CommandResult.Ok("");
+        }
+
+        /// <summary>Multi-faction phase 5: workforce commands on the faction's own colony.</summary>
+        private CommandResult TranslateStaff(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (!commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("Not a colony.");
+            if (commanded.FactionOwnerID != faction.Id)
+                return CommandResult.Reject("The colony is not yours.");
+            string? refusal;
+            switch (command)
+            {
+                case SetStaffTargetCommand t:
+                    Pulsar4X.Colonies.Workforce.SetTarget(commanded, t.Target);
+                    return CommandResult.Ok("");
+                case ContractStaffCommand c:
+                    if (!TryResolve(c.BlocColonyId, out var bloc) || !bloc.HasDataBlob<ColonyInfoDB>())
+                        return CommandResult.Reject("the bloc colony is gone.");
+                    refusal = Pulsar4X.Colonies.Workforce.TryContract(commanded, bloc, c.Count);
+                    break;
+                case RelocateCommutersCommand r:
+                    if (!TryResolve(r.BlocColonyId, out var from) || !from.HasDataBlob<ColonyInfoDB>())
+                        return CommandResult.Reject("the bloc colony is gone.");
+                    refusal = Pulsar4X.Colonies.Workforce.TryRelocateCommuters(commanded, from, r.Count);
+                    break;
+                default:
+                    return CommandResult.Reject("Unknown workforce command.");
+            }
+            return refusal == null ? CommandResult.Ok("") : CommandResult.Reject(refusal);
         }
 
         static CommandResult? RejectWarehouse(Entity faction, Entity colony)

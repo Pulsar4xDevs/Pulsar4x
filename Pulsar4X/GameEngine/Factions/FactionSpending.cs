@@ -69,6 +69,10 @@ public static class FactionSpending
     public static decimal WagePerDay(Game? game, int factionId)
         => PaysWages(game, factionId) ? Math.Max(0, game!.Settings.CrewWagePerDay) : 0;
 
+    /// <summary>Multi-faction phase 6: the faction's staff wage per employee per day (0 when it pays no wages).</summary>
+    public static decimal StaffWagePerDay(Game? game, int factionId)
+        => PaysWages(game, factionId) ? Math.Max(0, game!.Settings.StaffWagePerDay) : 0;
+
     /// <summary>Most unpaid days one pay run books (a background system runs the pay processor every 10 days).</summary>
     public const int MaxCatchUpDays = 31;
 

@@ -185,6 +185,9 @@ namespace Pulsar4X.People
                     return "The colony has nobody to hire.";
             }
 
+            // Multi-faction phase 5: a hire comes from civilians, not from staff at work.
+            if (Pulsar4X.Colonies.Workforce.Civilians(colony) < 1)
+                return "The colony has no civilians free (everyone is at work).";
             info.Population[speciesId] -= 1;
             pool.Candidates.Remove(candidate);
 

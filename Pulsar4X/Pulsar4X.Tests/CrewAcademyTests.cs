@@ -114,6 +114,9 @@ public class CrewAcademyTests
         var info = _earth.GetDataBlob<ColonyInfoDB>();
         int human = info.Population.Keys.Single();
         info.Population[human] = 20;
+        // Multi-faction phase 5: trainees come from civilians. All 20 would be at work, so lay the staff off first.
+        Assert.That(NavalAcademyCourse.TryTrainCrew(_earth, Academy.ComponentId, 20, human), Does.Contain("civilians free"));
+        Pulsar4X.Colonies.Workforce.SetTarget(_earth, 0);
         Assert.That(NavalAcademyCourse.TryTrainCrew(_earth, Academy.ComponentId, 30), Is.EqualTo("The colony has 20 people. This crew course needs 30."));
         Assert.That(NavalAcademyCourse.TryTrainCrew(_earth, Academy.ComponentId, 20, human), Is.Null);
         Assert.That(info.Population.ContainsKey(human), Is.False, "all 20 went to class");

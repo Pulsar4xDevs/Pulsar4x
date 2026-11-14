@@ -212,6 +212,8 @@ namespace Pulsar4X.Colonies
             if (colonyBlueprint.UniqueID == CeresStart.DepotColonyId)
                 WriteDepotPrices(colonyEntity);
             SeedMarketRows(colonyEntity, colonyBlueprint, factionInfo);
+            // Multi-faction phase 5: staff start at min(population, required).
+            Workforce.Ensure(colonyEntity);
             if (colonyEntity.HasDataBlob<LogiBaseDB>())
                 AgentProcessor.AssignGoal(colonyEntity, new Goal(GoalType.OfferStock) { Name = "Offer stock" });
 
@@ -481,6 +483,7 @@ namespace Pulsar4X.Colonies
 
             // Sum the grid once now: a colony with people and no installations still has life support.
             Pulsar4X.Energy.ColonyPowerProcessor.Recalc(colonyEntity);
+            Workforce.Ensure(colonyEntity);
 
             return colonyEntity;
         }

@@ -252,7 +252,8 @@ namespace Pulsar4X.Ships
             {
                 if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))
                     return 0;
-                int have = (int)Math.Min(count, NavalAcademyCourse.PopulationOf(info));
+                // Multi-faction phase 5: NPC crews come from civilians, not from staff at work.
+                int have = (int)Math.Min(count, Pulsar4X.Colonies.Workforce.Civilians(colony));
                 if (have > 0)
                     NavalAcademyCourse.TakePeople(info, have);
                 return have;
@@ -268,7 +269,7 @@ namespace Pulsar4X.Ships
             if (count <= 0)
                 return 0;
             if (CrewsFromPopulation(colony))
-                return colony.TryGetDataBlob<ColonyInfoDB>(out var info) ? (int)Math.Min(count, NavalAcademyCourse.PopulationOf(info)) : 0;
+                return colony.HasDataBlob<ColonyInfoDB>() ? (int)Math.Min(count, Pulsar4X.Colonies.Workforce.Civilians(colony)) : 0;
             return colony.TryGetDataBlob<ColonyCrewPoolDB>(out var pool) ? (int)Math.Min(count, pool.Total) : 0;
         }
 

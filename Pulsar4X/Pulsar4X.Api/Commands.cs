@@ -105,6 +105,19 @@ public sealed record MoveGoodsSameBodyCommand(
     int TargetEntityId,
     int DestId,
     IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
+/// <summary>
+/// Multi-faction phase 5: contract staff (commuters) from the bloc that owns <paramref name="BlocColonyId"/>, on the
+/// same body. A positive count hires (no fee; within the bloc's labour pool and the colony's open posts), a negative
+/// count ends that many. Needs Friendly relations both ways.
+/// </summary>
+public sealed record ContractStaffCommand(int TargetEntityId, int BlocColonyId, long Count) : GameCommand(TargetEntityId);
+
+/// <summary>Multi-faction phase 5: turn this many commuters from that bloc into residents ("Relocate to company"), 100 cr each, paid to the bloc.</summary>
+public sealed record RelocateCommutersCommand(int TargetEntityId, int BlocColonyId, long Count) : GameCommand(TargetEntityId);
+
+/// <summary>Multi-faction phase 5: the colony's wanted headcount; null resets it to Required. Lay-offs (contract staff first) apply at once, hiring ramps daily.</summary>
+public sealed record SetStaffTargetCommand(int TargetEntityId, long? Target) : GameCommand(TargetEntityId);
+
 /// <summary>This many finished crates of one component design.</summary>
 public sealed record BootstrapCrateRequest(string DesignId, int Count);
 
