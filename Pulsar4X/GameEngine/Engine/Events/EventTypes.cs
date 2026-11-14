@@ -81,5 +81,10 @@ namespace Pulsar4X.Events
         /// <summary>A ship's batteries ran empty while its plant cannot carry its life support (crew plan phase 4).</summary>
         LifeSupportFailing,
         #endregion
+
+        #region Market (appended so saved ordinals stay put)
+        /// <summary>A same-body market trade settled instantly (multi-faction phase 4 auto-clearing included).</summary>
+        MarketTradeSettled,
+        #endregion
     }
 }

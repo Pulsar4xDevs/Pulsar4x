@@ -6,6 +6,7 @@ using System.Linq;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Industry;
 using Pulsar4X.Storage;
@@ -456,6 +457,15 @@ public static class ShipmentBook
             string item = picked[i].item.UniqueID;
             buyerInfo.Money.AddExpense(now, TransactionCategory.Trade, $"same-body {item} {seller.FactionOwnerID}", amount);
             sellerInfo.Money.AddIncome(now, TransactionCategory.Trade, $"same-body {item} {buyer.FactionOwnerID}", amount);
+            // Every same-body sale, auto-cleared ones included, shows in both factions' event logs.
+            Pulsar4X.Events.EventManager.Instance.Publish(Pulsar4X.Events.Event.Create(
+                Pulsar4X.Events.EventType.MarketTradeSettled,
+                now,
+                $"{seller.GetName(seller.FactionOwnerID)} sold {units:N0} {item} to {buyer.GetName(buyer.FactionOwnerID)} for {amount:N0} cr (same body, no fee)",
+                seller.FactionOwnerID,
+                seller.Manager?.ManagerID,
+                seller.Id,
+                new List<int> { seller.FactionOwnerID, buyer.FactionOwnerID }));
         }
         if (!any)
             reason = "No room in the buyer's warehouse.";

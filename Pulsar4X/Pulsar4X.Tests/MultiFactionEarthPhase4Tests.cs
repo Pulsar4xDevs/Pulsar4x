@@ -182,8 +182,18 @@ public class MultiFactionEarthPhase4Tests
         var row = Row(spc, "iron");
         row.LastConsumption(spc, t0);
         decimal companyFunds = Info(_company).Money.GetCurrentFunds(), spcFunds = Info(spc).Money.GetCurrentFunds();
+        var events = new List<Pulsar4X.Events.Event>();
+        Action<Pulsar4X.Events.Event> onTrade = events.Add;
+        Pulsar4X.Events.EventManager.Instance.Subscribe(Pulsar4X.Events.EventType.MarketTradeSettled, onTrade);
+        try { Plan(spc, t0); }
+        finally { Pulsar4X.Events.EventManager.Instance.Unsubscribe(Pulsar4X.Events.EventType.MarketTradeSettled, onTrade); }
 
-        Plan(spc, t0);
+        // Listing is consent, but every auto-cleared sale shows in the player's ledger and event log.
+        var sale = events.Single(e => e.ConcernedFactions.Contains(_player.Id));
+        Assert.That(sale.ConcernedFactions, Does.Contain(spc.FactionOwnerID));
+        Assert.That(sale.Message, Does.Contain("5,000 iron"));
+        Assert.That(Info(_company).Money.GetTransactionsByCategory(TransactionCategory.Trade)
+            .Count(t => t.Amount == 5_000m && t.Description.StartsWith("same-body iron")), Is.EqualTo(1));
 
         Assert.That(Units(_company, "iron"), Is.EqualTo(0));
         Assert.That(Units(spc, "iron"), Is.EqualTo(5_000));
