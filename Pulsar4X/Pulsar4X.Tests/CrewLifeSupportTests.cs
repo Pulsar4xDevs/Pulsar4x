@@ -119,8 +119,11 @@ public class CrewLifeSupportTests
         var design = player.GetDataBlob<FactionInfoDB>().ShipDesigns["default-ship-design-starship"];
         Assert.That(design.Components.Where(c => c.design.UniqueID == "default-design-reactor-2t").Sum(c => c.count), Is.EqualTo(1));
         Assert.That(ShipCrew.DesignCrewWarnings(design.Components), Is.Empty);
-        Assert.That(ShipCrew.Split(design.Components).Required, Is.EqualTo(7), "4 crew plus the reactor's 3");
-        Assert.That(ShipCrew.Split(design.Components).Capacity, Is.EqualTo(7));
+        // 3 bridge and parts crew plus the reactor's 3 (the bridge needs one fewer since the 2026-11-15 size pass);
+        // the 7th berth is the captain's.
+        Assert.That(ShipCrew.Split(design.Components).Required, Is.EqualTo(6), "3 crew plus the reactor's 3");
+        Assert.That(ShipCrew.Split(design.Components).Capacity, Is.EqualTo(6));
+        Assert.That(design.CrewBerths, Is.EqualTo(7), "a berth for the captain");
         Assert.That(ReactorOutput(design.Components), Is.EqualTo(15).Within(1e-9));
         Assert.That(ReactorOutput(design.Components), Is.GreaterThan(1.1 * 7), "carries its crew's 7 kW with headroom");
     }

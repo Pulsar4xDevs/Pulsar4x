@@ -227,9 +227,9 @@
         "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "0.5",
         "CrewReq": "Max(2, 2 * Pow(PropertyValue('Survey Speed'), 0.7))",
-        "ResearchCost": "PropertyValue('Survey Speed')",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "PropertyValue('Survey Speed') * Pow(PropertyValue('Survey Speed') / 1, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Survey Speed') / 1, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Survey Speed') / 1, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.4",
@@ -246,7 +246,7 @@
           "Name": "Power Draw",
           "Units": "kW",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "5 * PropertyValue('Survey Speed')"
+          "PropertyFormula": "(5 * PropertyValue('Survey Speed')) * Pow(PropertyValue('Survey Speed') / 1, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -294,9 +294,9 @@
         "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "0.5",
         "CrewReq": "Max(2, 20 * Pow(PropertyValue('Survey Speed') / 10.0, 0.7))",
-        "ResearchCost": "PropertyValue('Survey Speed')",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "PropertyValue('Survey Speed') * Pow(PropertyValue('Survey Speed') / 1, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Survey Speed') / 1, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Survey Speed') / 1, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.4",
@@ -313,7 +313,7 @@
           "Name": "Power Draw",
           "Units": "kW",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "1 * PropertyValue('Survey Speed')"
+          "PropertyFormula": "(1 * PropertyValue('Survey Speed')) * Pow(PropertyValue('Survey Speed') / 1, -0.15)"
         },
         {
           "Name": "DBargsPower",

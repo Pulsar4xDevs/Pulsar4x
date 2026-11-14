@@ -412,16 +412,11 @@ namespace Pulsar4X.Engine.Api
                     }
                 }
 
-                // Ship designs are saved on the faction, but each producer's IndustryView
-                // contains its own projected design choices. Refresh those snapshots even while
-                // paused, rather than waiting for the next colony tick.
-                if (command is SaveShipDesignCommand)
-                {
-                    foreach (var system in _game.Systems)
-                        foreach (var producer in system.GetAllEntitiesWithDataBlob<Pulsar4X.Industry.IndustryAbilityDB>())
-                            if (producer.FactionOwnerID == session.FactionId)
-                                PushEntityRefresh(producer, session.FactionId);
-                }
+                // Ship and component designs are saved on the faction, but each producer's
+                // IndustryView contains its own projected design choices (build and upgrade lists).
+                // Refresh those snapshots even while paused, rather than waiting for the next colony tick.
+                if (command is SaveShipDesignCommand or CreateComponentDesignCommand)
+                    PushProducerRefresh(session.FactionId);
 
                 // A new component design also registers a research project for itself.
                 if (command is CreateComponentDesignCommand)
@@ -449,6 +444,17 @@ namespace Pulsar4X.Engine.Api
         {
             if (e.FactionId is not int factionId) return;
             PushComponentDesigns(factionId);
+            // A design the research unlocked joins the producers' build lists now.
+            PushProducerRefresh(factionId);
+        }
+
+        /// <summary>Pushes a fresh snapshot of every production site the faction owns.</summary>
+        private void PushProducerRefresh(int factionId)
+        {
+            foreach (var system in _game.Systems)
+                foreach (var producer in system.GetAllEntitiesWithDataBlob<Pulsar4X.Industry.IndustryAbilityDB>())
+                    if (producer.FactionOwnerID == factionId)
+                        PushEntityRefresh(producer, factionId);
         }
 
         private void PushComponentDesigns(int factionId)

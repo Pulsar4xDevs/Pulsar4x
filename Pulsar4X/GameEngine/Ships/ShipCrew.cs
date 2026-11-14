@@ -26,13 +26,19 @@ namespace Pulsar4X.Ships
     /// (geo and grav surveyors, asteroid miners, shuttlebays, construction bays) share what is left:
     /// F = clamp((aboard - engine crew - bridge crew) / work crew, 0, 1), and they run at F².
     /// Nothing else degrades: lasers, fire control, sensors, reactors and the bridge run at full.
+    /// </para>
+    /// <para>
+    /// A ship with a captain (ShipInfoDB.CommanderID) counts the captain as one more crew: one more required,
+    /// one berth, life support and wages. The captain is counted in ShipCrewDB.Aboard (so pay and life support
+    /// follow) but is never drawn from or returned to a colony pool, and does not crew the engines.
     /// TODO(crew): weapon crew waits for the damage rework.
     /// </para>
     /// </summary>
     public static class ShipCrew
     {
         /// <summary>Crew of a part list split by what the crew does. Capacity is the most that can be aboard.</summary>
-        public readonly record struct CrewSplit(int Required, int Berths, int Engine, int Bridge, int Work)
+        /// <para>Captain is 1 when a captain sits the ship: counted in Required and Bridge, never drawn from a pool.</para>
+        public readonly record struct CrewSplit(int Required, int Berths, int Engine, int Bridge, int Work, int Captain = 0)
         {
             public int Capacity => Math.Min(Required, Berths);
         }
@@ -107,19 +113,47 @@ namespace Pulsar4X.Ships
                 .ToList();
         }
 
+        /// <summary>The mounted parts' split, plus the captain when one sits the ship.</summary>
         public static CrewSplit SplitOf(Entity ship)
         {
             int parts = ship.TryGetDataBlob<ComponentInstancesDB>(out var instances) ? instances.AllComponents.Count : 0;
+            int captain = HasCaptain(ship) ? 1 : 0;
             if (ship.TryGetDataBlob<ShipCrewDB>(out var db))
             {
-                if (db.CachedParts != parts)
+                if (db.CachedParts != parts || db.CachedSplit.Captain != captain)
                 {
-                    db.CachedSplit = Split(Mounted(ship));
+                    db.CachedSplit = WithCaptain(Split(Mounted(ship)), captain);
                     db.CachedParts = parts;
                 }
                 return db.CachedSplit;
             }
-            return Split(Mounted(ship));
+            return WithCaptain(Split(Mounted(ship)), captain);
+        }
+
+        static CrewSplit WithCaptain(CrewSplit split, int captain)
+            => captain <= 0 ? split : split with { Required = split.Required + captain, Bridge = split.Bridge + captain, Captain = captain };
+
+        /// <summary>True when an officer captains the ship.</summary>
+        public static bool HasCaptain(Entity ship)
+            => ship != null && ship.TryGetDataBlob<ShipInfoDB>(out var info) && info.CommanderID >= 0;
+
+        /// <summary>1 when the captain is counted in the ship's crew aboard, else 0.</summary>
+        static int CaptainAboard(ShipCrewDB db) => db.CaptainAboard ? 1 : 0;
+
+        /// <summary>
+        /// Boards or lands the captain in the crew count when a captain is seated or leaves (ShipInfoDB.CommanderID).
+        /// The captain always boards, even when that puts the ship one over its berths; no crew are drawn or returned.
+        /// </summary>
+        public static void SyncCaptain(Entity ship)
+        {
+            if (ship == null || ship.Manager == null || !ship.TryGetDataBlob<ShipCrewDB>(out var db))
+                return;
+            bool has = HasCaptain(ship);
+            if (has == db.CaptainAboard)
+                return;
+            db.CaptainAboard = has;
+            db.CachedParts = -1;
+            db.Aboard = has ? db.Aboard + 1 : Math.Max(0, db.Aboard - 1);
         }
 
         /// <summary>True when the ship carries crew (every ship made by ShipFactory).</summary>
@@ -137,8 +171,9 @@ namespace Pulsar4X.Ships
             return EngineFactor(split, db.Aboard);
         }
 
+        /// <summary>The captain does not crew the engines, so a seated captain is taken off <paramref name="aboard"/>.</summary>
         public static double EngineFactor(CrewSplit split, int aboard)
-            => split.Engine <= 0 ? 1 : Math.Clamp(aboard / (double)split.Engine, 0, 1);
+            => split.Engine <= 0 ? 1 : Math.Clamp((aboard - split.Captain) / (double)split.Engine, 0, 1);
 
         /// <summary>F for the work parts: the crew left after the engines and then the bridge, over the work parts' crew, 0..1.</summary>
         public static double WorkFactor(CrewSplit split, int aboard)
@@ -270,6 +305,7 @@ namespace Pulsar4X.Ships
         {
             var db = new ShipCrewDB(Split(Mounted(ship)).Capacity);
             ship.SetDataBlob(db);
+            SyncCaptain(ship);
             RefreshLifeSupport(ship);
         }
 
@@ -350,24 +386,27 @@ namespace Pulsar4X.Ships
 
         /// <summary>
         /// A launch: the new ship takes min(required, berths) from the colony, largest species pool first.
-        /// When the colony is short it launches under-crewed and an event says so. Returns crew boarded.
+        /// When the colony is short it launches under-crewed and an event says so. Returns crew boarded
+        /// (a seated captain is aboard too but is not drawn from the colony).
         /// </summary>
         public static int BoardAtLaunch(Entity ship, Entity colony, DateTime at)
         {
-            var split = SplitOf(ship);
-            int boarded = Draw(colony, split.Capacity);
             if (!ship.TryGetDataBlob<ShipCrewDB>(out var db))
             {
                 db = new ShipCrewDB();
                 ship.SetDataBlob(db);
             }
-            db.Aboard = boarded;
-            if (boarded < split.Required && colony.Manager != null)
+            SyncCaptain(ship);
+            var split = SplitOf(ship);
+            int captain = CaptainAboard(db);
+            int boarded = Draw(colony, Math.Max(0, split.Capacity - captain));
+            db.Aboard = boarded + captain;
+            if (db.Aboard < split.Required && colony.Manager != null)
             {
                 EventManager.Instance.Publish(Event.Create(
                     EventType.ShipUnderCrewed,
                     at,
-                    LaunchShortText(ship.GetName(ship.FactionOwnerID), boarded, split.Required),
+                    LaunchShortText(ship.GetName(ship.FactionOwnerID), db.Aboard, split.Required),
                     ship.FactionOwnerID,
                     ship.Manager?.ManagerID ?? colony.Manager.ManagerID,
                     ship.Id));
@@ -402,11 +441,12 @@ namespace Pulsar4X.Ships
             return got;
         }
 
-        /// <summary>Sends crew down to the colony's pool: everyone when <paramref name="count"/> is negative. Returns how many left.</summary>
+        /// <summary>Sends crew down to the colony's pool: everyone but the captain when <paramref name="count"/> is negative. Returns how many left.</summary>
         public static int ToPool(Entity ship, Entity colony, int count = -1)
         {
             var db = ship.GetDataBlob<ShipCrewDB>();
-            int leave = count < 0 ? db.Aboard : Math.Min(db.Aboard, count);
+            int crew = Math.Max(0, db.Aboard - CaptainAboard(db));
+            int leave = count < 0 ? crew : Math.Min(crew, count);
             db.Aboard -= leave;
             Return(colony, leave);
             return leave;
@@ -419,7 +459,7 @@ namespace Pulsar4X.Ships
                 return 0;
             db.CachedParts = -1; // a refit can swap parts one for one; recount
             int cap = SplitOf(ship).Capacity;
-            int excess = Math.Max(0, db.Aboard - cap);
+            int excess = Math.Max(0, Math.Min(db.Aboard - cap, db.Aboard - CaptainAboard(db)));
             if (excess > 0)
             {
                 db.Aboard -= excess;
@@ -428,13 +468,13 @@ namespace Pulsar4X.Ships
             return excess;
         }
 
-        /// <summary>Scrapping a ship at a colony returns everyone aboard to its pool, then removes the ship.</summary>
+        /// <summary>Scrapping a ship at a colony returns its crew (not the captain) to its pool, then removes the ship.</summary>
         public static int Scrap(Entity ship, Entity colony)
         {
             int returned = 0;
             if (ship.TryGetDataBlob<ShipCrewDB>(out var db))
             {
-                returned = db.Aboard;
+                returned = Math.Max(0, db.Aboard - CaptainAboard(db)); // the captain is an officer, not pool crew
                 db.Aboard = 0;
                 Return(colony, returned);
             }

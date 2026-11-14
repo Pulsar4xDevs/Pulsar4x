@@ -10,9 +10,9 @@
         "Volume": "Max(1, [Mass] / 150)",
         "HTK": "0.5",
         "CrewReq": "0",
-        "ResearchCost": "[Mass] * 0.5",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "[Mass] * 0.5 * Pow(PropertyValue('Mass') / 250, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 250, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Mass') / 250, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.15",
@@ -96,9 +96,9 @@
         "Volume": "[Mass] / 48",
         "HTK": "0.5",
         "CrewReq": "0",
-        "ResearchCost": "[Mass] * 0.7",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "[Mass] * 0.7 * Pow(PropertyValue('Mass') / 2000, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 2000, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Mass') / 2000, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.15",
@@ -181,9 +181,9 @@
         "Volume": "Max(1, PropertyValue('Mass'))",
         "HTK": "0.5",
         "CrewReq": "Max(1, 0.0275 * Pow([Mass], 0.75))",
-        "ResearchCost": "[Mass] * 1",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "[Mass] * 1 * Pow(PropertyValue('Mass') / 2500, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 2500, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Mass') / 2500, 0.15)"
       },
       "ResourceCost": {
         "copper": "[Mass] * 0.25",

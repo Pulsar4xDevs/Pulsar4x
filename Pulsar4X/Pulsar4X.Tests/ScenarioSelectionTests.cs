@@ -29,12 +29,13 @@ public class ScenarioSelectionTests
         => names.Select(n => Mod(n).Path).ToList();
 
     [Test]
-    public void DiscoverScenarios_DataScenarios_FindsWarpTechStartAndEarlyTech()
+    public void DiscoverScenarios_DataScenarios_FindsWarpTechStartEarlyTechAndTesting()
     {
         ModsState.RefreshModsList("Data");
         var discovered = new ModLoader().DiscoverScenarios(new[] { "Data/scenarios" });
 
-        Assert.That(discovered.Keys, Is.EquivalentTo(new[] { WarpTechStart, EarlyTech }));
+        Assert.That(discovered.Keys, Is.EquivalentTo(new[] { WarpTechStart, EarlyTech, "Pulsar4x.Scenario.Testing" }));
+        Assert.That(discovered["Pulsar4x.Scenario.Testing"].DefaultEnabled, Is.False);
         Assert.That(discovered[WarpTechStart].RequiredMods, Is.EqualTo(new[] { BaseMod }));
         Assert.That(discovered[EarlyTech].RequiredMods, Is.EqualTo(new[] { BaseMod }));
         Assert.That(discovered[EarlyTech].RequiredScenarios, Does.Contain(WarpTechStart));
@@ -69,7 +70,7 @@ public class ScenarioSelectionTests
             "colony-earth", "colony-luna-concord", "colony-mars-outpost", "colony-ceres-depot"
         }));
         Assert.That(store.SystemBodies, Does.ContainKey("planet-earth"));
-        Assert.That(store.SystemBodies, Has.Count.EqualTo(534));
+        Assert.That(store.SystemBodies, Has.Count.EqualTo(533), "the Hyperbolic Test Moon is only in the Testing scenario");
         Assert.That(store.SystemBodies.Count, Is.EqualTo(baseline.SystemBodies.Count));
         Assert.That(store.Colonies.Count, Is.EqualTo(baseline.Colonies.Count));
 

@@ -99,15 +99,11 @@ public class EarthStartTests
         var designs = player.GetDataBlob<FactionInfoDB>().ShipDesigns;
         var yard = colony.GetDataBlob<IndustryAbilityDB>().ProductionLines.Values
             .Single(line => line.IndustryTypeRates.ContainsKey("ship-assembly"));
-        // The starting yard is sized a little above the Starship (Jon's call), not to fit every
-        // starting design: larger hulls need slip research first.
-        var starship = designs["default-ship-design-starship"];
-        // 38 t since crew plan phase 4 gave the Starship a 2 t reactor and two more bunks (37.7 t).
-        Assert.That(yard.MaxVolume, Is.EqualTo(38000));
-        Assert.That(starship.MassPerUnit, Is.LessThanOrEqualTo(yard.MaxVolume));
-        Assert.That(yard.MaxVolume, Is.LessThanOrEqualTo(starship.MassPerUnit * 1.15), "a modest margin, not a blanket allowance");
-        Assert.That(designs["default-ship-design-tanker"].MassPerUnit, Is.GreaterThan(yard.MaxVolume),
-            "larger starting hulls need slip research");
+        // The starting yard has an 85 t slip (Jon's call, 2026-11-15): every starting hull fits,
+        // the largest being the Dropship (82.7 t).
+        Assert.That(yard.MaxVolume, Is.EqualTo(85000));
+        foreach (var design in designs.Values)
+            Assert.That(design.MassPerUnit, Is.LessThanOrEqualTo(yard.MaxVolume), design.Name);
 
         // The starting yard is reproducible with starting research: the designer's slip range allows it.
         var info = player.GetDataBlob<FactionInfoDB>();

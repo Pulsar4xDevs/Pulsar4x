@@ -190,10 +190,11 @@ public class CrewFormulaTests
 
         if (scenario.EndsWith("WarpTechStart"))
         {
-            Assert.That(crew["Sanctum Adroit Gunship"], Is.EqualTo(29), "was 20,365");
-            Assert.That(crew["Ob'enn Dropship"], Is.EqualTo(52), "was 20,454");
-            Assert.That(crew["Surveyor"], Is.EqualTo(37), "was 103");
-            Assert.That(crew["Colony Ship"], Is.EqualTo(44), "was 126");
+            // One fewer since bridge crew scale with console space^0.75 (2026-11-15 size pass).
+            Assert.That(crew["Sanctum Adroit Gunship"], Is.EqualTo(28), "was 20,365");
+            Assert.That(crew["Ob'enn Dropship"], Is.EqualTo(51), "was 20,454");
+            Assert.That(crew["Surveyor"], Is.EqualTo(36), "was 103");
+            Assert.That(crew["Colony Ship"], Is.EqualTo(43), "was 126");
         }
     }
 

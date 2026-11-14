@@ -1,12 +1,5 @@
 [
   {
-    "Type": "Armor",
-    "Payload": {
-      "UniqueID": "stainless-steel-armor",
-      "Density": "7901"
-    }
-  },
-  {
     "Type": "Theme",
     "CollectionOperation": "Add",
     "Payload": {

@@ -293,6 +293,11 @@ public class EarlyTechStartTests
         Assert.That(installations, Does.Not.Contain("default-design-factory"));
         Assert.That(installations, Does.Not.Contain("default-design-refinery"));
 
+        // Early Tech shares the Warp Tech yard: an 85 t slip (Jon's call, 2026-11-15).
+        var yard = colony.GetDataBlob<Pulsar4X.Industry.IndustryAbilityDB>().ProductionLines.Values
+            .Single(line => line.IndustryTypeRates.ContainsKey("ship-assembly"));
+        Assert.That(yard.MaxVolume, Is.EqualTo(85000));
+
         var info = faction.GetDataBlob<FactionInfoDB>();
         var tech = faction.GetDataBlob<FactionTechDB>();
         var ship = game.Systems.SelectMany(system => system.GetAllEntitiesWithDataBlob<ShipInfoDB>()).Single();

@@ -14,8 +14,8 @@ namespace Pulsar4X.Tests;
 
 /// <summary>
 /// Geological surveyor costs used to grow with the square or cube of survey speed, so the
-/// cheapest survey point was always the smallest component. They now scale with that same
-/// speed, and a speed of 1 keeps the old numbers. Crew is the exception: since crew plan phase 0
+/// cheapest survey point was always the smallest component. Mass and minerals now scale with
+/// that same speed, and costs a little faster (the 2026-11-15 size pass); a speed of 1 keeps the old numbers. Crew is the exception: since crew plan phase 0
 /// it grows sub-linearly with speed.
 /// </summary>
 [TestFixture]
@@ -58,9 +58,11 @@ public class GeoSurveyorCostTests
         Assert.That(design.MassPerUnit, Is.EqualTo(100L * speed), "mass");
         Assert.That(design.VolumePerUnit, Is.EqualTo(10d * speed).Within(1e-9), "volume");
         Assert.That(design.CrewReq, Is.EqualTo(crew), "crew");
-        Assert.That(design.ResearchCostValue, Is.EqualTo((long)speed), "research");
-        Assert.That(design.CreditCost, Is.EqualTo(100 * speed), "credits");
-        Assert.That(design.IndustryPointCosts, Is.EqualTo(100L * speed), "build points");
+        // The 2026-11-15 size pass: research x speed^0.3, credits x speed^0.1, build points x speed^0.15
+        // on top of linear (the template default is speed 1, so speed 1 keeps the old numbers).
+        Assert.That(design.ResearchCostValue, Is.EqualTo(speed * System.Math.Pow(speed, 0.3)).Within(1), "research");
+        Assert.That(design.CreditCost, Is.EqualTo(100 * speed * System.Math.Pow(speed, 0.1)).Within(1), "credits");
+        Assert.That(design.IndustryPointCosts, Is.EqualTo(100 * speed * System.Math.Pow(speed, 0.15)).Within(1), "build points");
         Assert.That(design.ResourceCosts["stainless-steel"], Is.EqualTo(40L * speed));
         Assert.That(design.ResourceCosts["plastic"], Is.EqualTo(20L * speed));
         Assert.That(design.ResourceCosts["aluminium"], Is.EqualTo(10L * speed));

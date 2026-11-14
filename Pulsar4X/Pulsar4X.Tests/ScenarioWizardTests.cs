@@ -22,7 +22,16 @@ public class ScenarioWizardTests
     private const string BaseMod = "Pulsar4x";
     private const string WarpTechStart = "Pulsar4x.Scenario.WarpTechStart";
     private const string EarlyTech = "Pulsar4x.Scenario.EarlyTech";
-    private const string TestingMod = "Pulsar4x-Testing";
+    private const string TestingScenario = "Pulsar4x.Scenario.Testing";
+    private const string HyperbolicMoon = "moon-earth-hyperbola";
+
+    /// <summary>An optional, off-by-default mod namespace. No such mod ships any more
+    /// (the old testing mod is now the Testing scenario), so tests that need an installed
+    /// optional mod add <see cref="OptionalModFixture"/> to the installed list.</summary>
+    private const string TestingMod = "Pulsar4x-TestFixture";
+
+    private static ModOption OptionalModFixture()
+        => new ModOption(TestingMod, TestingMod, "0.1", "", "fixture/modInfo.json", false);
 
     private static ModsState.ModMetaData Mod(string name)
         => ModsState.AvailableMods.Single(m => m.Mod.ModName == name);
@@ -51,13 +60,15 @@ public class ScenarioWizardTests
 
     private static List<ModOption> InstalledMods()
     {
-        return ModsState.AvailableMods.Select(m => new ModOption(
+        var mods = ModsState.AvailableMods.Select(m => new ModOption(
             m.Mod.ModName,
             m.Mod.Namespace,
             m.Mod.Version,
             m.ManifestHash,
             m.Path,
             m.Mod.DefaultEnabled)).ToList();
+        mods.Add(OptionalModFixture());
+        return mods;
     }
 
     [Test]
@@ -187,8 +198,8 @@ public class ScenarioWizardTests
         Assert.That(ModsState.IsModEnabled.ContainsKey("Pulsar4x.EarlyTechStart"), Is.False);
         Assert.That(ModsState.IsModEnabled.ContainsKey("Early Tech Start"), Is.False);
         Assert.That(ModsState.IsModEnabled[BaseMod], Is.True);
-        Assert.That(ModsState.IsModEnabled.ContainsKey(TestingMod), Is.True);
-        Assert.That(ModsState.IsModEnabled[TestingMod], Is.False);
+        Assert.That(ModsState.IsModEnabled.ContainsKey("Pulsar4x-Testing"), Is.False,
+            "the old testing mod is folded into the Testing scenario");
 
         foreach (var mod in ModsState.AvailableMods)
         {
@@ -212,7 +223,9 @@ public class ScenarioWizardTests
             "colony-earth", "colony-luna-concord", "colony-mars-outpost", "colony-ceres-depot"
         }));
         Assert.That(store.SystemBodies, Does.ContainKey("planet-earth"));
-        Assert.That(store.SystemBodies, Has.Count.EqualTo(534));
+        Assert.That(store.SystemBodies, Has.Count.EqualTo(533));
+        Assert.That(store.SystemBodies, Does.Not.ContainKey(HyperbolicMoon));
+        Assert.That(store.Systems["system-sol"].Bodies, Does.Not.Contain(HyperbolicMoon));
 
         var catalog = GameLifecycle.BuildCatalog(store);
         var systems = catalog.Systems.Where(s => s.StartingBodies.Count > 0).ToList();
@@ -291,5 +304,62 @@ public class ScenarioWizardTests
         Assert.That(info.ShipDesigns.Keys,
             Is.EquivalentTo(new[] { "early-ship-design-starship", "early-ship-design-newton-tug" }));
         Assert.That(result.Value.game.Systems.Select(s => s.ID), Does.Contain("system-sol"));
+    }
+
+    [Test]
+    public void TestingScenario_IsOffByDefaultAndBuildsOnWarpTechStart()
+    {
+        var testing = DiscoverScenarios()[TestingScenario];
+        Assert.That(testing.DefaultEnabled, Is.False);
+        Assert.That(testing.RequiredMods, Is.EqualTo(new[] { BaseMod }));
+
+        var manifest = new ModLoader().DiscoverScenarios(
+            GameLifecycle.ScenarioRoots(ModsState.AvailableMods.Select(m => m.Path)))[TestingScenario];
+        Assert.That(manifest.RequiredScenarios, Is.EqualTo(new[] { WarpTechStart }));
+    }
+
+    [Test]
+    public void HyperbolicTestMoon_LoadsOnlyWithTheTestingScenario()
+    {
+        ModsState.RefreshModsList("Data");
+        var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
+
+        var warp = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, WarpTechStart);
+        Assert.That(warp.SystemBodies, Does.Not.ContainKey(HyperbolicMoon));
+        Assert.That(warp.Systems["system-sol"].Bodies, Does.Not.Contain(HyperbolicMoon));
+
+        var testing = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, TestingScenario);
+        Assert.That(testing.ScenarioNamespace, Is.EqualTo(TestingScenario));
+        Assert.That(testing.SystemBodies, Does.ContainKey(HyperbolicMoon));
+        Assert.That(testing.SystemBodies[HyperbolicMoon].Name, Is.EqualTo("Hyperbolic Test Moon"));
+        Assert.That(testing.Systems["system-sol"].Bodies, Does.Contain(HyperbolicMoon));
+        Assert.That(testing.Colonies, Does.ContainKey("colony-earth"));
+        Assert.That(testing.Themes["default-theme"].FirstNames, Does.Contain("FakeFirstName1"));
+        Assert.That(warp.Themes["default-theme"].FirstNames, Does.Not.Contain("FakeFirstName1"));
+
+        // The moon is a real body in a new Testing game.
+        var catalog = GameLifecycle.BuildCatalog(testing);
+        var request = new NewGameRequest(
+            ModManifestPaths: TickedPaths(BaseMod),
+            FactionName: "United Earth Corp",
+            FactionAbbreviation: "UEC",
+            SpeciesId: catalog.DefaultStart!.SpeciesId,
+            ColonyId: catalog.DefaultStart.ColonyId,
+            SystemId: catalog.DefaultStart.SystemId,
+            BodyId: catalog.DefaultStart.BodyId,
+            EnabledSystems: catalog.Systems.Where(s => s.StartingBodies.Count > 0).Select(s => s.Id).ToList(),
+            MaxSystems: 10,
+            MasterSeed: 12345678,
+            StartingFunds: 100_000_000,
+            EleStart: true,
+            SMPassword: "",
+            PlayerPassword: "",
+            ScenarioId: TestingScenario);
+        var result = GameLifecycle.CreateGameCore(testing, request);
+        Assert.That(result, Is.Not.Null);
+        var sol = result!.Value.game.Systems.Single(s => s.ID == "system-sol");
+        var names = sol.GetAllEntitiesWithDataBlob<Pulsar4X.Galaxy.SystemBodyInfoDB>()
+            .Select(b => b.GetDataBlob<NameDB>().DefaultName).ToList();
+        Assert.That(names, Does.Contain("Hyperbolic Test Moon"));
     }
 }

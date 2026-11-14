@@ -53,7 +53,8 @@ public class ApiCrewSnapshotTests
             Assert.That(view.BerthsByComponent, Is.Not.Empty, "a bridge or crew quarters");
             Assert.That(view.BerthsByComponent.Sum(r => r.Berths), Is.EqualTo(view.CrewBerths));
             Assert.That(view.CrewTracked, Is.True, "crew plan phase 3 tracks crew aboard");
-            Assert.That(view.CrewAboard, Is.EqualTo(design.CrewReq), "scenario ships start fully crewed");
+            // The captain counts as one more crew aboard (2026-11-15).
+            Assert.That(view.CrewAboard, Is.EqualTo(design.CrewReq + (ShipCrew.HasCaptain(ship) ? 1 : 0)), "scenario ships start fully crewed");
             Assert.That(view.CrewFactor, Is.EqualTo(1));
             Assert.That(view.EngineCrewFactor, Is.EqualTo(1));
             Assert.That(view.UnderCrewed, Is.False);
@@ -65,11 +66,12 @@ public class ApiCrewSnapshotTests
         Assert.That(snapshots.Concat(fleets.SelectMany(f => f.Ships)).Any(s => s.CrewRequired > 0), Is.True);
         foreach (var snapshot in snapshots.Concat(fleets.SelectMany(f => f.Ships)))
         {
-            var design = ships.Single(s => s.Id == snapshot.Id).GetDataBlob<ShipInfoDB>().Design;
+            var entity = ships.Single(s => s.Id == snapshot.Id);
+            var design = entity.GetDataBlob<ShipInfoDB>().Design;
             Assert.That(snapshot.CrewRequired, Is.EqualTo(design.CrewReq), snapshot.Name);
             Assert.That(snapshot.CrewBerths, Is.EqualTo(design.CrewBerths));
             Assert.That(snapshot.CrewTracked, Is.True);
-            Assert.That(snapshot.CrewAboard, Is.EqualTo(design.CrewReq));
+            Assert.That(snapshot.CrewAboard, Is.EqualTo(design.CrewReq + (ShipCrew.HasCaptain(entity) ? 1 : 0)), "crew plus the captain");
             Assert.That(snapshot.UnderCrewed, Is.False);
         }
     }

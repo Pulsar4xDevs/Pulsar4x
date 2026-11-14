@@ -11,6 +11,11 @@ using Pulsar4X.Engine.Api;
 using Pulsar4X.Factions;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Technology;
+using Pulsar4X.Colonies;
+using Pulsar4X.Galaxy;
+using Pulsar4X.Industry;
+using Pulsar4X.People;
+using NameDB = Pulsar4X.Names.NameDB;
 
 namespace Pulsar4X.Tests
 {
@@ -160,6 +165,41 @@ namespace Pulsar4X.Tests
             var noTemplate = _server.SubmitCommand(session,
                 new CreateComponentDesignCommand(session.FactionId, "no-such-template", "Name", Array.Empty<DesignerInput>()));
             Assert.That(noTemplate.Accepted, Is.False);
+        }
+
+        /// <summary>A new installation design must reach the colony's build list at once, even while
+        /// paused: the server refreshes every production site after CreateComponentDesignCommand,
+        /// not only after the next colony tick or a save/reload.</summary>
+        [Test]
+        public void CreateComponentDesign_installation_reaches_the_colony_build_list_while_paused()
+        {
+            var session = Connect();
+            UnlockEverything(session);
+            var faction = _game.Factions[session.FactionId];
+            var species = SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
+            var planet = _game.Systems[0].GetAllEntitiesWithDataBlob<SystemBodyInfoDB>()
+                .First(b => b.HasDataBlob<MassVolumeDB>() && b.HasDataBlob<NameDB>());
+            var colony = ColonyFactory.CreateColony(faction, species, planet, initialPopulation: 9_000_000);
+            colony.SetDataBlob(new IndustryAbilityDB("test-factory", new IndustryAbilityDB.ProductionLine
+            {
+                Name = "Test Factory",
+                IndustryTypeRates = { ["installation-construction"] = 10 },
+            }));
+            Assert.That(_game.TimePulse.IsRunning, Is.False, "the test universe starts paused");
+
+            var received = new List<GameEventEnvelope>();
+            using var subscription = _server.Subscribe(session, received.Add);
+            received.Clear(); // discard the initial connect push
+
+            var result = _server.SubmitCommand(session, new CreateComponentDesignCommand(
+                session.FactionId, "mine", "Paused Mine", Array.Empty<DesignerInput>()));
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+
+            var push = received.LastOrDefault(e => e.Type == GameEventType.EntityChanged && e.EntityId == colony.Id
+                                                   && e.Entity?.GetView<IndustryView>() != null);
+            Assert.That(push, Is.Not.Null, "expected the colony's industry snapshot refreshed after the design was created");
+            var buildList = push!.Entity!.GetView<IndustryView>()!.ProductionLines.Single().Constructibles;
+            Assert.That(buildList.Select(c => c.Name), Does.Contain("Paused Mine"));
         }
 
         /// <summary>Research unlocks templates on the faction data store, but the component design

@@ -9,6 +9,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Api;
+using Pulsar4X.Energy;
 using Pulsar4X.Events;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
@@ -89,12 +90,50 @@ public class CrewAboardTests
         {
             var design = ship.GetDataBlob<ShipInfoDB>().Design;
             Assert.That(ShipCrew.Tracked(ship), Is.True, design.Name);
-            Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(design.CrewReq), design.Name);
+            Assert.That(ShipCrew.HasCaptain(ship), Is.True, design.Name + ": scenario ships come with a captain");
+            Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(design.CrewReq + 1), design.Name + ": crew plus the captain");
+            Assert.That(ShipCrew.SplitOf(ship).Required, Is.EqualTo(design.CrewReq + 1), design.Name);
+            // The Sensor Sat has one berth for its one crew; its captain boards over the berths (no quarters to spare on a 433 kg sat).
+            if (design.Name != "Sensor Sat")
+                Assert.That(ShipCrew.Aboard(ship), Is.LessThanOrEqualTo(design.CrewBerths), design.Name + ": the captain has a berth");
             Assert.That(ShipCrew.WorkFactor(ship), Is.EqualTo(1), design.Name);
             Assert.That(ShipCrew.EngineFactor(ship), Is.EqualTo(1), design.Name);
             Assert.That(ShipCrew.Note(ship), Is.Empty, design.Name);
         }
         Assert.That(Pool.Total, Is.EqualTo(500), "scenario ships draw nobody");
+    }
+
+    [Test]
+    public void Captain_CountsAsOneCrew_ForBerthsLifeSupportAndPay_AndIsNeverDrawnFromThePool()
+    {
+        var ship = _game.Systems.SelectMany(s => s.GetAllEntitiesWithDataBlob<ShipInfoDB>())
+            .First(s => s.FactionOwnerID == _player.Id && ShipCrew.HasCaptain(s) && s.HasDataBlob<EnergyGenAbilityDB>());
+        var info = ship.GetDataBlob<ShipInfoDB>();
+        int crew = info.Design.CrewReq;
+        Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(crew + 1));
+        Assert.That(ShipCrew.LifeSupport(ship), Is.EqualTo((crew + 1) * ShipCrew.KWPerCrew(ship)).Within(1e-9));
+        long payroll = FactionSpending.CrewOnPayroll(_game, _player.Id);
+
+        // The captain leaves: one fewer aboard, required, life support and on the payroll; nobody joins the pool.
+        int captainId = info.CommanderID;
+        long pool = Pool.Total;
+        info.CommanderID = -1;
+        Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(crew));
+        Assert.That(ShipCrew.SplitOf(ship).Required, Is.EqualTo(crew));
+        Assert.That(ShipCrew.LifeSupport(ship), Is.EqualTo(crew * ShipCrew.KWPerCrew(ship)).Within(1e-9));
+        Assert.That(FactionSpending.CrewOnPayroll(_game, _player.Id), Is.EqualTo(payroll - 1));
+        Assert.That(Pool.Total, Is.EqualTo(pool));
+
+        // Sending everyone down keeps a seated captain aboard; the captain boards without drawing anyone.
+        info.CommanderID = captainId;
+        Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(crew + 1));
+        Assert.That(Pool.Total, Is.EqualTo(pool));
+        Assert.That(ShipCrew.ToPool(ship, _earth), Is.EqualTo(crew));
+        Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(1), "the captain stays");
+        Assert.That(ShipCrew.EngineFactor(ship), Is.EqualTo(ShipCrew.SplitOf(ship).Engine > 0 ? 0 : 1), "the captain does not crew the engines");
+        Assert.That(ShipCrew.TopUp(ship, _earth), Is.EqualTo(crew), "a top-up refills the crew, not the captain's seat");
+        Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(crew + 1));
+        Assert.That(FactionSpending.CrewOnPayroll(_game, _player.Id), Is.EqualTo(payroll));
     }
 
     [Test]

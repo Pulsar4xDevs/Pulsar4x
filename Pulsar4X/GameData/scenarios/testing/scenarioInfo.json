@@ -1,0 +1,18 @@
+{
+  "Author": "Pulsar4x Devs",
+  "ScenarioName": "Testing",
+  "Version": "0.1",
+  "Namespace": "Pulsar4x.Scenario.Testing",
+  "Description": "Warp Tech Start plus test-only data: the Hyperbolic Test Moon and fake theme names and ranks.",
+  "DefaultEnabled": false,
+  "RequiredMods": [
+    "Pulsar4x"
+  ],
+  "RequiredScenarios": [
+    "Pulsar4x.Scenario.WarpTechStart"
+  ],
+  "DataFiles": [
+    "testBodies.json",
+    "testData.json"
+  ]
+}

@@ -11,7 +11,21 @@ namespace Pulsar4X.Ships
 
         #region Properties
 
-        public int CommanderID { get; internal set; } = -1;
+        /// <summary>The captain. Seating or clearing one boards or lands them in the crew count (ShipCrew.SyncCaptain).</summary>
+        [JsonIgnore]
+        public int CommanderID
+        {
+            get => _commanderID;
+            internal set
+            {
+                _commanderID = value;
+                if (OwningEntity != null)
+                    ShipCrew.SyncCaptain(OwningEntity);
+            }
+        }
+
+        // Saved under the old property name; loading sets the field, so it does not board anyone.
+        [JsonProperty("CommanderID")] int _commanderID = -1;
 
         public ShipDesign Design { get; private set; }
 

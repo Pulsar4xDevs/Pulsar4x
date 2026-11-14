@@ -330,6 +330,11 @@ namespace Pulsar4X.Engine
             // Power state saved under older rules (demand, battery limits) is brought up to date.
             Pulsar4X.Energy.EnergyLoadRefresh.AfterLoad(loadedGame);
 
+            // A save from before captains counted as crew boards each seated captain once.
+            foreach (var manager in loadedGame.GlobalManagerDictionary.Values)
+                foreach (var ship in manager.GetAllEntitiesWithDataBlob<Pulsar4X.Ships.ShipCrewDB>())
+                    Pulsar4X.Ships.ShipCrew.SyncCaptain(ship);
+
             foreach (var system in loadedGame.Systems)
                 system.UpdateActivityState();
 

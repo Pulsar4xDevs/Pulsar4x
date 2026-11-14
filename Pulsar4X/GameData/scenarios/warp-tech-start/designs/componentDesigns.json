@@ -500,7 +500,10 @@
     "Payload": {
       "UniqueId": "default-design-shipyard",
       "Name": "Ship Yard",
-      "TemplateId": "shipyard"
+      "TemplateId": "shipyard",
+      "Properties": [
+        { "Key": "Slip Size", "Value": 85000 }
+      ]
     }
   },
   {

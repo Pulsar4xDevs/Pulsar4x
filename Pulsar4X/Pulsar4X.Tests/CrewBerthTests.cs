@@ -95,7 +95,7 @@ public class CrewBerthTests
         var shortParts = new List<(ComponentDesign, int)> { (bridge, 1), (bay, 1) };
         var warnings = ShipCrew.DesignCrewWarnings(shortParts);
         Assert.That(warnings, Has.Count.EqualTo(1));
-        Assert.That(warnings[0], Does.Contain("Crew 22").And.Contain("only 4 berths").And.Contain("18 more"));
+        Assert.That(warnings[0], Does.Contain("Crew 21").And.Contain("only 4 berths").And.Contain("17 more"));
 
         var fullParts = new List<(ComponentDesign, int)> { (bridge, 1), (bay, 1), (quarters, 2) };
         Assert.That(ShipCrew.DesignCrewWarnings(fullParts), Is.Empty);
@@ -146,21 +146,24 @@ public class CrewBerthTests
             TestContext.Out.WriteLine($"{design.Name} ({faction.GetDataBlob<NameDB>().DefaultName}): crew {design.CrewReq}, berths {design.CrewBerths}, mass {design.MassPerUnit}");
             Assert.That(design.CrewBerths, Is.EqualTo(ShipCrew.Berths(design.Components)), design.Name);
             Assert.That(design.CrewBerths, Is.GreaterThanOrEqualTo(design.CrewReq), design.Name);
+            if (design.Name != "Sensor Sat")
+                Assert.That(design.CrewBerths, Is.GreaterThanOrEqualTo(design.CrewReq + 1), design.Name + ": a berth for the captain");
             Assert.That(ShipCrew.DesignCrewWarnings(design.Components), Is.Empty, design.Name);
         }
 
         if (scenario.EndsWith("WarpTechStart"))
         {
             Assert.That(berths.Keys, Does.Contain("Geo Surveyor").And.Contain("Prospector"), "the NPC factions' designs");
-            Assert.That(berths["Cargo Courier"], Is.EqualTo((14, 14)));
-            Assert.That(berths["Colony Ship"], Is.EqualTo((44, 49)));
-            Assert.That(berths["Ob'enn Dropship"], Is.EqualTo((52, 56)));
+            // Courier: a third 1-berth quarters for the captain (2026-11-15). Bridge crew now scale with console^0.75.
+            Assert.That(berths["Cargo Courier"], Is.EqualTo((14, 15)));
+            Assert.That(berths["Colony Ship"], Is.EqualTo((43, 49)));
+            Assert.That(berths["Ob'enn Dropship"], Is.EqualTo((51, 56)));
             Assert.That(berths["Sensor Sat"], Is.EqualTo((1, 1)));
         }
         else
         {
             Assert.That(berths["Newton Tug"], Is.EqualTo((2, 3)));
-            Assert.That(berths["Starship"], Is.EqualTo((3, 3)));
+            Assert.That(berths["Starship"], Is.EqualTo((3, 4)), "a second 1-berth quarters for the captain");
         }
     }
 

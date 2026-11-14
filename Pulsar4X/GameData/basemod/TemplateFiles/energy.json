@@ -10,9 +10,9 @@
         "Volume": "PropertyValue('Mass')",
         "HTK": "0.5",
         "CrewReq": "Max(1, 0.0275 * Pow([Mass], 0.75))",
-        "ResearchCost": "[Mass] * 0.5",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "[Mass] * 0.5 * Pow(PropertyValue('Mass') / 1500, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 1500, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Mass') / 1500, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.5",
@@ -87,9 +87,9 @@
         "Volume": "[Mass] / 2896.6",
         "HTK": "0.5",
         "CrewReq": "0",
-        "ResearchCost": "[Mass] * 0.25",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "[Mass] * 0.25 * Pow(PropertyValue('Mass') / 1500, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 1500, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Mass') / 1500, 0.15)"
       },
       "ResourceCost": {
         "plastic": "[Mass] * 0.2",
@@ -170,9 +170,9 @@
         "Volume": "PropertyValue('Mass')",
         "HTK": "0.5",
         "CrewReq": "1",
-        "ResearchCost": "[Mass] * 0.5",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "[Mass] * 0.5 * Pow(PropertyValue('Mass') / 1000, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 1000, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Mass') / 1000, 0.15)"
       },
       "ResourceCost": {
         "aluminium": "PropertyValue('Structural Material')",
@@ -294,9 +294,9 @@
         "Volume": "PropertyValue('Mass') / 1000",
         "HTK": "0.5",
         "CrewReq": "1",
-        "ResearchCost": "[Mass] * 0.5",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "[Mass] * 0.5 * Pow(PropertyValue('Mass') / 250, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 250, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Mass') / 250, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.3",
@@ -392,9 +392,9 @@
         "Volume": "PropertyValue('Mass') / 1000",
         "HTK": "0.5",
         "CrewReq": "3",
-        "ResearchCost": "[Mass] * 0.5",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "[Mass] * 0.5 * Pow(PropertyValue('Mass') / 2000, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 2000, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Mass') / 2000, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "PropertyValue('CoreMass') * 0.5 + PropertyValue('GennyMass') * 0.2",
@@ -524,9 +524,9 @@
         "Volume": "[Mass] / 2000",
         "HTK": "[Mass] * 0.5",
         "CrewReq": "0",
-        "ResearchCost": "[Mass] * 0.5",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "[Mass] * 0.5 * Pow(PropertyValue('Area') / 100, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Area') / 100, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Area') / 100, 0.15)"
       },
       "ResourceCost": {
         "plastic": "[Mass] * 0.3",
@@ -610,10 +610,10 @@
         "Mass": "PropertyValue('Size') * 5000.0",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "Max(10, PropertyValue('Size') * 0.5)",
+        "CrewReq": "Max(10, PropertyValue('Size') * 0.5 * Pow(PropertyValue('Size') / 10, -0.25))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.1",
-        "BuildPointCost": "[Mass] * 0.2"
+        "CreditCost": "[Mass] * 0.1 * Pow(PropertyValue('Size') / 10, 0.1)",
+        "BuildPointCost": "[Mass] * 0.2 * Pow(PropertyValue('Size') / 10, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.4",
@@ -676,10 +676,10 @@
         "Mass": "PropertyValue('Size') * 2000.0",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "Max(5, PropertyValue('Size') * 0.5)",
+        "CrewReq": "Max(5, PropertyValue('Size') * 0.5 * Pow(PropertyValue('Size') / 5, -0.25))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.1",
-        "BuildPointCost": "[Mass] * 0.2"
+        "CreditCost": "[Mass] * 0.1 * Pow(PropertyValue('Size') / 5, 0.1)",
+        "BuildPointCost": "[Mass] * 0.2 * Pow(PropertyValue('Size') / 5, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.6",
@@ -742,10 +742,10 @@
         "Mass": "PropertyValue('Size') * 20000.0",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "Max(20, PropertyValue('Size') * 0.5)",
+        "CrewReq": "Max(20, PropertyValue('Size') * 0.5 * Pow(PropertyValue('Size') / 50, -0.25))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.1",
-        "BuildPointCost": "[Mass] * 0.2"
+        "CreditCost": "[Mass] * 0.1 * Pow(PropertyValue('Size') / 50, 0.1)",
+        "BuildPointCost": "[Mass] * 0.2 * Pow(PropertyValue('Size') / 50, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.5",
@@ -808,10 +808,10 @@
         "Mass": "PropertyValue('Area') * TechData('tech-panel-density') * 1.5",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "Max(1, PropertyValue('Area') * 0.0001)",
+        "CrewReq": "Max(1, PropertyValue('Area') * 0.0001 * Pow(PropertyValue('Area') / 100000, -0.25))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass] * 0.5"
+        "CreditCost": "[Mass] * Pow(PropertyValue('Area') / 100000, 0.1)",
+        "BuildPointCost": "[Mass] * 0.5 * Pow(PropertyValue('Area') / 100000, 0.15)"
       },
       "ResourceCost": {
         "aluminium": "[Mass] * 0.4",
@@ -890,8 +890,8 @@
         "HTK": "0.5",
         "CrewReq": "2",
         "ResearchCost": "0",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass] * 0.5"
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mass') / 100000, 0.1)",
+        "BuildPointCost": "[Mass] * 0.5 * Pow(PropertyValue('Mass') / 100000, 0.15)"
       },
       "ResourceCost": {
         "plastic": "[Mass] * 0.2",

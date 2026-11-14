@@ -32,6 +32,10 @@ namespace Pulsar4X.Ships
         [JsonProperty]
         internal double GravSurveyCarry { get; set; }
 
+        /// <summary>True while a seated captain is counted in <see cref="Aboard"/> (ShipCrew.SyncCaptain).</summary>
+        [JsonProperty]
+        public bool CaptainAboard { get; internal set; }
+
         /// <summary>Life support this ship has booked into its plant's must-run demand, kW (crew plan phase 4).</summary>
         [JsonProperty]
         public double LifeSupport_kW { get; internal set; }
@@ -58,6 +62,7 @@ namespace Pulsar4X.Ships
             GravSurveyCarry = db.GravSurveyCarry;
             LifeSupport_kW = db.LifeSupport_kW;
             LifeSupportFailing = db.LifeSupportFailing;
+            CaptainAboard = db.CaptainAboard;
         }
 
         public override object Clone() => new ShipCrewDB(this);

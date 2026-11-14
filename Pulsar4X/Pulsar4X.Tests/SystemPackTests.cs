@@ -89,7 +89,7 @@ public class SystemPackTests
         Assert.That(store.Systems, Does.ContainKey(AlphaSystem));
         Assert.That(store.Systems["system-sol"].ModNamespace, Is.EqualTo(SolPack));
         Assert.That(store.Systems[AlphaSystem].ModNamespace, Is.EqualTo(AlphaPack));
-        Assert.That(store.SystemBodies, Has.Count.EqualTo(534));
+        Assert.That(store.SystemBodies, Has.Count.EqualTo(533), "the Hyperbolic Test Moon is only in the Testing scenario");
         Assert.That(store.SystemBodies, Does.ContainKey("planet-earth"));
         Assert.That(store.Colonies.Keys, Is.EquivalentTo(new[]
         {

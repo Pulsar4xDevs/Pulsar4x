@@ -9,10 +9,10 @@
         "Mass": "PropertyValue('Area') * 0.05",
         "Volume": "PropertyValue('Area') * 0.01",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Area') * 0.008",
+        "CrewReq": "PropertyValue('Area') * 0.008 * Pow(PropertyValue('Area') / 1000000, -0.25)",
         "ResearchCost": "0",
-        "CreditCost": "120",
-        "BuildPointCost": "[Mass] * 0.2"
+        "CreditCost": "120 * Pow(PropertyValue('Area') / 1000000, 1.1)",
+        "BuildPointCost": "[Mass] * 0.2 * Pow(PropertyValue('Area') / 1000000, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.45",
@@ -33,7 +33,7 @@
           "Units": "kW",
           "DescriptionFormula": "'Extraction only: 0.05 kWh per kg across the 15 minerals, at full accessibility. Refining energy belongs to the refinery.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('MiningAmount') * 15 * 0.05 / 24"
+          "PropertyFormula": "(PropertyValue('MiningAmount') * 15 * 0.05 / 24) * Pow(PropertyValue('Area') / 1000000, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -96,8 +96,8 @@
         "HTK": "0.5",
         "CrewReq": "0",
         "ResearchCost": "0",
-        "CreditCost": "120",
-        "BuildPointCost": "[Mass]"
+        "CreditCost": "120 * Pow(PropertyValue('Size') / 5, 1.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Size') / 5, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.10",
@@ -118,7 +118,7 @@
           "Units": "kW",
           "DescriptionFormula": "'Extraction only: 0.05 kWh per kg across the 15 minerals, at full accessibility.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('MiningAmount') * 15 * 0.05 / 24"
+          "PropertyFormula": "(PropertyValue('MiningAmount') * 15 * 0.05 / 24) * Pow(PropertyValue('Size') / 5, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -180,9 +180,9 @@
         "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "0.5",
         "CrewReq": "1",
-        "ResearchCost": "100",
-        "CreditCost": "[Mass]",
-        "BuildPointCost": "[Mass]"
+        "ResearchCost": "100 * Pow(PropertyValue('Mining Rate') / 1, 0.3)",
+        "CreditCost": "[Mass] * Pow(PropertyValue('Mining Rate') / 1, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Mining Rate') / 1, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.4",
@@ -302,10 +302,10 @@
         "Mass": "PropertyValue('Size') * 0.4",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "[Mass] * 0.02",
+        "CrewReq": "[Mass] * 0.02 * Pow(PropertyValue('Size') / 1000, -0.25)",
         "ResearchCost": "0",
-        "CreditCost": "120",
-        "BuildPointCost": "[Mass]"
+        "CreditCost": "120 * Pow(PropertyValue('Size') / 1000, 1.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Size') / 1000, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.15",
@@ -324,7 +324,7 @@
           "Units": "kW",
           "DescriptionFormula": "'7 kWh per refining point (a recipe average).'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Refinery Points') * 7 / 24"
+          "PropertyFormula": "(PropertyValue('Refinery Points') * 7 / 24) * Pow(PropertyValue('Size') / 1000, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -371,10 +371,10 @@
         "Mass": "PropertyValue('Size') * 2.5",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "[Mass] * 0.08",
+        "CrewReq": "[Mass] * 0.08 * Pow(PropertyValue('Size') / 5000, -0.25)",
         "ResearchCost": "0",
-        "CreditCost": "120",
-        "BuildPointCost": "8000"
+        "CreditCost": "120 * Pow(PropertyValue('Size') / 5000, 1.1)",
+        "BuildPointCost": "8000 * Pow(PropertyValue('Size') / 5000, 1.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.50",
@@ -392,7 +392,7 @@
           "Units": "kW",
           "DescriptionFormula": "'7 kWh per refining point (a recipe average).'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Refinery Points') * 7 / 24"
+          "PropertyFormula": "(PropertyValue('Refinery Points') * 7 / 24) * Pow(PropertyValue('Size') / 5000, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -439,10 +439,10 @@
         "Mass": "PropertyValue('Size') * 0.4",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "[Mass] * 0.02",
+        "CrewReq": "[Mass] * 0.02 * Pow(PropertyValue('Size') / 200, -0.25)",
         "ResearchCost": "0",
-        "CreditCost": "120",
-        "BuildPointCost": "PropertyValue('Size') * 9"
+        "CreditCost": "120 * Pow(PropertyValue('Size') / 200, 1.1)",
+        "BuildPointCost": "PropertyValue('Size') * 9 * Pow(PropertyValue('Size') / 200, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.15",
@@ -461,7 +461,7 @@
           "Units": "kW",
           "DescriptionFormula": "'10 kWh per construction point.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "(PropertyValue('Component Construction Points') + PropertyValue('Installation Construction Points') + PropertyValue('Fighter Construction Points') + PropertyValue('Ordnance Construction Points')) * 10 / 24"
+          "PropertyFormula": "((PropertyValue('Component Construction Points') + PropertyValue('Installation Construction Points') + PropertyValue('Fighter Construction Points') + PropertyValue('Ordnance Construction Points')) * 10 / 24) * Pow(PropertyValue('Size') / 200, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -525,10 +525,10 @@
         "Mass": "PropertyValue('Size') * 2.5",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "[Mass] * 0.08",
+        "CrewReq": "[Mass] * 0.08 * Pow(PropertyValue('Size') / 1000, -0.25)",
         "ResearchCost": "0",
-        "CreditCost": "120",
-        "BuildPointCost": "8000"
+        "CreditCost": "120 * Pow(PropertyValue('Size') / 1000, 1.1)",
+        "BuildPointCost": "8000 * Pow(PropertyValue('Size') / 1000, 1.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.50",
@@ -546,7 +546,7 @@
           "Units": "kW",
           "DescriptionFormula": "'10 kWh per construction point.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "(PropertyValue('Component Construction Points') + PropertyValue('Installation Construction Points') + PropertyValue('Fighter Construction Points') + PropertyValue('Ordnance Construction Points')) * 10 / 24"
+          "PropertyFormula": "((PropertyValue('Component Construction Points') + PropertyValue('Installation Construction Points') + PropertyValue('Fighter Construction Points') + PropertyValue('Ordnance Construction Points')) * 10 / 24) * Pow(PropertyValue('Size') / 1000, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -613,8 +613,8 @@
         "HTK": "0.5",
         "CrewReq": "PropertyValue('Crew Size')",
         "ResearchCost": "0",
-        "CreditCost": "120",
-        "BuildPointCost": "20000"
+        "CreditCost": "120 * Pow(PropertyValue('Slip Size') / 38000, 1.1)",
+        "BuildPointCost": "20000 * Pow(PropertyValue('Slip Size') / 38000, 1.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.50",
@@ -632,7 +632,7 @@
           "Units": "kW",
           "DescriptionFormula": "'10 kWh per component point, 5 kWh per assembly point, plus 50 kW yard hotel load. Refits share the yard and add nothing.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "(PropertyValue('Component Construction Points') * 10 + PropertyValue('Ship Assembly Points') * 5) / 24 + 50"
+          "PropertyFormula": "(PropertyValue('Component Construction Points') * 10 + PropertyValue('Ship Assembly Points') * 5) / 24 + 50 * Pow(PropertyValue('Slip Size') / 38000, 0.85)"
         },
         {
           "Name": "DBargsPower",
@@ -655,7 +655,7 @@
           "Name": "Slip Size",
           "DescriptionFormula": "'Maximum ship mass this slip can work on (kg)'",
           "GuiHint": "GuiSelectionMaxMinInt",
-          "MaxFormula": "TechData('tech-shipyard-slip-max-size') + 33000",
+          "MaxFormula": "TechData('tech-shipyard-slip-max-size') + 80000",
           "MinFormula": "1000",
           "StepFormula": "1000",
           "PropertyFormula": "38000"
@@ -703,13 +703,13 @@
       "Name": "Prefab Logistics Office",
       "Formulas": {
         "Description": "A freightable office for import and export. The site office handles more goods.",
-        "Mass": "1000",
+        "Mass": "1000 * Pow(PropertyValue('Logistic Capacity') / 2, 0.75)",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "2",
+        "CrewReq": "2 * Pow(PropertyValue('Logistic Capacity') / 2, 0.75)",
         "ResearchCost": "0",
-        "CreditCost": "60",
-        "BuildPointCost": "[Mass]"
+        "CreditCost": "60 * Pow(PropertyValue('Logistic Capacity') / 2, 1.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Logistic Capacity') / 2, 0.4)"
       },
       "ResourceCost": {
         "aluminium": "[Mass] * 0.40",
@@ -727,7 +727,7 @@
           "Units": "kW",
           "DescriptionFormula": "'0.5 kW per crew.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "0.5 * 2"
+          "PropertyFormula": "0.5 * 2 * Pow(PropertyValue('Logistic Capacity') / 2, 0.85)"
         },
         {
           "Name": "DBargsPower",
@@ -762,13 +762,13 @@
       "Name": "Logistics Office",
       "Formulas": {
         "Description": "A site-built office for import and export. Assembled in place. It cannot be freighted.",
-        "Mass": "25000",
+        "Mass": "25000 * Pow(PropertyValue('Logistic Capacity') / 20, 0.75)",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "40",
+        "CrewReq": "40 * Pow(PropertyValue('Logistic Capacity') / 20, 0.75)",
         "ResearchCost": "0",
-        "CreditCost": "120",
-        "BuildPointCost": "8000"
+        "CreditCost": "120 * Pow(PropertyValue('Logistic Capacity') / 20, 1.1)",
+        "BuildPointCost": "8000 * Pow(PropertyValue('Logistic Capacity') / 20, 1.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.50",
@@ -786,7 +786,7 @@
           "Units": "kW",
           "DescriptionFormula": "'0.5 kW per crew.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "0.5 * 40"
+          "PropertyFormula": "0.5 * 40 * Pow(PropertyValue('Logistic Capacity') / 20, 0.85)"
         },
         {
           "Name": "DBargsPower",
@@ -821,8 +821,8 @@
       "Name": "Fuel Storage",
       "Formulas": {
         "Description": "Stores Fuel",
-        "Mass": "PropertyValue('Tank Radius')",
-        "Volume": "[Mass]",
+        "Mass": "PropertyValue('Dry Weight')",
+        "Volume": "PropertyValue('Tank Volume')",
         "HTK": "0.5",
         "CrewReq": "0",
         "ResearchCost": "0",
@@ -845,7 +845,7 @@
           "MaxFormula": "1000000",
           "MinFormula": "1",
           "StepFormula": "1",
-          "PropertyFormula": "2500"
+          "PropertyFormula": "8"
         },
         {
           "Name": "Tank Volume",
@@ -1018,13 +1018,13 @@
       "Name": "Prefab Spaceport",
       "Formulas": {
         "Description": "A freightable cargo transfer point. It moves cargo and does not store it.",
-        "Mass": "1000",
+        "Mass": "1000 * Pow(PropertyValue('Cargo Transfer Rate') / 10, 0.75)",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "2",
+        "CrewReq": "2 * Pow(PropertyValue('Cargo Transfer Rate') / 10, 0.75)",
         "ResearchCost": "0",
-        "CreditCost": "60",
-        "BuildPointCost": "[Mass]"
+        "CreditCost": "60 * Pow(PropertyValue('Cargo Transfer Rate') / 10, 1.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Cargo Transfer Rate') / 10, 0.4)"
       },
       "ResourceCost": {
         "aluminium": "[Mass] * 0.40",
@@ -1042,7 +1042,7 @@
           "Units": "kW",
           "DescriptionFormula": "'Cargo handling, 20 kW per kg/s of transfer rate.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Cargo Transfer Rate') * 20"
+          "PropertyFormula": "PropertyValue('Cargo Transfer Rate') * 20 * Pow(PropertyValue('Cargo Transfer Rate') / 10, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -1334,10 +1334,10 @@
         "Mass": "PropertyValue('Office Space') * 100",
         "Volume": "[Mass] * 0.1",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Office Space') * 0.25",
-        "ResearchCost": "PropertyValue('Office Space') * 0.5",
-        "CreditCost": "120",
-        "BuildPointCost": "[Mass] * 0.1"
+        "CrewReq": "PropertyValue('Office Space') * 0.25 * Pow(PropertyValue('Office Space') / 100, -0.25)",
+        "ResearchCost": "PropertyValue('Office Space') * 0.5 * Pow(PropertyValue('Office Space') / 100, 0.3)",
+        "CreditCost": "120 * Pow(PropertyValue('Office Space') / 100, 1.1)",
+        "BuildPointCost": "[Mass] * 0.1 * Pow(PropertyValue('Office Space') / 100, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.5",
@@ -1356,7 +1356,7 @@
           "Units": "kW",
           "DescriptionFormula": "'0.5 kW per crew.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "0.5 * PropertyValue('Office Space') * 0.25"
+          "PropertyFormula": "(0.5 * PropertyValue('Office Space') * 0.25) * Pow(PropertyValue('Office Space') / 100, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -1403,10 +1403,10 @@
         "Mass": "PropertyValue('Level') * 2000",
         "Volume": "[Mass] * 0.1",
         "HTK": "1.0",
-        "CrewReq": "PropertyValue('Level') * 10",
+        "CrewReq": "PropertyValue('Level') * 10 * Pow(PropertyValue('Level') / 1, -0.25)",
         "ResearchCost": "0",
         "CreditCost": "0",
-        "BuildPointCost": "PropertyValue('Level') * 200"
+        "BuildPointCost": "PropertyValue('Level') * 200 * Pow(PropertyValue('Level') / 1, 0.15)"
       },
       "ResourceCost": {
         "aluminium": "[Mass] * 0.35",
@@ -1424,7 +1424,7 @@
           "Units": "kW",
           "DescriptionFormula": "'10 kWh per installation point.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Level') * 5 * 10 / 24"
+          "PropertyFormula": "(PropertyValue('Level') * 5 * 10 / 24) * Pow(PropertyValue('Level') / 1, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -1464,10 +1464,10 @@
         "Mass": "PropertyValue('Level') * 15000",
         "Volume": "[Mass] * 0.1",
         "HTK": "1.0",
-        "CrewReq": "PropertyValue('Level') * 80",
+        "CrewReq": "PropertyValue('Level') * 80 * Pow(PropertyValue('Level') / 1, -0.25)",
         "ResearchCost": "0",
         "CreditCost": "0",
-        "BuildPointCost": "PropertyValue('Level') * 2000"
+        "BuildPointCost": "PropertyValue('Level') * 2000 * Pow(PropertyValue('Level') / 1, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.50",
@@ -1485,7 +1485,7 @@
           "Units": "kW",
           "DescriptionFormula": "'10 kWh per installation point.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Level') * 8 * 10 / 24"
+          "PropertyFormula": "(PropertyValue('Level') * 8 * 10 / 24) * Pow(PropertyValue('Level') / 1, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -1528,7 +1528,7 @@
         "CrewReq": "Max(1, PropertyValue('Size') * 20 * TechData('tech-construction-automation'))",
         "ResearchCost": "0",
         "CreditCost": "0",
-        "BuildPointCost": "[Mass]"
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Size') / 1, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.6",
@@ -1547,7 +1547,7 @@
           "Units": "kW",
           "DescriptionFormula": "'10 kWh per installation point.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Size') * 5 * 10 / 24"
+          "PropertyFormula": "(PropertyValue('Size') * 5 * 10 / 24) * Pow(PropertyValue('Size') / 1, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -1589,8 +1589,8 @@
         "HTK": "1.0",
         "CrewReq": "50",
         "ResearchCost": "0",
-        "CreditCost": "500",
-        "BuildPointCost": "[Mass]"
+        "CreditCost": "500 * Pow(PropertyValue('Max Tonnage') / 100000, 1.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Max Tonnage') / 100000, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.4",

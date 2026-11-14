@@ -9,10 +9,10 @@
         "Mass": "PropertyValue('Size Efficiency') * 0.6",
         "Volume": "PropertyValue('Storage Volume') + PropertyValue('Size Efficiency')",
         "HTK": "0.5",
-        "CrewReq": "Max(1, PropertyValue('Size Efficiency') * 0.1)",
+        "CrewReq": "Max(1, PropertyValue('Size Efficiency') * 0.1 * Pow(PropertyValue('Storage Volume') / 500, -0.25))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "[Mass]"
+        "CreditCost": "[Mass] * 0.12 * Pow(PropertyValue('Storage Volume') / 500, 0.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Storage Volume') / 500, 0.15)"
       },
       "ResourceCost": {
         "aluminium": "[Mass] * 0.45",
@@ -30,7 +30,7 @@
           "Units": "kW",
           "DescriptionFormula": "'0.5 W per cubic metre of storage (automated, low light).'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Storage Volume') * 0.0005"
+          "PropertyFormula": "(PropertyValue('Storage Volume') * 0.0005) * Pow(PropertyValue('Storage Volume') / 500, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -75,10 +75,10 @@
         "Mass": "PropertyValue('Size Efficiency') * 4",
         "Volume": "PropertyValue('Storage Volume') + PropertyValue('Size Efficiency')",
         "HTK": "0.5",
-        "CrewReq": "Max(10, PropertyValue('Size Efficiency') * 0.25)",
+        "CrewReq": "Max(10, PropertyValue('Size Efficiency') * 0.25 * Pow(PropertyValue('Storage Volume') / 100000, -0.25))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "8000"
+        "CreditCost": "[Mass] * 0.12 * Pow(PropertyValue('Storage Volume') / 100000, 0.1)",
+        "BuildPointCost": "8000 * Pow(PropertyValue('Storage Volume') / 100000, 1.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.50",
@@ -96,7 +96,7 @@
           "Units": "kW",
           "DescriptionFormula": "'0.5 W per cubic metre of storage (automated, low light).'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Storage Volume') * 0.0005"
+          "PropertyFormula": "(PropertyValue('Storage Volume') * 0.0005) * Pow(PropertyValue('Storage Volume') / 100000, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -143,8 +143,8 @@
         "HTK": "0.5",
         "CrewReq": "Max(1, 0.33 * Pow(PropertyValue('Size Efficiency'), 0.7))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "[Mass] * 0.25"
+        "CreditCost": "[Mass] * 0.12 * Pow(PropertyValue('Storage Volume') / 500, 0.1)",
+        "BuildPointCost": "[Mass] * 0.25 * Pow(PropertyValue('Storage Volume') / 500, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.5",
@@ -219,6 +219,13 @@
           "PropertyFormula": "10"
         },
         {
+          "Name": "Life Support at Full Berths",
+          "Units": "kW",
+          "DescriptionFormula": "'Life support with every berth filled: 1 kW per crew x the Closed-Loop Life Support factor at design time. Display only; the ship books life support for the crew actually aboard.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Berths') * TechData('tech-life-support-efficiency')"
+        },
+        {
           "Name": "DBargs",
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(PropertyValue('Berths'))",
@@ -239,8 +246,8 @@
         "HTK": "0.5",
         "CrewReq": "Max(1, 0.06 * Pow(PropertyValue('Berths'), 0.7))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "[Mass] * 4.5"
+        "CreditCost": "[Mass] * 0.12 * Pow(PropertyValue('Berths') / 100, 0.1)",
+        "BuildPointCost": "[Mass] * 4.5 * Pow(PropertyValue('Berths') / 100, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.4",
@@ -281,10 +288,10 @@
         "Mass": "PropertyValue('Size') * 2.5",
         "Volume": "PropertyValue('Size')",
         "HTK": "0.5",
-        "CrewReq": "Max(40, PropertyValue('Size') * 0.15)",
+        "CrewReq": "Max(40, PropertyValue('Size') * 0.15 * Pow(PropertyValue('Size') / 100000, -0.25))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "8000"
+        "CreditCost": "[Mass] * 0.12 * Pow(PropertyValue('Size') / 100000, 0.1)",
+        "BuildPointCost": "8000 * Pow(PropertyValue('Size') / 100000, 1.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.50",
@@ -302,7 +309,7 @@
           "Units": "kW",
           "DescriptionFormula": "'Port cranes and transfer handling, 20 W per unit of size.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Size') * 0.02"
+          "PropertyFormula": "(PropertyValue('Size') * 0.02) * Pow(PropertyValue('Size') / 100000, -0.15)"
         },
         {
           "Name": "DBargsPower",
@@ -377,8 +384,8 @@
         "HTK": "0.5",
         "CrewReq": "Max(5, 0.01 * Pow(PropertyValue('Size'), 0.7))",
         "ResearchCost": "0",
-        "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "[Mass] * 0.5"
+        "CreditCost": "[Mass] * 0.12 * Pow(PropertyValue('Size') / 2000, 0.1)",
+        "BuildPointCost": "[Mass] * 0.5 * Pow(PropertyValue('Size') / 2000, 0.15)"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.3",
@@ -444,10 +451,10 @@
         "Mass": "PropertyValue('Console Space') * 100",
         "Volume": "[Mass] * 0.1",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Console Space') * 0.25",
-        "ResearchCost": "PropertyValue('Console Space') * 0.5",
-        "CreditCost": "120",
-        "BuildPointCost": "[Mass]"
+        "CrewReq": "PropertyValue('Console Space') * 0.25 * Pow(PropertyValue('Console Space') / 5, -0.25)",
+        "ResearchCost": "PropertyValue('Console Space') * 0.5 * Pow(PropertyValue('Console Space') / 5, 0.3)",
+        "CreditCost": "120 * Pow(PropertyValue('Console Space') / 5, 1.1)",
+        "BuildPointCost": "[Mass] * Pow(PropertyValue('Console Space') / 5, 0.15)"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.5",
@@ -487,9 +494,22 @@
           "AttributeType": "GameEngine.People.AdminSpaceAtb"
         },
         {
+          "Name": "Berths",
+          "DescriptionFormula": "'Bunks on the bridge for its own crew: half the console space, at least 2'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "Max(2, Floor(PropertyValue('Console Space') / 2))"
+        },
+        {
+          "Name": "Life Support at Full Berths",
+          "Units": "kW",
+          "DescriptionFormula": "'Life support with every bridge berth filled: 1 kW per crew x the Closed-Loop Life Support factor at design time. Display only.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Berths') * TechData('tech-life-support-efficiency')"
+        },
+        {
           "Name": "DBargsBerths",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(Max(2, PropertyValue('Console Space') / 2))",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Berths'))",
           "AttributeType": "Pulsar4X.Ships.CrewQuartersAtb"
         }
       ]
