@@ -121,7 +121,7 @@ public sealed record FactionSnapshot(
     /// <summary>Research labs' running cost, cr/day: the labs that research today (a queued tech and points to spend).</summary>
     public decimal LabCostsPerDay { get; init; }
 
-    /// <summary>All daily running costs, cr/day: <see cref="PayrollPerDay"/> + <see cref="LabCostsPerDay"/>. Income is not forecast.</summary>
+    /// <summary>All daily running costs, cr/day: <see cref="PayrollPerDay"/> + <see cref="LabCostsPerDay"/> + <see cref="StaffWagesPerDay"/> (multi-faction phase 6). Income is not forecast.</summary>
     public decimal RunningCostsPerDay { get; init; }
 
     /// <summary>
@@ -141,7 +141,7 @@ public sealed record FactionSnapshot(
     /// <summary>Research labs' running cost for the current game month, cr: <see cref="LabCostsPerDay"/> × <see cref="DaysInMonth"/>.</summary>
     public decimal LabCostsPerMonth { get; init; }
 
-    /// <summary>All running costs for the current game month, cr: <see cref="PayrollPerMonth"/> + <see cref="LabCostsPerMonth"/>.</summary>
+    /// <summary>All running costs for the current game month, cr: <see cref="PayrollPerMonth"/> + <see cref="LabCostsPerMonth"/> + <see cref="StaffWagesPerMonth"/>.</summary>
     public decimal RunningCostsPerMonth { get; init; }
 
     /// <summary>
@@ -161,6 +161,38 @@ public sealed record FactionSnapshot(
 
     /// <summary>The research part of <see cref="AccruedThisMonth"/>, cr.</summary>
     public decimal AccruedResearchThisMonth { get; init; }
+
+    // ---- Staff wages and tax (multi-faction phase 6). Money in credits (cr). ----
+
+    /// <summary>The ledger category name of a staff wage line (and of a bloc's contract staff income).</summary>
+    public const string StaffWagesCategory = "StaffWages";
+
+    /// <summary>The ledger category name of a bloc's monthly tax income.</summary>
+    public const string TaxCategory = "Tax";
+
+    /// <summary>Own staff at work across the faction's colonies (Employed).</summary>
+    public long StaffOnPayroll { get; init; }
+
+    /// <summary>Contract staff (commuters) the faction employs; their wage is paid into their bloc's funds.</summary>
+    public long CommutersOnPayroll { get; init; }
+
+    /// <summary>Wage per employee per day, cr (GameSettings.StaffWagePerDay, default 2). 0 when the faction pays no wages.</summary>
+    public decimal StaffWagePerDay { get; init; }
+
+    /// <summary>(<see cref="StaffOnPayroll"/> + <see cref="CommutersOnPayroll"/>) × <see cref="StaffWagePerDay"/>, cr/day.</summary>
+    public decimal StaffWagesPerDay { get; init; }
+
+    /// <summary><see cref="StaffWagesPerDay"/> × <see cref="DaysInMonth"/>, cr.</summary>
+    public decimal StaffWagesPerMonth { get; init; }
+
+    /// <summary>The staff wage part of <see cref="AccruedThisMonth"/>, cr.</summary>
+    public decimal AccruedStaffWagesThisMonth { get; init; }
+
+    /// <summary>Tax income per month (blocs only: residents × GameSettings.BlocTaxPerPersonPerMonth), cr; 0 for others.</summary>
+    public decimal TaxIncomePerMonth { get; init; }
+
+    /// <summary>Funds a bloc keeps back before it bids: three months of running costs, cr (0 for factions that don't bid).</summary>
+    public decimal BidReserve { get; init; }
 
     /// <summary>Total of the last day's Wages lines, cr (negative, an expense). 0 when none was booked.</summary>
     public decimal LastWages { get; init; }

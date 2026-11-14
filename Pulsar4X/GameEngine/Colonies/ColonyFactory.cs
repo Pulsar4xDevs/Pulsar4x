@@ -270,6 +270,7 @@ namespace Pulsar4X.Colonies
                         colony.StartingFunds);
                     faction.FactionOwnerID = faction.Id;
                     faction.GetDataBlob<FactionInfoDB>().AutoHires = true;
+                    faction.GetDataBlob<FactionInfoDB>().NpcEconomy = colony.NpcEconomy;
                     created[colony.OwnerFaction] = faction;
                 }
 

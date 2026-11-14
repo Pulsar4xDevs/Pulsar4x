@@ -119,7 +119,24 @@ namespace Pulsar4X.Factions
 
         /// <summary>Everything accrued this month and not yet billed, cr.</summary>
         [JsonIgnore]
-        public decimal AccruedOwed => AccruedWages + AccruedResearch;
+        public decimal AccruedOwed => AccruedWages + AccruedResearch + AccruedStaffWages;
+
+        /// <summary>Multi-faction phase 6: an NPC with its own economy (the Earth blocs): pays crew and staff wages,
+        /// collects tax, and stops bidding below three months of running costs. Other NPCs (Luna, Ceres) are exempt.</summary>
+        [JsonProperty]
+        public bool NpcEconomy { get; internal set; }
+
+        /// <summary>Multi-faction phase 6: staff wages owed for <see cref="AccrualMonth"/> (own staff and commuters), cr.</summary>
+        [JsonProperty]
+        public decimal AccruedStaffWages { get; internal set; }
+
+        /// <summary>Staff-days behind <see cref="AccruedStaffWages"/>.</summary>
+        [JsonProperty]
+        public long AccruedStaffDays { get; internal set; }
+
+        /// <summary>The part of <see cref="AccruedStaffWages"/> owed to each bloc for its commuters, by bloc faction id.</summary>
+        [JsonProperty]
+        public Dictionary<int, decimal> AccruedCommuterWages { get; internal set; } = new();
 
         public SafeList<Entity> Commanders { get; internal set; } = new ();
 
@@ -204,6 +221,10 @@ namespace Pulsar4X.Factions
             AccruedWageDays = factionDB.AccruedWageDays;
             AccruedResearch = factionDB.AccruedResearch;
             AccruedLabDays = factionDB.AccruedLabDays;
+            NpcEconomy = factionDB.NpcEconomy;
+            AccruedStaffWages = factionDB.AccruedStaffWages;
+            AccruedStaffDays = factionDB.AccruedStaffDays;
+            AccruedCommuterWages = new Dictionary<int, decimal>(factionDB.AccruedCommuterWages ?? new Dictionary<int, decimal>());
             InternalKnownJumpPoints = new Dictionary<string, List<Entity>>(factionDB.KnownJumpPoints);
 
             ShipDesigns = new Dictionary<string, ShipDesign>(factionDB.ShipDesigns);

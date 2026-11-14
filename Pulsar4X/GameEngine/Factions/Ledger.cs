@@ -12,7 +12,12 @@ public enum TransactionCategory
     Research,
     Trade,
     /// <summary>Crew pay: accrued daily, billed as one line per faction on the 1st of each game month.</summary>
-    Wages
+    Wages,
+    /// <summary>Multi-faction phase 6: staff pay (own staff and contract staff), billed with crew wages on the 1st;
+    /// a bloc's share of contract staff wages is booked to it as income under this category.</summary>
+    StaffWages,
+    /// <summary>Multi-faction phase 6: a bloc's tax income, booked on the 1st for the month before.</summary>
+    Tax,
 }
 
 public class Transaction

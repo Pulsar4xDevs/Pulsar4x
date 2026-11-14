@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
 using Pulsar4X.Ships;
@@ -8,9 +9,10 @@ namespace Pulsar4X.Factions;
 
 /// <summary>
 /// Crew plan phase 5: who pays crew wages, and the negative-balance spending block.
-/// Only the local human player pays and is blocked: NPCs crew from untrained population and pay
-/// nothing for now (TODO: NPC economy), and a game with no local human (headless, most tests)
-/// charges nobody.
+/// Multi-faction phase 6: the local human player and every NPC with its own economy
+/// (<see cref="FactionInfoDB.NpcEconomy"/>, the Earth blocs) pay crew and staff wages; only the player is
+/// blocked while negative. Other NPCs (Luna, Ceres) are exempt, and a game with no local human (headless,
+/// most tests) charges nobody.
 /// </summary>
 public static class FactionSpending
 {
@@ -31,14 +33,20 @@ public static class FactionSpending
         "Academy courses",
     };
 
-    /// <summary>True for the local human player's faction: it pays crew wages and is blocked while negative.</summary>
+    /// <summary>True for the local human player's faction and for NPCs with their own economy (multi-faction phase 6):
+    /// they pay crew and staff wages. Always false in a game with no local human.</summary>
     public static bool PaysWages(Game? game, int factionId)
-        => game != null && game.LocalHumanFactionId >= 0 && factionId == game.LocalHumanFactionId;
+        => game != null && game.LocalHumanFactionId >= 0
+            && (factionId == game.LocalHumanFactionId || IsNpcEconomy(game, factionId));
 
-    /// <summary>True while the faction's balance is below zero and it is the player (NPCs are exempt).</summary>
+    /// <summary>An NPC faction that runs its own economy (pays wages, collects tax).</summary>
+    public static bool IsNpcEconomy(Game game, int factionId)
+        => game.Factions.TryGetValue(factionId, out var f) && f.TryGetDataBlob<FactionInfoDB>(out var info) && info.NpcEconomy;
+
+    /// <summary>True while the faction's balance is below zero and it is the player (NPCs are never blocked).</summary>
     public static bool IsBlocked(Game? game, int factionId)
     {
-        if (!PaysWages(game, factionId))
+        if (game == null || game.LocalHumanFactionId < 0 || factionId != game.LocalHumanFactionId)
             return false;
         if (!game!.Factions.TryGetValue(factionId, out var faction) || !faction.TryGetDataBlob<FactionInfoDB>(out var info))
             return false;
@@ -72,6 +80,64 @@ public static class FactionSpending
     /// <summary>Multi-faction phase 6: the faction's staff wage per employee per day (0 when it pays no wages).</summary>
     public static decimal StaffWagePerDay(Game? game, int factionId)
         => PaysWages(game, factionId) ? Math.Max(0, game!.Settings.StaffWagePerDay) : 0;
+
+    /// <summary>Multi-faction phase 6: own staff at work across the faction's colonies.</summary>
+    public static long StaffOnPayroll(FactionInfoDB info)
+    {
+        long staff = 0;
+        foreach (var colony in info.Colonies)
+            if (colony.IsValid && colony.TryGetDataBlob<ColonyWorkforceDB>(out var db))
+                staff += db.Employed;
+        return staff;
+    }
+
+    /// <summary>Multi-faction phase 6: contract staff at the faction's colonies, by the bloc that supplies them.</summary>
+    public static Dictionary<int, long> CommutersByBloc(FactionInfoDB info)
+    {
+        var result = new Dictionary<int, long>();
+        foreach (var colony in info.Colonies)
+            if (colony.IsValid && colony.TryGetDataBlob<ColonyWorkforceDB>(out var db))
+                foreach (var (bloc, n) in db.Commuters)
+                    result[bloc] = (result.TryGetValue(bloc, out var t) ? t : 0) + n;
+        return result;
+    }
+
+    /// <summary>Residents of the faction's colonies (the tax base).</summary>
+    public static long Residents(FactionInfoDB info)
+    {
+        long people = 0;
+        foreach (var colony in info.Colonies)
+            if (colony.IsValid && colony.TryGetDataBlob<ColonyInfoDB>(out var ci))
+                people += Pulsar4X.People.NavalAcademyCourse.PopulationOf(ci);
+        return people;
+    }
+
+    /// <summary>Average days in a month, for monthly rates and the bid reserve.</summary>
+    public const double DaysPerMonth = 30.44;
+
+    /// <summary>
+    /// Multi-faction phase 6: the faction's running costs per month at the game's wages, whether or not it is charged
+    /// (crew on payroll × crew wage + staff and commuters × staff wage) × <see cref="DaysPerMonth"/>. Labs are not counted.
+    /// </summary>
+    public static decimal MonthlyRunningCosts(Game game, int factionId)
+    {
+        if (!game.Factions.TryGetValue(factionId, out var faction) || !faction.TryGetDataBlob<FactionInfoDB>(out var info))
+            return 0;
+        long staff = StaffOnPayroll(info);
+        foreach (var n in CommutersByBloc(info).Values)
+            staff += n;
+        decimal perDay = CrewOnPayroll(game, factionId) * Math.Max(0, game.Settings.CrewWagePerDay)
+            + staff * Math.Max(0, game.Settings.StaffWagePerDay);
+        return perDay * (decimal)DaysPerMonth;
+    }
+
+    /// <summary>The Staff wages ledger line booked on the 1st for the month before.</summary>
+    public static string MonthlyStaffWagesText(DateTime month, long averageStaff, decimal wage, int days)
+        => $"Staff wages for {month:yyyy-MM}: avg {averageStaff:N0} staff x {wage:N0} cr x {days} days";
+
+    /// <summary>The Tax ledger line booked on a bloc on the 1st for the month before.</summary>
+    public static string MonthlyTaxText(DateTime month, long people, decimal tax)
+        => $"Tax for {month:yyyy-MM}: {people:N0} people x {tax:N0} cr";
 
     /// <summary>Most unpaid days one pay run books (a background system runs the pay processor every 10 days).</summary>
     public const int MaxCatchUpDays = 31;
@@ -107,7 +173,7 @@ public static class FactionSpending
     /// background gap) are billed together on the first of them. Starts the accrual month when none is set
     /// (a new game, or a save from before monthly billing). Returns the amount billed.
     /// </summary>
-    public static decimal SettleMonth(FactionInfoDB info, DateTime at)
+    public static decimal SettleMonth(FactionInfoDB info, DateTime at, Game? game = null)
     {
         var month = MonthStart(at);
         if (info.AccrualMonth is not { } accrualMonth)
@@ -132,6 +198,34 @@ public static class FactionSpending
             info.Money.AddExpense(billDate, TransactionCategory.Research, MonthlyResearchText(accrualMonth, info.AccruedLabDays), info.AccruedResearch);
             billed += info.AccruedResearch;
         }
+        // Multi-faction phase 6: staff wages (own staff and commuters) on the same bill; each bloc is paid its
+        // commuters' share; a bloc collects its tax.
+        if (info.AccruedStaffWages > 0)
+        {
+            int days = Math.Max(1, info.AccruedWageDays);
+            long avgStaff = (long)Math.Round((double)info.AccruedStaffDays / days);
+            decimal wage = info.AccruedStaffDays > 0 ? info.AccruedStaffWages / info.AccruedStaffDays : 0;
+            info.Money.AddExpense(billDate, TransactionCategory.StaffWages, MonthlyStaffWagesText(accrualMonth, avgStaff, wage, days), info.AccruedStaffWages);
+            billed += info.AccruedStaffWages;
+            if (game != null)
+            {
+                foreach (var (blocId, amount) in info.AccruedCommuterWages)
+                {
+                    if (amount > 0 && game.Factions.TryGetValue(blocId, out var bloc) && bloc.TryGetDataBlob<FactionInfoDB>(out var blocInfo))
+                        blocInfo.Money.AddIncome(billDate, TransactionCategory.StaffWages, $"Contract staff wages for {accrualMonth:yyyy-MM} from {info.Abbreviation}", amount);
+                }
+            }
+        }
+        if (info.NpcEconomy && game != null && game.Settings.BlocTaxPerPersonPerMonth > 0)
+        {
+            long people = Residents(info);
+            decimal tax = game.Settings.BlocTaxPerPersonPerMonth;
+            if (people > 0)
+                info.Money.AddIncome(billDate, TransactionCategory.Tax, MonthlyTaxText(accrualMonth, people, tax), people * tax);
+        }
+        info.AccruedStaffWages = 0;
+        info.AccruedStaffDays = 0;
+        info.AccruedCommuterWages.Clear();
         info.AccruedWages = 0;
         info.AccruedWageCrewDays = 0;
         info.AccruedWageDays = 0;
@@ -148,7 +242,7 @@ public static class FactionSpending
     /// </summary>
     public static bool TryAccrueResearch(Game? game, int factionId, FactionInfoDB info, DateTime at, decimal cost)
     {
-        SettleMonth(info, at);
+        SettleMonth(info, at, game);
         if (IsBlocked(game, factionId) || FundsAfterOwed(info) < cost)
             return false;
         if (cost > 0)
@@ -167,13 +261,31 @@ public static class FactionSpending
     /// </summary>
     public static decimal PayDay(Game game, DateTime at)
     {
-        // TODO(crew plan, NPC economy): NPC factions pay no wages yet; they crew from untrained population.
-        int id = game.LocalHumanFactionId;
-        if (id < 0 || !game.Factions.TryGetValue(id, out var faction) || !faction.TryGetDataBlob<FactionInfoDB>(out var info))
+        // Multi-faction phase 6: the player and every NPC with its own economy (in faction id order).
+        if (game.LocalHumanFactionId < 0)
+            return 0;
+        // Returns the player's crew wages accrued by this run, as before (NPC and staff accruals are on their ledgers).
+        decimal player = 0;
+        foreach (var id in game.Factions.Keys.OrderBy(k => k).ToList())
+        {
+            if (!PaysWages(game, id))
+                continue;
+            decimal crew = PayDay(game, id, at);
+            if (id == game.LocalHumanFactionId)
+                player = crew;
+        }
+        return player;
+    }
+
+    /// <summary>One faction's pay run (see <see cref="PayDay(Game, DateTime)"/>): crew wages, plus staff wages on own staff
+    /// and commuters (the commuters' share is owed to their bloc and paid to it on the 1st). Returns the crew wages accrued.</summary>
+    public static decimal PayDay(Game game, int id, DateTime at)
+    {
+        if (!game.Factions.TryGetValue(id, out var faction) || !faction.TryGetDataBlob<FactionInfoDB>(out var info))
             return 0;
         if (info.LastCrewPayday.HasValue && info.LastCrewPayday.Value.Date >= at.Date)
         {
-            SettleMonth(info, at);
+            SettleMonth(info, at, game);
             return 0;
         }
         // Background systems run hotloop processors at a tenth of the rate, so the pay run can be days
@@ -186,16 +298,31 @@ public static class FactionSpending
         decimal wage = WagePerDay(game, id);
         long crew = CrewOnPayroll(game, id);
         decimal amount = crew * wage;
+        decimal staffWage = StaffWagePerDay(game, id);
+        long staff = StaffOnPayroll(info);
+        var commuters = CommutersByBloc(info);
+        long commuterTotal = commuters.Values.Sum();
+        decimal staffAmount = (staff + commuterTotal) * staffWage;
         decimal total = 0;
         for (var day = first; day <= at.Date; day = day.AddDays(1))
         {
-            SettleMonth(info, day);
-            if (amount <= 0)
+            SettleMonth(info, day, game);
+            if (amount <= 0 && staffAmount <= 0)
                 continue;
-            info.AccruedWages += amount;
-            info.AccruedWageCrewDays += crew;
             info.AccruedWageDays++;
-            total += amount;
+            if (amount > 0)
+            {
+                info.AccruedWages += amount;
+                info.AccruedWageCrewDays += crew;
+                total += amount;
+            }
+            if (staffAmount > 0)
+            {
+                info.AccruedStaffWages += staffAmount;
+                info.AccruedStaffDays += staff + commuterTotal;
+                foreach (var (bloc, n) in commuters)
+                    info.AccruedCommuterWages[bloc] = (info.AccruedCommuterWages.TryGetValue(bloc, out var owed) ? owed : 0) + n * staffWage;
+            }
         }
         return total;
     }

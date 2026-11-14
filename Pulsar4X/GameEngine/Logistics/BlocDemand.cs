@@ -16,9 +16,16 @@ namespace Pulsar4X.Logistics;
 /// </summary>
 public static class BlocDemand
 {
-    /// <summary>Funds a buying faction keeps back; bids only spend what is above it. Phase 6 replaces this with
-    /// the three-months-of-running-costs stop.</summary>
-    public const decimal ReserveCredits = 10_000_000m;
+    /// <summary>Months of running costs a buying faction keeps back (multi-faction phase 6, replacing phase 4's flat
+    /// 10M reserve): demand rows only bid with funds above this; selling is never stopped.</summary>
+    public const double ReserveMonths = 3;
+
+    /// <summary>The faction's bid reserve: <see cref="ReserveMonths"/> × its monthly running costs at the game's wages.</summary>
+    public static decimal ReserveFor(Entity colony)
+    {
+        var game = colony.Manager?.Game;
+        return game == null ? 0 : FactionSpending.MonthlyRunningCosts(game, colony.FactionOwnerID) * (decimal)ReserveMonths;
+    }
 
     /// <summary>Days short at which the premium reaches its cap (x2 of the base bid, 1.5 x seed ask at factor 0.75).</summary>
     public const double PremiumDays = 90;
@@ -77,7 +84,7 @@ public static class BlocDemand
         var info = InfoOf(colony);
         if (info == null)
             return 0;
-        decimal spare = info.Money.GetCurrentFunds() - ReserveCredits;
+        decimal spare = info.Money.GetCurrentFunds() - ReserveFor(colony);
         return spare <= 0 ? 0 : (long)Math.Floor(spare / price);
     }
 

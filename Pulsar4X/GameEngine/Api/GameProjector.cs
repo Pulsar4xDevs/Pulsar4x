@@ -83,7 +83,12 @@ namespace Pulsar4X.Engine.Api
             decimal wage = Pulsar4X.Factions.FactionSpending.WagePerDay(_game, factionId);
             bool blocked = Pulsar4X.Factions.FactionSpending.IsBlocked(_game, factionId);
             decimal payroll = payrollCrew * wage;
-            decimal running = payroll + labCosts;
+            // Multi-faction phase 6: staff wages on own staff and commuters, and a bloc's tax.
+            long staff = Pulsar4X.Factions.FactionSpending.StaffOnPayroll(info);
+            long commuters = Pulsar4X.Factions.FactionSpending.CommutersByBloc(info).Values.Sum();
+            decimal staffWage = Pulsar4X.Factions.FactionSpending.StaffWagePerDay(_game, factionId);
+            decimal staffPerDay = (staff + commuters) * staffWage;
+            decimal running = payroll + labCosts + staffPerDay;
             // Monthly billing: costs accrue daily and are billed on the 1st; a month's bill is the daily rate x its days.
             DateTime now = _game.TimePulse.GameGlobalDateTime;
             int daysInMonth = Pulsar4X.Factions.FactionSpending.DaysInMonth(now);
@@ -109,6 +114,16 @@ namespace Pulsar4X.Engine.Api
                 AccruedThisMonth = owed,
                 AccruedWagesThisMonth = info.AccruedWages,
                 AccruedResearchThisMonth = info.AccruedResearch,
+                StaffOnPayroll = staff,
+                CommutersOnPayroll = commuters,
+                StaffWagePerDay = staffWage,
+                StaffWagesPerDay = staffPerDay,
+                StaffWagesPerMonth = staffPerDay * daysInMonth,
+                AccruedStaffWagesThisMonth = info.AccruedStaffWages,
+                TaxIncomePerMonth = info.NpcEconomy && Pulsar4X.Factions.FactionSpending.PaysWages(_game, factionId)
+                    ? Pulsar4X.Factions.FactionSpending.Residents(info) * _game.Settings.BlocTaxPerPersonPerMonth : 0,
+                BidReserve = info.NpcEconomy
+                    ? Pulsar4X.Factions.FactionSpending.MonthlyRunningCosts(_game, factionId) * (decimal)Pulsar4X.Logistics.BlocDemand.ReserveMonths : 0,
                 LastWages = lastWages?.Sum(t => t.Amount) ?? 0,
                 LastWagesDate = lastWages?.Key,
                 FundsNegative = funds < 0,

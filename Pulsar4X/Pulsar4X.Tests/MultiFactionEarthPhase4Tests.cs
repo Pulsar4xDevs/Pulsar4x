@@ -223,15 +223,18 @@ public class MultiFactionEarthPhase4Tests
     {
         var spc = Named("Sino-Pacific Coalition");
         var t0 = spc.StarSysDateTime;
+        // Multi-faction phase 6: the reserve is three months of the bloc's running costs (was a flat 10M).
+        decimal reserve = BlocDemand.ReserveFor(spc);
+        Assert.That(reserve, Is.EqualTo(3 * FactionSpending.MonthlyRunningCosts(_game, spc.FactionOwnerID)).And.GreaterThan(0));
         SetStock(spc, "iron", 0);
         Row(spc, "iron").LastConsumption(spc, t0);
-        SetFunds(spc, BlocDemand.ReserveCredits + 1_000m);
+        SetFunds(spc, reserve + 1_000m);
 
         Plan(spc, t0);
         Assert.That(MarketBook.TryGet(spc, "iron", out var listing), Is.True);
         Assert.That(listing.BuyQuantity, Is.EqualTo((long)Math.Floor(1_000m / listing.Bid)));
 
-        SetFunds(spc, BlocDemand.ReserveCredits - 1m);
+        SetFunds(spc, reserve - 1m);
         Plan(spc, t0);
         Assert.That(!MarketBook.TryGet(spc, "iron", out listing) || listing.BuyQuantity == 0, Is.True, "nothing above the reserve");
     }

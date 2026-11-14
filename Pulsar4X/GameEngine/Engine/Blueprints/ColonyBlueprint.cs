@@ -35,6 +35,8 @@ public class ColonyBlueprint : Blueprint
     /// every library and tech. Default false keeps the old open-everything placement.
     /// </summary>
     public bool TechFromStartingItems { get; set; }
+    /// <summary>Multi-faction phase 6: the owning NPC faction runs its own economy (pays wages, collects tax).</summary>
+    public bool NpcEconomy { get; set; }
 
     public List<StartingItemBlueprint>? Installations { get; set; }
     public List<StartingItemBlueprint>? Cargo { get; set; }

@@ -378,6 +378,7 @@
       "Stance": "Friendly",
       "StartingFunds": 50000000,
       "TechFromStartingItems": true,
+      "NpcEconomy": true,
       "Installations": [
         { "Id": "default-design-infrastructure-site", "Amount": 250 },
         { "Id": "default-design-mine", "Amount": 2 },
@@ -509,6 +510,7 @@
       "Stance": "Friendly",
       "StartingFunds": 50000000,
       "TechFromStartingItems": true,
+      "NpcEconomy": true,
       "Installations": [
         { "Id": "default-design-infrastructure-site", "Amount": 250 },
         { "Id": "default-design-warehouse", "Amount": 1 },
@@ -641,6 +643,7 @@
       "Stance": "Friendly",
       "StartingFunds": 50000000,
       "TechFromStartingItems": true,
+      "NpcEconomy": true,
       "Installations": [
         { "Id": "default-design-infrastructure-site", "Amount": 250 },
         { "Id": "default-design-warehouse", "Amount": 1 },

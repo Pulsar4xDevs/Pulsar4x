@@ -136,7 +136,9 @@ public class CrewPayTests
         Assert.That(labs[0].Amount, Is.EqualTo(-days * labCost));
         Assert.That(wages[0].Description, Is.EqualTo(FactionSpending.MonthlyWagesText(start, crew, 100m, days)));
         Assert.That(labs[0].Description, Is.EqualTo(FactionSpending.MonthlyResearchText(start, days)));
-        Assert.That(Info.Money.GetCurrentFunds(), Is.EqualTo(before - days * (crew * 100m + labCost)));
+        // Multi-faction phase 6: the staff wage line is billed on the same day.
+        long staff = FactionSpending.StaffOnPayroll(Info);
+        Assert.That(Info.Money.GetCurrentFunds(), Is.EqualTo(before - days * (crew * 100m + labCost + staff * 2m)));
         // The 1st's own wages and research start the new month's bill.
         Assert.That(Info.AccrualMonth, Is.EqualTo(payday));
         Assert.That(Info.AccruedWages, Is.EqualTo(crew * 100m));
@@ -244,7 +246,9 @@ public class CrewPayTests
         var payday = start.AddMonths(1);
         FactionSpending.PayDay(_game, payday.AddHours(0.4)); // catches up the rest of the month, then bills it
         int days = DateTime.DaysInMonth(start.Year, start.Month);
-        Assert.That(Info.Money.GetCurrentFunds(), Is.EqualTo(-days * crew * 100m), "the whole bill is booked even when it can't be covered");
+        // Multi-faction phase 6: staff wages are on the same bill.
+        long staff = FactionSpending.StaffOnPayroll(Info);
+        Assert.That(Info.Money.GetCurrentFunds(), Is.EqualTo(-days * (crew * 100m + staff * 2m)), "the whole bill is booked even when it can't be covered");
         Assert.That(FactionSpending.CrewOnPayroll(_game, _player.Id), Is.EqualTo(crew), "nobody leaves");
         Assert.That(FactionSpending.IsBlocked(_game, _player.Id), Is.True);
 
@@ -343,7 +347,10 @@ public class CrewPayTests
         loaded.LocalHumanFactionId = _player.Id;
         int lines = info.Money.GetTransactionsByCategory(TransactionCategory.Wages).Count;
         var payday = FactionSpending.NextPayday(Now);
-        Assert.That(FactionSpending.SettleMonth(info, payday), Is.EqualTo(2 * accrued));
+        // Multi-faction phase 6: the staff accrual survives the save and is billed with the crew wages.
+        Assert.That(info.AccruedStaffWages, Is.EqualTo(2 * 2m * FactionSpending.StaffOnPayroll(info)));
+        decimal staffOwed = info.AccruedStaffWages;
+        Assert.That(FactionSpending.SettleMonth(info, payday), Is.EqualTo(2 * accrued + staffOwed));
         Assert.That(info.Money.GetTransactionsByCategory(TransactionCategory.Wages), Has.Count.EqualTo(lines + 1));
     }
 
