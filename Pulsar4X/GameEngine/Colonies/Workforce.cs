@@ -301,11 +301,11 @@ namespace Pulsar4X.Colonies
             if (payerInfo.Money.GetCurrentFunds() < fee)
                 return $"The signing fee is {fee:N0} cr.";
 
-            NavalAcademyCourse.TakePeople(blocInfo, (int)count);
             var info = colony.GetDataBlob<ColonyInfoDB>();
             int species = info.Population.OrderByDescending(p => p.Value).ThenBy(p => p.Key).Select(p => p.Key).DefaultIfEmpty(-1).First();
             if (species < 0)
                 return "The colony has no species to join.";
+            NavalAcademyCourse.TakePeople(blocInfo, (int)count);
             info.Population[species] += count;
             if (have - count <= 0) db.Commuters.Remove(blocId); else db.Commuters[blocId] = have - count;
             db.Employed += count;
