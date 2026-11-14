@@ -280,16 +280,21 @@ namespace Pulsar4X.Colonies
                 SpeciesCargo.Register(info.Data, info.Species);
 
                 // Installation designs look up resources, templates, and tech levels. A placed
-                // faction does not run the player's long StartingItems list, so open those libraries.
-                UnlockAll(info.Data.LockedCargoGoods.GetAll().Values.Select(c => c.UniqueID), info);
-                UnlockAll(info.Data.LockedComponentTemplates.Keys, info);
-                UnlockAll(info.Data.LockedIndustryTypes.Keys, info);
-                UnlockAll(info.Data.LockedCargoTypes.Keys, info);
-                UnlockAll(info.Data.LockedArmor.Keys, info);
-                var lockedTechs = info.Data.LockedTechs.Keys.ToList();
-                UnlockAll(lockedTechs, info);
-                foreach (var id in lockedTechs)
-                    info.Data.IncrementTechLevel(id);
+                // faction without its own tech list opens every library. A blueprint with
+                // TechFromStartingItems (the Earth blocs) gets exactly its StartingItems instead,
+                // so it starts at the scenario's tech level, not UnlockAll.
+                if (!colony.TechFromStartingItems)
+                {
+                    UnlockAll(info.Data.LockedCargoGoods.GetAll().Values.Select(c => c.UniqueID), info);
+                    UnlockAll(info.Data.LockedComponentTemplates.Keys, info);
+                    UnlockAll(info.Data.LockedIndustryTypes.Keys, info);
+                    UnlockAll(info.Data.LockedCargoTypes.Keys, info);
+                    UnlockAll(info.Data.LockedArmor.Keys, info);
+                    var lockedTechs = info.Data.LockedTechs.Keys.ToList();
+                    UnlockAll(lockedTechs, info);
+                    foreach (var id in lockedTechs)
+                        info.Data.IncrementTechLevel(id);
+                }
 
                 CreateFromBlueprint(game, faction, species, system, body, colony);
 
@@ -301,6 +306,27 @@ namespace Pulsar4X.Colonies
                     FactionStanceRules.SeedFromStance(info, playerFaction.Id, stance);
                 }
             }
+
+            // Placed factions are Friendly with each other too (blocs, Luna, Ceres), with Trade and
+            // Positions seeded both ways, unless data already set a stance between them.
+            var placed = created.Values.ToList();
+            for (int i = 0; i < placed.Count; i++)
+            {
+                for (int j = i + 1; j < placed.Count; j++)
+                    SeedMutual(placed[i], placed[j], FactionStance.Friendly);
+            }
+        }
+
+        static void SeedMutual(Entity a, Entity b, FactionStance stance)
+        {
+            var aInfo = a.GetDataBlob<FactionInfoDB>();
+            var bInfo = b.GetDataBlob<FactionInfoDB>();
+            if (aInfo.Stances.ContainsKey(b.Id) || bInfo.Stances.ContainsKey(a.Id))
+                return;
+            aInfo.Stances[b.Id] = stance;
+            bInfo.Stances[a.Id] = stance;
+            FactionStanceRules.SeedFromStance(aInfo, b.Id, stance);
+            FactionStanceRules.SeedFromStance(bInfo, a.Id, stance);
         }
 
         static void WriteDepotPrices(Entity colony)

@@ -208,6 +208,46 @@ namespace Pulsar4X.Extensions
         }
 
         /// <summary>
+        /// Every colony on a body: the body itself if it is a colony, plus its direct children
+        /// that are colonies. Several factions can each have one colony on the same body.
+        /// </summary>
+        public static List<Entity> ColoniesOnBody(this Entity body)
+        {
+            var colonies = new List<Entity>();
+            if (body.HasDataBlob<ColonyInfoDB>())
+                colonies.Add(body);
+
+            if (body.TryGetDataBlob<PositionDB>(out var positionDB))
+            {
+                foreach (var child in positionDB.Children)
+                {
+                    if (child.HasDataBlob<ColonyInfoDB>())
+                        colonies.Add(child);
+                }
+            }
+
+            return colonies;
+        }
+
+        /// <summary>
+        /// The colony that the given faction owns on this body, if any.
+        /// </summary>
+        public static bool TryGetFactionColonyOnBody(this Entity body, int factionId, out Entity colony)
+        {
+            foreach (var candidate in body.ColoniesOnBody())
+            {
+                if (candidate.FactionOwnerID == factionId)
+                {
+                    colony = candidate;
+                    return true;
+                }
+            }
+
+            colony = null!;
+            return false;
+        }
+
+        /// <summary>
         /// Checks if the entity has the ability to conduct geo-surveys
         /// </summary>
         /// <param name="entity"></param>

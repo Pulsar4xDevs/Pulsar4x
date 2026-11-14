@@ -30,6 +30,11 @@ public class ColonyBlueprint : Blueprint
     /// Requires an installation that creates that post, such as a city hall. Earth leaves this false.
     /// </summary>
     public bool SeatAdministrator { get; set; }
+    /// <summary>
+    /// For an <see cref="OwnerFaction"/> colony: unlock only <see cref="StartingItems"/> rather than
+    /// every library and tech. Default false keeps the old open-everything placement.
+    /// </summary>
+    public bool TechFromStartingItems { get; set; }
 
     public List<StartingItemBlueprint>? Installations { get; set; }
     public List<StartingItemBlueprint>? Cargo { get; set; }

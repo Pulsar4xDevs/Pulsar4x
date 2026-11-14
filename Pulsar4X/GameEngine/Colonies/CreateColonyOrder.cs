@@ -43,7 +43,8 @@ public class CreateColonyOrder : EntityAction
 
     internal override bool IsFinished()
     {
-        _isFinished = TargetSystemBody.IsOrHasColony().Item1;
+        // Scoped to this faction: another faction's colony on the same body does not count.
+        _isFinished = TargetSystemBody.TryGetFactionColonyOnBody(RequestingFactionGuid, out _);
         return _isFinished;
     }
 
@@ -63,6 +64,7 @@ public class CreateColonyOrder : EntityAction
 
     internal override bool IsValidCommand(Game game)
     {
-        return true;
+        // A faction founds at most one colony per body. Other factions' colonies do not block it.
+        return !TargetSystemBody.TryGetFactionColonyOnBody(RequestingFactionGuid, out _);
     }
 }
