@@ -247,7 +247,13 @@ namespace Pulsar4X.Client
         {
             if(!IsActive) return;
 
-            ImGui.SetNextWindowSize(new Vector2(1350, 825), ImGuiCond.FirstUseEver);
+            // Fit the viewport left of the 256 px selector (Systems / Celestial Bodies tree), so at 1280 px the
+            // tree doesn't cover the Statistics column and its warnings.
+            var viewport = ImGui.GetMainViewport();
+            var fit = FitDesignerSize(viewport.WorkSize, SelectorWidth);
+            ImGui.SetNextWindowPos(viewport.WorkPos + new Vector2(DesignerMargin, DesignerTop), ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(fit, ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSizeConstraints(new Vector2(Math.Min(640f, fit.X), Math.Min(400f, fit.Y)), viewport.WorkSize);
 
             if (Window.Begin("Ship Design", ref IsActive, _flags))
             {
@@ -271,9 +277,11 @@ namespace Pulsar4X.Client
                 }
 
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
-                var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
-                var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
+                // Statistics gets the largest share: its labels, values and wrapped warnings are the widest text.
+                var shares = DesignerColumnShares(windowContentSize.X);
+                var firstChildSize = new Vector2(windowContentSize.X * shares.X, windowContentSize.Y);
+                var secondChildSize = new Vector2(windowContentSize.X * shares.Y, windowContentSize.Y);
+                var thirdChildSize = new Vector2(windowContentSize.X * shares.Z - (windowContentSize.X * 0.01f), windowContentSize.Y);
                 if(ImGui.BeginChild("ShipDesign1", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayComponentSelection();
@@ -296,6 +304,29 @@ namespace Pulsar4X.Client
             }
             Window.End();
         }
+
+        internal const float SelectorWidth = 256f;
+        internal const float DesignerMargin = 8f;
+        internal const float DesignerTop = 48f;
+        static readonly Vector2 PreferredDesignerSize = new(1350, 825);
+
+        /// <summary>
+        /// The designer's first-use size: its preferred 1350x825, shrunk to fit the viewport left of the right-hand
+        /// selector and below the top bar.
+        /// </summary>
+        internal static Vector2 FitDesignerSize(Vector2 workSize, float selectorWidth)
+        {
+            float w = Math.Min(PreferredDesignerSize.X, workSize.X - selectorWidth - 2 * DesignerMargin);
+            float h = Math.Min(PreferredDesignerSize.Y, workSize.Y - DesignerTop - DesignerMargin);
+            return new Vector2(Math.Max(320f, w), Math.Max(240f, h));
+        }
+
+        /// <summary>
+        /// Width shares of the Available Components, Current Design and Statistics panels. Equal thirds when there is
+        /// room (1100 px or more of content); narrower, the Statistics panel takes 42% so its rows and warnings fit.
+        /// </summary>
+        internal static Vector3 DesignerColumnShares(float contentWidth)
+            => contentWidth >= 1100f ? new Vector3(0.33f, 0.33f, 0.33f) : new Vector3(0.30f, 0.28f, 0.42f);
 
         internal void NewShipButton()
         {
@@ -709,10 +740,10 @@ namespace Pulsar4X.Client
             DisplayHelpers.Header("Statisitcs", "The attributes of the ship are calculated based on the components you have added to the design.");
 
             UpdateShipStats();
-            if(ImGui.BeginTable("DesignStatsTables", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchSame))
+            if(ImGui.BeginTable("DesignStatsTables", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Resizable))
             {
-                ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.None);
-                ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None);
+                ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.WidthStretch, 0.55f);
+                ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 0.45f);
                 ImGui.TableHeadersRow();
 
                 ImGui.TableNextColumn();
@@ -810,23 +841,6 @@ namespace Pulsar4X.Client
                 ImGui.Text("Warp Bubble Collapse");
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Power(_wec));
-
-                foreach (var warning in _warpWarnings)
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
-                    ImGui.TextWrapped(warning);
-                    ImGui.PopStyleColor();
-                }
-
-                // Crew warnings sit with the warp warnings, in amber: an under-berthed ship still launches, under-crewed.
-                foreach (var warning in _crewWarnings)
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.TableNextColumn();
-                    CrewBars.Warning(warning);
-                }
 
                 ImGui.TableNextColumn();
                 ImGui.Text((_solarArea > 0 || double.IsNaN(_solarArea)) ? "Non-solar Output" : "Energy Output");
@@ -946,6 +960,24 @@ namespace Pulsar4X.Client
                 }
 
                 ImGui.EndTable();
+            }
+
+            // Warp / fuel warnings (red) and crew warnings (amber) under the table, wrapped to the panel's full
+            // width; in the narrow Value column they were cut off at 1280 px.
+            if (_warpWarnings.Count > 0 || _crewWarnings.Count > 0)
+            {
+                ImGui.Spacing();
+                ImGui.PushTextWrapPos(0f);
+                foreach (var warning in _warpWarnings)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                    ImGui.TextWrapped(warning.Replace("%", "%%"));
+                    ImGui.PopStyleColor();
+                }
+                // An under-berthed ship still launches, under-crewed.
+                foreach (var warning in _crewWarnings)
+                    CrewBars.Warning(warning);
+                ImGui.PopTextWrapPos();
             }
 
             ImGui.NewLine();

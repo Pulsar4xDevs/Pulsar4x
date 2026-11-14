@@ -376,8 +376,16 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     ImGui.Text($"{index + 1}");
                     ImGui.TableNextColumn();
-                    ImGui.Text(tech.Name);
-                    DisplayHelpers.TechTooltip(tech);
+                    string queuedName = FitText(tech.Name, ImGui.GetContentRegionAvail().X, t => ImGui.CalcTextSize(t).X);
+                    ImGui.TextUnformatted(queuedName);
+                    if (queuedName != tech.Name && ImGui.IsItemHovered())
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.TextUnformatted(tech.Name);
+                        ImGui.EndTooltip();
+                    }
+                    else
+                        DisplayHelpers.TechTooltip(tech);
                     ImGui.TableNextColumn();
                     Buttons(labId, researcher, techId, ref index);
                     index++;
@@ -403,6 +411,8 @@ namespace Pulsar4X.Client
                         var height = ImGui.GetTextLineHeight();
                         var pos = ImGui.GetCursorPos();
                         ImGui.ProgressBar(frac, new Vector2(size.X, height), "");
+                        // Long names are cut with "..." to fit the row; the hover shows the full name.
+                        string shownName = FitText(tech.DisplayName, size.X - 4f, t => ImGui.CalcTextSize(t).X);
                         if (ImGui.IsItemHovered())
                         {
                             string metaInfo = "";
@@ -422,11 +432,11 @@ namespace Pulsar4X.Client
                             DisplayHelpers.DescriptiveTooltip(
                                 tech.DisplayName,
                                 tech.CategoryName,
-                                tech.Description,
-                                () => ImGui.Text(metaInfo));
+                                FullNameLine(tech.DisplayName, shownName) + tech.Description,
+                                () => ImGui.TextUnformatted(metaInfo));
                         }
                         ImGui.SetCursorPos(new Vector2(pos.X + 2f, pos.Y));
-                        ImGui.Text(tech.DisplayName);
+                        ImGui.TextUnformatted(shownName);
 
                         if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
                         {
@@ -479,6 +489,32 @@ namespace Pulsar4X.Client
         }
 
         private void SubmitCommand(GameCommand command) => _uiState.GameClient?.SubmitCommandAsync(command);
+
+        public const string Ellipsis = "...";
+
+        /// <summary>
+        /// <paramref name="text"/> if it fits <paramref name="width"/> (as measured), else the longest prefix that fits
+        /// with "..." after it. Never returns more than the original text.
+        /// </summary>
+        public static string FitText(string text, float width, Func<string, float> measure)
+        {
+            if (string.IsNullOrEmpty(text) || measure(text) <= width)
+                return text ?? "";
+            int lo = 0, hi = text.Length;
+            while (lo < hi)
+            {
+                int mid = (lo + hi + 1) / 2;
+                if (measure(text.Substring(0, mid).TrimEnd() + Ellipsis) <= width)
+                    lo = mid;
+                else
+                    hi = mid - 1;
+            }
+            return lo == 0 ? Ellipsis : text.Substring(0, lo).TrimEnd() + Ellipsis;
+        }
+
+        /// <summary>The full name as the tooltip's first line when the list shows it cut; empty otherwise. '%' is escaped (the tooltip text is a format string).</summary>
+        public static string FullNameLine(string fullName, string shownName)
+            => shownName == fullName ? "" : fullName.Replace("%", "%%") + "\n\n";
 
         /// <summary>The lab cost tooltip: the daily rate, this month's days, and when the bill is booked.</summary>
         public static string LabCostTooltip(ResearcherView researcher)

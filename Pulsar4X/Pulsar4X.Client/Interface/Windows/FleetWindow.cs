@@ -10,6 +10,10 @@ namespace Pulsar4X.Client
 {
     public class FleetWindow : UniquePulsarGuiWindow<FleetWindow>
     {
+        // Styles.TableFlags carries SizingStretchProp; a table that wants another sizing policy masks it out first.
+        const ImGuiTableFlags SizingPolicies = ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.SizingFixedSame
+            | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.SizingStretchSame;
+
         private enum IssueOrderType
         {
             MoveTo,
@@ -2865,20 +2869,28 @@ namespace Pulsar4X.Client
 
             if(!string.IsNullOrEmpty(preview.Mode))
                 ImGui.Text("Mode: " + preview.Mode);
-            ImGui.Text($"Δv {Stringify.Velocity(preview.DeltaV)}, have {Stringify.Velocity(preview.Have)}");
+            ImGui.TextWrapped($"Δv {Stringify.Velocity(preview.DeltaV)}, have {Stringify.Velocity(preview.Have)}".Replace("%", "%%"));
             if(preview.Feasible && preview.DepartInSeconds > 60 && preview.DepartInSeconds < 1e10)
-                ImGui.Text("Departure " + DateDisplay.FormatDateTime(now.AddSeconds(preview.DepartInSeconds)));
+                ImGui.TextWrapped("Departure " + DateDisplay.FormatDateTime(now.AddSeconds(preview.DepartInSeconds)));
             if(preview.Feasible && preview.EtaSeconds > 0 && preview.EtaSeconds < 1e10)
-                ImGui.Text("Arrival " + DateDisplay.FormatDateTime(now.AddSeconds(preview.EtaSeconds)));
+                ImGui.TextWrapped("Arrival " + DateDisplay.FormatDateTime(now.AddSeconds(preview.EtaSeconds)));
 
             foreach(var other in preview.Modes)
                 ImGui.TextWrapped(OtherModeLine(other, preview, warpSpeed));
 
-            if(preview.Timings.Count > 0 && ImGui.BeginTable("trip-timing", 6, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
+            // Fixed-fit columns with horizontal scroll: in the narrow orders panel a stretch table squeezed every
+            // column (and cut the dates); now each column keeps its width and the table scrolls sideways if needed.
+            var cellPad = ImGui.GetStyle().CellPadding;
+            float timingHeight = (preview.Timings.Count + 1) * (ImGui.GetTextLineHeight() + 2 * cellPad.Y + 1f)
+                + ImGui.GetStyle().ScrollbarSize + 4f;
+            if(preview.Timings.Count > 0 && ImGui.BeginTable("trip-timing", 6,
+                (Styles.TableFlags & ~SizingPolicies) | ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX, new Vector2(0, timingHeight)))
             {
                 ImGui.TableSetupColumn("Timing");
                 ImGui.TableSetupColumn("Wait");
-                ImGui.TableSetupColumn("Depart");
+                // Fixed to the longest date the format setting can give, so the stretch columns can't squeeze it.
+                ImGui.TableSetupColumn("Depart", ImGuiTableColumnFlags.WidthFixed,
+                    DateDisplay.DateTimeColumnWidth(t => ImGui.CalcTextSize(t).X, padding: 2 * cellPad.X));
                 ImGui.TableSetupColumn("Arrive");
                 ImGui.TableSetupColumn("Δv");
                 ImGui.TableSetupColumn("Fuel");

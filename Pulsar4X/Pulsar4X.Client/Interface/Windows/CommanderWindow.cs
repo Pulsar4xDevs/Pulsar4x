@@ -135,8 +135,13 @@ namespace Pulsar4X.Client
                 ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 0.12f);
                 ImGui.TableSetupColumn("Rank", ImGuiTableColumnFlags.None, 0.16f);
                 ImGui.TableSetupColumn("Assignment", ImGuiTableColumnFlags.None, 0.26f);
-                ImGui.TableSetupColumn("Yrs of Service", ImGuiTableColumnFlags.None, 0.1f);
-                ImGui.TableSetupColumn("Yrs in Rank", ImGuiTableColumnFlags.None, 0.1f);
+                // Fixed to fit the header (and the widest value), so "Yrs of Service" isn't cut to "Yrs of S...".
+                float pad = 2 * ImGui.GetStyle().CellPadding.X + ImGui.GetStyle().ItemSpacing.X;
+                float valueWidth = ImGui.CalcTextSize(YearsValueSample).X;
+                ImGui.TableSetupColumn(ServiceHeader, ImGuiTableColumnFlags.WidthFixed,
+                    FitColumnWidth(ImGui.CalcTextSize(ServiceHeader).X, valueWidth, pad));
+                ImGui.TableSetupColumn(RankHeader, ImGuiTableColumnFlags.WidthFixed,
+                    FitColumnWidth(ImGui.CalcTextSize(RankHeader).X, valueWidth, pad));
                 ImGui.TableHeadersRow();
 
                 foreach(var person in people)
@@ -182,6 +187,15 @@ namespace Pulsar4X.Client
 
         private static string RankDisplay(CommanderSnapshot person)
             => person.RankName ?? $"Rank {person.Rank}";
+
+        public const string ServiceHeader = "Yrs of Service";
+        public const string RankHeader = "Yrs in Rank";
+        /// <summary>The widest years value a cell should show ("100.0").</summary>
+        public const string YearsValueSample = "100.0";
+
+        /// <summary>Width of a fixed column that shows both its header and its widest value in full.</summary>
+        public static float FitColumnWidth(float headerWidth, float valueWidth, float padding)
+            => Math.Max(headerWidth, valueWidth) + Math.Max(0f, padding);
 
         /// <summary>Elapsed years from <paramref name="from"/> to <paramref name="to"/> (365.25-day years), never negative.</summary>
         public static double YearsBetween(DateTime from, DateTime to)

@@ -94,5 +94,12 @@ namespace Pulsar4X.Client
 
         /// <summary>The widest date-time the current styles can show (28 Dec, 23:59:59), for sizing columns so no date is clipped.</summary>
         public static string WidestDateTimeSample(bool seconds = false) => FormatDateTime(new DateTime(2050, 12, 28, 23, 59, 59), seconds);
+
+        /// <summary>
+        /// Width for a fixed date-time column: the widest sample in the current styles, as <paramref name="measure"/>
+        /// sizes it (ImGui.CalcTextSize in the UI), plus <paramref name="padding"/>.
+        /// </summary>
+        public static float DateTimeColumnWidth(Func<string, float> measure, bool seconds = false, float padding = 0f)
+            => measure(WidestDateTimeSample(seconds)) + Math.Max(0f, padding);
     }
 }
