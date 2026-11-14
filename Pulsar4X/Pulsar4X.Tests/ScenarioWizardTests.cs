@@ -211,16 +211,17 @@ public class ScenarioWizardTests
     }
 
     [Test]
-    public void ExplicitWarpTechStart_HasFourColonyBlueprintsAndTheSolStartIds()
+    public void ExplicitWarpTechStart_HasSevenColonyBlueprintsAndTheSolStartIds()
     {
         ModsState.RefreshModsList("Data");
         var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
         var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, WarpTechStart);
 
-        Assert.That(store.Colonies, Has.Count.EqualTo(4));
+        Assert.That(store.Colonies, Has.Count.EqualTo(7));
         Assert.That(store.Colonies.Keys, Is.EquivalentTo(new[]
         {
-            "colony-earth", "colony-luna-concord", "colony-mars-outpost", "colony-ceres-depot"
+            "colony-earth", "colony-luna-concord", "colony-mars-outpost", "colony-ceres-depot",
+            "colony-earth-amc", "colony-earth-spc", "colony-earth-ecn"
         }));
         Assert.That(store.SystemBodies, Does.ContainKey("planet-earth"));
         Assert.That(store.SystemBodies, Has.Count.EqualTo(533));
@@ -295,6 +296,8 @@ public class ScenarioWizardTests
         var colonies = result!.Value.game.Systems
             .SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             .ToList();
+        Assert.That(colonies, Has.Count.EqualTo(4), "the early company plus three early Earth blocs");
+        colonies = colonies.Where(c => c.FactionOwnerID == result.Value.faction.Id).ToList();
         Assert.That(colonies, Has.Count.EqualTo(1));
         Assert.That(colonies[0].FactionOwnerID, Is.EqualTo(result.Value.faction.Id));
         Assert.That(colonies[0].GetDataBlob<NameDB>().GetName(result.Value.faction.Id),

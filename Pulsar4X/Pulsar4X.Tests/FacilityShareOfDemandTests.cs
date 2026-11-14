@@ -12,8 +12,8 @@ namespace Pulsar4X.Tests;
 
 /// <summary>
 /// Power rebalance: on quickstart day 1, in the warp-tech and early-tech starts, every player
-/// colony's facilities make up 10-30 % of its demand (life support the rest; 10-50 % on a garden
-/// world since crew plan phase 4 cut garden life support to 0.01 kW a head), its plants cover the
+/// colony's facilities make up 10-30 % of its demand (life support the rest; 95-99 % on a garden
+/// world, where life support is 0.01 kW a head and the company is 8,000 people), its plants cover the
 /// whole demand at satisfaction 1 in every tier, and it starts with the 730-day fuel runway.
 /// </summary>
 [TestFixture]
@@ -57,11 +57,15 @@ public class FacilityShareOfDemandTests
             double share = facilities / power.Demand_kW;
             TestContext.Out.WriteLine($"{scenario} {Name(colony)}: demand {power.Demand_kW:N1} kW, life support {power.LifeSupport_kW:N1}, facilities {facilities:N1} ({share:P1}), delivered {power.Delivered_kW:N1}");
             Assert.That(power.Demand_kW, Is.EqualTo(power.LifeSupport_kW + facilities).Within(1e-6));
-            // Crew plan phase 4: garden-world life support fell 0.05 -> 0.01 kW a head (Earth 25 MW -> 5 MW),
-            // so Earth's facilities are now ~45 % of its demand. Sealed worlds keep the old band.
+            // Crew plan phase 4: garden-world life support fell 0.05 -> 0.01 kW a head. Multi-faction phase 0
+            // then shrank the company to 8,000 people (~81 kW of life support), so Earth HQ's demand is
+            // almost all facilities (~98 %). Sealed worlds keep the old band.
             bool garden = power.LifeSupportColonists > 0
                 && power.LifeSupport_kW / power.LifeSupportColonists <= ColonyPowerProcessor.LifeSupportBase_kWPerColonist + 1e-9;
-            Assert.That(share, Is.InRange(0.10, garden ? 0.50 : 0.30), $"{Name(colony)} facility share");
+            if (garden)
+                Assert.That(share, Is.InRange(0.95, 0.99), $"{Name(colony)} facility share");
+            else
+                Assert.That(share, Is.InRange(0.10, 0.30), $"{Name(colony)} facility share");
             Assert.That(power.Delivered_kW, Is.GreaterThanOrEqualTo(power.Demand_kW), $"{Name(colony)}: the plants cover day 1");
             Assert.That(power.TierSatisfaction.Values, Is.All.EqualTo(1), $"{Name(colony)}: every tier served");
         }

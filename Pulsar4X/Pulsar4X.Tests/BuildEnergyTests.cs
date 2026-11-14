@@ -392,13 +392,13 @@ public class BuildEnergyTests
     }
 
     [Test]
-    public void LunaKeepsItsFifteenInfrastructure_PlusThreeForItsBatteryBank()
+    public void LunaHasSixtyInfrastructure_ForTwelveThousandPeople()
     {
-        // TessaBot P3: phase 2 raised it to 21 for the reactor's mass; no test needs that, so it is back to 15.
-        // The scenario battery bank (3 x 1000 t) adds ~3000 to Luna's required capacity; three more
-        // 400-capacity units hold its infrastructure efficiency at its pre-bank 0.40.
+        // Multi-faction phase 0 (Jon, 2026-11-15): Luna Concord shrinks to 12,000 people on 60 sites
+        // of 200 colonists each (was 80,000 on 15 + 3).
         var luna = _store.Colonies["colony-luna-concord"];
-        Assert.That(luna.Installations!.Single(i => i.Id == "default-design-infrastructure-luna").Amount, Is.EqualTo(15 + 3));
+        Assert.That(luna.StartingPopulation, Is.EqualTo(12000));
+        Assert.That(luna.Installations!.Single(i => i.Id == "default-design-infrastructure-luna").Amount, Is.EqualTo(60));
     }
 
     [Test]

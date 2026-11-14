@@ -194,7 +194,7 @@ public class DefaultStartTests
         Assert.That(start.SystemId, Is.EqualTo("system-sol"));
         Assert.That(start.BodyId, Is.EqualTo("planet-earth"));
         Assert.That(start.ThemeId, Is.EqualTo("default-theme"));
-        Assert.That(start.StartingFunds, Is.EqualTo(100000000));
+        Assert.That(start.StartingFunds, Is.EqualTo(25000000));
         Assert.That(start.MaxSystems, Is.EqualTo(10));
         Assert.That(start.EleStart, Is.True);
         Assert.That(start.FactionName, Is.EqualTo("United Earth Corp"));
@@ -224,7 +224,7 @@ public class DefaultStartTests
         Assert.That(request.SystemId, Is.EqualTo("system-sol"));
         Assert.That(request.BodyId, Is.EqualTo("planet-earth"));
         Assert.That(request.ThemeId, Is.EqualTo("default-theme"));
-        Assert.That(request.StartingFunds, Is.EqualTo(100000000));
+        Assert.That(request.StartingFunds, Is.EqualTo(25000000));
         Assert.That(request.MaxSystems, Is.EqualTo(10));
         Assert.That(request.EleStart, Is.True);
         Assert.That(request.FactionName, Is.EqualTo("United Earth Corp"));
@@ -319,7 +319,7 @@ public class DefaultStartTests
         Assert.That(request.SystemId, Is.EqualTo(start.SystemId));
         Assert.That(request.BodyId, Is.EqualTo(start.BodyId));
         Assert.That(request.EnabledSystems, Is.EqualTo(catalog.IncludedSystemIds));
-        Assert.That(request.StartingFunds, Is.EqualTo(100000000));
+        Assert.That(request.StartingFunds, Is.EqualTo(25000000));
         Assert.That(request.MaxSystems, Is.EqualTo(10));
         Assert.That(request.EleStart, Is.True);
         Assert.That(request.FactionName, Is.EqualTo("United Earth Corp"));

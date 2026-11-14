@@ -27,7 +27,7 @@
     "System": "system-sol",
     "Body": "planet-earth",
     "Theme": "default-theme",
-    "StartingFunds": 100000000,
+    "StartingFunds": 25000000,
     "MaxSystems": 10,
     "EleStart": true,
     "FactionName": "United Earth Corp",

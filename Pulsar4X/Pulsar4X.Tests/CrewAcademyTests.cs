@@ -65,19 +65,25 @@ public class CrewAcademyTests
         var pool = earth.GetDataBlob<ColonyCrewPoolDB>();
         int human = earth.GetDataBlob<ColonyInfoDB>().Population.Keys.Single();
         Assert.That(pool.Trained.Keys, Is.EquivalentTo(new[] { human }), "seeded as Earth's own species");
-        Assert.That(pool.Total, Is.EqualTo(500));
+        Assert.That(pool.Total, Is.EqualTo(100));
     }
 
     [Test]
-    public void Seeds_EarthOnly_NpcLunaAndCeresAndMarsNone()
+    public void Seeds_EarthCompanyAndBlocs_NpcLunaAndCeresAndMarsNone()
     {
-        long PoolAt(string body)
+        long PoolAt(string body, bool player = true)
         {
             var colony = _game.Systems.SelectMany(s => s.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
-                .Single(c => c.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<NameDB>().DefaultName == body);
+                .Where(c => c.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<NameDB>().DefaultName == body)
+                .First(c => body != "Earth" || (c.FactionOwnerID == _player.Id) == player);
             return colony.TryGetDataBlob<ColonyCrewPoolDB>(out var pool) ? pool.Total : 0;
         }
-        Assert.That(PoolAt("Earth"), Is.EqualTo(500));
+        Assert.That(PoolAt("Earth"), Is.EqualTo(100));
+        // Multi-faction phase 0: each Earth bloc starts with a 200 trained-crew pool.
+        foreach (var bloc in _game.Systems.SelectMany(s => s.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+                     .Where(c => c.FactionOwnerID != _player.Id
+                         && c.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<NameDB>().DefaultName == "Earth"))
+            Assert.That(bloc.GetDataBlob<ColonyCrewPoolDB>().Total, Is.EqualTo(200));
         Assert.That(PoolAt("Luna"), Is.EqualTo(0), "Luna is an NPC colony: NPCs crew from population");
         Assert.That(PoolAt("Mars"), Is.EqualTo(0));
         Assert.That(PoolAt("Ceres"), Is.EqualTo(0));
@@ -94,7 +100,7 @@ public class CrewAcademyTests
         var cohort = Academy.Cohorts.Single();
         Assert.That(cohort.Kind, Is.EqualTo(EngineCourse.Crew));
         Assert.That(cohort.GraduationDate, Is.EqualTo(_earth.StarSysDateTime.AddDays(90)));
-        Assert.That(Pool, Is.EqualTo(500), "trainees join the pool only when they graduate");
+        Assert.That(Pool, Is.EqualTo(100), "trainees join the pool only when they graduate");
 
         Assert.That(NavalAcademyCourse.TryTrainCrew(_earth, Academy.ComponentId, 51), Is.EqualTo("This crew course needs 51 seats. 50 are free."));
         Assert.That(NavalAcademyCourse.TryTrainCrew(_earth, Academy.ComponentId, 0), Is.EqualTo("Enrol at least one trainee."));
@@ -119,9 +125,9 @@ public class CrewAcademyTests
         Assert.That(NavalAcademyCourse.TryTrainCrew(_earth, Academy.ComponentId, 120), Is.Null);
         var grad = Academy.Cohorts.Single().GraduationDate;
         NavalAcademyCourse.Graduate(_earth, grad.AddDays(-1));
-        Assert.That(Pool, Is.EqualTo(500), "not yet");
+        Assert.That(Pool, Is.EqualTo(100), "not yet");
         NavalAcademyCourse.Graduate(_earth, grad);
-        Assert.That(Pool, Is.EqualTo(620));
+        Assert.That(Pool, Is.EqualTo(220));
         Assert.That(Academy.Cohorts, Is.Empty);
         Assert.That(NavalAcademyCourse.CrewSeatsUsed(Academy), Is.EqualTo(0));
     }
@@ -138,7 +144,7 @@ public class CrewAcademyTests
         int launched = _earth.Manager!.GetAllEntitiesWithDataBlob<Pulsar4X.Ships.ShipCrewDB>()
             .Where(s => !before.Contains(s.Id)).Sum(s => s.GetDataBlob<Pulsar4X.Ships.ShipCrewDB>().Aboard);
         Assert.That(Academy.Cohorts, Is.Empty);
-        Assert.That(Pool + launched, Is.EqualTo(510));
+        Assert.That(Pool + launched, Is.EqualTo(110));
     }
 
     [Test]
@@ -149,7 +155,7 @@ public class CrewAcademyTests
         int cohort = Academy.Cohorts.Single().CohortId;
         Assert.That(NavalAcademyCourse.TryCancel(_earth, Academy.ComponentId, cohort), Is.Null);
         Assert.That(People, Is.EqualTo(before));
-        Assert.That(Pool, Is.EqualTo(500));
+        Assert.That(Pool, Is.EqualTo(100));
     }
 
     [Test]
@@ -164,8 +170,8 @@ public class CrewAcademyTests
 
         var projected = new GameProjector(_game).ProjectEntity(_earth, _player.Id);
         var colony = projected.GetView<ColonyView>()!;
-        Assert.That(colony.CrewPool, Is.EqualTo(500));
-        Assert.That(colony.CrewPoolBySpecies.Single().Trained, Is.EqualTo(500));
+        Assert.That(colony.CrewPool, Is.EqualTo(100));
+        Assert.That(colony.CrewPoolBySpecies.Single().Trained, Is.EqualTo(100));
         var academy = projected.GetView<NavalAcademyView>()!.Academies.Single();
         Assert.That(academy.CrewSeats, Is.EqualTo(200));
         Assert.That(academy.CrewSeatsInUse, Is.EqualTo(100));
@@ -193,7 +199,7 @@ public class CrewAcademyTests
         EntityIDGenerator.NextId = Math.Max(next, EntityIDGenerator.NextId);
 
         Assert.That(loaded.GlobalManager.TryGetGlobalEntityById(earthId, out var earth), Is.True);
-        Assert.That(earth.GetDataBlob<ColonyCrewPoolDB>().Total, Is.EqualTo(500));
+        Assert.That(earth.GetDataBlob<ColonyCrewPoolDB>().Total, Is.EqualTo(100));
         var row = earth.GetDataBlob<NavalAcademyDB>().Academies.Single();
         Assert.That(row.CrewSeats, Is.EqualTo(200));
         Assert.That(row.CrewCourseMonths, Is.EqualTo(3));
@@ -202,7 +208,7 @@ public class CrewAcademyTests
         Assert.That(cohort.Count, Is.EqualTo(75));
 
         NavalAcademyCourse.Graduate(earth, cohort.GraduationDate);
-        Assert.That(earth.GetDataBlob<ColonyCrewPoolDB>().Total, Is.EqualTo(575));
+        Assert.That(earth.GetDataBlob<ColonyCrewPoolDB>().Total, Is.EqualTo(175));
     }
 
     [Test]

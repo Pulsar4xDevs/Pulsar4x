@@ -85,8 +85,8 @@ public class ApiCrewSnapshotTests
         var projected = _projector.ProjectEntity(earth, _player.Id);
 
         var colony = projected.GetView<ColonyView>()!;
-        Assert.That(colony.CrewPool, Is.EqualTo(500), "the seeded Earth pool");
-        Assert.That(colony.CrewPoolBySpecies.Single().Trained, Is.EqualTo(500));
+        Assert.That(colony.CrewPool, Is.EqualTo(100), "the seeded Earth pool (multi-faction phase 0: 500 -> 100)");
+        Assert.That(colony.CrewPoolBySpecies.Single().Trained, Is.EqualTo(100));
 
         var academy = projected.GetView<NavalAcademyView>()!.Academies.First();
         Assert.That(academy.CrewSeats, Is.EqualTo(200));

@@ -40,9 +40,12 @@ public class ScenarioBatteryTests
 
     static string Name(Entity colony) => colony.GetDataBlob<NameDB>().DefaultName;
 
-    [TestCase(WarpTechStart, new[] { "Earth HQ", "Mars HQ", "Luna Concord", "Ceres Depot" })]
-    [TestCase(EarlyTech, new[] { "Earth HQ" })]   // the early-tech start replaces the outposts with one early Earth
-    [TestCase(null, new[] { "Earth HQ" })]        // the default start is Early Tech (2026-11-15)
+    static readonly HashSet<string> EarthColonies = new() { "Earth HQ", "Americas Compact", "Sino-Pacific Coalition", "Euro Consortium" };
+
+    // Multi-faction phase 0: the three Earth blocs sit beside the company in both starts.
+    [TestCase(WarpTechStart, new[] { "Earth HQ", "Mars HQ", "Luna Concord", "Ceres Depot", "Americas Compact", "Sino-Pacific Coalition", "Euro Consortium" })]
+    [TestCase(EarlyTech, new[] { "Earth HQ", "Americas Compact", "Sino-Pacific Coalition", "Euro Consortium" })]   // early company + early blocs, no outposts
+    [TestCase(null, new[] { "Earth HQ", "Americas Compact", "Sino-Pacific Coalition", "Euro Consortium" })]        // the default start is Early Tech (2026-11-15)
     public void EveryScenarioColony_StartsWithAFullBank_OfTwoToSixHours(string? scenario, string[] expected)
     {
         var colonies = Colonies(Start(scenario));
@@ -57,9 +60,10 @@ public class ScenarioBatteryTests
             Assert.That(power.MaxDischarge_kW, Is.GreaterThan(0), name);
             Assert.That(power.Demand_kW, Is.GreaterThan(0), name);
             double hours = power.StoreMax_kJ / 3600 / power.Demand_kW;
-            // Crew plan phase 4 cut garden-world life support to 0.01 kW a head, so Earth's demand fell
-            // (~30 MW -> ~10 MW) and its unchanged bank now covers ~15 h. The sealed outposts keep 2-6 h.
-            double maxHours = name == "Earth HQ" ? 16.0 : 6.0;
+            // Crew plan phase 4 cut garden-world life support to 0.01 kW a head, so Earth colonies get up
+            // to 16 h: the 8,000-person company (~3.7 MW on a 350 t bank, ~13 h) and the 1M-person blocs
+            // (~11 MW on 900 t, ~11.5 h). The sealed outposts keep 2-6 h.
+            double maxHours = EarthColonies.Contains(name) ? 16.0 : 6.0;
             Assert.That(hours, Is.InRange(2.0, maxHours), name + $" bank covers 2-{maxHours} h of its demand");
         }
     }
@@ -84,11 +88,12 @@ public class ScenarioBatteryTests
     }
 
     [Test]
-    public void LunasBank_IsMatchedByInfrastructure_SoItsEfficiencyHolds()
+    public void LunasBank_IsCoveredByInfrastructure_SoItRunsAtFullEfficiency()
     {
-        // Before the bank Luna ran at 6000 / 14950 = 0.401. 3 x 1000 t of battery adds ~3000 to the
-        // required capacity; three more 400-capacity units hold it there.
+        // Multi-faction phase 0 (Jon, 2026-11-15): Luna is 12,000 people on 60 infrastructure sites
+        // with one 600 t bank, and the passive sensor's crew shrank, so its infrastructure now covers
+        // the whole demand (it ran at ~0.40 before).
         var luna = Colonies(Start(WarpTechStart)).Single(c => Name(c) == "Luna Concord");
-        Assert.That(Pulsar4X.Industry.InfrastructureProcessor.GetEfficiency(luna), Is.InRange(0.40, 0.41));
+        Assert.That(Pulsar4X.Industry.InfrastructureProcessor.GetEfficiency(luna), Is.EqualTo(1.0).Within(1e-9));
     }
 }

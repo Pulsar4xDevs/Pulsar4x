@@ -814,6 +814,28 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-grid-battery-350t",
+      "Name": "Grid Battery 350 t",
+      "TemplateId": "grid-battery",
+      "Properties": [
+        { "Key": "Mass", "Value": 350000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-grid-battery-600t",
+      "Name": "Grid Battery 600 t",
+      "TemplateId": "grid-battery",
+      "Properties": [
+        { "Key": "Mass", "Value": 600000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-grid-battery-900t",
       "Name": "Grid Battery 900 t",
       "TemplateId": "grid-battery",

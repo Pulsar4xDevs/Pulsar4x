@@ -69,7 +69,7 @@ public class CrewPayTests
         Assert.That(_game.LocalHumanFactionId, Is.EqualTo(_player.Id));
         Assert.That(_game.Settings.CrewWagePerDay, Is.EqualTo(100m));
         Assert.That(FactionSpending.WagePerDay(_game, _player.Id), Is.EqualTo(100m));
-        Assert.That(FactionSpending.CrewOnPayroll(_game, _player.Id), Is.GreaterThan(500), "500 pooled plus the crews aboard");
+        Assert.That(FactionSpending.CrewOnPayroll(_game, _player.Id), Is.GreaterThan(100), "100 pooled plus the crews aboard");
     }
 
     [Test]

@@ -52,7 +52,7 @@ public class ApiPayAndLifeSupportSnapshotTests
             .Where(r => r.TechQueue.Count > 0 && r.PointsPerDay.GetValue() > 0).Sum(r => r.CostPerDay.GetValue());
 
         var faction = _projector.ProjectFaction(_player.Id)!;
-        Assert.That(crew, Is.GreaterThan(500), "ships aboard plus the 500 Earth pool");
+        Assert.That(crew, Is.GreaterThan(100), "ships aboard plus the 100 Earth pool");
         Assert.That(faction.CrewOnPayroll, Is.EqualTo(crew));
         Assert.That(faction.CrewWagePerDay, Is.EqualTo(100m), "the player pays GameSettings.CrewWagePerDay");
         Assert.That(faction.PayrollPerDay, Is.EqualTo(crew * 100m));

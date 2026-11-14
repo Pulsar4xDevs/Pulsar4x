@@ -9,7 +9,7 @@
         "Mass": "PropertyValue('Area') * 0.05",
         "Volume": "PropertyValue('Area') * 0.01",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Area') * 0.008 * Pow(PropertyValue('Area') / 1000000, -0.25)",
+        "CrewReq": "PropertyValue('Area') * 0.0008 * Pow(PropertyValue('Area') / 1000000, -0.25)",
         "ResearchCost": "0",
         "CreditCost": "120 * Pow(PropertyValue('Area') / 1000000, 1.1)",
         "BuildPointCost": "[Mass] * 0.2 * Pow(PropertyValue('Area') / 1000000, 0.15)"
@@ -371,7 +371,7 @@
         "Mass": "PropertyValue('Size') * 2.5",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "[Mass] * 0.08 * Pow(PropertyValue('Size') / 5000, -0.25)",
+        "CrewReq": "[Mass] * 0.04 * Pow(PropertyValue('Size') / 5000, -0.25)",
         "ResearchCost": "0",
         "CreditCost": "120 * Pow(PropertyValue('Size') / 5000, 1.1)",
         "BuildPointCost": "8000 * Pow(PropertyValue('Size') / 5000, 1.15)"
@@ -644,12 +644,12 @@
         {
           "Name": "Component Construction Points",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Crew Size') * 0.01"
+          "PropertyFormula": "PropertyValue('Crew Size') * 0.1"
         },
         {
           "Name": "Ship Assembly Points",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Crew Size') * 0.02"
+          "PropertyFormula": "PropertyValue('Crew Size') * 0.2"
         },
         {
           "Name": "Slip Size",
@@ -664,15 +664,15 @@
           "Name": "Crew Size",
           "DescriptionFormula": "'More crew leads to faster build times'",
           "GuiHint": "GuiSelectionMaxMinInt",
-          "MaxFormula": "1000000",
-          "MinFormula": "1000",
-          "StepFormula": "1000",
-          "PropertyFormula": "20000"
+          "MaxFormula": "100000",
+          "MinFormula": "250",
+          "StepFormula": "250",
+          "PropertyFormula": "2000"
         },
         {
           "Name": "Refit Points",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Crew Size') * 0.0005"
+          "PropertyFormula": "PropertyValue('Crew Size') * 0.005"
         },
         {
           "Name": "db",

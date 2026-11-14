@@ -54,7 +54,7 @@ public class ScenarioSelectionTests
     }
 
     [Test]
-    public void LoadModStore_ExplicitWarpTechStart_HasFourColoniesAndEarthAmongTheBodies()
+    public void LoadModStore_ExplicitWarpTechStart_HasSevenColoniesAndEarthAmongTheBodies()
     {
         ModsState.RefreshModsList("Data");
         var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
@@ -65,10 +65,11 @@ public class ScenarioSelectionTests
         loader.LoadModManifest("Data/basemod/modInfo.json", baseline);
         loader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", baseline);
 
-        Assert.That(store.Colonies, Has.Count.EqualTo(4));
+        Assert.That(store.Colonies, Has.Count.EqualTo(7));
         Assert.That(store.Colonies.Keys, Is.EquivalentTo(new[]
         {
-            "colony-earth", "colony-luna-concord", "colony-mars-outpost", "colony-ceres-depot"
+            "colony-earth", "colony-luna-concord", "colony-mars-outpost", "colony-ceres-depot",
+            "colony-earth-amc", "colony-earth-spc", "colony-earth-ecn"
         }));
         Assert.That(store.SystemBodies, Does.ContainKey("planet-earth"));
         Assert.That(store.SystemBodies, Has.Count.EqualTo(533), "the Hyperbolic Test Moon is only in the Testing scenario");
@@ -136,6 +137,8 @@ public class ScenarioSelectionTests
         var colonies = result!.Value.game.Systems
             .SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             .ToList();
+        Assert.That(colonies, Has.Count.EqualTo(4), "the early company plus three early Earth blocs");
+        colonies = colonies.Where(c => c.FactionOwnerID == result.Value.faction.Id).ToList();
         Assert.That(colonies, Has.Count.EqualTo(1));
         Assert.That(colonies[0].GetDataBlob<NameDB>().GetName(result.Value.faction.Id),
             Does.Contain("Earth"));

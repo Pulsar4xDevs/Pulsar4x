@@ -381,16 +381,17 @@ public class ColonyPowerEnforcementTests
 
     // ---- scenarios ----
 
-    [TestCase("Pulsar4x.Scenario.WarpTechStart", 4)]
-    [TestCase("Pulsar4x.Scenario.EarlyTech", 1)]
-    [TestCase(null, 1)]   // the default start is Early Tech (2026-11-15): one Earth colony
+    // Multi-faction phase 0: three Earth blocs beside the company in both starts.
+    [TestCase("Pulsar4x.Scenario.WarpTechStart", 7)]
+    [TestCase("Pulsar4x.Scenario.EarlyTech", 4)]
+    [TestCase(null, 4)]   // the default start is Early Tech (2026-11-15): the company plus three blocs
     public void EveryScenarioColony_StartsFullyPowered_WithAFuelRunway(string? scenario, int colonies)
     {
         var game = StartGameLikeTheMenu(scenario);
         var all = game.Systems.SelectMany(s => s.GetAllEntitiesWithDataBlob<ColonyInfoDB>()).ToList();
         Assert.That(all, Has.Count.EqualTo(colonies));
         var earth = all.Single(c => c.GetDataBlob<NameDB>().DefaultName.Contains("Earth"));
-        Assert.That(earth.GetDataBlob<ColonyInfoDB>().Population.Values.Sum(), Is.EqualTo(500_000),
+        Assert.That(earth.GetDataBlob<ColonyInfoDB>().Population.Values.Sum(), Is.EqualTo(8_000),
             "Earth starts as one corporation, not the planet");
 
         foreach (var colony in all)

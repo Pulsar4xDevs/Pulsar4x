@@ -250,7 +250,7 @@ public class EarlyTechStartTests
     }
 
     [Test]
-    public void NewGameWithEarlyMod_HasEarthAsTheOnlyColony()
+    public void NewGameWithEarlyMod_HasTheCompanyAndThreeEarlyBlocs_AllOnEarth()
     {
         var (game, faction) = StartGameLikeTheMenu(EarlyTech);
 
@@ -258,15 +258,17 @@ public class EarlyTechStartTests
             .SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             .ToList();
 
-        Assert.That(colonies, Has.Count.EqualTo(1));
-        var colony = colonies[0];
-        Assert.That(colony.FactionOwnerID, Is.EqualTo(faction.Id));
+        // Multi-faction phase 0: the early company plus the three early bloc variants, no modern leftovers.
+        Assert.That(colonies, Has.Count.EqualTo(4));
+        Assert.That(colonies.Select(c => c.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<NameDB>().DefaultName),
+            Is.All.EqualTo("Earth"));
+        var colony = colonies.Single(c => c.FactionOwnerID == faction.Id);
         Assert.That(colony.GetDataBlob<NameDB>().GetName(faction.Id), Does.Contain("Earth"));
 
-        // No scenario factions were placed, only the player's (and the game master's).
-        var withColonies = game.Factions.Values.Where(f => f.Id != faction.Id
-            && colonies.Any(c => c.FactionOwnerID == f.Id));
-        Assert.That(withColonies, Is.Empty);
+        var blocNames = game.Factions.Values.Where(f => f.Id != faction.Id
+                && colonies.Any(c => c.FactionOwnerID == f.Id))
+            .Select(f => f.GetDataBlob<NameDB>().DefaultName);
+        Assert.That(blocNames, Is.EquivalentTo(new[] { "Americas Compact", "Sino-Pacific Coalition", "Euro Consortium" }));
     }
 
     [Test]
@@ -275,7 +277,7 @@ public class EarlyTechStartTests
         var (game, faction) = StartGameLikeTheMenu(EarlyTech);
         var colony = game.Systems
             .SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
-            .Single();
+            .Single(c => c.FactionOwnerID == faction.Id);
 
         var installations = colony.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign.Keys.ToList();
         foreach (var id in new[] { "default-design-mine", "default-design-refinery-site", "default-design-factory-site",
@@ -352,7 +354,7 @@ public class EarlyTechStartTests
         var colonies = loaded.Systems
             .SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             .ToList();
-        Assert.That(colonies, Has.Count.EqualTo(1));
+        Assert.That(colonies, Has.Count.EqualTo(4), "the company plus three early blocs");
     }
 
     [Test]
@@ -652,7 +654,7 @@ public class EarlyTechStartTests
     }
 
     [Test]
-    public void WarpTechSol_MarsHasSpareRoom_AndEarthPostsRelocationWithFare()
+    public void WarpTechSol_MarsHasSpareRoom_AndTheSmallCompanyEarthIsNotOvercrowded()
     {
         var (game, faction) = StartGameLikeTheMenu(WarpTechStart);
         var sol = game.Systems.Single(system => system.ID == "system-sol");
@@ -670,20 +672,18 @@ public class EarlyTechStartTests
         Assert.That(marsSupport, Is.EqualTo(2000), "colony-cost-adjusted Mars capacity");
         Assert.That(marsSupport - marsPop, Is.EqualTo(1000), "Mars posts meaningful demand room");
 
-        // The periodic market pass posts relocation from overcrowded Earth toward Mars.
+        // Multi-faction phase 0: the company is 8,000 people on 5 infrastructure sites (20,000
+        // support), so Earth HQ is no longer overcrowded and posts no "people leaving" row. Mars's
+        // spare room is still pinned above.
+        long earthPop = earth.GetDataBlob<ColonyInfoDB>().Population.Values.Sum();
+        Assert.That(earthPop, Is.EqualTo(8000));
+        Assert.That(MigrationPlanner.Capacity(earth, speciesEntity), Is.GreaterThan(earthPop), "Earth HQ has room");
+
         new RunMarketPlan().Plan(earth, new Goal(GoalType.RunMarket), earth.StarSysDateTime);
 
         var speciesId = earth.GetDataBlob<ColonyInfoDB>().Population.Keys.First().ToString();
-        Assert.That(MarketBook.TryGet(earth, speciesId, out var leaving), Is.True,
-            "Earth offers people leaving");
-        Assert.That(leaving.Relocation, Is.True);
-        Assert.That(leaving.SellQuantity, Is.GreaterThan(0));
-        Assert.That(leaving.Ask, Is.EqualTo(0));
-        Assert.That(MarketBook.TryGet(mars, speciesId, out var accepting), Is.True,
-            "Mars accepts relocating people");
-        Assert.That(accepting.Relocation, Is.True);
-        Assert.That(accepting.BuyQuantity, Is.GreaterThan(0));
-        Assert.That(accepting.Bid, Is.EqualTo(SpeciesCargo.FareCreditsPerPerson));
+        Assert.That(MarketBook.TryGet(earth, speciesId, out var leaving) && leaving.SellQuantity > 0, Is.False,
+            "Earth HQ offers nobody leaving");
     }
 
     // --- Prefab infrastructure: zero pressure at start, Luna after one research -------------

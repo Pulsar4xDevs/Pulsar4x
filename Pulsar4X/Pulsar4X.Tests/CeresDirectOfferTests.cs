@@ -175,6 +175,9 @@ public class CeresDirectOfferTests
             ship.StarSysDateTime, TransactionCategory.InitialInvestment, "test", 1000);
         FillGeneralStorage(depot);
         FillGeneralStorage(luna);
+        // Multi-faction phase 0: the Earth blocs are trade partners too, so they are full as well.
+        foreach (var bloc in EarthBlocColonies(sol))
+            FillGeneralStorage(bloc);
         BringAlongside(ship, depot);
         ReadyToSell(ship, standing);
 
@@ -210,6 +213,12 @@ public class CeresDirectOfferTests
 
         var purse = depotFaction.GetDataBlob<FactionInfoDB>().Money;
         purse.AddExpense(ship.StarSysDateTime, TransactionCategory.Trade, "test", purse.GetCurrentFunds());
+        // Multi-faction phase 0: the Earth blocs are trade partners too, so their purses are empty as well.
+        foreach (var bloc in EarthBlocColonies(sol))
+        {
+            var blocPurse = Faction(game, bloc.GetDataBlob<NameDB>().DefaultName).GetDataBlob<FactionInfoDB>().Money;
+            blocPurse.AddExpense(ship.StarSysDateTime, TransactionCategory.Trade, "test", blocPurse.GetCurrentFunds());
+        }
 
         AgentProcessor.RunAgentNow(ship);
 
@@ -399,6 +408,10 @@ public class CeresDirectOfferTests
         FactionFactory.PlaceFactions(game, store);
         return (game, game.Systems.Single(s => s.ID == "system-sol"));
     }
+
+    static IEnumerable<Entity> EarthBlocColonies(StarSystem sol)
+        => sol.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
+            .Where(c => c.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<NameDB>().DefaultName == "Earth");
 
     static Entity Faction(Game game, string name)
         => game.Factions.Values.Single(f => f.GetDataBlob<NameDB>().DefaultName == name);

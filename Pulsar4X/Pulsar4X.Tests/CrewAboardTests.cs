@@ -101,7 +101,7 @@ public class CrewAboardTests
             Assert.That(ShipCrew.EngineFactor(ship), Is.EqualTo(1), design.Name);
             Assert.That(ShipCrew.Note(ship), Is.Empty, design.Name);
         }
-        Assert.That(Pool.Total, Is.EqualTo(500), "scenario ships draw nobody");
+        Assert.That(Pool.Total, Is.EqualTo(100), "scenario ships draw nobody");
     }
 
     [Test]
@@ -143,7 +143,7 @@ public class CrewAboardTests
         var courier = Design("default-ship-design-courier");
         var ship = Launch(courier, "Crewtest Full");
         Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(courier.CrewReq));
-        Assert.That(Pool.Total, Is.EqualTo(500 - courier.CrewReq));
+        Assert.That(Pool.Total, Is.EqualTo(100 - courier.CrewReq));
         var view = new GameProjector(_game).ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
         Assert.That(view.CrewTracked, Is.True);
         Assert.That(view.CrewAboard, Is.EqualTo(courier.CrewReq));
@@ -200,7 +200,7 @@ public class CrewAboardTests
 
         IndustryJobView Row() => projector.ProjectEntity(_earth, _player.Id).GetView<IndustryView>()!.ProductionLines
             .Single(l => l.Id == line.Id).Jobs.Single(j => j.JobId == job.JobID);
-        Assert.That(Row().CrewWarning, Is.Empty, "500 in the pool");
+        Assert.That(Row().CrewWarning, Is.Empty, "100 in the pool");
         SetPool(5);
         Assert.That(Row().CrewRequired, Is.EqualTo(courier.CrewReq));
         Assert.That(Row().CrewWarning, Is.EqualTo($"Pool 5 of {courier.CrewReq} crew; the ship will launch under-crewed"));
@@ -211,9 +211,9 @@ public class CrewAboardTests
     {
         var courier = Design("default-ship-design-courier");
         var ship = Launch(courier, "Crewtest Scrap");
-        Assert.That(Pool.Total, Is.EqualTo(500 - courier.CrewReq));
+        Assert.That(Pool.Total, Is.EqualTo(100 - courier.CrewReq));
         Assert.That(ShipCrew.Scrap(ship, _earth), Is.EqualTo(courier.CrewReq));
-        Assert.That(Pool.Total, Is.EqualTo(500));
+        Assert.That(Pool.Total, Is.EqualTo(100));
         Assert.That(ship.IsValid, Is.False);
     }
 
@@ -402,7 +402,7 @@ public class CrewAboardTests
         int excess = ShipCrew.AfterRefit(ship, _earth);
         Assert.That(excess, Is.EqualTo(courier.CrewReq - split.Capacity));
         Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(split.Capacity));
-        Assert.That(Pool.Total, Is.EqualTo(500 + excess));
+        Assert.That(Pool.Total, Is.EqualTo(100 + excess));
         Assert.That(ShipCrew.AfterRefit(ship, _earth), Is.EqualTo(0));
     }
 
