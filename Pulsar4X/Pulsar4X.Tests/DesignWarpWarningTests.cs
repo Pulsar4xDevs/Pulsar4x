@@ -23,6 +23,7 @@ public class DesignWarpWarningTests
 {
     Entity _tanker = null!;
     List<(ComponentDesign design, int count)> _tankerParts = null!;
+    Pulsar4X.Factions.FactionInfoDB _info = null!;
 
     [OneTimeSetUp]
     public void StartQuickstart()
@@ -39,6 +40,7 @@ public class DesignWarpWarningTests
         _tanker = game.Systems.SelectMany(s => s.GetAllEntitiesWithDataBlob<ShipInfoDB>())
             .Single(s => s.FactionOwnerID == player.Id && s.GetDataBlob<NameDB>().GetName(player.Id) == "Tanker I");
         _tankerParts = _tanker.GetDataBlob<ShipInfoDB>().Design.Components.ToList();
+        _info = player.GetDataBlob<Pulsar4X.Factions.FactionInfoDB>();
 
         Assert.That(Count<WarpDriveAtb>(_tankerParts), Is.EqualTo(1));
         Assert.That(Count<EnergyGenerationAtb>(_tankerParts), Is.EqualTo(2));
@@ -128,5 +130,86 @@ public class DesignWarpWarningTests
     {
         Assert.That(WarpMath.DesignWarpWarnings(Tanker(drives: 0, reactors: 0, batteries: 0)
             .Where(p => !p.design.HasAttribute<WarpDriveAtb>()).ToList()), Is.Empty);
+    }
+
+    // ---- closed-loop life support (fix 6) ----
+
+    [Test]
+    public void ClosedLoopTech_LowersTheLifeSupportInTheSustainCheck()
+    {
+        // The LifeSupport_CountsInTheSustainCheck case warns at factor 1; a researched factor that brings the
+        // crew's life support inside the plant's spare output clears it.
+        var parts = Tanker(drives: 1, reactors: 1, batteries: 4);
+        double output = parts.Where(p => p.design.HasAttribute<EnergyGenerationAtb>()).Sum(p => p.design.GetAttribute<EnergyGenerationAtb>().PowerOutputMax * p.count);
+        double sustain = parts.Where(p => p.design.HasAttribute<WarpDriveAtb>()).Sum(p => p.design.GetAttribute<WarpDriveAtb>().BubbleSustainCost * p.count);
+        int crew = ShipCrew.Split(parts).Capacity;
+        Assume.That(crew, Is.GreaterThan(0));
+        double fits = (output - sustain) / crew * 0.9;
+        Assert.That(fits, Is.GreaterThan(0).And.LessThan(1));
+
+        Assert.That(WarpMath.DesignWarpWarnings(parts, lifeSupportFactor: 1), Has.Count.EqualTo(1), "default factor 1 is unchanged");
+        Assert.That(WarpMath.DesignWarpWarnings(parts, lifeSupportFactor: fits), Is.Empty, "the closed-loop factor applies");
+        var warned = WarpMath.DesignWarpWarnings(parts, lifeSupportFactor: 1, kWPerCrew: 1);
+        Assert.That(warned[0], Does.Contain(Pulsar4X.Api.Stringify.Power(crew * 1.0)));
+        // CrewTech's factor for the faction's research is what the designer passes: 1 before any research.
+        Assert.That(CrewTech.LifeSupportFactor(_info.Data), Is.EqualTo(1).Within(1e-9), "no research at the start");
+    }
+
+    // ---- Newtonian engine with no fuel storage (fix 8) ----
+
+    static bool IsEngine(ComponentDesign d) => d.HasAttribute<NewtonionThrustAtb>();
+
+    bool StoresFuel(ComponentDesign d, string fuelId)
+    {
+        if (!d.TryGetAttribute<Pulsar4X.Storage.CargoStorageAtb>(out var hold))
+            return false;
+        var fuel = _info.Data.CargoGoods.GetAny(fuelId);
+        return fuel != null && hold.StoreTypeID == fuel.CargoTypeID;
+    }
+
+    string TankerFuel => _tankerParts.First(p => IsEngine(p.design)).design.GetAttribute<NewtonionThrustAtb>().FuelType;
+
+    [Test]
+    public void EngineWithFuelTank_HasNoFuelWarning()
+    {
+        Assume.That(_tankerParts.Any(p => IsEngine(p.design)), "the Tanker has a Newtonian engine");
+        Assert.That(_tankerParts.Any(p => StoresFuel(p.design, TankerFuel)), Is.True, "and a tank for its fuel");
+        Assert.That(WarpMath.DesignFuelWarnings(_tankerParts, _info.Data.CargoGoods), Is.Empty);
+        Assert.That(WarpMath.DesignWarpWarnings(_tankerParts, cargoGoods: _info.Data.CargoGoods), Is.Empty);
+    }
+
+    [Test]
+    public void EngineWithNoFuelTank_Warns()
+    {
+        string fuel = TankerFuel;
+        var parts = _tankerParts.Where(p => !StoresFuel(p.design, fuel)).ToList();
+        var warnings = WarpMath.DesignFuelWarnings(parts, _info.Data.CargoGoods);
+        Assert.That(warnings, Has.Count.EqualTo(1));
+        Assert.That(warnings[0], Does.StartWith("No fuel storage: "));
+        Assert.That(warnings[0], Does.Contain(_info.Data.CargoGoods.GetAny(fuel)!.Name));
+        Assert.That(WarpMath.DesignWarpWarnings(parts, cargoGoods: _info.Data.CargoGoods), Does.Contain(warnings[0]), "shown with the designer's warnings");
+    }
+
+    [Test]
+    public void EngineWithOnlyAHoldForOtherCargo_Warns()
+    {
+        string fuel = TankerFuel;
+        var otherHold = _info.ComponentDesigns.Values.FirstOrDefault(d =>
+            d.TryGetAttribute<Pulsar4X.Storage.CargoStorageAtb>(out var h) && h.MaxVolume > 0 && !StoresFuel(d, fuel));
+        if (otherHold == null)
+            Assert.Ignore("no non-fuel cargo hold design in this start");
+        var parts = _tankerParts.Where(p => !StoresFuel(p.design, fuel)).ToList();
+        parts.Add((otherHold!, 1));
+        Assert.That(WarpMath.DesignFuelWarnings(parts, _info.Data.CargoGoods), Has.Count.EqualTo(1), "a hold that can't store the fuel doesn't count");
+        // Without the cargo goods to tell them apart, any hold counts.
+        Assert.That(WarpMath.DesignFuelWarnings(parts), Is.Empty);
+    }
+
+    [Test]
+    public void NoNewtonianEngine_HasNoFuelWarning()
+    {
+        string fuel = TankerFuel;
+        var parts = _tankerParts.Where(p => !IsEngine(p.design) && !StoresFuel(p.design, fuel)).ToList();
+        Assert.That(WarpMath.DesignFuelWarnings(parts, _info.Data.CargoGoods), Is.Empty);
     }
 }

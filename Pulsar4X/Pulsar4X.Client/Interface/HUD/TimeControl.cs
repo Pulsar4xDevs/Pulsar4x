@@ -77,7 +77,7 @@ namespace Pulsar4X.Client
 
             // Date display
             ImGui.SameLine();
-            ImGui.Text(currenttime.ToShortDateString());
+            ImGui.Text(DateDisplay.FormatDate(currenttime));
 
             // Time span slider
             ImGui.SameLine();
@@ -129,7 +129,7 @@ namespace Pulsar4X.Client
             {
                 ImGui.PushItemWidth(100);
                 ImGui.Indent();
-                ImGui.Text(currenttime.ToString(_uiState.GameSettings.GetTimeFormat()));
+                ImGui.Text(DateDisplay.FormatTime(currenttime, seconds: true));
 
                 ImGui.BeginDisabled(!isPaused);
                 ImGui.SameLine();

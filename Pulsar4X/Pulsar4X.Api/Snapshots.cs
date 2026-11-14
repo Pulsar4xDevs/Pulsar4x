@@ -104,7 +104,8 @@ public sealed record FactionSnapshot(
 
     /// <summary>
     /// The ledger category name of a crew pay line, as in <see cref="LedgerEntrySnapshot.Category"/>. The pay
-    /// processor books one such line a day for the player (amount negative); NPC factions pay no wages yet.
+    /// processor accrues wages daily and books one such line for the player on the 1st of each game month (amount
+    /// negative); NPC factions pay no wages yet.
     /// </summary>
     public const string WagesCategory = "Wages";
 
@@ -124,10 +125,42 @@ public sealed record FactionSnapshot(
     public decimal RunningCostsPerDay { get; init; }
 
     /// <summary>
-    /// Days until the funds run out at <see cref="RunningCostsPerDay"/>, income not counted: funds / running costs.
-    /// Null when nothing costs anything (show "∞"); 0 when funds are already 0 or negative.
+    /// Days until the spendable funds (funds less <see cref="AccruedThisMonth"/>) run out at <see cref="RunningCostsPerDay"/>,
+    /// income not counted. Null when nothing costs anything (show "∞"); 0 when nothing is left to spend.
     /// </summary>
     public double? DaysUntilBroke { get; init; }
+
+    // ---- Monthly billing: wages and research accrue daily and are billed once, on the 1st of each game month. ----
+
+    /// <summary>Days in the current game month; the per-month rates below are the daily rates times this.</summary>
+    public int DaysInMonth { get; init; } = 30;
+
+    /// <summary>Crew payroll for the current game month, cr: <see cref="PayrollPerDay"/> × <see cref="DaysInMonth"/>.</summary>
+    public decimal PayrollPerMonth { get; init; }
+
+    /// <summary>Research labs' running cost for the current game month, cr: <see cref="LabCostsPerDay"/> × <see cref="DaysInMonth"/>.</summary>
+    public decimal LabCostsPerMonth { get; init; }
+
+    /// <summary>All running costs for the current game month, cr: <see cref="PayrollPerMonth"/> + <see cref="LabCostsPerMonth"/>.</summary>
+    public decimal RunningCostsPerMonth { get; init; }
+
+    /// <summary>
+    /// Months until the spendable funds (funds less <see cref="AccruedThisMonth"/>) run out at <see cref="RunningCostsPerMonth"/>,
+    /// income not counted. Null when nothing costs anything; 0 when nothing is left to spend.
+    /// </summary>
+    public double? MonthsUntilBroke { get; init; }
+
+    /// <summary>When the month's wages and research are billed: the 1st of the next game month.</summary>
+    public DateTime? NextPayday { get; init; }
+
+    /// <summary>Wages plus research accrued this month and not yet billed, cr (positive, owed). Labs can only spend funds less this.</summary>
+    public decimal AccruedThisMonth { get; init; }
+
+    /// <summary>The wage part of <see cref="AccruedThisMonth"/>, cr.</summary>
+    public decimal AccruedWagesThisMonth { get; init; }
+
+    /// <summary>The research part of <see cref="AccruedThisMonth"/>, cr.</summary>
+    public decimal AccruedResearchThisMonth { get; init; }
 
     /// <summary>Total of the last day's Wages lines, cr (negative, an expense). 0 when none was booked.</summary>
     public decimal LastWages { get; init; }
@@ -1001,7 +1034,11 @@ public sealed record CandidateView(
     string Location,
     int Wage,
     string LabCategory,
-    int MaxLabs);
+    int MaxLabs)
+{
+    /// <summary>The wage for the current game month (Wage per day × days in the month), cr.</summary>
+    public int WagePerMonth { get; init; }
+}
 
 /// <summary>Every mounted academy on a colony, plus the people a recruit cohort would draw on.</summary>
 public sealed record NavalAcademyView(
@@ -1329,7 +1366,20 @@ public sealed record ResearcherView(
     ModifiedValue CostPerDay,
     ModifiedValue PointsPerDay,
     int FundingLevel,
-    IReadOnlyList<string> TechQueue) : IComponentView;
+    IReadOnlyList<string> TechQueue) : IComponentView
+{
+    /// <summary>Days in the current game month (the research bill is the daily cost times this).</summary>
+    public int DaysInMonth { get; init; } = 30;
+
+    /// <summary>
+    /// This lab's running cost for the current game month, cr: <see cref="CostPerDay"/> × <see cref="DaysInMonth"/>.
+    /// Research costs accrue each day the lab researches and are billed once, on the 1st of the next month.
+    /// </summary>
+    public decimal CostPerMonth { get; init; }
+
+    /// <summary>When this month's research bill is booked: the 1st of the next game month.</summary>
+    public DateTime? NextPayday { get; init; }
+}
 
 // --------------------------------------------------------------------------------------------
 // Faction research state. Tech progress lives in faction data (not on lab entities), so it's

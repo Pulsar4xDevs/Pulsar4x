@@ -6,9 +6,10 @@ using Pulsar4X.Interfaces;
 namespace Pulsar4X.Ships;
 
 /// <summary>
-/// Crew plan phase 5: pays the player's crew wages once a day, at 0.4 h (before research at 0.5 h),
-/// through <see cref="FactionSpending.PayDay"/>. Keyed on ShipCrewDB only so the hotloop schedules it;
-/// it pays for the whole faction (ships and pools) and the payday guard keeps it to one line a day.
+/// Crew plan phase 5: accrues the player's crew wages once a day, at 0.4 h (before research at 0.5 h),
+/// through <see cref="FactionSpending.PayDay"/>, and bills the month's wages and research on the 1st
+/// (<see cref="FactionSpending.SettleMonth"/>). Keyed on ShipCrewDB only so the hotloop schedules it;
+/// it pays for the whole faction (ships and pools) and the payday guard keeps it to one day's accrual a day.
 /// </summary>
 public class CrewPayProcessor : IHotloopProcessor
 {

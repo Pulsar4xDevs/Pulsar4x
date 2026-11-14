@@ -383,7 +383,7 @@ namespace Pulsar4X.Client
                 changes = true;
             }
 
-            ImGui.Text("Time: " + _atDatetime); //ImGui.SameLine();
+            ImGui.Text("Time: " + DateDisplay.FormatDateTime(_atDatetime, seconds: true)); //ImGui.SameLine();
 
             if (ImGui.Button("-1##t"))
             {
@@ -464,7 +464,7 @@ namespace Pulsar4X.Client
                 changes = true;
             }
 
-            ImGui.Text("Time: " + _atDatetime); //ImGui.SameLine();
+            ImGui.Text("Time: " + DateDisplay.FormatDateTime(_atDatetime, seconds: true)); //ImGui.SameLine();
 
             if (ImGui.Button("-1##t"))
             {
@@ -692,8 +692,8 @@ namespace Pulsar4X.Client
             double capture = OrbitalMath.CaptureBurn(muTarget, chosen.VInfArrive, rp);
             double allowance = TransferWindows.CorrectionAllowanceMps;
             double need = escape + capture + allowance;
-            ImGui.Text("Depart " + chosen.Depart.ToString("yyyy-MM-dd HH:mm"));
-            ImGui.Text("Arrive " + chosen.Arrive.ToString("yyyy-MM-dd HH:mm"));
+            ImGui.Text("Depart " + DateDisplay.FormatDateTime(chosen.Depart));
+            ImGui.Text("Arrive " + DateDisplay.FormatDateTime(chosen.Arrive));
             ImGui.Text("Escape " + Stringify.Velocity(escape));
             ImGui.Text("Correction allowance " + Stringify.Velocity(allowance));
             ImGui.Text("Capture " + Stringify.Velocity(capture));
@@ -850,8 +850,8 @@ namespace Pulsar4X.Client
             }
 
             PreviewPorkchop(chosen, currentKE, targetKe);
-            ImGui.Text("Depart " + chosen.Depart.ToString("yyyy-MM-dd HH:mm"));
-            ImGui.Text("Arrive " + chosen.Arrive.ToString("yyyy-MM-dd HH:mm"));
+            ImGui.Text("Depart " + DateDisplay.FormatDateTime(chosen.Depart));
+            ImGui.Text("Arrive " + DateDisplay.FormatDateTime(chosen.Arrive));
             ImGui.Text("Δv " + Stringify.Velocity(chosen.TotalDeltaV)
                 + "  (depart " + Stringify.Velocity(chosen.DepartDeltaV.Length())
                 + ", arrive " + Stringify.Velocity(chosen.ArriveDeltaV.Length()) + ")");

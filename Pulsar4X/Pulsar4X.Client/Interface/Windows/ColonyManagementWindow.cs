@@ -349,7 +349,7 @@ namespace Pulsar4X.Client
             if (power.HasDispatched)
                 DisplayHelpers.PrintRow("Running at", Stringify.Power(power.Dispatched_kW),
                     tooltipTwo: "Average plant output in the last daily pass"
-                        + (power.LastDispatch is { } last ? $" ({last:yyyy-MM-dd HH:mm})" : ""));
+                        + (power.LastDispatch is { } last ? " (" + DateDisplay.FormatDateTime(last) + ")" : ""));
             else
                 DisplayHelpers.PrintRow("Running at", "awaiting daily pass",
                     tooltipTwo: "The plants have not had their first daily pass yet");
@@ -567,8 +567,8 @@ namespace Pulsar4X.Client
                 var labelSize = ImGui.CalcTextSize(label);
                 draw.AddText(new Vector2(x0 - labelSize.X - 4f, y - labelSize.Y / 2), axisColour, label);
             }
-            string firstDay = history[0].Date.ToString("yyyy-MM-dd");
-            string lastDay = history[n - 1].Date.ToString("yyyy-MM-dd");
+            string firstDay = DateDisplay.FormatDate(history[0].Date);
+            string lastDay = DateDisplay.FormatDate(history[n - 1].Date);
             draw.AddText(new Vector2(x0, y1 + 2f), axisColour, firstDay);
             draw.AddText(new Vector2(x1 - ImGui.CalcTextSize(lastDay).X, y1 + 2f), axisColour, lastDay);
             string daysLabel = n + " days";
@@ -609,7 +609,7 @@ namespace Pulsar4X.Client
                 day = Math.Clamp(day, 0, n - 1);
                 draw.AddLine(new Vector2(X(day), y0), new Vector2(X(day), y1), axisColour);
                 var h = history[day];
-                string tip = h.Date.ToString("yyyy-MM-dd")
+                string tip = DateDisplay.FormatDate(h.Date)
                     + "\nDemand: " + Stringify.Power(h.Demand_kW)
                     + "\nGeneration: " + Stringify.Power(h.Generation_kW)
                     + "\nAvailable: " + Stringify.Power(h.Delivered_kW);
@@ -876,10 +876,16 @@ namespace Pulsar4X.Client
                             return;
                         }
                         ImGui.SameLine();
-                        ImGui.Text(candidate.Name + ", " + candidate.Location + ", wage " + candidate.Wage);
+                        ImGui.Text(candidate.Name + ", " + candidate.Location + ", wage " + CandidateWageText(candidate));
                     }
                 });
         }
+
+        /// <summary>"3,000 a month" (the month's wage); falls back to "100 a day" from an older server.</summary>
+        public static string CandidateWageText(CandidateView candidate)
+            => candidate.WagePerMonth > 0
+                ? candidate.WagePerMonth.ToString("N0", System.Globalization.CultureInfo.CurrentCulture) + " a month"
+                : candidate.Wage.ToString("N0", System.Globalization.CultureInfo.CurrentCulture) + " a day";
 
         private void DisplayRecruitment(int colonyId, RecruitmentView view)
         {
@@ -891,7 +897,7 @@ namespace Pulsar4X.Client
             foreach (var candidate in view.Candidates)
             {
                 ImGui.Text(candidate.Name + ", age " + candidate.Age);
-                ImGui.Text("Lab: " + candidate.LabCategory + ", up to " + candidate.MaxLabs + " labs. Wage " + candidate.Wage + ".");
+                ImGui.Text("Lab: " + candidate.LabCategory + ", up to " + candidate.MaxLabs + " labs. Wage " + CandidateWageText(candidate) + ".");
                 if (ImGui.Button("Hire as administrator###recruit-admin-" + candidate.Id))
                     _uiState.GameClient?.SubmitCommandAsync(
                         new HireCandidateCommand(colonyId, candidate.Id, HireRole.Administrator));
@@ -939,6 +945,12 @@ namespace Pulsar4X.Client
             }
 
             var galaxy = _uiState.GameClient?.Galaxy;
+            if (academy.Academies.Count == 0)
+            {
+                ImGui.Separator();
+                CrewBars.Warning(CrewActions.NoAcademies);
+                return;
+            }
             for (int i = 0; i < academy.Academies.Count; i++)
                 DisplayAcademy(colonyId, academy, academy.Academies[i], i, galaxy, enrolled);
         }
@@ -954,7 +966,7 @@ namespace Pulsar4X.Client
 
             foreach (var cohort in row.Cohorts)
             {
-                string date = cohort.Graduation.ToShortDateString();
+                string date = DateDisplay.FormatDate(cohort.Graduation);
                 if (cohort.Course == AcademyCourseKind.Crew)
                     continue; // Listed under the crew course below.
                 if (cohort.Course == AcademyCourseKind.Class)
@@ -1007,6 +1019,9 @@ namespace Pulsar4X.Client
             if (selected >= 0 && ready.All(officer => officer.Id != selected))
                 selected = -1;
 
+            ImGui.SeparatorText("Officer training");
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("A class of recruits graduates as ensigns; a command course raises one officer's cap.\nPick recruits or an officer, then press Run class / Run command course.");
             if (max == 0)
                 ImGui.BeginDisabled();
             if (ImGui.SliderInt("Recruits###recruits-" + row.ComponentId, ref recruits, 0, Math.Max(max, 0)) && recruits > 0)
@@ -1047,11 +1062,14 @@ namespace Pulsar4X.Client
             }
 
             bool command = selected >= 0 && recruits == 0;
-            bool canRun = free > 0 && (recruits > 0 || command) && row.FundsReason.Length == 0;
-            string caption = command ? "Run command course" : "Run class";
-            if (!canRun)
-                ImGui.BeginDisabled();
-            if (ImGui.Button(caption + "###run-" + row.ComponentId, new Vector2(-1, 0)) && canRun)
+            // Always shown as an ordinary auto-sized button (not full width, so it no longer reads as a header);
+            // disabled with the reason inline and on hover when it can't run (item 10).
+            string? runRefusal = CrewActions.RunCourseRefusal(free, recruits, command, row.FundsReason, academy.Population, academy.PeoplePerEnsign);
+            string caption = command ? "Run command course" : "Run class (" + recruits.ToString("N0") + " recruits)";
+            string runTip = command
+                ? "Start a command course for the picked officer."
+                : "Enrol " + recruits.ToString("N0") + " recruits. They graduate as ensigns in " + row.TrainingPeriodMonths + " months.";
+            if (CrewBars.GatedButton(caption + "###run-" + row.ComponentId, runRefusal, runTip))
             {
                 if (command)
                     _uiState.GameClient?.SubmitCommandAsync(
@@ -1060,18 +1078,11 @@ namespace Pulsar4X.Client
                     _uiState.GameClient?.SubmitCommandAsync(
                         new TrainAcademyClassCommand(colonyId, row.ComponentId, recruits));
             }
-            if (!canRun)
-            {
-                ImGui.EndDisabled();
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                {
-                    if (row.FundsReason.Length > 0)
-                        ImGui.SetTooltip(row.FundsReason.Replace("%", "%%"));
-                    else if (free <= 0)
-                        ImGui.SetTooltip("This academy has no free seats.");
-                }
-            }
+            if (runRefusal != null)
+                CrewBars.Warning(runRefusal);
 
+            ImGui.Spacing();
+            ImGui.SeparatorText("Crew training");
             DisplayCrewCourse(colonyId, row, academy.Population);
 
             _academyRecruits[row.ComponentId] = recruits;
@@ -1098,7 +1109,7 @@ namespace Pulsar4X.Client
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Stop this course. The trainees go back to the colony.");
                 ImGui.SameLine();
-                ImGui.TextUnformatted(cohort.Count.ToString("N0") + " crew in training, graduating " + cohort.Graduation.ToString("yyyy-MM-dd") + " into the pool.");
+                ImGui.TextUnformatted(cohort.Count.ToString("N0") + " crew in training, graduating " + DateDisplay.FormatDate(cohort.Graduation) + " into the pool.");
             }
 
             if (row.FundsReason.Length > 0)
@@ -1127,11 +1138,14 @@ namespace Pulsar4X.Client
             ImGui.SameLine();
             string tip = "Enrol " + count.ToString("N0") + " colonists. They graduate into the crew pool in "
                 + row.CrewCourseLengthMonths.ToString("N0") + " months.";
-            if (CrewBars.GatedButton("Train crew###train-crew-" + row.ComponentId, refusal, tip, new Vector2(-1, 0)))
+            if (CrewBars.GatedButton("Train crew###train-crew-" + row.ComponentId, refusal, tip))
             {
                 _uiState.GameClient?.SubmitCommandAsync(new TrainAcademyCrewCommand(colonyId, row.ComponentId, count));
                 _academyCrewCount.Remove(row.ComponentId);
             }
+            // The funds / course reasons are already shown above; any other refusal goes inline too.
+            if (refusal != null && row.FundsReason.Length == 0 && row.CrewCourseReason.Length == 0)
+                CrewBars.Warning(refusal);
         }
 
         private static string OfficerLine(CommanderSnapshot officer)

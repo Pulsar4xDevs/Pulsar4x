@@ -77,7 +77,7 @@ public class CrewUiTests
         var row = CrewBars.CourseRow(academy);
         Assert.That(row.Value, Is.EqualTo("50 / 200"));
         Assert.That(row.Percent, Is.EqualTo("25%"));
-        Assert.That(row.Trailing, Is.EqualTo("3 mo, next 2045-03-01 (50)"));
+        Assert.That(row.Trailing, Is.EqualTo("3 mo, next 1 Mar 2045 (50)"));
 
         var idle = CrewBars.CourseRow(new NavalAcademyClassView(7, 8, 24, 0, 50, Array.Empty<AcademyCohortView>()));
         Assert.That(idle.Percent, Is.EqualTo("-"));
@@ -194,5 +194,19 @@ public class CrewUiTests
         Assert.That(CrewActions.ToPoolRefusal(Ship(17, 20, tracked: true, aboard: 0), colony), Is.EqualTo("Nobody is aboard."));
         Assert.That(CrewActions.TopUpRefusal(Ship(17, 20), colony), Is.EqualTo("This ship does not carry crew."));
         Assert.That(CrewActions.ToPoolRefusal(Ship(17, 20), colony), Is.EqualTo("This ship does not carry crew."));
+    }
+
+    // ---- item 10: the academy's run buttons are always shown, disabled with a reason ----
+
+    [Test]
+    public void RunCourseRefusal_SaysWhyTheOfficerCourseCantRun()
+    {
+        Assert.That(CrewActions.RunCourseRefusal(2, 1, false, "", 500_000, 1000), Is.Null, "recruits set");
+        Assert.That(CrewActions.RunCourseRefusal(2, 0, true, "", 500_000, 1000), Is.Null, "officer picked");
+        Assert.That(CrewActions.RunCourseRefusal(2, 1, false, FundsText.PausedFundsNegative, 500_000, 1000), Is.EqualTo(FundsText.PausedFundsNegative));
+        Assert.That(CrewActions.RunCourseRefusal(0, 1, false, "", 500_000, 1000), Is.EqualTo("This academy has no free seats."));
+        Assert.That(CrewActions.RunCourseRefusal(2, 0, false, "", 500_000, 1000), Is.EqualTo("Set Recruits above 0, or pick an officer for a command course."));
+        Assert.That(CrewActions.RunCourseRefusal(2, 0, false, "", 500, 1000), Does.Contain("A recruit needs"));
+        Assert.That(CrewActions.NoAcademies, Does.Contain("Naval Academy installation"));
     }
 }

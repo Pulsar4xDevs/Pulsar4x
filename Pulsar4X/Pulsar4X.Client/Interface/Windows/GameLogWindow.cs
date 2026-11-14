@@ -117,7 +117,8 @@ namespace Pulsar4X.Client
                 ImGui.Text($"Number of events: {events.Count}");
 
                 ImGui.Columns(5, "Events", true);
-                ImGui.SetColumnWidth(0, 164);
+                // Wide enough for the longest date/time format the player can pick (e.g. "28 Dec 2050 11:59:59 PM").
+                ImGui.SetColumnWidth(0, System.Math.Max(164f, ImGui.CalcTextSize(DateDisplay.WidestDateTimeSample(seconds: true)).X + 2 * ImGui.GetStyle().ItemSpacing.X + 4f));
                 ImGui.SetColumnWidth(1, 128);
                 ImGui.SetColumnWidth(2, 128);
                 ImGui.SetColumnWidth(3, 128);
@@ -150,7 +151,7 @@ namespace Pulsar4X.Client
                             _scrollToHighlight = false;
                         }
                     }
-                    ImGui.Text(e.StarDate.ToString(_uiState.GameSettings.GetDateTimeFormat()));
+                    ImGui.Text(DateDisplay.FormatDateTime(e.StarDate, seconds: true));
                     ImGui.NextColumn();
                     ImGui.Text(e.EventType);
                     ImGui.NextColumn();

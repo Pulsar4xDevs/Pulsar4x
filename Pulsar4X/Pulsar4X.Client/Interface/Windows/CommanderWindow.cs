@@ -162,12 +162,12 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     ImGui.Text(YearsBetween(person.CommissionedOn, now).ToString("F0"));
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Commissioned on: " + person.CommissionedOn.ToShortDateString());
+                        ImGui.SetTooltip("Commissioned on: " + DateDisplay.FormatDate(person.CommissionedOn));
 
                     ImGui.TableNextColumn();
                     ImGui.Text(YearsBetween(person.RankedOn, now).ToString("F0"));
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Promoted on: " + person.RankedOn.ToShortDateString());
+                        ImGui.SetTooltip("Promoted on: " + DateDisplay.FormatDate(person.RankedOn));
                 }
 
                 ImGui.EndTable();

@@ -2867,9 +2867,9 @@ namespace Pulsar4X.Client
                 ImGui.Text("Mode: " + preview.Mode);
             ImGui.Text($"Δv {Stringify.Velocity(preview.DeltaV)}, have {Stringify.Velocity(preview.Have)}");
             if(preview.Feasible && preview.DepartInSeconds > 60 && preview.DepartInSeconds < 1e10)
-                ImGui.Text("Departure " + now.AddSeconds(preview.DepartInSeconds).ToString("yyyy-MM-dd HH:mm"));
+                ImGui.Text("Departure " + DateDisplay.FormatDateTime(now.AddSeconds(preview.DepartInSeconds)));
             if(preview.Feasible && preview.EtaSeconds > 0 && preview.EtaSeconds < 1e10)
-                ImGui.Text("Arrival " + now.AddSeconds(preview.EtaSeconds).ToString("yyyy-MM-dd HH:mm"));
+                ImGui.Text("Arrival " + DateDisplay.FormatDateTime(now.AddSeconds(preview.EtaSeconds)));
 
             foreach(var other in preview.Modes)
                 ImGui.TextWrapped(OtherModeLine(other, preview, warpSpeed));
@@ -2899,7 +2899,7 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     ImGui.Text(row.WaitSeconds < 60 ? "0" : WaitText(row.WaitSeconds));
                     ImGui.TableNextColumn();
-                    ImGui.Text(row.WaitSeconds < 60 ? "now" : now.AddSeconds(row.WaitSeconds).ToString("MMM d HH:mm"));
+                    ImGui.Text(row.WaitSeconds < 60 ? "now" : DateDisplay.FormatDateTime(now.AddSeconds(row.WaitSeconds)));
                     ImGui.TableNextColumn();
                     ImGui.Text("+" + WaitText(row.EtaSeconds));
                     ImGui.TableNextColumn();

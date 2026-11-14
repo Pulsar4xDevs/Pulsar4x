@@ -131,7 +131,8 @@ namespace Pulsar4X.Engine
 
         /// <summary>
         /// Crew pay, cr per crew per day: crew aboard the player's ships and trained crew in its pools.
-        /// Also the wage shown on civilian candidates.
+        /// Accrued daily and billed once a month, on the 1st (with the month's research lab costs).
+        /// Also the wage shown on civilian candidates (per month there).
         /// </summary>
         public decimal CrewWagePerDay { get; set; } = DefaultCrewWagePerDay;
 

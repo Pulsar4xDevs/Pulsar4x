@@ -27,7 +27,14 @@ namespace Pulsar4X.Client
         public float UIScale { get; set; } = 1.0f;
         public bool ShowTooltips { get; set; } = true;
         public bool ShowFPS { get; set; } = false;
+        /// <summary>Retired: replaced by <see cref="TimeStyle"/>. Still read so old settings files load; not used.</summary>
         public bool EuropeClock { get; set; } = false;
+
+        /// <summary>How game dates are shown (default "15 Nov 2026"). See <see cref="DateDisplay"/>.</summary>
+        public DateStyle DateStyle { get; set; } = DateStyle.DayMonthName;
+
+        /// <summary>How game times are shown (default 24-hour). See <see cref="DateDisplay"/>.</summary>
+        public TimeStyle TimeStyle { get; set; } = TimeStyle.TwentyFourHour;
 
         // Input Settings
         public bool MouseInvertY { get; set; } = false;
@@ -78,7 +85,7 @@ namespace Pulsar4X.Client
 
                 var settings = JsonConvert.DeserializeObject<GameSettings>(json) ?? new GameSettings();
 
-                Helpers.SetClock((settings.EuropeClock) ? "en-150" : "en");
+                settings.ApplyDateDisplay();
 
                 return settings;
             }
@@ -125,8 +132,16 @@ namespace Pulsar4X.Client
             }
         }
 
-        public string GetTimeFormat() => EuropeClock ? "HH:mm:ss" : "hh:mm:ss tt";
-        public string GetDateFormat() => EuropeClock ? "dd/MM/yyyy" : "MM/dd/yyyy";
+        /// <summary>Points the shared <see cref="DateDisplay"/> formatter at these settings.</summary>
+        public void ApplyDateDisplay()
+        {
+            DateDisplay.Date = Enum.IsDefined(typeof(DateStyle), DateStyle) ? DateStyle : DateStyle.DayMonthName;
+            DateDisplay.Time = Enum.IsDefined(typeof(TimeStyle), TimeStyle) ? TimeStyle : TimeStyle.TwentyFourHour;
+        }
+
+        // Format strings for callers that need one; display code should call DateDisplay directly.
+        public string GetTimeFormat() => DateDisplay.TimeFormat(TimeStyle, seconds: true);
+        public string GetDateFormat() => DateDisplay.DateFormat(DateStyle);
         public string GetDateTimeFormat() => GetDateFormat() + " " + GetTimeFormat();
     }
 }

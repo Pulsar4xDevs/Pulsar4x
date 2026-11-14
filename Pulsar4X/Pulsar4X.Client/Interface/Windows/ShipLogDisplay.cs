@@ -29,7 +29,7 @@ namespace Pulsar4X.Client
                     bool indent = line.Kind != ShipLogKind.Own;
                     if (indent)
                         ImGui.Indent();
-                    ImGui.TextWrapped(line.At.ToString("yyyy-MM-dd HH:mm") + "  " + line.Text);
+                    ImGui.TextWrapped(DateDisplay.FormatDateTime(line.At) + "  " + line.Text);
                     if (indent)
                         ImGui.Unindent();
                 }

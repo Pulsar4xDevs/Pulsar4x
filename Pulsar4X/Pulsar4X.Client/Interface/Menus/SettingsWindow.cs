@@ -255,12 +255,20 @@ namespace Pulsar4X.Client
                 settings.ShowFPS = showFPS;
             }
 
-            // 24-hour clock
-            bool europeClock = settings.EuropeClock;
-            if (ImGui.Checkbox("24-hour clock", ref europeClock))
+            // Date and time format: every game date in the UI goes through DateDisplay. Applies at once.
+            int dateStyle = (int)settings.DateStyle;
+            if (ImGui.Combo("Date format", ref dateStyle, DateDisplay.DateStyleLabels, DateDisplay.DateStyleLabels.Length))
             {
-                settings.EuropeClock = europeClock;
+                settings.DateStyle = (DateStyle)dateStyle;
+                settings.ApplyDateDisplay();
             }
+            int timeStyle = (int)settings.TimeStyle;
+            if (ImGui.Combo("Time format", ref timeStyle, DateDisplay.TimeStyleLabels, DateDisplay.TimeStyleLabels.Length))
+            {
+                settings.TimeStyle = (TimeStyle)timeStyle;
+                settings.ApplyDateDisplay();
+            }
+            ImGui.TextDisabled("Example: " + DateDisplay.FormatDateTime(new DateTime(2050, 1, 15, 14, 5, 9), seconds: true));
         }
 
         private void DisplayDebugSettings()
@@ -437,7 +445,7 @@ namespace Pulsar4X.Client
 
         private void ApplySettings()
         {
-            Helpers.SetClock((_uiState.GameSettings.EuropeClock) ? "en-150" : "en");
+            _uiState.GameSettings.ApplyDateDisplay();
             _uiState.GameSettings.ApplyDisplaySettings(_uiState.ViewPort);
         }
 
@@ -450,6 +458,7 @@ namespace Pulsar4X.Client
         private void ResetToDefaults()
         {
             _uiState.GameSettings = new GameSettings();
+            _uiState.GameSettings.ApplyDateDisplay();
             ImGui.GetStyle().FontScaleMain = 1.0f;
             //ImGui.GetStyle().ScaleAllSizes(1.0f);
         }

@@ -8,9 +8,10 @@ namespace Pulsar4X.Factions;
 public enum TransactionCategory
 {
     InitialInvestment,
+    /// <summary>Research lab running costs: accrued daily, billed as one line per faction on the 1st of each game month.</summary>
     Research,
     Trade,
-    /// <summary>Crew pay: one line per faction per day (crew plan phase 5).</summary>
+    /// <summary>Crew pay: accrued daily, billed as one line per faction on the 1st of each game month.</summary>
     Wages
 }
 

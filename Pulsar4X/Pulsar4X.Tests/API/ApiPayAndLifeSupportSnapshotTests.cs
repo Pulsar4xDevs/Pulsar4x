@@ -58,7 +58,17 @@ public class ApiPayAndLifeSupportSnapshotTests
         Assert.That(faction.PayrollPerDay, Is.EqualTo(crew * 100m));
         Assert.That(faction.LabCostsPerDay, Is.EqualTo(labs));
         Assert.That(faction.RunningCostsPerDay, Is.EqualTo(crew * 100m + labs));
-        Assert.That(faction.DaysUntilBroke, Is.EqualTo((double)(faction.Funds / faction.RunningCostsPerDay)));
+        Assert.That(faction.DaysUntilBroke, Is.EqualTo((double)((faction.Funds - faction.AccruedThisMonth) / faction.RunningCostsPerDay)));
+        // Monthly billing: the per-month rates are the daily ones times this game month's days.
+        var now = _game.TimePulse.GameGlobalDateTime;
+        int days = DateTime.DaysInMonth(now.Year, now.Month);
+        Assert.That(faction.DaysInMonth, Is.EqualTo(days));
+        Assert.That(faction.PayrollPerMonth, Is.EqualTo(crew * 100m * days));
+        Assert.That(faction.LabCostsPerMonth, Is.EqualTo(labs * days));
+        Assert.That(faction.RunningCostsPerMonth, Is.EqualTo((crew * 100m + labs) * days));
+        Assert.That(faction.NextPayday, Is.EqualTo(new DateTime(now.Year, now.Month, 1).AddMonths(1)));
+        Assert.That(faction.AccruedThisMonth, Is.EqualTo(0m), "nothing accrued before the first day runs");
+        Assert.That(faction.MonthsUntilBroke, Is.EqualTo((double)(faction.Funds / faction.RunningCostsPerMonth)));
         Assert.That(faction.Funds, Is.GreaterThan(0m));
         Assert.That(faction.FundsNegative, Is.False);
         Assert.That(faction.SpendingBlocked, Is.False);
@@ -66,6 +76,21 @@ public class ApiPayAndLifeSupportSnapshotTests
         Assert.That(faction.LastWages, Is.EqualTo(0m));
         Assert.That(faction.LastWagesDate, Is.Null);
         Assert.That(FactionSnapshot.WagesCategory, Is.EqualTo(TransactionCategory.Wages.ToString()));
+    }
+
+    [Test]
+    public void Faction_ShowsWhatIsOwedThisMonth_AndSpendableFundsDriveDaysUntilBroke()
+    {
+        var info = _player.GetDataBlob<FactionInfoDB>();
+        var now = _game.TimePulse.GameGlobalDateTime;
+        decimal accrued = FactionSpending.PayDay(_game, now);
+        Assert.That(accrued, Is.GreaterThan(0m));
+        var faction = _projector.ProjectFaction(_player.Id)!;
+        Assert.That(faction.AccruedThisMonth, Is.EqualTo(accrued));
+        Assert.That(faction.AccruedWagesThisMonth, Is.EqualTo(accrued));
+        Assert.That(faction.AccruedResearchThisMonth, Is.EqualTo(0m));
+        Assert.That(faction.Funds, Is.EqualTo(info.Money.GetCurrentFunds()), "owed is not yet taken from funds");
+        Assert.That(faction.DaysUntilBroke, Is.EqualTo((double)((faction.Funds - accrued) / faction.RunningCostsPerDay)));
     }
 
     [Test]

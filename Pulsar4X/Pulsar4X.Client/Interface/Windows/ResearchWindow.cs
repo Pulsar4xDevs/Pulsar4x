@@ -238,15 +238,16 @@ namespace Pulsar4X.Client
                 }
 
                 ImGui.TableNextColumn();
-                ImGui.TextColored(Styles.DescriptiveColor, "Cost per Day");
+                ImGui.TextColored(Styles.DescriptiveColor, "Cost per Month");
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted(researcher.CostPerDay.Value.ToString("C0", CultureInfo.CurrentCulture));
+                ImGui.TextUnformatted(researcher.CostPerMonth.ToString("C0", CultureInfo.CurrentCulture));
                 if(ImGui.IsItemHovered())
                 {
                     DisplayHelpers.DescriptiveTooltip(
-                        "Cost per Day",
-                        "",
-                        $"{researcher.CostPerDay.BaseValue.ToString("C0", CultureInfo.CurrentCulture)} Base Value",
+                        "Cost per Month",
+                        researcher.CostPerDay.Value.ToString("C0", CultureInfo.CurrentCulture) + " a day",
+                        LabCostTooltip(researcher) + "\n\n"
+                            + $"{researcher.CostPerDay.BaseValue.ToString("C0", CultureInfo.CurrentCulture)} a day Base Value",
                         delegate {
                             foreach(var modifier in researcher.CostPerDay.Modifiers)
                             {
@@ -469,5 +470,16 @@ namespace Pulsar4X.Client
         }
 
         private void SubmitCommand(GameCommand command) => _uiState.GameClient?.SubmitCommandAsync(command);
+
+        /// <summary>The lab cost tooltip: the daily rate, this month's days, and when the bill is booked.</summary>
+        public static string LabCostTooltip(ResearcherView researcher)
+        {
+            string text = researcher.CostPerDay.Value.ToString("C0", CultureInfo.CurrentCulture) + " a day x "
+                + researcher.DaysInMonth + " days this month. Accrues each day the lab researches";
+            text += researcher.NextPayday is { } payday
+                ? " and is billed on " + DateDisplay.FormatDate(payday) + "."
+                : " and is billed on the 1st of next month.";
+            return text + " A lab only runs when funds, less what is already owed this month, cover its day.";
+        }
     }
 }

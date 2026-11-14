@@ -95,6 +95,32 @@ namespace Pulsar4X.Factions
         /// <summary>The last day crew wages were paid (crew plan phase 5); null before the first payday.</summary>
         public DateTime? LastCrewPayday { get; internal set; }
 
+        /// <summary>
+        /// Monthly billing: the first day of the game month the accrued wages and research below belong to.
+        /// Null before anything has accrued (and in saves from before monthly billing, which start fresh).
+        /// On the first run in a later month the accrual is billed (one Wages and one Research line) and reset.
+        /// </summary>
+        public DateTime? AccrualMonth { get; internal set; }
+
+        /// <summary>Crew wages owed for <see cref="AccrualMonth"/>, accrued daily and not yet billed, cr.</summary>
+        public decimal AccruedWages { get; internal set; }
+
+        /// <summary>Crew-days behind <see cref="AccruedWages"/> (crew on payroll summed over the accrued days).</summary>
+        public long AccruedWageCrewDays { get; internal set; }
+
+        /// <summary>Days of wages behind <see cref="AccruedWages"/>.</summary>
+        public int AccruedWageDays { get; internal set; }
+
+        /// <summary>Research lab running costs owed for <see cref="AccrualMonth"/>, accrued daily and not yet billed, cr.</summary>
+        public decimal AccruedResearch { get; internal set; }
+
+        /// <summary>Lab-days behind <see cref="AccruedResearch"/> (one per lab per day it researched).</summary>
+        public int AccruedLabDays { get; internal set; }
+
+        /// <summary>Everything accrued this month and not yet billed, cr.</summary>
+        [JsonIgnore]
+        public decimal AccruedOwed => AccruedWages + AccruedResearch;
+
         public SafeList<Entity> Commanders { get; internal set; } = new ();
 
         public Dictionary<string, ShipDesign> ShipDesigns = new ();
@@ -172,6 +198,12 @@ namespace Pulsar4X.Factions
             Colonies = new List<Entity>(factionDB.Colonies);
             AutoHires = factionDB.AutoHires;
             LastCrewPayday = factionDB.LastCrewPayday;
+            AccrualMonth = factionDB.AccrualMonth;
+            AccruedWages = factionDB.AccruedWages;
+            AccruedWageCrewDays = factionDB.AccruedWageCrewDays;
+            AccruedWageDays = factionDB.AccruedWageDays;
+            AccruedResearch = factionDB.AccruedResearch;
+            AccruedLabDays = factionDB.AccruedLabDays;
             InternalKnownJumpPoints = new Dictionary<string, List<Entity>>(factionDB.KnownJumpPoints);
 
             ShipDesigns = new Dictionary<string, ShipDesign>(factionDB.ShipDesigns);
