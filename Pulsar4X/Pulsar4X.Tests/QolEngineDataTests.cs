@@ -87,7 +87,7 @@ public class QolEngineDataTests
             var design = designer.CreateDesign(faction);
 
             Assert.That(design.DisplayProperties.ContainsKey("Power Draw"), Is.True);
-            Assert.That(design.DisplayProperties["Power Draw"], Is.EqualTo(10).Within(1e-9), "5 kW per survey-speed point");
+            Assert.That(design.DisplayProperties["Power Draw"], Is.EqualTo(5 * 2 * Math.Pow(2, -0.15)).Within(1e-9), "5 kW per survey-speed point, scaled by Speed^-0.15");
 
             var summary = new GameProjector(game).ProjectComponentDesigns(faction.Id)!
                 .Designs.Single(d => d.Id == design.UniqueID);
@@ -97,7 +97,7 @@ public class QolEngineDataTests
             Assert.That(summary.ResearchCost, Is.EqualTo(design.ResearchCostValue));
             Assert.That(summary.IndustryPoints, Is.EqualTo(design.IndustryPointCosts));
             Assert.That(summary.EnergyCost, Is.EqualTo(design.EnergyCost));
-            Assert.That(summary.DisplayStats["Power Draw"], Is.EqualTo(10).Within(1e-9));
+            Assert.That(summary.DisplayStats["Power Draw"], Is.EqualTo(5 * 2 * Math.Pow(2, -0.15)).Within(1e-9));
         }
         finally
         {
