@@ -186,8 +186,8 @@ namespace Pulsar4X.Client
                 Outline(draw, origin, cellW, cellH, ny, absI, absJ, white);
             Outline(draw, origin, cellW, cellH, ny, SelectedI, SelectedJ, yellow);
 
-            ImGui.Text(grid.Departures[0].ToString("yyyy-MM-dd")
-                + "  →  " + grid.Departures[nx - 1].ToString("yyyy-MM-dd")
+            ImGui.Text(DateDisplay.FormatDate(grid.Departures[0])
+                + "  →  " + DateDisplay.FormatDate(grid.Departures[nx - 1])
                 + "     TOF " + (grid.TimeOfFlightSeconds[0] / 86400.0).ToString("0.##")
                 + "–" + (grid.TimeOfFlightSeconds[ny - 1] / 86400.0).ToString("0.##") + " days");
 
@@ -202,8 +202,8 @@ namespace Pulsar4X.Client
                 ImGui.Text("No solution");
             else
             {
-                ImGui.Text("Depart " + cell.Depart.ToString("yyyy-MM-dd HH:mm"));
-                ImGui.Text("Arrive " + cell.Arrive.ToString("yyyy-MM-dd HH:mm"));
+                ImGui.Text("Depart " + DateDisplay.FormatDateTime(cell.Depart));
+                ImGui.Text("Arrive " + DateDisplay.FormatDateTime(cell.Arrive));
                 ImGui.Text((tripCost ? "Trip " : "Δv ") + Stringify.Velocity(cell.TotalDeltaV));
                 if (!tripCost)
                     ImGui.Text("depart " + Stringify.Velocity(cell.DepartDeltaV.Length())

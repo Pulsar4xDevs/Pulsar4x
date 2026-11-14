@@ -75,6 +75,12 @@ namespace Pulsar4X.Tests
             Assert.That(fundingResult.Accepted, Is.True, fundingResult.RejectionReason);
             view = _projector.ProjectEntity(lab, session.FactionId).GetView<ResearcherView>();
             Assert.That(view!.FundingLevel, Is.EqualTo(3));
+            // Monthly billing: the lab's cost per month is its daily cost times this game month's days, billed on the 1st.
+            var labNow = lab.StarSysDateTime;
+            int days = DateTime.DaysInMonth(labNow.Year, labNow.Month);
+            Assert.That(view.DaysInMonth, Is.EqualTo(days));
+            Assert.That(view.CostPerMonth, Is.EqualTo((decimal)view.CostPerDay.Value * days).Within(0.01m));
+            Assert.That(view.NextPayday, Is.EqualTo(new DateTime(labNow.Year, labNow.Month, 1).AddMonths(1)));
 
             // Instant orders don't raise engine messages; the server itself pushes a refresh of the
             // commanded entity after each accepted command.

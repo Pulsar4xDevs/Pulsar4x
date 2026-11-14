@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using NUnit.Framework;
 using Pulsar4X.Api;
+using Pulsar4X.Client;
 using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Tests;
@@ -175,16 +176,48 @@ public class CrewLifeSupportAndWagesUiTests
     [Test]
     public void Payroll_RunningCosts_AndDaysUntilBroke()
     {
-        var f = Faction(10_000m) with { CrewOnPayroll = 1234, CrewWagePerDay = 2m, PayrollPerDay = 2468m, LabCostsPerDay = 32m, RunningCostsPerDay = 2500m, DaysUntilBroke = 4.0 };
-        Assert.That(Finances.PayrollText(f, Inv), Is.EqualTo("1,234 crew x ¤2.00 = ¤2,468.00 a day"));
-        Assert.That(Finances.RunningCostsText(f, Inv), Is.EqualTo("¤2,500.00 a day (wages ¤2,468.00, labs ¤32.00)"));
+        var f = Faction(10_000m) with
+        {
+            CrewOnPayroll = 1234, CrewWagePerDay = 2m, PayrollPerDay = 2468m, LabCostsPerDay = 32m, RunningCostsPerDay = 2500m, DaysUntilBroke = 4.0,
+            DaysInMonth = 30, PayrollPerMonth = 74_040m, LabCostsPerMonth = 960m, RunningCostsPerMonth = 75_000m,
+        };
+        Assert.That(Finances.PayrollText(f, Inv), Is.EqualTo("1,234 crew x ¤2.00 a day = ¤74,040.00 a month"));
+        Assert.That(Finances.RunningCostsText(f, Inv), Is.EqualTo("¤75,000.00 a month (wages ¤74,040.00, labs ¤960.00)"));
         Assert.That(Finances.PayrollText(f with { CrewWagePerDay = 0, PayrollPerDay = 0 }, Inv), Is.EqualTo("1,234 crew, no wages charged yet"));
         Assert.That(Finances.DaysUntilBrokeText(null), Is.EqualTo("∞"));
         Assert.That(Finances.DaysUntilBrokeText(0), Is.EqualTo("now"));
         Assert.That(Finances.DaysUntilBrokeText(1.5), Is.EqualTo("1 day"));
         Assert.That(Finances.DaysUntilBrokeText(412.9), Is.EqualTo("412 days"));
         Assert.That(Finances.LastWagesText(f, Inv), Is.EqualTo("none booked yet"));
-        Assert.That(Finances.LastWagesText(f with { LastWages = -2000m, LastWagesDate = new DateTime(2026, 11, 13) }, Inv), Is.EqualTo("-¤2,000.00 on 2026-11-13"));
+        Assert.That(Finances.LastWagesText(f with { LastWages = -2000m, LastWagesDate = new DateTime(2026, 11, 13) }, Inv), Is.EqualTo("-¤2,000.00 on 13 Nov 2026"), "the default date format");
+    }
+
+    [Test]
+    public void MonthlyBilling_OwedThisMonth_NextPayday_AndPerMonthRates()
+    {
+        var f = Faction(10_000m);
+        Assert.That(Finances.AccruedText(f, Inv), Is.EqualTo("nothing yet"));
+        Assert.That(Finances.NextPaydayText(f), Is.EqualTo("-"));
+        var owing = f with { AccruedThisMonth = 12_000m, AccruedWagesThisMonth = 10_000m, AccruedResearchThisMonth = 2_000m, NextPayday = new DateTime(2050, 2, 1) };
+        Assert.That(Finances.AccruedText(owing, Inv), Is.EqualTo("¤12,000.00 (wages ¤10,000.00, research ¤2,000.00)"));
+        Assert.That(Finances.NextPaydayText(owing), Is.EqualTo("1 Feb 2050"));
+        Assert.That(Finances.PerMonthText(100m, 31, Inv), Is.EqualTo("¤3,100.00 a month"));
+        Assert.That(LedgerWindow.CategoryLabel(FactionSnapshot.WagesCategory), Is.EqualTo("Wages (monthly)"));
+        Assert.That(LedgerWindow.CategoryLabel("Research"), Is.EqualTo("Research (monthly)"));
+        Assert.That(LedgerWindow.CategoryLabel("Trade"), Is.EqualTo("Trade"));
+    }
+
+    [Test]
+    public void CandidateWage_AndLabCost_ShowPerMonth()
+    {
+        var candidate = new CandidateView(1, "Ada", 30, 2, "Earth", 100, "Physics", 3) { WagePerMonth = 3_100 };
+        Assert.That(ColonyManagementWindow.CandidateWageText(candidate), Does.EndWith(" a month").And.Contain("100"));
+        Assert.That(ColonyManagementWindow.CandidateWageText(candidate with { WagePerMonth = 0 }), Does.EndWith(" a day"));
+        var lab = new ResearcherView("Lab", "research-lab", "", 1, "Earth", null, null,
+            new ModifiedValue(10_000, 10_000, Array.Empty<ValueModifier>()), new ModifiedValue(5, 5, Array.Empty<ValueModifier>()), 1, Array.Empty<string>())
+            { DaysInMonth = 31, CostPerMonth = 310_000m, NextPayday = new DateTime(2050, 2, 1) };
+        string tip = ResearchWindow.LabCostTooltip(lab);
+        Assert.That(tip, Does.Contain("31 days this month").And.Contain("1 Feb 2050"));
     }
 
     [Test]

@@ -284,12 +284,12 @@ namespace Pulsar4X.Client
         {
             ImGui.BeginTooltip();
             if (bucket.Start.Date == bucket.End.Date)
-                ImGui.TextUnformatted(bucket.Start.ToString("d MMM yyyy", CultureInfo.InvariantCulture));
+                ImGui.TextUnformatted(DateDisplay.FormatDate(bucket.Start));
             else
                 ImGui.TextUnformatted(
-                    bucket.Start.ToString("d MMM yyyy", CultureInfo.InvariantCulture)
+                    DateDisplay.FormatDate(bucket.Start)
                     + " – "
-                    + bucket.End.ToString("d MMM yyyy", CultureInfo.InvariantCulture));
+                    + DateDisplay.FormatDate(bucket.End));
 
             if (candles)
             {

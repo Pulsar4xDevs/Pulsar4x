@@ -9,9 +9,10 @@ using Pulsar4X.Api;
 namespace Pulsar4X.Client.Interface.Widgets;
 
 /// <summary>
-/// The faction's running costs in the Transactions window (crew plan phase 5): wages, the daily payroll
-/// (crew on payroll x wage), running costs per day, days until broke and, while funds are negative, a red
-/// banner with what the block stops. <see cref="IClientGalaxy.Faction"/> is always the player's own
+/// The faction's running costs in the Transactions window (crew plan phase 5): the last monthly wage bill, the
+/// payroll (crew on payroll x wage) and running costs per month, what is owed so far this month, the next payday
+/// (wages and research accrue daily and are billed on the 1st), days until broke and, while funds are negative,
+/// a red banner with what the block stops. <see cref="IClientGalaxy.Faction"/> is always the player's own
 /// faction, so this never shows an NPC's books (NPCs pay no wages). Text helpers are pure for tests.
 /// </summary>
 public static class Finances
@@ -28,15 +29,32 @@ public static class Finances
 
     static string Money(decimal amount, CultureInfo? culture) => amount.ToString("C2", culture ?? CultureInfo.CurrentCulture);
 
-    /// <summary>"1,234 crew x $2.00 = $2,468.00 a day"; before wages are charged, "1,234 crew, no wages charged yet".</summary>
+    /// <summary>
+    /// "1,234 crew x $2.00 a day = $74,040.00 a month" (this month's days); before wages are charged,
+    /// "1,234 crew, no wages charged yet".
+    /// </summary>
     public static string PayrollText(FactionSnapshot f, CultureInfo? culture = null)
         => f.CrewWagePerDay <= 0 && f.PayrollPerDay <= 0
             ? f.CrewOnPayroll.ToString("N0", culture) + " crew, no wages charged yet"
-            : f.CrewOnPayroll.ToString("N0", culture) + " crew x " + Money(f.CrewWagePerDay, culture) + " = " + Money(f.PayrollPerDay, culture) + " a day";
+            : f.CrewOnPayroll.ToString("N0", culture) + " crew x " + Money(f.CrewWagePerDay, culture) + " a day = " + Money(f.PayrollPerMonth, culture) + " a month";
 
-    /// <summary>"$2,500.00 a day (wages $2,468.00, labs $32.00)".</summary>
+    /// <summary>"$75,000.00 a month (wages $74,040.00, labs $960.00)".</summary>
     public static string RunningCostsText(FactionSnapshot f, CultureInfo? culture = null)
-        => Money(f.RunningCostsPerDay, culture) + " a day (wages " + Money(f.PayrollPerDay, culture) + ", labs " + Money(f.LabCostsPerDay, culture) + ")";
+        => Money(f.RunningCostsPerMonth, culture) + " a month (wages " + Money(f.PayrollPerMonth, culture) + ", labs " + Money(f.LabCostsPerMonth, culture) + ")";
+
+    /// <summary>"$12,000.00 (wages $10,000.00, research $2,000.00)", or "nothing yet".</summary>
+    public static string AccruedText(FactionSnapshot f, CultureInfo? culture = null)
+        => f.AccruedThisMonth <= 0
+            ? "nothing yet"
+            : Money(f.AccruedThisMonth, culture) + " (wages " + Money(f.AccruedWagesThisMonth, culture) + ", research " + Money(f.AccruedResearchThisMonth, culture) + ")";
+
+    /// <summary>"2050-02-01", or "-" when unknown.</summary>
+    public static string NextPaydayText(FactionSnapshot f)
+        => DateDisplay.FormatDate(f.NextPayday, "-");
+
+    /// <summary>A daily rate as a month's: "$3,000.00 a month" (30 days unless given).</summary>
+    public static string PerMonthText(decimal perDay, int daysInMonth = 30, CultureInfo? culture = null)
+        => Money(perDay * Math.Max(1, daysInMonth), culture) + " a month";
 
     /// <summary>"∞" when nothing costs anything, "now" at 0 (funds gone), else "412 days" / "1 day".</summary>
     public static string DaysUntilBrokeText(double? days)
@@ -49,9 +67,9 @@ public static class Finances
         return whole == 1 ? "1 day" : whole.ToString("N0") + " days";
     }
 
-    /// <summary>The last day's Wages lines: "-$2,000.00 on 2026-11-13", or "none booked yet".</summary>
+    /// <summary>The last Wages bill (booked on the 1st for the month before): "-$2,000.00 on 2026-11-01", or "none booked yet".</summary>
     public static string LastWagesText(FactionSnapshot f, CultureInfo? culture = null)
-        => f.LastWagesDate is { } date ? Money(f.LastWages, culture) + " on " + date.ToString("yyyy-MM-dd") : "none booked yet";
+        => f.LastWagesDate is { } date ? Money(f.LastWages, culture) + " on " + DateDisplay.FormatDate(date) : "none booked yet";
 
     /// <summary>The negative-balance banner, or empty while funds are 0 or more.</summary>
     public static string BannerText(FactionSnapshot f, CultureInfo? culture = null)
@@ -92,10 +110,12 @@ public static class Finances
 
         if (ImGui.BeginTable("##finances", 2, ImGuiTableFlags.SizingFixedFit))
         {
-            Row("Wages", LastWagesText(f), "The last day's crew pay lines (ledger category " + FactionSnapshot.WagesCategory + ").");
-            Row("Payroll", PayrollText(f), "Crew aboard the faction's ships plus trained crew in its colony pools. Academy students are not paid.");
-            Row("Running costs", RunningCostsText(f), "Daily costs: crew payroll plus the research labs that research today. Income is not forecast.");
-            Row("Days until broke", DaysUntilBrokeText(f.DaysUntilBroke), "Funds / running costs, income not counted.");
+            Row("Last wage bill", LastWagesText(f), "The last monthly crew pay line (ledger category " + FactionSnapshot.WagesCategory + "), booked on the 1st for the month before.");
+            Row("Payroll", PayrollText(f), "Crew aboard the faction's ships plus trained crew in its colony pools. Academy students are not paid.\nWages accrue daily and are billed once, on the 1st of each month.");
+            Row("Running costs", RunningCostsText(f), "Per month (" + f.DaysInMonth + " days this month): crew payroll plus the research labs that research today. Income is not forecast.");
+            Row("Owed this month", AccruedText(f), "Wages and research accrued so far this month, not yet billed. Labs can only spend funds less this.");
+            Row("Next payday", NextPaydayText(f), "The month's wages and research are billed on the 1st. If funds can't cover the bill, the balance goes negative and spending is blocked.");
+            Row("Days until broke", DaysUntilBrokeText(f.DaysUntilBroke), "(Funds - owed this month) / daily running costs, income not counted.");
             ImGui.EndTable();
         }
     }

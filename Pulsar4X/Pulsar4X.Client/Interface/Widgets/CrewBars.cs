@@ -26,6 +26,26 @@ public static class CrewActions
     public static int ClampTrain(int? count, int max)
         => max <= 0 ? 0 : Math.Clamp(count ?? max, 1, max);
 
+    /// <summary>The message on a colony's Naval Academy tab when it lists no academy.</summary>
+    public const string NoAcademies = "No naval academy here. Build a Naval Academy installation at this colony to run officer classes, command courses and crew courses.";
+
+    /// <summary>
+    /// Null when the officer course button (Run class / Run command course) may order a course; otherwise why not,
+    /// shown inline and on hover. <paramref name="command"/>: an officer is picked and no recruits are set.
+    /// </summary>
+    public static string? RunCourseRefusal(int freeSeats, int recruits, bool command, string? fundsReason, long population, int peoplePerEnsign)
+    {
+        if (!string.IsNullOrEmpty(fundsReason))
+            return fundsReason;
+        if (freeSeats <= 0)
+            return "This academy has no free seats.";
+        if (command || recruits > 0)
+            return null;
+        if (peoplePerEnsign > 0 && population < peoplePerEnsign)
+            return "The colony has " + Stringify.Quantity(population) + " people. A recruit needs " + Stringify.Quantity(peoplePerEnsign) + ".";
+        return "Set Recruits above 0, or pick an officer for a command course.";
+    }
+
     /// <summary>Null when a crew course can start at this academy.</summary>
     public static string? TrainRefusal(NavalAcademyClassView row, long population)
     {
@@ -225,7 +245,7 @@ public static class CrewBars
     public static PowerRow CourseRow(NavalAcademyClassView academy)
     {
         string next = academy.NextCrewGraduation is { } date
-            ? "next " + date.ToString("yyyy-MM-dd") + (academy.NextCrewGraduationCount > 0 ? " (" + academy.NextCrewGraduationCount.ToString("N0") + ")" : "")
+            ? "next " + DateDisplay.FormatDate(date) + (academy.NextCrewGraduationCount > 0 ? " (" + academy.NextCrewGraduationCount.ToString("N0") + ")" : "")
             : "none running";
         bool full = academy.CrewSeats > 0 && academy.CrewSeatsInUse >= academy.CrewSeats;
         return new PowerRow
@@ -244,7 +264,7 @@ public static class CrewBars
                 ("Seats", academy.CrewSeats.ToString("N0")),
                 ("In use", academy.CrewSeatsInUse.ToString("N0")),
                 ("Course length", academy.CrewCourseLengthMonths.ToString("N0") + " months"),
-                ("Next graduation", academy.NextCrewGraduation?.ToString("yyyy-MM-dd") ?? "-"),
+                ("Next graduation", DateDisplay.FormatDate(academy.NextCrewGraduation, "-")),
                 ("Graduating", academy.NextCrewGraduationCount.ToString("N0")),
             },
         };

@@ -17,6 +17,13 @@ namespace Pulsar4X.People
         {
             if(manager == null) throw new ArgumentNullException("manager cannot be null");
 
+            // A commander made without dates (the starting scientist and admin, tests) joins today. Left at
+            // DateTime.MinValue the Commanders window showed ~2049 "years of service".
+            if (commanderDB.CommissionedOn == default)
+                commanderDB.CommissionedOn = manager.StarSysDateTime;
+            if (commanderDB.RankedOn == default)
+                commanderDB.RankedOn = commanderDB.CommissionedOn;
+
             var blobs = new List<BaseDataBlob>();
             var nameDB = new NameDB(commanderDB.ToString(), factionID, commanderDB.ToString());
             blobs.Add(nameDB);

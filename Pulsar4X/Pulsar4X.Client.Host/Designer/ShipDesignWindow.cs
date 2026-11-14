@@ -62,6 +62,13 @@ namespace Pulsar4X.Client
         private double _estor;
         private double _egen;
         private double _solarArea;
+        // Item 7: solar output at 1 AU from the viewed system's main star (fallback: the capital's system).
+        private double _solarAt1AU = double.NaN;
+        private string _solarStarName = "";
+        private string _solarStarSystemName = "";
+        private double _solarStarLuminosity;
+        private string? _solarSystemKey;
+        private bool _solarFromCapital;
         private double _lifeSupportPower;
         private int _lifeSupportCapacity;
         private double _lifeSupportPerCrew;
@@ -849,12 +856,18 @@ namespace Pulsar4X.Client
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(auxTip);
 
+                RefreshSolarAt1AU(force: false);
                 double totalDraw = _lifeSupportPower + _auxPower;
                 bool solarFitted = _solarArea > 0 || double.IsNaN(_solarArea);
-                bool powerDeficit = totalDraw > _egen && !solarFitted;
+                bool solarKnown = solarFitted && _solarArea > 0 && double.IsFinite(_solarAt1AU);
+                // With panels, the deficit test counts their output at 1 AU from the reference star.
+                double supply = _egen + (solarKnown ? _solarAt1AU : 0);
+                bool powerDeficit = totalDraw > supply && (!solarFitted || solarKnown);
                 string totalTip = "Life support plus component loads (warp bubble costs are listed above).";
                 if (powerDeficit)
-                    totalTip += "\nDeficit " + Stringify.Power(totalDraw - _egen) + " with no solar collectors fitted.";
+                    totalTip += solarKnown
+                        ? "\nDeficit " + Stringify.Power(totalDraw - supply) + " even with solar output at 1 AU from " + _solarStarName + "."
+                        : "\nDeficit " + Stringify.Power(totalDraw - _egen) + " with no solar collectors fitted.";
                 ImGui.TableNextColumn();
                 ImGui.Text("Total Power Draw");
                 if (ImGui.IsItemHovered())
@@ -882,11 +895,22 @@ namespace Pulsar4X.Client
                     else
                         ImGui.Text(Stringify.Quantity(_solarArea) + " m²");
                     ImGui.TableNextColumn();
-                    ImGui.Text("Solar Output");
+                    bool haveSolar = !double.IsNaN(_solarArea) && double.IsFinite(_solarAt1AU);
+                    ImGui.Text(haveSolar ? SolarOutputLabel(_solarStarName) : "Solar Output");
+                    string solarTip = haveSolar ? SolarOutputTooltip() : "";
+                    if (haveSolar && ImGui.IsItemHovered())
+                        ImGui.SetTooltip(solarTip);
                     ImGui.TableNextColumn();
-                    ImGui.TextWrapped(double.IsNaN(_solarArea)
-                        ? "Cannot assess malformed collectors."
-                        : "Depends on local illumination and spectrum.");
+                    if (haveSolar)
+                    {
+                        ImGui.Text(Stringify.Power(_solarAt1AU));
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip(solarTip);
+                    }
+                    else
+                        ImGui.TextWrapped(double.IsNaN(_solarArea)
+                            ? "Cannot assess malformed collectors."
+                            : "Depends on local illumination and spectrum (no star to measure against).");
                 }
 
                 ImGui.TableNextColumn();
@@ -984,6 +1008,81 @@ namespace Pulsar4X.Client
 
             var size = ImGui.GetContentRegionAvail();
             DisplayImage(size.X, size.Y);
+        }
+
+        /// <summary>"Solar Output (1 AU, Sol)".</summary>
+        public static string SolarOutputLabel(string starName)
+            => string.IsNullOrEmpty(starName) ? "Solar Output (1 AU)" : "Solar Output (1 AU, " + starName + ")";
+
+        string SolarOutputTooltip()
+        {
+            string where = _solarFromCapital
+                ? "the capital's system (" + _solarStarSystemName + "); no system is being viewed"
+                : "the system being viewed (" + _solarStarSystemName + ")";
+            return "What the fitted collectors absorb 1 AU from " + _solarStarName + " (L = "
+                + _solarStarLuminosity.ToString("0.00") + "), the main star of " + where + ".\n"
+                + "Uses the star's emission spectrum and each panel's absorption band, as the running ship does.\n"
+                + "Output falls with the square of distance and differs around other stars.";
+        }
+
+        /// <summary>
+        /// Recomputes <see cref="_solarAt1AU"/> when the design changed (<paramref name="force"/>) or the viewed system
+        /// changed: the system being viewed, else the capital's (the faction's first colony), its heaviest star.
+        /// </summary>
+        void RefreshSolarAt1AU(bool force)
+        {
+            var lifecycle = GameLifecycle.Instance;
+            StarSystem? system = lifecycle?.SelectedSystem;
+            bool fromCapital = false;
+            if (system == null)
+            {
+                fromCapital = true;
+                var capital = _factionInfoDB.Colonies.FirstOrDefault(c => c?.Manager is StarSystem);
+                system = capital?.Manager as StarSystem;
+            }
+            string key = system?.ID ?? "";
+            if (!force && key == _solarSystemKey)
+                return;
+            _solarSystemKey = key;
+            _solarFromCapital = fromCapital;
+            _solarAt1AU = double.NaN;
+            _solarStarName = "";
+            _solarStarSystemName = "";
+            _solarStarLuminosity = 0;
+            if (system == null)
+                return;
+            var star = MainStar(system);
+            if (star == null)
+                return;
+            int factionId = lifecycle?.Faction?.Id ?? -1;
+            _solarStarName = star.GetName(factionId);
+            _solarStarSystemName = system.NameDB?.GetName(factionId) ?? _solarStarName;
+            _solarStarLuminosity = star.TryGetDataBlob<Pulsar4X.Galaxy.StarInfoDB>(out var info) ? info.Luminosity : 0;
+            _solarAt1AU = SolarAtDistance(star, Pulsar4X.Orbital.UniversalConstants.Units.MetersPerAu, SelectedComponents);
+        }
+
+        /// <summary>The system's heaviest star with an emission profile, or null.</summary>
+        public static Entity? MainStar(StarSystem system)
+            => system.GetStarsSortedByDryMass().FirstOrDefault(s => s.HasDataBlob<Pulsar4X.Sensors.SensorProfileDB>());
+
+        /// <summary>
+        /// kW the fitted solar panels absorb at <paramref name="distance_m"/> from <paramref name="star"/>, from its
+        /// spectrum, the way EnergyGenHotloopProcessor.SolarAt does for a live ship (one star only):
+        /// SensorTools.AttenuatedForDistanceList then AbsorbedPower per panel, times the panel count.
+        /// </summary>
+        public static double SolarAtDistance(Entity star, double distance_m, IEnumerable<(ComponentDesign design, int count)> components)
+        {
+            if (!(distance_m > 0) || !star.TryGetDataBlob<Pulsar4X.Sensors.SensorProfileDB>(out var profile))
+                return double.NaN;
+            var emissions = Pulsar4X.Sensors.SensorTools.AttenuatedForDistanceList(profile, distance_m, 0.1);
+            double total = 0;
+            foreach (var (design, count) in components)
+            {
+                if (count <= 0 || design == null || !design.TryGetAttribute<EnergySolarGenerationAtb>(out var panel))
+                    continue;
+                total += EnergyGenHotloopProcessor.AbsorbedPower(panel, emissions) * count;
+            }
+            return total;
         }
 
         private void UpdateShipStats()
@@ -1093,7 +1192,6 @@ namespace Pulsar4X.Client
             _wsc = wsc;
             _wspd = WarpMath.MaxSpeedCalc(wp, mass);
             _wpow = wp;
-            _warpWarnings = WarpMath.DesignWarpWarnings(SelectedComponents);
             _crewWarnings = ShipCrew.DesignCrewWarnings(SelectedComponents);
             _crewBerths = ShipCrew.Berths(SelectedComponents);
             _berthRows = SelectedComponents
@@ -1113,6 +1211,11 @@ namespace Pulsar4X.Client
             var crewSplit = ShipCrew.Split(SelectedComponents);
             _lifeSupportCapacity = crewSplit.Capacity;
             _lifeSupportPower = crewSplit.Capacity * _lifeSupportPerCrew * _lifeSupportFactor;
+            // The warp check counts life support at the same per-crew rate and closed-loop tech factor as the row
+            // above, and warns when a Newtonian engine has no tank for its fuel.
+            _warpWarnings = WarpMath.DesignWarpWarnings(SelectedComponents, _lifeSupportFactor, _lifeSupportPerCrew,
+                _factionInfoDB.Data.CargoGoods);
+            RefreshSolarAt1AU(force: true);
 
             _auxPower = 0;
             _auxPowerLines = new List<string>();
@@ -1134,6 +1237,10 @@ namespace Pulsar4X.Client
             else
                 _trnge = cargoTransfer.range;
             //double fuelMass = 0;
+            // Reset first, so removing the last tank (or engine) doesn't leave the old capacity showing.
+            _fuelType = null;
+            _fuelStoreVolume = 0;
+            _fuelStoreMass = 0;
             if (thrusterFuel.IsNotNullOrEmpty())
             {
                 _fuelType = _factionInfoDB.Data.CargoGoods.GetAny(thrusterFuel);

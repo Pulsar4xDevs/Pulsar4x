@@ -236,6 +236,7 @@ public static class ComponentUpgradeHelper
         "Sensitivity at Worst Wavelength",
         "Gravitational Coupling",
         "Cost Per Day",
+        "Cost Per Month",
         "Dry Weight",
         "CoreMass",
         "GennyMass",

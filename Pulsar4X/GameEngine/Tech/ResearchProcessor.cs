@@ -57,7 +57,10 @@ namespace Pulsar4X.Technology
         /// <param name="entity"></param>
         /// <param name="factionAbilities"></param>
         /// <param name="factionTechs"></param>
-        internal void DoResearch(Entity entity)
+        internal void DoResearch(Entity entity) => DoResearch(entity, entity.Manager.StarSysDateTime);
+
+        /// <summary><see cref="DoResearch(Entity)"/> as of <paramref name="at"/> (the date the day's cost accrues to).</summary>
+        internal void DoResearch(Entity entity, DateTime at)
         {
             Entity faction = entity.Manager.Game.Factions[entity.FactionOwnerID];
 
@@ -65,6 +68,9 @@ namespace Pulsar4X.Technology
                 return;
 
             FactionDataStore factionDataStore = factionInfoDB.Data;
+
+            // Bill last month's wages and research on the first run of a new month, even for an idle lab.
+            Pulsar4X.Factions.FactionSpending.SettleMonth(factionInfoDB, at);
 
             // If unable to get the db return
             if(!entity.TryGetDataBlob<ResearcherDB>(out var researcherDB))
@@ -99,16 +105,11 @@ namespace Pulsar4X.Technology
 
             var cost = researcherDB.CostPerDay.GetValue();
 
-            // Check to make sure the cost can be paid (and, crew plan phase 5, the player is not in debt)
-            if(factionInfoDB.Money.GetCurrentFunds() < cost || Pulsar4X.Factions.FactionSpending.IsBlocked(entity.Manager.Game, entity.FactionOwnerID))
+            // Monthly billing: the lab's day is added to this month's research bill, billed on the 1st. It only runs
+            // when funds less what the faction already owes this month cover today's cost (and, crew plan phase 5,
+            // the player is not in debt); a lab that can't pay gets no points today.
+            if(!Pulsar4X.Factions.FactionSpending.TryAccrueResearch(entity.Manager.Game, entity.FactionOwnerID, factionInfoDB, at, cost))
                 return;
-
-            // Pay the costs
-            factionInfoDB.Money.AddExpense(
-                entity.Manager.StarSysDateTime,
-                TransactionCategory.Research,
-                $"Payment to run research lab on {entity.Manager.StarSysDateTime.ToShortDateString()}",
-                cost);
 
             // Apply the research points
             int currentLvl = tech.Level;

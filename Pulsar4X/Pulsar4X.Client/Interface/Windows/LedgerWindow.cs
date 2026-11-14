@@ -65,17 +65,16 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
         if (ImGui.BeginTable("LedgerRows", 4, Styles.TableFlags | ImGuiTableFlags.ScrollY,
                 new Vector2(0, ImGui.GetContentRegionAvail().Y)))
         {
-            ImGui.TableSetupColumn("Date", ImGuiTableColumnFlags.WidthFixed, 168);
+            ImGui.TableSetupColumn("Date", ImGuiTableColumnFlags.WidthFixed, System.Math.Max(168f, ImGui.CalcTextSize(DateDisplay.WidestDateTimeSample()).X + 8f));
             ImGui.TableSetupColumn("Category", ImGuiTableColumnFlags.WidthFixed, 140);
             ImGui.TableSetupColumn("Description", ImGuiTableColumnFlags.WidthStretch);
             ImGui.TableSetupColumn("Amount", ImGuiTableColumnFlags.WidthFixed, 120);
             ImGui.TableHeadersRow();
 
-            string dateFormat = _uiState.GameSettings.GetDateTimeFormat();
             foreach (var row in rows)
             {
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted(row.Date.ToString(dateFormat));
+                ImGui.TextUnformatted(DateDisplay.FormatDateTime(row.Date));
 
                 ImGui.TableNextColumn();
                 ImGui.TextUnformatted(CategoryLabel(row.Category));
@@ -99,12 +98,13 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
         Window.End();
     }
 
-    static string CategoryLabel(string category) => category switch
+    /// <summary>The ledger's category column. Wages and research are billed once a month, on the 1st.</summary>
+    public static string CategoryLabel(string category) => category switch
     {
         "InitialInvestment" => "Initial investment",
-        "Research" => "Research",
+        "Research" => "Research (monthly)",
         "Trade" => "Trade",
-        FactionSnapshot.WagesCategory => "Wages",
+        FactionSnapshot.WagesCategory => "Wages (monthly)",
         _ => category
     };
 }

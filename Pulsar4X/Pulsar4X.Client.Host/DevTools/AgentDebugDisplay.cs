@@ -97,7 +97,7 @@ namespace Pulsar4X.Client
             int shown = Math.Min(upcoming.Count, 6);
             for (int i = 0; i < shown; i++)
             {
-                ImGui.Text(upcoming[i].when.ToString(dateFormat) + "  " + upcoming[i].processor);
+                ImGui.Text(DateDisplay.FormatDateTime(upcoming[i].when, seconds: true) + "  " + upcoming[i].processor);
             }
             if (upcoming.Count > shown)
                 ImGui.Text("+" + (upcoming.Count - shown) + " later interrupts");
@@ -237,7 +237,7 @@ namespace Pulsar4X.Client
                 ImGui.TableSetColumnIndex(2);
                 ImGui.Text(ActionDetail(action));
                 ImGui.TableSetColumnIndex(3);
-                ImGui.Text(action.ActionOnDate.Year < 2 ? "" : action.ActionOnDate.ToString(dateFormat));
+                ImGui.Text(action.ActionOnDate.Year < 2 ? "" : DateDisplay.FormatDateTime(action.ActionOnDate, seconds: true));
             }
 
             ImGui.EndTable();

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -160,14 +161,14 @@ namespace Pulsar4X.Client
                         ImGui.TextColored(Styles.DescriptiveColor, "Unassigned");
 
                     ImGui.TableNextColumn();
-                    ImGui.Text(YearsBetween(person.CommissionedOn, now).ToString("F0"));
+                    ImGui.Text(YearsText(person.CommissionedOn, now));
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Commissioned on: " + person.CommissionedOn.ToShortDateString());
+                        ImGui.SetTooltip("Commissioned on: " + DateDisplay.FormatDate(person.CommissionedOn));
 
                     ImGui.TableNextColumn();
-                    ImGui.Text(YearsBetween(person.RankedOn, now).ToString("F0"));
+                    ImGui.Text(YearsText(person.RankedOn, now));
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Promoted on: " + person.RankedOn.ToShortDateString());
+                        ImGui.SetTooltip("Promoted on: " + DateDisplay.FormatDate(person.RankedOn));
                 }
 
                 ImGui.EndTable();
@@ -182,7 +183,15 @@ namespace Pulsar4X.Client
         private static string RankDisplay(CommanderSnapshot person)
             => person.RankName ?? $"Rank {person.Rank}";
 
-        private static double YearsBetween(DateTime from, DateTime to)
-            => (to - from).TotalDays / 365.25;
+        /// <summary>Elapsed years from <paramref name="from"/> to <paramref name="to"/> (365.25-day years), never negative.</summary>
+        public static double YearsBetween(DateTime from, DateTime to)
+            => Math.Max(0, (to - from).TotalDays / 365.25);
+
+        /// <summary>
+        /// "Yrs of Service" / "Yrs in Rank" cell: elapsed years to one decimal ("10.0", "0.0" for today).
+        /// An unrecorded date (DateTime.MinValue, from older saves) shows "-" rather than a calendar-sized number.
+        /// </summary>
+        public static string YearsText(DateTime from, DateTime now)
+            => from == default ? "-" : YearsBetween(from, now).ToString("0.0", CultureInfo.InvariantCulture);
     }
 }

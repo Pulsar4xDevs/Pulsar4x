@@ -555,7 +555,7 @@ namespace Pulsar4X.Client
                                 ImGui.Text("Current Speed: " + db.CurrentNonNewtonionVectorMS.Length());
                                 ImGui.Text("NewtonionVector " + db.SavedNewtonionVector);
 
-                                ImGui.Text("EDA " + db.PredictedExitTime.ToString());
+                                ImGui.Text("EDA " + DateDisplay.FormatDateTime(db.PredictedExitTime, seconds: true));
                                 double distance = Distance.DistanceBetween(db.EntryPointAbsolute, db.ExitPointAbsolute);
                                 ImGui.Text("Distance " + Stringify.Distance(distance));
                                 ImGui.SameLine();
@@ -566,7 +566,7 @@ namespace Pulsar4X.Client
                                 double speed = ((distance) / totalTime.TotalSeconds);
                                 ImGui.Text("speed2 " + speed);
                                 ImGui.Text("LastDateTime: ");
-                                ImGui.Text(db.LastProcessDateTime.ToString());
+                                ImGui.Text(DateDisplay.FormatDateTime(db.LastProcessDateTime, seconds: true));
                                 ImGui.Text("Time Since Last: ");
                                 var timelen = _uiState.PrimarySystemDateTime - db.LastProcessDateTime;
                                 ImGui.Text(timelen.ToString());
@@ -694,7 +694,7 @@ namespace Pulsar4X.Client
             {
                 var game = GameLifecycle.Instance!.Game!;
                 ImGui.Text($"Total Systems: {game.Systems.Count}");
-                ImGui.Text($"Global Time: {game.TimePulse.GameGlobalDateTime.ToString(_uiState.GameSettings.GetDateTimeFormat())}");
+                ImGui.Text($"Global Time: {DateDisplay.FormatDateTime(game.TimePulse.GameGlobalDateTime, seconds: true)}");
 
                 int stasisCount = game.Systems.Count(s => s.ActivityState == SystemActivityState.Stasis);
                 int bgCount = game.Systems.Count(s => s.ActivityState == SystemActivityState.Background);
@@ -721,7 +721,7 @@ namespace Pulsar4X.Client
                         ImGui.TableSetColumnIndex(1);
                         ImGui.Text(system.ActivityState.ToString());
                         ImGui.TableSetColumnIndex(2);
-                        ImGui.Text(system.StarSysDateTime.ToString(_uiState.GameSettings.GetDateTimeFormat()));
+                        ImGui.Text(DateDisplay.FormatDateTime(system.StarSysDateTime, seconds: true));
                         ImGui.TableSetColumnIndex(3);
                         var lag = game.TimePulse.GameGlobalDateTime - system.StarSysDateTime;
                         ImGui.Text(lag.TotalSeconds > 0 ? lag.ToString() : "-");
@@ -926,7 +926,7 @@ namespace Pulsar4X.Client
 
                         ImGui.TableNextRow();
                         ImGui.TableSetColumnIndex(0);
-                        ImGui.Text(qi.Time.ToString(_uiState.GameSettings.GetDateTimeFormat()));
+                        ImGui.Text(DateDisplay.FormatDateTime(qi.Time, seconds: true));
                         ImGui.TableSetColumnIndex(1);
                         ImGui.Text(s);
                         ImGui.TableSetColumnIndex(2);
@@ -956,7 +956,7 @@ namespace Pulsar4X.Client
                     {
                         ImGui.TableNextRow();
                         ImGui.TableSetColumnIndex(0);
-                        ImGui.Text(dateTime?.ToString(_uiState.GameSettings.GetDateTimeFormat()) ?? "N/A");
+                        ImGui.Text((dateTime is { } dt ? DateDisplay.FormatDateTime(dt, seconds: true) : "N/A"));
                         ImGui.TableSetColumnIndex(1);
                         ImGui.Text("System");
                         ImGui.TableSetColumnIndex(2);

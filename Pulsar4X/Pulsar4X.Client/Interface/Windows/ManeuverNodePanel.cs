@@ -179,7 +179,7 @@ public class ManeuverNodePanel
             ImGui.Text("Burn: " + Stringify.Quantity(_node.BurnTimeTotal, "0.#") + " s");
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Estimated burn duration at full thrust");
-            ImGui.Text("Time: " + _node.NodeTime.ToString("yyyy-MM-dd HH:mm:ss"));
+            ImGui.Text("Time: " + DateDisplay.FormatDateTime(_node.NodeTime, seconds: true));
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("When the burn will be centered.\nDrag the node marker on the orbit to change.");
 
@@ -204,7 +204,7 @@ public class ManeuverNodePanel
                     }
                     if (ImGui.IsItemHovered())
                         ImGui.SetTooltip("Closest approach: " + distText +
-                            "\nTime: " + enc.EncounterTime.ToString("yyyy-MM-dd HH:mm:ss") +
+                            "\nTime: " + DateDisplay.FormatDateTime(enc.EncounterTime, seconds: true) +
                             (enc.EntersSOI ? "\nEnters sphere of influence" : "\nNear miss"));
                 }
             }

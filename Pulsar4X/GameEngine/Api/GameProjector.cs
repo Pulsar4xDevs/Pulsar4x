@@ -84,6 +84,11 @@ namespace Pulsar4X.Engine.Api
             bool blocked = Pulsar4X.Factions.FactionSpending.IsBlocked(_game, factionId);
             decimal payroll = payrollCrew * wage;
             decimal running = payroll + labCosts;
+            // Monthly billing: costs accrue daily and are billed on the 1st; a month's bill is the daily rate x its days.
+            DateTime now = _game.TimePulse.GameGlobalDateTime;
+            int daysInMonth = Pulsar4X.Factions.FactionSpending.DaysInMonth(now);
+            decimal owed = info.AccruedOwed;
+            decimal spendable = funds - owed;
             var lastWages = info.Money.GetAllTransactions().Where(t => t.Category == TransactionCategory.Wages)
                 .GroupBy(t => t.Date.Date).OrderByDescending(g => g.Key).FirstOrDefault();
             return new FactionSnapshot(name, info.Abbreviation, funds, transactions, halts,
@@ -94,7 +99,16 @@ namespace Pulsar4X.Engine.Api
                 PayrollPerDay = payroll,
                 LabCostsPerDay = labCosts,
                 RunningCostsPerDay = running,
-                DaysUntilBroke = running <= 0 ? null : funds <= 0 ? 0 : (double)(funds / running),
+                DaysUntilBroke = running <= 0 ? null : spendable <= 0 ? 0 : (double)(spendable / running),
+                DaysInMonth = daysInMonth,
+                PayrollPerMonth = payroll * daysInMonth,
+                LabCostsPerMonth = labCosts * daysInMonth,
+                RunningCostsPerMonth = running * daysInMonth,
+                MonthsUntilBroke = running <= 0 ? null : spendable <= 0 ? 0 : (double)(spendable / (running * daysInMonth)),
+                NextPayday = Pulsar4X.Factions.FactionSpending.NextPayday(now),
+                AccruedThisMonth = owed,
+                AccruedWagesThisMonth = info.AccruedWages,
+                AccruedResearchThisMonth = info.AccruedResearch,
                 LastWages = lastWages?.Sum(t => t.Amount) ?? 0,
                 LastWagesDate = lastWages?.Key,
                 FundsNegative = funds < 0,
@@ -1609,7 +1623,8 @@ namespace Pulsar4X.Engine.Api
             {
                 string category = game.TechCategories.TryGetValue(candidate.LabCategory, out var cat) ? cat.Name : candidate.LabCategory;
                 var view = new CandidateView(candidate.Id, candidate.Name, candidate.Age, at.Id, at.GetName(factionId),
-                    (int)game.Settings.CrewWagePerDay, category, candidate.MaxLabs);
+                    (int)game.Settings.CrewWagePerDay, category, candidate.MaxLabs)
+                    { WagePerMonth = (int)game.Settings.CrewWagePerDay * Pulsar4X.Factions.FactionSpending.DaysInMonth(colony.StarSysDateTime) };
                 all.Add(view);
                 if (at.Id == colony.Id)
                     here.Add(view);
@@ -2195,7 +2210,12 @@ namespace Pulsar4X.Engine.Api
                 ToModifiedValue(r.CostPerDay),
                 ToModifiedValue(r.PointsPerDay),
                 r.FundingLevel,
-                new List<string>(r.TechQueue));
+                new List<string>(r.TechQueue))
+            {
+                DaysInMonth = Pulsar4X.Factions.FactionSpending.DaysInMonth(lab.StarSysDateTime),
+                CostPerMonth = r.CostPerDay.GetValue() * Pulsar4X.Factions.FactionSpending.DaysInMonth(lab.StarSysDateTime),
+                NextPayday = Pulsar4X.Factions.FactionSpending.NextPayday(lab.StarSysDateTime),
+            };
         }
 
         private static ModifiedValue ToModifiedValue<T>(ModifiableValue<T> value) where T : IConvertible

@@ -224,10 +224,18 @@ public static class WarpMath
     /// generator's output (EnergyGenerationAtb.OnComponentInstallation adds that), i.e. the live
     /// EnergyStoreMax[WarpAbilityDB.EnergyType].
     /// The sustain line is the <see cref="WarpRefusal"/> demand test; the creation line is
-    /// WarpMoveAction's "store can never hold it" test. Empty when there is no drive or nothing is wrong.
+    /// WarpMoveAction's "store can never hold it" test.
+    /// Life support is crew capacity × <paramref name="kWPerCrew"/> × <paramref name="lifeSupportFactor"/>
+    /// (CrewTech.LifeSupportFactor: closed-loop life-support research lowers it; 1 = no research).
+    /// The designer's fuel check (<see cref="DesignFuelWarnings"/>) comes first, so a Newtonian engine with
+    /// no tank for its fuel warns even on a ship with no warp drive. Empty when nothing is wrong.
     /// </summary>
-    public static List<string> DesignWarpWarnings(IEnumerable<(ComponentDesign design, int count)> components)
+    /// <param name="cargoGoods">The faction's cargo goods, to tell which holds can store an engine's fuel. Null: any cargo hold counts.</param>
+    public static List<string> DesignWarpWarnings(IEnumerable<(ComponentDesign design, int count)> components,
+        double lifeSupportFactor = 1, double kWPerCrew = GameSettings.DefaultShipLifeSupport_kWPerCrew,
+        Pulsar4X.Storage.CargoDefinitionsLibrary? cargoGoods = null)
     {
+        var warnings = DesignFuelWarnings(components, cargoGoods);
         double sustain = 0;
         double creation = 0;
         double output = 0;
@@ -246,7 +254,6 @@ public static class WarpMath
                 output += plant.PowerOutputMax * count;
         }
 
-        var warnings = new List<string>();
         if (!hasDrive)
             return warnings;
 
@@ -259,8 +266,13 @@ public static class WarpMath
                 store += plant.PowerOutputMax * count;
         }
 
-        // Crew plan phase 4: life support is must-run, 1 kW per crew at tech 0 (min(required, berths) aboard).
-        double lifeSupport = Pulsar4X.Ships.ShipCrew.Split(components).Capacity * GameSettings.DefaultShipLifeSupport_kWPerCrew;
+        // Crew plan phase 4: life support is must-run, 1 kW per crew at tech 0 (min(required, berths) aboard),
+        // lowered by the closed-loop life-support tech factor, as the live ship gets it (ShipCrew.KWPerCrew).
+        if (!(lifeSupportFactor >= 0) || !double.IsFinite(lifeSupportFactor))
+            lifeSupportFactor = 1;
+        if (!(kWPerCrew >= 0) || !double.IsFinite(kWPerCrew))
+            kWPerCrew = GameSettings.DefaultShipLifeSupport_kWPerCrew;
+        double lifeSupport = Pulsar4X.Ships.ShipCrew.Split(components).Capacity * kWPerCrew * lifeSupportFactor;
         if (sustain + lifeSupport > output)
             warnings.Add(lifeSupport > 0
                 ? "Can't warp: bubble sustain " + Stringify.Power(sustain) + " plus life support " + Stringify.Power(lifeSupport)
@@ -269,6 +281,52 @@ public static class WarpMath
         // WarpMoveAction.Execute: storeMax + 1e-6 >= creationCost or the warp fails.
         if (store + 1e-6 < creation)
             warnings.Add("Can't warp: bubble creation needs " + Stringify.Energy(creation) + ", batteries hold " + Stringify.Energy(store) + ".");
+        return warnings;
+    }
+
+    /// <summary>
+    /// Designer check: every fuel a fitted Newtonian engine (NewtonionThrustAtb) burns needs somewhere to go.
+    /// With <paramref name="cargoGoods"/>, a hold counts only when its store type (CargoStorageAtb.StoreTypeID)
+    /// is the fuel's cargo type, as the designer's fuel capacity and the live CargoStorageDB see it, so a general
+    /// cargo hold does not count for a liquid fuel. Without it, any cargo hold with volume counts.
+    /// One warning per fuel with nowhere to go; empty when there is no Newtonian engine or every fuel has a tank.
+    /// </summary>
+    public static List<string> DesignFuelWarnings(IEnumerable<(ComponentDesign design, int count)> components,
+        Pulsar4X.Storage.CargoDefinitionsLibrary? cargoGoods = null)
+    {
+        var warnings = new List<string>();
+        var engines = new Dictionary<string, List<string>>(); // fuel id -> engine names
+        var stores = new Dictionary<string, double>(); // store type id -> volume
+        double anyStore = 0;
+        foreach (var (design, count) in components)
+        {
+            if (design == null || count <= 0)
+                continue;
+            if (design.TryGetAttribute<NewtonionThrustAtb>(out var engine) && !string.IsNullOrEmpty(engine.FuelType))
+            {
+                if (!engines.TryGetValue(engine.FuelType, out var names))
+                    engines[engine.FuelType] = names = new List<string>();
+                if (!names.Contains(design.Name))
+                    names.Add(design.Name);
+            }
+            if (design.TryGetAttribute<Pulsar4X.Storage.CargoStorageAtb>(out var hold) && hold.MaxVolume > 0)
+            {
+                stores[hold.StoreTypeID ?? ""] = (stores.TryGetValue(hold.StoreTypeID ?? "", out var v) ? v : 0) + hold.MaxVolume * count;
+                anyStore += hold.MaxVolume * count;
+            }
+        }
+        foreach (var (fuelId, names) in engines)
+        {
+            var fuel = cargoGoods?.GetAny(fuelId);
+            bool stored = cargoGoods == null
+                ? anyStore > 0
+                : fuel != null && stores.TryGetValue(fuel.CargoTypeID, out var volume) && volume > 0;
+            if (stored)
+                continue;
+            string fuelName = fuel?.Name ?? fuelId;
+            warnings.Add("No fuel storage: " + string.Join(", ", names) + " burns " + fuelName
+                + ", but no fitted tank or hold can store it. Add a fuel tank.");
+        }
         return warnings;
     }
 

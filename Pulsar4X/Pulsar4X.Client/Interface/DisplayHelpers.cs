@@ -185,11 +185,11 @@ namespace Pulsar4X.Client
             PrintCell(string.IsNullOrEmpty(person.RankName) ? "Rank " + person.Rank : person.RankName);
 
             PrintFormattedCell("Commissioned:");
-            PrintCell(person.CommissionedOn.ToShortDateString(),
+            PrintCell(DateDisplay.FormatDate(person.CommissionedOn),
                 YearsInService(person.CommissionedOn, now).ToString("F1") + " years of service");
 
             PrintFormattedCell("Promoted:");
-            PrintCell(person.RankedOn.ToShortDateString(),
+            PrintCell(DateDisplay.FormatDate(person.RankedOn),
                 YearsInService(person.RankedOn, now).ToString("F1") + " years in rank");
 
             PrintFormattedCell("Experience:");
