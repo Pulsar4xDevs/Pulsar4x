@@ -183,10 +183,19 @@ namespace Pulsar4X.Client
             // Lab stats in an aligned label/value grid, two pairs per row
             if(ImGui.BeginTable("LabSummary", 4, ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.13f);
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.37f);
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.13f);
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.37f);
+                // Label columns are fixed to their widest label plus a gap so
+                // labels never touch their values; value columns share the rest.
+                float labelGap = ImGui.GetStyle().ItemSpacing.X * 2;
+                float leftLabelWidth = Math.Max(
+                    Math.Max(ImGui.CalcTextSize("Location").X, ImGui.CalcTextSize("Cost per Month").X),
+                    ImGui.CalcTextSize("Funding").X) + labelGap;
+                float rightLabelWidth = Math.Max(
+                    ImGui.CalcTextSize("Scientist").X,
+                    ImGui.CalcTextSize("Progress per Day").X) + labelGap;
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, leftLabelWidth);
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 1f);
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, rightLabelWidth);
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch, 1f);
 
                 ImGui.TableNextColumn();
                 ImGui.AlignTextToFramePadding();
