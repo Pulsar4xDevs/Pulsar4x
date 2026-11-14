@@ -4,7 +4,7 @@
   "Version": "0.1",
   "Namespace": "Pulsar4x.Scenario.EarlyTech",
   "Description": "An early-technology Earth start; advanced techs stay locked until researched.",
-  "DefaultEnabled": false,
+  "DefaultEnabled": true,
   "RequiredMods": [
     "Pulsar4x"
   ],
