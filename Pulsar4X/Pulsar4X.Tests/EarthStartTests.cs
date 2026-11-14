@@ -62,7 +62,13 @@ public class EarthStartTests
             long reserve = Pulsar4X.Energy.ColonyPowerProcessor.FuelReserveUnits(colony, cargoId);
             Assert.That(book.Listings[cargoId].SellQuantity, Is.EqualTo(System.Math.Max(0, StockOf(colony, cargoId) - reserve)));
             Assert.That(book.Listings[cargoId].BuyQuantity, Is.EqualTo(0));
-            Assert.That(book.Listings[cargoId].Ask, Is.EqualTo(0));
+            // Multi-faction phase 4: a row OfferStock adds asks the seed ask (was 0); the scenario's
+            // stainless-steel standing row keeps its own price.
+            var row = colony.GetDataBlob<ColonyMarketPolicyDB>().Rows[cargoId];
+            decimal seed = Pulsar4X.Energy.EnergyPricing.SeedAsk(colony.Manager!.Game,
+                colony.GetFactionOwner.GetDataBlob<Pulsar4X.Factions.FactionInfoDB>().Data, cargoId);
+            Assert.That(book.Listings[cargoId].Ask, Is.EqualTo(row.Ask), cargoId);
+            Assert.That(row.Ask, Is.EqualTo(cargoId == "stainless-steel" ? 0m : seed), cargoId);
         }
 
         long steel = StockOf(colony, "stainless-steel");

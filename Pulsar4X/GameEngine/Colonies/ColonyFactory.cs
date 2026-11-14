@@ -211,6 +211,7 @@ namespace Pulsar4X.Colonies
             // Priced rows go in first. Offer stock skips a cargo id that already has a policy row.
             if (colonyBlueprint.UniqueID == CeresStart.DepotColonyId)
                 WriteDepotPrices(colonyEntity);
+            SeedMarketRows(colonyEntity, colonyBlueprint, factionInfo);
             if (colonyEntity.HasDataBlob<LogiBaseDB>())
                 AgentProcessor.AssignGoal(colonyEntity, new Goal(GoalType.OfferStock) { Name = "Offer stock" });
 
@@ -344,6 +345,38 @@ namespace Pulsar4X.Colonies
             policy.Rows[CeresStart.FuelId] = Priced(CeresStart.FuelId, CeresStart.FuelAsk(game, data), 0);
             policy.Rows[CeresStart.IronId] = Priced(CeresStart.IronId, CeresStart.IronAsk(game, data), CeresStart.IronBid(game, data));
             policy.Rows[CeresStart.WaterId] = Priced(CeresStart.WaterId, CeresStart.WaterAsk(game, data), 0);
+            colony.SetDataBlob(policy);
+        }
+
+        /// <summary>
+        /// Multi-faction phase 4: a bloc blueprint's <see cref="ColonyBlueprint.Market"/> rows become priced policy rows.
+        /// Buy rows hold hold-days x use and bid seed ask x bid factor; Sell rows ask the seed ask. A good the faction
+        /// has not unlocked is skipped.
+        /// </summary>
+        static void SeedMarketRows(Entity colony, ColonyBlueprint blueprint, FactionInfoDB info)
+        {
+            if (blueprint.Market == null || blueprint.Market.Count == 0)
+                return;
+            var game = colony.Manager?.Game;
+            var policy = colony.TryGetDataBlob<ColonyMarketPolicyDB>(out var existing) ? existing : new ColonyMarketPolicyDB();
+            double millions = (blueprint.StartingPopulation ?? 0) / 1_000_000.0;
+            foreach (var spec in blueprint.Market)
+            {
+                if (string.IsNullOrEmpty(spec.CargoId) || !info.Data.CargoGoods.Contains(spec.CargoId))
+                    continue;
+                decimal ask = Pulsar4X.Energy.EnergyPricing.SeedAsk(game, info.Data, spec.CargoId);
+                bool buy = !string.Equals(spec.Role, "Sell", StringComparison.OrdinalIgnoreCase);
+                double use = buy ? spec.UsePerDayPerMillion * millions : 0;
+                policy.Rows[spec.CargoId] = new MarketPolicyRow
+                {
+                    CargoId = spec.CargoId,
+                    Min = buy ? (long)Math.Ceiling(spec.HoldDays * use) : 0,
+                    Ask = ask,
+                    Bid = buy ? Math.Round(ask * (decimal)spec.BidFactor, 2, MidpointRounding.AwayFromZero) : 0,
+                    UsePerDay = use,
+                    BidFactor = buy ? spec.BidFactor : 0,
+                };
+            }
             colony.SetDataBlob(policy);
         }
 

@@ -31,10 +31,26 @@ public class RunMarketPlan : IGoalPlanner
         if (managedEntity.Manager is { } manager)
             MigrationBook.Refresh(manager);
 
+
         if (!managedEntity.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy) || policy.Rows.Count == 0)
             return PlanResult.Continue(new List<EntityAction>());
 
         var info = FactionOf(managedEntity);
+
+        // Multi-faction phase 4: a shortfall at a bid first pulls from same-body sell listings (instant, fee 0),
+        // so the stock read below already counts it and only the rest is listed as a buy.
+        var wants = new List<(string, long, decimal, bool)>();
+        foreach (var (key, row) in policy.Rows)
+        {
+            string cargoId = string.IsNullOrEmpty(row.CargoId) ? key : row.CargoId;
+            if (string.IsNullOrEmpty(cargoId) || row.Bid <= 0)
+                continue;
+            long short_ = Math.Max(row.Min, Needed(managedEntity, cargoId)) - StockOf(managedEntity, info, cargoId);
+            if (short_ > 0)
+                wants.Add((cargoId, short_, row.Bid, row.IsDemand()));
+        }
+        BlocDemand.ClearSameBody(managedEntity, wants);
+
         var ranked = new List<RowWork>();
         foreach (var (key, row) in policy.Rows)
         {
@@ -107,7 +123,7 @@ public class RunMarketPlan : IGoalPlanner
                 CargoId = item.CargoId,
                 SellQuantity = Math.Max(0, item.Stock - item.Hold),
                 Ask = item.Row.Ask,
-                BuyQuantity = BuyQuantityOf(item),
+                BuyQuantity = BuyQuantityOf(managedEntity, item),
                 Bid = item.Row.Bid,
                 Reserve = item.Row.Min,
             };
@@ -121,9 +137,13 @@ public class RunMarketPlan : IGoalPlanner
     /// <summary>
     /// Shortage to the hold. A bid with a max above the stock does not buy that surplus.
     /// </summary>
-    static long BuyQuantityOf(RowWork item)
+    static long BuyQuantityOf(Entity colony, RowWork item)
     {
-        return Math.Max(0, item.Hold - item.Stock);
+        long want = Math.Max(0, item.Hold - item.Stock);
+        // A bloc demand row only bids with funds above the reserve (multi-faction phase 4).
+        if (want > 0 && item.Row.IsDemand())
+            want = Math.Min(want, BlocDemand.Affordable(colony, item.Row.Bid));
+        return want;
     }
 
     static bool ListingMatches(Entity colony, MarketListing desired)

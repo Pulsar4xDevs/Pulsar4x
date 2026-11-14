@@ -132,7 +132,9 @@ public class LunaConcordTests
             }
             Assert.That(listing.SellQuantity, Is.GreaterThan(0), listing.CargoId);
             Assert.That(listing.BuyQuantity, Is.EqualTo(0));
-            Assert.That(listing.Ask, Is.EqualTo(0));
+            // Multi-faction phase 4: OfferStock rows ask the seed ask, so Luna no longer asks 0.
+            Assert.That(listing.Ask, Is.EqualTo(Pulsar4X.Energy.EnergyPricing.SeedAsk(game,
+                colony.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data, listing.CargoId)).And.GreaterThan(0), listing.CargoId);
         }
 
         var view = new GameProjector(game).ProjectEntity(colony, player.Id).GetView<MarketView>();

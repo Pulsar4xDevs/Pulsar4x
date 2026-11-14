@@ -44,6 +44,19 @@ public class ColonyBlueprint : Blueprint
     public List<string>? StartingItems { get; set; }
     public List<LaunchQueueBlueprint>? LaunchQueue { get; set; }
     public List<FleetBlueprint>? Fleets { get; set; }
+    /// <summary>Multi-faction phase 4: bloc market rows seeded into the colony's market policy.</summary>
+    public List<MarketRowBlueprint>? Market { get; set; }
+
+    /// <summary>One bloc market row. Use is per day per million people; Min = hold days x use.</summary>
+    public class MarketRowBlueprint
+    {
+        public string CargoId { get; set; } = "";
+        /// <summary>"Buy" (demand: consumed, bid with the shortage premium) or "Sell" (surplus at seed ask).</summary>
+        public string Role { get; set; } = "Buy";
+        public double HoldDays { get; set; } = 30;
+        public double BidFactor { get; set; } = 0.75;
+        public double UsePerDayPerMillion { get; set; }
+    }
 
     public struct StartingItemBlueprint
     {

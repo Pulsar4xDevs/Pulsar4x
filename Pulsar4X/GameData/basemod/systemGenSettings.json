@@ -25,8 +25,8 @@
       "RuinsGenerationChance": 0.5,
       "MinMineralAccessibility": 0.1,
       "MinHomeworldMineralAccessibility": 0.5,
-      "MinHomeworldMineralAmmount": 50000.0,
-      "HomeworldMineralAmmount": 100000.0,
+      "MinHomeworldMineralAmmount": 60000000.0,
+      "HomeworldMineralAmmount": 120000000.0,
       "MinMaxAtmosphericPressure": {
         "Min": 1E-09,
         "Max": 200.0

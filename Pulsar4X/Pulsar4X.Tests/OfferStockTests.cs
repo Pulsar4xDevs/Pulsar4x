@@ -54,14 +54,18 @@ public class OfferStockTests
         Assert.That(row.Min, Is.EqualTo(0));
         Assert.That(row.Max, Is.EqualTo(0));
         Assert.That(row.AutoProduce, Is.False);
-        Assert.That(row.Ask, Is.EqualTo(0));
-        Assert.That(row.Bid, Is.EqualTo(0));
+        // Multi-faction phase 4: a new row is priced at the seed ask / seed bid (was 0 / 0).
+        Assert.That(row.Ask, Is.EqualTo(SeedAsk(colony, "iron")).And.GreaterThan(0));
+        Assert.That(row.Bid, Is.EqualTo(Pulsar4X.Energy.EnergyPricing.SeedBid(Game, Data(colony), "iron")));
         Assert.That(MarketBook.TryGet(colony, "iron", out var listing), Is.True);
         Assert.That(listing.SellQuantity, Is.EqualTo(40));
         Assert.That(listing.BuyQuantity, Is.EqualTo(0));
         Assert.That(listing.Reserve, Is.EqualTo(0));
-        Assert.That(listing.Ask, Is.EqualTo(0));
+        Assert.That(listing.Ask, Is.EqualTo(row.Ask));
     }
+
+    static FactionDataStore Data(Entity colony) => colony.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
+    static decimal SeedAsk(Entity colony, string cargoId) => Pulsar4X.Energy.EnergyPricing.SeedAsk(Game, Data(colony), cargoId);
 
     [Test]
     public void ExistingRow_IsLeftAlone()
@@ -96,7 +100,7 @@ public class OfferStockTests
         Assert.That(plan.Message, Does.Contain("1 skipped for capacity"));
         Assert.That(HasRow(colony, "iron"), Is.True);
         Assert.That(HasRow(colony, "titanium"), Is.False);
-        Assert.That(Row(colony, "iron").Ask, Is.EqualTo(0));
+        Assert.That(Row(colony, "iron").Ask, Is.EqualTo(SeedAsk(colony, "iron")));
     }
 
     [Test]

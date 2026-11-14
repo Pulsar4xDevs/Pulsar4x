@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -13,6 +14,18 @@ public sealed class MarketPolicyRow
     public decimal Ask;
     public decimal Bid;
 
+    /// <summary>Bloc demand (multi-faction phase 4): units the colony's abstract economy uses per day. 0 = none.</summary>
+    public double UsePerDay;
+    /// <summary>Bloc demand: bid = seed ask x this x the shortage premium. 0 = not a demand row (bid left alone).</summary>
+    public double BidFactor;
+    /// <summary>Bloc demand: when stock first fell below <see cref="Min"/>; null when filled.</summary>
+    public DateTime? ShortSince;
+    /// <summary>Bloc demand: fractional use carried to the next pass.</summary>
+    public double UseOwed;
+
+    /// <summary>True for a data-driven bloc demand row (bid follows the shortage premium, capped by the reserve).</summary>
+    public bool IsDemand() => BidFactor > 0;
+
     public MarketPolicyRow Copy() => new()
     {
         CargoId = CargoId,
@@ -21,6 +34,10 @@ public sealed class MarketPolicyRow
         AutoProduce = AutoProduce,
         Ask = Ask,
         Bid = Bid,
+        UsePerDay = UsePerDay,
+        BidFactor = BidFactor,
+        ShortSince = ShortSince,
+        UseOwed = UseOwed,
     };
 }
 
@@ -32,9 +49,12 @@ public class ColonyMarketPolicyDB : BaseDataBlob
 {
     public Dictionary<string, MarketPolicyRow> Rows { get; } = new();
 
+    /// <summary>When the bloc consumption sink last ran (multi-faction phase 4). Null before the first pass.</summary>
+    public DateTime? LastConsumption { get; set; }
+
     public override object Clone()
     {
-        var copy = new ColonyMarketPolicyDB();
+        var copy = new ColonyMarketPolicyDB { LastConsumption = LastConsumption };
         foreach (var (id, row) in Rows)
             copy.Rows[id] = row.Copy();
         return copy;

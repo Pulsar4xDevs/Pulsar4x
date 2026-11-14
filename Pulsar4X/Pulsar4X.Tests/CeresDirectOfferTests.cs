@@ -52,7 +52,7 @@ public class CeresDirectOfferTests
         Assert.That(water.BuyQuantity, Is.EqualTo(0));
 
         Assert.That(MarketBook.TryGet(luna, "iron", out var lunaIron), Is.True);
-        Assert.That(lunaIron.Bid, Is.EqualTo(0));
+        // Multi-faction phase 4: Luna's row carries the seed bid now, but holds no shortfall so it buys nothing.
         Assert.That(lunaIron.BuyQuantity, Is.EqualTo(0));
     }
 

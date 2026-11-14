@@ -65,7 +65,7 @@ public class CeresDepotTests
     }
 
     [Test]
-    public void PlacedDepot_PricesFuelAndOre_AndLeavesLunaAtZero()
+    public void PlacedDepot_PricesFuelAndOre_AndLunaAtTheSeedPrice()
     {
         var modLoader = new ModLoader();
         var store = new ModDataStore();
@@ -102,11 +102,13 @@ public class CeresDepotTests
         Assert.That(iron.SellQuantity, Is.GreaterThan(0));
 
         var lunaIron = luna.GetDataBlob<ColonyMarketPolicyDB>().Rows["iron"];
-        Assert.That(lunaIron.Ask, Is.EqualTo(0));
-        Assert.That(lunaIron.Bid, Is.EqualTo(0));
+        // Multi-faction phase 4: Luna's OfferStock row is priced at the seed ask / bid (was 0 / 0).
+        var lunaData = luna.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
+        Assert.That(lunaIron.Ask, Is.EqualTo(Pulsar4X.Energy.EnergyPricing.SeedAsk(game, lunaData, "iron")).And.GreaterThan(0));
+        Assert.That(lunaIron.Bid, Is.EqualTo(Pulsar4X.Energy.EnergyPricing.SeedBid(game, lunaData, "iron")));
         Assert.That(MarketBook.TryGet(luna, "iron", out var lunaListing), Is.True);
-        Assert.That(lunaListing.Ask, Is.EqualTo(0));
-        Assert.That(lunaListing.Bid, Is.EqualTo(0));
+        Assert.That(lunaListing.Ask, Is.EqualTo(lunaIron.Ask));
+        Assert.That(lunaListing.Bid, Is.EqualTo(lunaIron.Bid));
 
         Assert.That(
             game.Factions[depot.FactionOwnerID].GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(),

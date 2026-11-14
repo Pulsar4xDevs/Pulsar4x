@@ -9,7 +9,8 @@ namespace Pulsar4X.Logistics;
 
 /// <summary>
 /// Standing colony job. Adds a policy row for warehouse stock that has none,
-/// then returns that colony's RunMarket actions. Cargo has no catalog price, so a new row asks and bids 0.
+/// then returns that colony's RunMarket actions. A new row asks the good's seed ask and bids its seed bid
+/// (multi-faction phase 4; it was 0 / 0 before).
 /// </summary>
 public class OfferStockPlan : IGoalPlanner
 {
@@ -27,6 +28,9 @@ public class OfferStockPlan : IGoalPlanner
 
         if (managedEntity.HasDataBlob<LogiBaseDB>())
             Offer(managedEntity, notes);
+
+        // Multi-faction phase 4: bloc demand rows consume, and their bids follow the shortage premium.
+        BlocDemand.Run(managedEntity, atDateTime);
 
         var market = new RunMarketPlan().Plan(managedEntity, goal, atDateTime);
         actions.AddRange(market.Actions);
@@ -99,14 +103,16 @@ public class OfferStockPlan : IGoalPlanner
         if (policy.Rows.Count >= capacity)
             return false;
 
+        var game = colony.Manager?.Game;
+        var data = colony.GetFactionOwner.TryGetDataBlob<Pulsar4X.Factions.FactionInfoDB>(out var info) ? info.Data : null;
         policy.Rows[cargoId] = new MarketPolicyRow
         {
             CargoId = cargoId,
             Min = 0,
             Max = 0,
             AutoProduce = false,
-            Ask = 0,
-            Bid = 0,
+            Ask = data == null ? 0 : Pulsar4X.Energy.EnergyPricing.SeedAsk(game, data, cargoId),
+            Bid = data == null ? 0 : Pulsar4X.Energy.EnergyPricing.SeedBid(game, data, cargoId),
         };
         return true;
     }
