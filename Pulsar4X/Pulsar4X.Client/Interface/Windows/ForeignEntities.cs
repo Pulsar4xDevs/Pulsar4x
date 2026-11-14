@@ -202,6 +202,36 @@ namespace Pulsar4X.Client
         public static bool IsReadOnly(EntitySnapshot entity) => entity.Relation != OwnerRelation.Owned;
 
         /// <summary>
+        /// True when this faction has exactly one visible colony and that colony's name is the faction name,
+        /// so the Colony Management list can show it as a single leaf under Other factions.
+        /// </summary>
+        public static bool IsSingleNamedColony(ForeignFactionGroup faction)
+        {
+            if (faction == null || faction.Systems.Count != 1 || faction.Systems[0].Colonies.Count != 1)
+                return false;
+            var name = faction.Systems[0].Colonies[0].GetView<NameView>()?.Name;
+            return name != null && name == faction.FactionName;
+        }
+
+        /// <summary>
+        /// Owned colonies on a body: Kind == Colony, Relation == Owned, ColonyView.PlanetEntityId == bodyId, snapshot order.
+        /// </summary>
+        public static IReadOnlyList<EntitySnapshot> OwnedColoniesOn(IEnumerable<EntitySnapshot> entities, int bodyId)
+        {
+            var list = new List<EntitySnapshot>();
+            if (entities == null)
+                return list;
+            foreach (var entity in entities)
+            {
+                if (entity == null || entity.Kind != BodyKind.Colony || entity.Relation != OwnerRelation.Owned)
+                    continue;
+                if (entity.GetView<ColonyView>()?.PlanetEntityId == bodyId)
+                    list.Add(entity);
+            }
+            return list;
+        }
+
+        /// <summary>
         /// Non-owned colonies on a body: Kind == Colony, Relation != Owned, ColonyView.PlanetEntityId == bodyId, snapshot order.
         /// </summary>
         public static IReadOnlyList<EntitySnapshot> ForeignColoniesOn(IEnumerable<EntitySnapshot> entities, int bodyId)

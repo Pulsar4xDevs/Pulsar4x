@@ -242,7 +242,10 @@ namespace Pulsar4X.Client
                 DrawWindowAccents(accentColor);
                 DisplayHeader(accentColor);
                 DisplayContent();
-                float actual = ImGui.GetWindowSize().Y;
+                // Measure content, not GetWindowSize: a card pinned to the bottom cannot grow down,
+                // so a too-short first frame would otherwise freeze the height and clip the links.
+                float actual = ImGui.GetCursorPos().Y + ImGui.GetStyle().WindowPadding.Y;
+                actual = Math.Clamp(actual, 48f, work.WorkSize.Y - 8f);
                 float pinnedY = workBottom - actual - BottomMargin;
                 ImGui.SetWindowPos(new Vector2(currentX, pinnedY));
                 _laidOutHeight = actual;
@@ -511,31 +514,37 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            foreach (var colony in _system.Entities)
+            var ownedOnBody = ForeignEntities.OwnedColoniesOn(_system.Entities, _entity.Id);
+            var foreignOnBody = ForeignEntities.ForeignColoniesOn(_system.Entities, _entity.Id);
+            if (ownedOnBody.Count > 0)
             {
-                if (colony.Relation != OwnerRelation.Owned) continue;
-                if (colony.GetView<ColonyView>()?.PlanetEntityId != _entity.Id) continue;
-                string name = colony.GetView<NameView>()?.Name ?? "Colony";
-                ImGui.Spacing();
-                if (ImGui.Button("Colony Management: " + name + "##colony-link-" + colony.Id,
-                    new Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                ImGui.TextUnformatted("Your colonies");
+                foreach (var colony in ownedOnBody)
                 {
-                    var window = ColonyManagementWindow.GetInstance();
-                    window.SelectColony(colony.Id, SystemId);
-                    window.SetActive(true);
+                    string name = colony.GetView<NameView>()?.Name ?? "Colony";
+                    if (ImGui.Button(name + "##colony-link-" + colony.Id,
+                        new Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                    {
+                        var window = ColonyManagementWindow.GetInstance();
+                        window.SelectColony(colony.Id, SystemId);
+                        window.SetActive(true);
+                    }
                 }
             }
 
-            foreach (var colony in ForeignEntities.ForeignColoniesOn(_system.Entities, _entity.Id))
+            if (foreignOnBody.Count > 0)
             {
-                string name = colony.GetView<NameView>()?.Name ?? "Colony";
-                ImGui.Spacing();
-                if (ImGui.Button(name + "##foreign-colony-link-" + colony.Id,
-                    new Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                ImGui.TextUnformatted("Other factions");
+                foreach (var colony in foreignOnBody)
                 {
-                    var window = ColonyManagementWindow.GetInstance();
-                    window.SelectColony(colony.Id, SystemId);
-                    window.SetActive(true);
+                    string name = colony.GetView<NameView>()?.Name ?? "Colony";
+                    if (ImGui.Button(name + "##foreign-colony-link-" + colony.Id,
+                        new Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                    {
+                        var window = ColonyManagementWindow.GetInstance();
+                        window.SelectColony(colony.Id, SystemId);
+                        window.SetActive(true);
+                    }
                 }
             }
         }

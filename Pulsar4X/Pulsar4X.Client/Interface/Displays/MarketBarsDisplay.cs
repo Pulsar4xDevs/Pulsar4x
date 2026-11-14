@@ -21,6 +21,25 @@ namespace Pulsar4X.Client
         static readonly Dictionary<int, ShipDraft> _ship = new();
 
         /// <summary>
+        /// True when a buy into this colony from this office settles at once with fee 0 and no haul.
+        /// </summary>
+        public static bool DeliversHere(MarketView? market, int buyerColonyId)
+        {
+            if (market?.SameBodyColonyIds == null)
+                return false;
+            foreach (var id in market.SameBodyColonyIds)
+            {
+                if (id == buyerColonyId)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>Pane heading and button label for a buy, depending on whether it is a same-body delivery.</summary>
+        public static string BuyActionLabel(bool deliversHere) =>
+            deliversHere ? "Buy, delivered here" : "Buy and ship";
+
+        /// <summary>
         /// Height to leave under the Market tab so Buy and ship sits on-screen when it will draw. Zero if it will not.
         /// Slightly generous so a 1px shortfall does not still show a scrollbar.
         /// </summary>
@@ -36,8 +55,8 @@ namespace Pulsar4X.Client
         }
 
         /// <summary>
-        /// Buy and ship from a friendly market: the goods are sealed at the seller and paid for now, and a haul is
-        /// posted on one of this faction's colonies in the same system. A ship claims the haul to carry it.
+        /// Buy from a friendly market. A same-body destination is delivered here at fee 0 with no freight options;
+        /// otherwise the goods are sealed at the seller and a haul is posted for a ship to claim.
         /// </summary>
         public static void DisplayBuyAndShip(EntitySnapshot seller, MarketView? market, IClientSystem? system, GlobalUIState uiState)
         {
@@ -51,9 +70,10 @@ namespace Pulsar4X.Client
             }
             draft.Good = Math.Clamp(draft.Good, 0, goods.Count - 1);
             draft.Buyer = Math.Clamp(draft.Buyer, 0, buyers.Count - 1);
+            bool deliversHere = DeliversHere(market, buyers[draft.Buyer].Id);
 
             ImGui.Separator();
-            ImGui.Text("Buy and ship");
+            ImGui.Text(BuyActionLabel(deliversHere));
             ImGui.PushID("buy-and-ship-" + seller.Id);
             if (ImGui.BeginCombo("Good", goods[draft.Good].Name))
             {
@@ -77,19 +97,22 @@ namespace Pulsar4X.Client
             }
             ImGui.SetNextItemWidth(140f);
             ImGui.InputInt("Units", ref draft.Units);
-            ImGui.SetNextItemWidth(140f);
-            ImGui.InputDouble("Freight fee", ref draft.Fee, 0, 0, "%.2f");
             if (draft.Units < 1)
                 draft.Units = 1;
-            if (draft.Fee < 0)
-                draft.Fee = 0;
-            if (ImGui.Button("Buy and ship"))
+            if (!deliversHere)
+            {
+                ImGui.SetNextItemWidth(140f);
+                ImGui.InputDouble("Freight fee", ref draft.Fee, 0, 0, "%.2f");
+                if (draft.Fee < 0)
+                    draft.Fee = 0;
+            }
+            if (ImGui.Button(BuyActionLabel(deliversHere)))
             {
                 uiState.GameClient?.SubmitCommandAsync(new SealShipmentCommand(
                     buyers[draft.Buyer].Id,
                     seller.Id,
                     new[] { new SealLine(goods[draft.Good].CargoId, draft.Units) },
-                    (decimal)draft.Fee));
+                    deliversHere ? 0m : (decimal)draft.Fee));
             }
             ImGui.PopID();
         }

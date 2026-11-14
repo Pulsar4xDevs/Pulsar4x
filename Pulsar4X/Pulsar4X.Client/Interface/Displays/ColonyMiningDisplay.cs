@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Api;
@@ -30,7 +31,7 @@ namespace Pulsar4X.Client
                 ImGui.TableSetupColumn("Stockpile");
                 ImGui.TableSetupColumn("Available to Mine");
                 ImGui.TableSetupColumn("Accessibility");
-                ImGui.TableSetupColumn("Annual Production");
+                ImGui.TableSetupColumn("Yours / Body");
                 ImGui.TableSetupColumn("Years to Depletion");
                 ImGui.TableHeadersRow();
 
@@ -55,31 +56,14 @@ namespace Pulsar4X.Client
                     if(ImGui.IsItemHovered())
                         ImGui.SetTooltip("How easy it is to mine " + mineral.Name + " from this colony.\n\n1.0 = easiest\n0.0 = hardest");
                     ImGui.TableNextColumn();
-                    if(mineral.CanMine)
-                    {
-                        ImGui.Text(mineral.AnnualProduction.ToString("#,###,###"));
-                        if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip("Annual production of " + mineral.Name + " from this colony.");
-                    }
-                    else
-                    {
-                        ImGui.Text("-");
-                        if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip("This colony is currently unable to mine " + mineral.Name + ".");
-                    }
+                    ImGui.Text(FormatAnnualProduction(mineral));
+                    if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip(ProductionTooltip(mineral));
                     ImGui.TableNextColumn();
-                    if(mineral.AnnualProduction > 0)
-                    {
-                        var amount = mineral.AvailableToMine ?? 0;
-                        string yearsToDepletion = Math.Round((double)amount / (double)mineral.AnnualProduction, 4).ToString("#.0");
-                        ImGui.Text(yearsToDepletion);
-                        if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip("The colony will exhaust the available " + mineral.Name + " in " + yearsToDepletion + " years.");
-                    }
-                    else
-                    {
-                        ImGui.Text("-");
-                    }
+                    var years = FormatYearsToDepletion(mineral.YearsToDepletion);
+                    ImGui.Text(years);
+                    if(mineral.YearsToDepletion != null && ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Every colony on this body will exhaust the available " + mineral.Name + " in " + years + " years.");
                 }
 
                 ImGui.EndTable();
@@ -89,6 +73,34 @@ namespace Pulsar4X.Client
                     ImGui.Text("No minerals available.");
                 }
             }
+        }
+
+        /// <summary>This colony's annual production and the body's total, or "-" when nobody mines it.</summary>
+        public static string FormatAnnualProduction(MineralMiningRow mineral)
+        {
+            if (!mineral.CanMine && mineral.BodyAnnualProduction <= 0)
+                return "-";
+            return Quantity(mineral.AnnualProduction) + " / " + Quantity(mineral.BodyAnnualProduction);
+        }
+
+        /// <summary>"-" when the body is unmined or the amount is unsurveyed; otherwise years at the body total.</summary>
+        public static string FormatYearsToDepletion(double? years)
+        {
+            if (years is not double value)
+                return "-";
+            if (value < 1)
+                return Math.Round(value, 3).ToString("0.000", CultureInfo.InvariantCulture);
+            return Math.Round(value, 4).ToString("#0.0", CultureInfo.InvariantCulture);
+        }
+
+        static string Quantity(long amount) => amount.ToString("#,##0", CultureInfo.InvariantCulture);
+
+        static string ProductionTooltip(MineralMiningRow mineral)
+        {
+            if (!mineral.CanMine && mineral.BodyAnnualProduction <= 0)
+                return "This colony is currently unable to mine " + mineral.Name + ".";
+            return "This colony produces " + Quantity(mineral.AnnualProduction) + " of " + mineral.Name
+                + " per year. Every colony on this body produces " + Quantity(mineral.BodyAnnualProduction) + ".";
         }
     }
 }

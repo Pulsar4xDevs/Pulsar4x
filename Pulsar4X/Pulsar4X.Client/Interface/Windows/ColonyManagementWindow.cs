@@ -145,6 +145,12 @@ namespace Pulsar4X.Client
             {
                 foreach (var faction in foreign)
                 {
+                    if (ForeignEntities.IsSingleNamedColony(faction))
+                    {
+                        var only = faction.Systems[0];
+                        DisplayColonyLeaf(only.Colonies[0], only.SystemId);
+                        continue;
+                    }
                     ImGui.SetNextItemOpen(true, ImGuiCond.Appearing);
                     if (ImGui.TreeNode(faction.FactionName + "###faction-" + faction.FactionId))
                     {

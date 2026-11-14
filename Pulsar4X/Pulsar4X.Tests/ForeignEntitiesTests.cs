@@ -315,6 +315,60 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void OwnedColoniesOn_ListsOwnedColoniesOnThatBody()
+        {
+            var entities = new[]
+            {
+                Ship(600, OwnerRelation.Friendly, 7, "Hauler"),
+                Colony(2, OwnerRelation.Friendly, 7, 10, "Ceres Depot"),
+                Colony(1, OwnerRelation.Owned, 1, 10, "Earth HQ"),
+                Colony(5, OwnerRelation.Owned, 1, 11, "Luna Base"),
+                Colony(3, OwnerRelation.Neutral, 8, 11, "Luna Concord"),
+                Planet(10, "Ceres"),
+            };
+
+            var onCeres = ForeignEntities.OwnedColoniesOn(entities, 10);
+            Assert.AreEqual(1, onCeres.Count);
+            Assert.AreEqual(1, onCeres[0].Id);
+            Assert.AreEqual("Earth HQ", onCeres[0].GetView<NameView>().Name);
+
+            var onLuna = ForeignEntities.OwnedColoniesOn(entities, 11);
+            Assert.AreEqual(1, onLuna.Count);
+            Assert.AreEqual(5, onLuna[0].Id);
+            Assert.AreEqual(0, ForeignEntities.OwnedColoniesOn(entities, 99).Count);
+        }
+
+        [Test]
+        public void IsSingleNamedColony_WhenTheOnlyColonyUsesTheFactionName()
+        {
+            var amc = Colony(20, OwnerRelation.Friendly, 20, 9, "Americas Compact");
+            var single = new ForeignEntities.ForeignFactionGroup(20, "Americas Compact", new[]
+            {
+                new ForeignEntities.SystemColonies("sol", "Sol", new[] { amc }),
+            });
+            Assert.IsTrue(ForeignEntities.IsSingleNamedColony(single));
+
+            var twoColonies = new ForeignEntities.ForeignFactionGroup(20, "Americas Compact", new[]
+            {
+                new ForeignEntities.SystemColonies("sol", "Sol", new[]
+                {
+                    amc,
+                    Colony(21, OwnerRelation.Friendly, 20, 9, "Second"),
+                }),
+            });
+            Assert.IsFalse(ForeignEntities.IsSingleNamedColony(twoColonies));
+
+            var renamed = new ForeignEntities.ForeignFactionGroup(20, "Americas Compact", new[]
+            {
+                new ForeignEntities.SystemColonies("sol", "Sol", new[]
+                {
+                    Colony(20, OwnerRelation.Friendly, 20, 9, "Earth Branch"),
+                }),
+            });
+            Assert.IsFalse(ForeignEntities.IsSingleNamedColony(renamed));
+        }
+
+        [Test]
         public void ResolveForeignShip_FindsAVisibleForeignShip_OrReturnsNull()
         {
             var inAlpha = Ship(42, OwnerRelation.Neutral, 8, "Luna Runner");
