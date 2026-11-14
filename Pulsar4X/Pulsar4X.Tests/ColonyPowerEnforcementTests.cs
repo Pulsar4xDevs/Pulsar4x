@@ -381,8 +381,9 @@ public class ColonyPowerEnforcementTests
 
     // ---- scenarios ----
 
-    [TestCase(null, 4)]
+    [TestCase("Pulsar4x.Scenario.WarpTechStart", 4)]
     [TestCase("Pulsar4x.Scenario.EarlyTech", 1)]
+    [TestCase(null, 1)]   // the default start is Early Tech (2026-11-15): one Earth colony
     public void EveryScenarioColony_StartsFullyPowered_WithAFuelRunway(string? scenario, int colonies)
     {
         var game = StartGameLikeTheMenu(scenario);

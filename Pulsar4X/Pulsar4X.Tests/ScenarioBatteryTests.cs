@@ -19,6 +19,7 @@ namespace Pulsar4X.Tests;
 public class ScenarioBatteryTests
 {
     const string EarlyTech = "Pulsar4x.Scenario.EarlyTech";
+    const string WarpTechStart = "Pulsar4x.Scenario.WarpTechStart";
 
     static Game Start(string? scenario)
     {
@@ -39,8 +40,9 @@ public class ScenarioBatteryTests
 
     static string Name(Entity colony) => colony.GetDataBlob<NameDB>().DefaultName;
 
-    [TestCase(null, new[] { "Earth HQ", "Mars HQ", "Luna Concord", "Ceres Depot" })]
+    [TestCase(WarpTechStart, new[] { "Earth HQ", "Mars HQ", "Luna Concord", "Ceres Depot" })]
     [TestCase(EarlyTech, new[] { "Earth HQ" })]   // the early-tech start replaces the outposts with one early Earth
+    [TestCase(null, new[] { "Earth HQ" })]        // the default start is Early Tech (2026-11-15)
     public void EveryScenarioColony_StartsWithAFullBank_OfTwoToSixHours(string? scenario, string[] expected)
     {
         var colonies = Colonies(Start(scenario));
@@ -86,7 +88,7 @@ public class ScenarioBatteryTests
     {
         // Before the bank Luna ran at 6000 / 14950 = 0.401. 3 x 1000 t of battery adds ~3000 to the
         // required capacity; three more 400-capacity units hold it there.
-        var luna = Colonies(Start(null)).Single(c => Name(c) == "Luna Concord");
+        var luna = Colonies(Start(WarpTechStart)).Single(c => Name(c) == "Luna Concord");
         Assert.That(Pulsar4X.Industry.InfrastructureProcessor.GetEfficiency(luna), Is.InRange(0.40, 0.41));
     }
 }

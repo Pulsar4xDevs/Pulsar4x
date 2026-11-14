@@ -58,7 +58,7 @@ public class ScenarioManifestTests
     }
 
     [Test]
-    public void BothStarts_CatalogHasSolEarthAndTheStartColony()
+    public void EveryStart_CatalogHasSolEarthAndTheStartColony_AndTheDefaultIsEarlyTech()
     {
         ModsState.RefreshModsList("Data");
         var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
@@ -67,10 +67,18 @@ public class ScenarioManifestTests
             .Where(m => m.Mod.ModName == "Pulsar4x")
             .Select(m => m.Path)
             .ToList();
+        var warpCatalog = GameLifecycle.BuildCatalog(
+            GameLifecycle.LoadModStore(defaultPaths, available, "Pulsar4x.Scenario.WarpTechStart"));
+        var warpSol = warpCatalog.Systems.Single(system => system.Id == "system-sol");
+        Assert.That(warpSol.StartingBodies.Select(body => body.Id), Does.Contain("planet-earth"));
+        Assert.That(warpCatalog.Colonies.Select(colony => colony.Id), Does.Contain("colony-earth"));
+
+        // No scenario named: the default start is Early Tech (2026-11-15).
         var defaultCatalog = GameLifecycle.BuildCatalog(GameLifecycle.LoadModStore(defaultPaths, available));
         var defaultSol = defaultCatalog.Systems.Single(system => system.Id == "system-sol");
         Assert.That(defaultSol.StartingBodies.Select(body => body.Id), Does.Contain("planet-earth"));
-        Assert.That(defaultCatalog.Colonies.Select(colony => colony.Id), Does.Contain("colony-earth"));
+        Assert.That(defaultCatalog.Colonies.Select(colony => colony.Id), Does.Contain("colony-early-earth"));
+        Assert.That(defaultCatalog.Colonies.Select(colony => colony.Id), Does.Not.Contain("colony-earth"));
 
         var earlyCatalog = GameLifecycle.BuildCatalog(
             GameLifecycle.LoadModStore(defaultPaths, available, "Pulsar4x.Scenario.EarlyTech"));

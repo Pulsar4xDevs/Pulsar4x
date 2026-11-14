@@ -42,14 +42,15 @@ public class ScenarioSelectionTests
     }
 
     [Test]
-    public void DefaultChoice_Pulsar4xOnly_IsWarpTechStart()
+    public void DefaultChoice_Pulsar4xOnly_IsEarlyTech()
     {
         ModsState.RefreshModsList("Data");
         var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), ModsState.AvailableMods.Select(m => m.Path));
 
-        Assert.That(store.ScenarioNamespace, Is.EqualTo(WarpTechStart));
-        Assert.That(store.Colonies, Does.ContainKey("colony-earth"));
-        Assert.That(store.Colonies, Does.Not.ContainKey("colony-early-earth"));
+        // Early Tech is the default start since 2026-11-15 (its scenarioInfo is DefaultEnabled).
+        Assert.That(store.ScenarioNamespace, Is.EqualTo(EarlyTech));
+        Assert.That(store.Colonies, Does.ContainKey("colony-early-earth"));
+        Assert.That(store.Colonies, Does.Not.ContainKey("colony-earth"));
     }
 
     [Test]
@@ -291,7 +292,7 @@ public class ScenarioSelectionTests
     }
 
     [Test]
-    public void BuildQuickstartRequest_DefaultEnabledMods_UsesWarpTechStartStart()
+    public void BuildQuickstartRequest_DefaultEnabledMods_UsesTheEarlyTechStart()
     {
         ModsState.RefreshModsList("Data");
         var paths = ModsState.AvailableMods.Where(m => m.Mod.DefaultEnabled).Select(m => m.Path).ToList();
@@ -300,9 +301,9 @@ public class ScenarioSelectionTests
 
         var request = GameLifecycle.BuildQuickstartRequest(paths, catalog, 1);
         Assert.That(request, Is.Not.Null);
-        Assert.That(request.ScenarioId, Is.EqualTo(WarpTechStart));
+        Assert.That(request.ScenarioId, Is.EqualTo(EarlyTech));
         Assert.That(request.SpeciesId, Is.EqualTo("species-human"));
-        Assert.That(request.ColonyId, Is.EqualTo("colony-earth"));
+        Assert.That(request.ColonyId, Is.EqualTo("colony-early-earth"));
         Assert.That(request.SystemId, Is.EqualTo("system-sol"));
         Assert.That(request.BodyId, Is.EqualTo("planet-earth"));
     }

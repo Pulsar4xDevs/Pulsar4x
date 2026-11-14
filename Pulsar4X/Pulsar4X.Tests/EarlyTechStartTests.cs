@@ -36,6 +36,7 @@ public class EarlyTechStartTests
 {
     private const string BaseMod = "Pulsar4x";
     private const string EarlyTech = "Pulsar4x.Scenario.EarlyTech";
+    private const string WarpTechStart = "Pulsar4x.Scenario.WarpTechStart";
     private const string EarlyColony = "colony-early-earth";
 
     private static ModsState.ModMetaData Mod(string name)
@@ -447,7 +448,7 @@ public class EarlyTechStartTests
     }
 
     [Test]
-    public void EarlyTechShip_CannotJump_AndABaseModWarpShipCan()
+    public void EarlyTechShip_CannotJump_AndAWarpTechStartShipCan()
     {
         var (early, earlyFaction) = StartGameLikeTheMenu(EarlyTech);
         AssertJumpMatchesWarp(early, earlyFaction);
@@ -455,7 +456,7 @@ public class EarlyTechStartTests
         Assert.That(earlyShips, Is.Not.Empty);
         Assert.That(earlyShips.All(s => !s.CanJump), Is.True);
 
-        var (stock, stockFaction) = StartGameLikeTheMenu();
+        var (stock, stockFaction) = StartGameLikeTheMenu(WarpTechStart);
         AssertJumpMatchesWarp(stock, stockFaction);
         Assert.That(ProjectedShips(stock, stockFaction.Id).Any(s => s.CanJump), Is.True);
     }
@@ -637,9 +638,9 @@ public class EarlyTechStartTests
     }
 
     [Test]
-    public void DefaultBaseModStart_HasNuclearEnginesAndMoreThanOneColony()
+    public void WarpTechStart_HasNuclearEnginesAndMoreThanOneColony()
     {
-        var (game, faction) = StartGameLikeTheMenu();
+        var (game, faction) = StartGameLikeTheMenu(WarpTechStart);
         var info = faction.GetDataBlob<FactionInfoDB>();
         Assert.That(info.Data.ComponentTemplates.ContainsKey("scntr-engine"), Is.True);
         Assert.That(info.ComponentDesigns.ContainsKey("default-design-NTR1.8"), Is.True);
@@ -651,9 +652,9 @@ public class EarlyTechStartTests
     }
 
     [Test]
-    public void StockSol_MarsHasSpareRoom_AndEarthPostsRelocationWithFare()
+    public void WarpTechSol_MarsHasSpareRoom_AndEarthPostsRelocationWithFare()
     {
-        var (game, faction) = StartGameLikeTheMenu();
+        var (game, faction) = StartGameLikeTheMenu(WarpTechStart);
         var sol = game.Systems.Single(system => system.ID == "system-sol");
         var colonies = sol.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
             .Where(c => c.FactionOwnerID == faction.Id).ToList();
