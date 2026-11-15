@@ -91,6 +91,7 @@ namespace Pulsar4X.Colonies
 
                     Entity? destination = null;
                     long bestRoom = MinimumRoom - 1;
+                    int bestBand = int.MinValue;
                     foreach (var candidate in colonies)
                     {
                         if (candidate.Id == origin.Id || !CanRelocateBetween(origin, candidate))
@@ -101,10 +102,14 @@ namespace Pulsar4X.Colonies
                         long room = Room(candidate, speciesId);
                         if (room < MinimumRoom)
                             continue;
-                        if (room > bestRoom || (room == bestRoom && destination != null && candidate.Id < destination.Id))
+                        // Multi-faction phase 7a: destinations rank by satisfaction (10-point bands, starving last), then room.
+                        int band = Band(candidate);
+                        if (destination == null || band > bestBand
+                            || (band == bestBand && (room > bestRoom || (room == bestRoom && candidate.Id < destination.Id))))
                         {
                             destination = candidate;
                             bestRoom = room;
+                            bestBand = band;
                         }
                     }
                     if (destination == null)
@@ -178,6 +183,7 @@ namespace Pulsar4X.Colonies
 
                     Entity? destination = null;
                     long bestRoom = MinimumRoom - 1;
+                    int bestBand = int.MinValue;
                     foreach (var candidate in colonies.OrderBy(c => c.Id))
                     {
                         if (candidate.Id == origin.Id)
@@ -227,6 +233,10 @@ namespace Pulsar4X.Colonies
         /// uses to decide who dies. Zero means the colony supports none of that species and anyone
         /// there wants to leave.
         /// </summary>
+        /// <summary>Satisfaction band for ranking destinations; a colony in shortage ranks last.</summary>
+        static int Band(Entity colony)
+            => ColonyNeeds.GrowthStopped(colony) ? -1 : (int)Math.Floor(ColonyNeeds.Satisfaction(colony) / 10);
+
         public static long Support(Entity colony, Entity species)
         {
             if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info)
@@ -301,7 +311,7 @@ namespace Pulsar4X.Colonies
         /// <summary>
         /// People of one species who do not fit their colony's support. Zero when they do.
         /// </summary>
-        public static long Crowded(Entity colony, int speciesId)
+        public static long Crowded(Entity colony, int speciesId, bool includeLeaving = true)
         {
             if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))
                 return 0;
@@ -313,8 +323,15 @@ namespace Pulsar4X.Colonies
             long supported = Support(colony, species);
             if (supported <= 0)
                 return people;
-            long excess = people - supported;
-            return excess > 0 ? excess : 0;
+            long excess = Math.Max(0, people - supported);
+            // Multi-faction phase 7a: a starving (day 30 on) or unhappy (< 30) colony counts as crowded by the leavers.
+            if (includeLeaving)
+            {
+                long total = NavalAcademyCourse.PopulationOf(info);
+                long leaving = total > 0 ? (long)Math.Floor((double)ColonyNeeds.Leaving(colony) * people / total) : 0;
+                excess = Math.Max(excess, leaving);
+            }
+            return excess;
         }
 
         /// <summary>

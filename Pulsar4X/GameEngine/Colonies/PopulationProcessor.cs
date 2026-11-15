@@ -47,19 +47,17 @@ namespace Pulsar4X.Colonies
                 if (colonyCost > 0.0)
                 {
                     maxPopulation = (long)((double)(popSupportValue / needsSupport) / colonyCost) ;
-                    if (currentPopulation[id] > maxPopulation) // People will start dying
+                    if (currentPopulation[id] > maxPopulation)
                     {
-                        long excessPopulation = currentPopulation[id] - maxPopulation;
-                        // @todo: figure out better formula
-                        growthRate = -50.0;
-                        newPop = (long)(value * (1.0 + growthRate));
-                        if (newPop < 0)
-                            newPop = 0;
-                        UpdatePopulation(colonyInfoDB, currentPopulation, id, newPop);
+                        // Multi-faction phase 7a: overcrowding no longer kills. The old rule (growth −50, i.e.
+                        // −5000 %) emptied the colony on the first tick, and Luna (temperature colony cost ~36) and
+                        // Ceres start over their rated support. Overcrowded people stop growing, lose 15 satisfaction
+                        // and are offered relocation (MigrationPlanner.Crowded); only shortages kill.
+                        continue;
                     }
                     else
                     {
-                        growthRate = GrowthPerTick(value);
+                        growthRate = Adjusted(colony, GrowthPerTick(value));
                         // @todo: get external factors in population growth (or death)
                         newPop = (long)(value * (1.0 + growthRate));
                         if (newPop > maxPopulation)
@@ -71,7 +69,7 @@ namespace Pulsar4X.Colonies
                 }
                 else
                 {
-                    growthRate = GrowthPerTick(value);
+                    growthRate = Adjusted(colony, GrowthPerTick(value));
                     // @todo: get external factors in population growth (or death)
                     newPop = (long)(value * (1.0 + growthRate));
                     if (newPop < 0)
@@ -79,6 +77,18 @@ namespace Pulsar4X.Colonies
                     UpdatePopulation(colonyInfoDB, currentPopulation, id, newPop);
                 }
             }
+        }
+
+        /// <summary>
+        /// Multi-faction phase 7a: growth × (0.5 + satisfaction/100), and none while the colony is short of food or water.
+        /// </summary>
+        internal static double Adjusted(Entity colony, double growth)
+        {
+            if (growth <= 0)
+                return growth;
+            if (ColonyNeeds.GrowthStopped(colony))
+                return 0;
+            return growth * ColonyNeeds.GrowthFactor(colony);
         }
 
         /// <summary>Days between population passes (<see cref="RunFrequency"/>).</summary>

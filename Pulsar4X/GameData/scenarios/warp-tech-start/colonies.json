@@ -47,6 +47,10 @@
         { "Id": "hydrolox", "Amount": 9000000, "Type": "byCount" }
       ],
       "StartingItems": [
+        "food",
+        "agriculture",
+        "farm-site",
+        "ice-mine",
         "tech-modern-technology",
         "tech-fission-power-plant",
         "tech-conventional-engine",
@@ -137,6 +141,9 @@
         "infrastructure-site"
       ],
       "ComponentDesigns": [
+        "default-design-farm-site",
+        "default-design-farm-small",
+        "default-design-ice-mine",
         "default-design-grid-battery-350t",
         "default-design-grid-battery-900t",
         "default-design-grid-battery-1000t",
@@ -308,19 +315,27 @@
       "OwnerFaction": "Luna Concord",
       "OwnerAbbreviation": "LC",
       "Stance": "Friendly",
+      "StartingFunds": 2000000,
+      "Market": [
+        { "CargoId": "food", "Role": "Buy", "HoldDays": 180, "BidFactor": 0.75, "GapPerDay": 2000, "Max": 1000000 },
+        { "CargoId": "water", "Role": "Buy", "HoldDays": 180, "BidFactor": 0.75, "GapPerDay": 16000 }
+      ],
       "Installations": [
+        { "Id": "default-design-farm-site", "Amount": 2 },
         { "Id": "default-design-infrastructure-luna", "Amount": 60 },
         { "Id": "default-design-auto-mine", "Amount": 2 },
         { "Id": "default-design-warehouse-prefab", "Amount": 1 },
         { "Id": "default-design-planetary-spaceport-crate", "Amount": 1 },
         { "Id": "default-design-city-hall", "Amount": 1 },
-        { "Id": "default-design-logistics-office-trade", "Amount": 1 },
+        { "Id": "default-design-logistics-office-trade", "Amount": 2 },
         { "Id": "default-design-fuel-farm-5000k", "Amount": 5 },
         { "Id": "default-design-passive-sensor", "Amount": 1 },
         { "Id": "default-design-fission-plant-200", "Amount": 1 },
         { "Id": "default-design-grid-battery-600t", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "food", "Amount": 360000 },
+        { "Id": "water", "Amount": 2880000 },
         { "Id": "fissile-fuels", "Amount": 956 },
         { "Id": "iron", "Amount": 80000 },
         { "Id": "titanium", "Amount": 20000 },
@@ -328,6 +343,10 @@
         { "Id": "methalox", "Amount": 2000, "Type": "byCount" }
       ],
       "StartingItems": [
+        "food",
+        "agriculture",
+        "farm-site",
+        "ice-mine",
         "grid-battery",
         "iron",
         "titanium",
@@ -342,6 +361,9 @@
         "fissile-fuels"
       ],
       "ComponentDesigns": [
+        "default-design-farm-site",
+        "default-design-farm-small",
+        "default-design-ice-mine",
         "default-design-grid-battery-600t",
         "default-design-infrastructure-luna",
         "default-design-auto-mine",
@@ -364,6 +386,8 @@
       "Body": "Mars",
       "System": "system-sol",
       "Installations": [
+        { "Id": "default-design-farm-small", "Amount": 1 },
+        { "Id": "default-design-ice-mine", "Amount": 1 },
         { "Id": "default-design-infrastructure-mars", "Amount": 20 },
         { "Id": "default-design-auto-mine", "Amount": 1 },
         { "Id": "default-design-warehouse-prefab", "Amount": 1 },
@@ -374,9 +398,10 @@
         { "Id": "default-design-fuel-tank-3000", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "food", "Amount": 90000 },
         { "Id": "fissile-fuels", "Amount": 10 },
         { "Id": "iron", "Amount": 20000 },
-        { "Id": "water", "Amount": 10000 },
+        { "Id": "water", "Amount": 280000 },
         { "Id": "methalox", "Amount": 500, "Type": "byCount" }
       ],
       "StartingItems": [
@@ -401,6 +426,9 @@
       "Stance": "Friendly",
       "StartingFunds": 100000,
       "SeatAdministrator": true,
+      "Market": [
+        { "CargoId": "food", "Role": "Buy", "HoldDays": 180, "BidFactor": 0.75, "GapPerDay": 400 }
+      ],
       "Installations": [
         { "Id": "default-design-warehouse-prefab", "Amount": 2 },
         { "Id": "default-design-logistics-office-trade", "Amount": 2 },
@@ -413,10 +441,11 @@
         { "Id": "default-design-grid-battery-50t", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "food", "Amount": 72000 },
         { "Id": "fissile-fuels", "Amount": 15 },
         { "Id": "methalox", "Amount": 4000, "Type": "byVolume" },
         { "Id": "iron", "Amount": 2000 },
-        { "Id": "water", "Amount": 1000 }
+        { "Id": "water", "Amount": 145000 }
       ],
       "StartingItems": [
         "grid-battery",
@@ -461,6 +490,8 @@
       "TechFromStartingItems": true,
       "NpcEconomy": true,
       "Installations": [
+        { "Id": "default-design-farm-site", "Amount": 2 },
+        { "Id": "default-design-farm-small", "Amount": 1 },
         { "Id": "default-design-infrastructure-site", "Amount": 250 },
         { "Id": "default-design-mine", "Amount": 2 },
         { "Id": "default-design-warehouse", "Amount": 1 },
@@ -474,6 +505,7 @@
         { "Id": "default-design-naval-academy", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "food", "Amount": 150000 },
         { "Id": "fissile-fuels", "Amount": 359 },
         { "Id": "iron", "Amount": 200000 },
         { "Id": "stainless-steel", "Amount": 50000 },
@@ -483,6 +515,7 @@
         { "Id": "water", "Amount": 100000 }
       ],
       "Market": [
+        { "CargoId": "food", "Role": "Sell", "Max": 450000 },
         { "CargoId": "plastic", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 10 },
         { "CargoId": "methalox", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 2500 },
         { "CargoId": "stainless-steel", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 1000 },
@@ -490,6 +523,10 @@
         { "CargoId": "hydrocarbons", "Role": "Sell" }
       ],
       "StartingItems": [
+        "food",
+        "agriculture",
+        "farm-site",
+        "ice-mine",
         "tech-modern-technology",
         "tech-fission-power-plant",
         "tech-conventional-engine",
@@ -580,6 +617,9 @@
         "infrastructure-site"
       ],
       "ComponentDesigns": [
+        "default-design-farm-site",
+        "default-design-farm-small",
+        "default-design-ice-mine",
         "default-design-city-hall",
         "default-design-factory-site",
         "default-design-fission-plant-75",
@@ -630,6 +670,7 @@
         { "Id": "plastic", "Amount": 5000 }
       ],
       "Market": [
+        { "CargoId": "food", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 3000 },
         { "CargoId": "iron", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 5000 },
         { "CargoId": "copper", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 250 },
         { "CargoId": "rare-earth-elements", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 33 },
@@ -640,6 +681,10 @@
         { "CargoId": "plastic", "Role": "Sell" }
       ],
       "StartingItems": [
+        "food",
+        "agriculture",
+        "farm-site",
+        "ice-mine",
         "tech-modern-technology",
         "tech-fission-power-plant",
         "tech-conventional-engine",
@@ -730,6 +775,9 @@
         "infrastructure-site"
       ],
       "ComponentDesigns": [
+        "default-design-farm-site",
+        "default-design-farm-small",
+        "default-design-ice-mine",
         "default-design-city-hall",
         "default-design-factory-site",
         "default-design-fission-plant-75",
@@ -780,6 +828,7 @@
         { "Id": "aluminium", "Amount": 20000 }
       ],
       "Market": [
+        { "CargoId": "food", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 3000 },
         { "CargoId": "rare-earth-elements", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 67 },
         { "CargoId": "titanium", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 333 },
         { "CargoId": "fissile-fuels", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 0.5 },
@@ -787,6 +836,10 @@
         { "CargoId": "stainless-steel", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 1000 }
       ],
       "StartingItems": [
+        "food",
+        "agriculture",
+        "farm-site",
+        "ice-mine",
         "research-lab",
         "tech-modern-technology",
         "tech-fission-power-plant",
@@ -878,6 +931,9 @@
         "infrastructure-site"
       ],
       "ComponentDesigns": [
+        "default-design-farm-site",
+        "default-design-farm-small",
+        "default-design-ice-mine",
         "default-design-research-lab",
         "default-design-city-hall",
         "default-design-factory-site",

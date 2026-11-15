@@ -113,10 +113,13 @@ public class PrefabFacilitiesTests
         // banks add a site-built grid battery (no plant or grid-battery template ships as a crate
         // yet), so the outpost's grid equipment is the one exception.
         static bool Grid(ComponentDesign d) => d.HasAttribute<Pulsar4X.Energy.PowerPlantAtb>() || d.HasAttribute<Pulsar4X.Energy.EnergyStoreAtb>();
-        Assert.That(SiteOnly(mars).Where(d => !Grid(d)), Is.Empty);
-        Assert.That(SiteOnly(mars).Select(d => d.UniqueID), Is.EquivalentTo(new[] { "default-design-fission-plant-2", "default-design-grid-battery-50t" }));
+        // Multi-faction phase 7a: farms and ice mines are site-built (no crate template yet).
+        static bool Food(ComponentDesign d) => d.UniqueID.Contains("farm") || d.UniqueID == "default-design-ice-mine";
+        Assert.That(SiteOnly(mars).Where(d => !Grid(d) && !Food(d)), Is.Empty);
+        Assert.That(SiteOnly(mars).Select(d => d.UniqueID), Is.EquivalentTo(new[] { "default-design-fission-plant-2", "default-design-grid-battery-50t",
+            "default-design-farm-small", "default-design-ice-mine" }));
 
-        Assert.That(SiteOnly(ColonyOn(sol, "Luna")).Where(d => !Grid(d)).Select(d => d.UniqueID), Is.EqualTo(new[] { "default-design-city-hall" }));
+        Assert.That(SiteOnly(ColonyOn(sol, "Luna")).Where(d => !Grid(d) && !Food(d)).Select(d => d.UniqueID), Is.EqualTo(new[] { "default-design-city-hall" }));
         Assert.That(SiteOnly(ColonyOn(sol, "Ceres")).Where(d => !Grid(d)).Select(d => d.UniqueID), Is.EqualTo(new[] { "default-design-city-hall" }));
     }
 

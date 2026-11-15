@@ -126,7 +126,9 @@ namespace Pulsar4X.Industry
             // Power: industry runs at its tier's share of demand (1 with no grid or no shortage).
             double powerEfficiency = Pulsar4X.Energy.ColonyPowerProcessor.Satisfaction(industryEntity, Pulsar4X.Energy.PowerTier.Industry)
                 // Multi-faction phase 5: and at the Industry staffing tier's share (1 when fully staffed).
-                * Pulsar4X.Colonies.Workforce.Share(industryEntity, Pulsar4X.Colonies.StaffTier.Industry);
+                * Pulsar4X.Colonies.Workforce.Share(industryEntity, Pulsar4X.Colonies.StaffTier.Industry)
+                // Multi-faction phase 7a: × 0.9 below satisfaction 20, × 1.05 above 80.
+                * Pulsar4X.Colonies.ColonyNeeds.OutputFactor(industryEntity);
             // What the lines draw now; if a job finishes or stalls today, demand is refreshed at the end.
             string drawBefore = Pulsar4X.Energy.ColonyPowerProcessor.ProductionDrawKey(industryDB);
             int queuedBefore = industryEntity.TryGetDataBlob<LocalConstructionDB>(out var siteQueue) ? siteQueue.BuildQueue.Count : 0;

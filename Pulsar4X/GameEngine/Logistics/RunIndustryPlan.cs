@@ -44,6 +44,9 @@ public class RunIndustryPlan : IGoalPlanner
                     continue;
                 if (material.ResourceCosts == null || material.ResourceCosts.Count == 0)
                     continue;
+                // Multi-faction phase 7a: farms grow food on their own (ColonyNeeds.FarmDays); never a food job.
+                if (material.UniqueID == Pulsar4X.Colonies.ColonyNeeds.FoodId)
+                    continue;
                 if (!CanPay(managedEntity, info, material))
                     continue;
 

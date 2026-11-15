@@ -86,5 +86,16 @@ namespace Pulsar4X.Events
         /// <summary>A same-body market trade settled instantly (multi-faction phase 4 auto-clearing included).</summary>
         MarketTradeSettled,
         #endregion
+
+        #region Colony needs (appended so saved ordinals stay put)
+        /// <summary>Food or water stock is below 30 days, or a shortage stage was reached (multi-faction phase 7a).</summary>
+        SupplyWarning,
+        /// <summary>A colony's food or water ran short today (day 0 of the shortage clock).</summary>
+        SupplyShortage,
+        /// <summary>People died of a long food or water shortage.</summary>
+        PopulationStarved,
+        /// <summary>People left a colony in shortage (the −1 %/month decline).</summary>
+        PopulationLeft,
+        #endregion
     }
 }

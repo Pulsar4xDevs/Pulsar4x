@@ -198,6 +198,10 @@
         }
       ],
       "StartingItems": [
+        "food",
+        "agriculture",
+        "farm-site",
+        "ice-mine",
         "tech-early-technology",
         "tech-conventional-engine",
         "stainless-steel-armor",
@@ -271,6 +275,9 @@
         "infrastructure-site"
       ],
       "ComponentDesigns": [
+        "default-design-farm-site",
+        "default-design-farm-small",
+        "default-design-ice-mine",
         "default-design-grid-battery-350t",
         "default-design-grid-battery-900t",
         "default-design-grid-battery-1000t",
@@ -380,6 +387,8 @@
       "TechFromStartingItems": true,
       "NpcEconomy": true,
       "Installations": [
+        { "Id": "default-design-farm-site", "Amount": 2 },
+        { "Id": "default-design-farm-small", "Amount": 1 },
         { "Id": "default-design-infrastructure-site", "Amount": 250 },
         { "Id": "default-design-mine", "Amount": 2 },
         { "Id": "default-design-warehouse", "Amount": 1 },
@@ -393,6 +402,7 @@
         { "Id": "default-design-naval-academy", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "food", "Amount": 150000 },
         { "Id": "hydrocarbons", "Amount": 341348702 },
         { "Id": "iron", "Amount": 200000 },
         { "Id": "stainless-steel", "Amount": 50000 },
@@ -402,6 +412,7 @@
         { "Id": "water", "Amount": 100000 }
       ],
       "Market": [
+        { "CargoId": "food", "Role": "Sell", "Max": 450000 },
         { "CargoId": "plastic", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 10 },
         { "CargoId": "methalox", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 2500 },
         { "CargoId": "stainless-steel", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 1000 },
@@ -409,6 +420,10 @@
         { "CargoId": "hydrocarbons", "Role": "Sell" }
       ],
       "StartingItems": [
+        "food",
+        "agriculture",
+        "farm-site",
+        "ice-mine",
         "tech-early-technology",
         "tech-conventional-engine",
         "stainless-steel-armor",
@@ -482,6 +497,9 @@
         "infrastructure-site"
       ],
       "ComponentDesigns": [
+        "default-design-farm-site",
+        "default-design-farm-small",
+        "default-design-ice-mine",
         "default-design-city-hall",
         "default-design-factory-site",
         "default-design-fuel-farm-5000k",
@@ -532,6 +550,7 @@
         { "Id": "plastic", "Amount": 5000 }
       ],
       "Market": [
+        { "CargoId": "food", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 3000 },
         { "CargoId": "iron", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 5000 },
         { "CargoId": "copper", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 250 },
         { "CargoId": "rare-earth-elements", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 33 },
@@ -542,6 +561,10 @@
         { "CargoId": "plastic", "Role": "Sell" }
       ],
       "StartingItems": [
+        "food",
+        "agriculture",
+        "farm-site",
+        "ice-mine",
         "tech-early-technology",
         "tech-conventional-engine",
         "stainless-steel-armor",
@@ -615,6 +638,9 @@
         "infrastructure-site"
       ],
       "ComponentDesigns": [
+        "default-design-farm-site",
+        "default-design-farm-small",
+        "default-design-ice-mine",
         "default-design-city-hall",
         "default-design-factory-site",
         "default-design-fuel-farm-5000k",
@@ -665,12 +691,17 @@
         { "Id": "aluminium", "Amount": 20000 }
       ],
       "Market": [
+        { "CargoId": "food", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 3000 },
         { "CargoId": "rare-earth-elements", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 67 },
         { "CargoId": "titanium", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 333 },
         { "CargoId": "fissionables", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 50 },
         { "CargoId": "stainless-steel", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 1000 }
       ],
       "StartingItems": [
+        "food",
+        "agriculture",
+        "farm-site",
+        "ice-mine",
         "tech-early-technology",
         "tech-conventional-engine",
         "stainless-steel-armor",
@@ -744,6 +775,9 @@
         "infrastructure-site"
       ],
       "ComponentDesigns": [
+        "default-design-farm-site",
+        "default-design-farm-small",
+        "default-design-ice-mine",
         "default-design-research-lab",
         "default-design-city-hall",
         "default-design-factory-site",

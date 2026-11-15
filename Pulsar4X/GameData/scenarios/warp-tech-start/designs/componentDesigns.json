@@ -876,5 +876,32 @@
         { "Key": "Size", "Value": 75 }
       ]
     }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-farm-site",
+      "Name": "Farm",
+      "TemplateId": "farm-site"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-ice-mine",
+      "Name": "Ice Mine",
+      "TemplateId": "ice-mine"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-farm-small",
+      "Name": "Prefab Farm",
+      "TemplateId": "farm-site",
+      "Properties": [
+        { "Key": "Size", "Value": 2500 }
+      ]
+    }
   }
 ]

@@ -216,5 +216,24 @@
       "WealthCost": 0,
       "OutputAmount": 100
     }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "food",
+      "Name": "Food",
+      "Description": "Grown in hydroponic farms from water and power. A person eats 0.5 kg a day.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1,
+      "VolumePerUnit": 0.002,
+      "ResourceCosts": {
+        "water": 1
+      },
+      "IndustryPointCosts": 1,
+      "EnergyCost": 1,
+      "IndustryTypeID": "agriculture",
+      "WealthCost": 0,
+      "OutputAmount": 1
+    }
   }
 ]

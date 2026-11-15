@@ -155,6 +155,7 @@ public class CeresDepotTests
         Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds + CeresStart.ChartAsk));
         Assert.That(lode.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds - CeresStart.ChartAsk));
 
-        Assert.That(luna.GetDataBlob<LogiBaseDB>().Capacity, Is.EqualTo(5));
+        // Multi-faction phase 7a: Luna has a second trade office so its food and water rows do not push out its fuel.
+        Assert.That(luna.GetDataBlob<LogiBaseDB>().Capacity, Is.EqualTo(10));
     }
 }

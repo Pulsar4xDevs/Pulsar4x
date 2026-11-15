@@ -1644,5 +1644,144 @@
         }
       ]
     }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "farm-site",
+      "Name": "Farm",
+      "Formulas": {
+        "Description": "A site-built hydroponic farm: 1 kg water and 1 kWh make 1 kg food. 2,000 kg a day at the standard size, run by 500 staff.",
+        "Mass": "PropertyValue('Size') * 2.5",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "500 * PropertyValue('Size') / 5000",
+        "ResearchCost": "0",
+        "CreditCost": "120 * Pow(PropertyValue('Size') / 5000, 1.1)",
+        "BuildPointCost": "8000 * Pow(PropertyValue('Size') / 5000, 1.15)"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.50",
+        "space-crete": "[Mass] * 0.30",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.05"
+      },
+      "ComponentType": "Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'1 kWh per kg of food.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Farm Points') / 24"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 1)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
+          "Name": "Size",
+          "DescriptionFormula": "'Size of this installation'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "10000",
+          "MinFormula": "1000",
+          "StepFormula": "50",
+          "PropertyFormula": "5000"
+        },
+        {
+          "Name": "Farm Points",
+          "DescriptionFormula": "'Grows kg of food per day'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 0.4"
+        },
+        {
+          "Name": "FarmAbilitys",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "DataDict": {
+            "agriculture": "PropertyValue('Farm Points')"
+          },
+          "PropertyFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Industry.IndustryAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "ice-mine",
+      "Name": "Ice Mine",
+      "Formulas": {
+        "Description": "A mine that only digs water ice.",
+        "Mass": "PropertyValue('Area') * 0.05",
+        "Volume": "PropertyValue('Area') * 0.01",
+        "HTK": "0.5",
+        "CrewReq": "PropertyValue('Area') * 0.0001 * Pow(PropertyValue('Area') / 1000000, -0.25)",
+        "ResearchCost": "0",
+        "CreditCost": "120 * Pow(PropertyValue('Area') / 1000000, 1.1)",
+        "BuildPointCost": "[Mass] * 0.2 * Pow(PropertyValue('Area') / 1000000, 0.15)"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.45",
+        "space-crete": "[Mass] * 0.20",
+        "stainless-steel": "[Mass] * 0.10",
+        "silicon": "[Mass] * 0.10",
+        "aluminium": "[Mass] * 0.05",
+        "copper": "[Mass] * 0.05",
+        "graphite": "[Mass] * 0.05"
+      },
+      "ComponentType": "Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "DescriptionFormula": "'Extraction only: 0.05 kWh per kg of water ice.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "(PropertyValue('MiningAmount') * 0.05 / 24) * Pow(PropertyValue('Area') / 1000000, -0.15)"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 5)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
+          "Name": "Area",
+          "DescriptionFormula": "'Area covered by this mining operation in square meters'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "100000000",
+          "MinFormula": "10000",
+          "StepFormula": "10000",
+          "PropertyFormula": "1000000"
+        },
+        {
+          "Name": "MiningAmount",
+          "DescriptionFormula": "'Kilograms of water ice per day, before accessibility: five times a general mine's per-mineral rate, because it digs only ice.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Area') * 45 / 10000 * (1 + TechLevel('tech-mining-production') * 1.5) * 5"
+        },
+        {
+          "Name": "MiningAmountDict",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "DataDict": {
+            "water": "PropertyValue('MiningAmount')"
+          },
+          "PropertyFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Industry.MineResourcesAtbDB"
+        }
+      ]
+    }
   }
 ]

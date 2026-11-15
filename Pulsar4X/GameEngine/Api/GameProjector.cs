@@ -356,6 +356,7 @@ namespace Pulsar4X.Engine.Api
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Energy.ColonyPowerDB>(out var power) ? ToColonyPowerView(power, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ComponentInstancesDB>(out var ci) ? ToInstallationsView(ci, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyWorkforceDB>(out var wf) ? ToWorkforceView(wf, e) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyNeedsDB>(out var needs) ? ToColonyNeedsView(needs, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyInfoDB>(out var col) ? ToColonyMiningView(col, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<NavalAcademyDB>(out var na) ? ToNavalAcademyView(na, e) : null,
             (e, f) => e.FactionOwnerID == f && e.HasDataBlob<ColonyInfoDB>() ? ToRecruitmentView(e, f) : null,
@@ -783,6 +784,37 @@ namespace Pulsar4X.Engine.Api
             var hash = value.GetHashCode();
             var factor = (hash % 41 - 20) / 100.0;
             return (long)(value * (1 + factor));
+        }
+
+        private static ColonyNeedsView ToColonyNeedsView(ColonyNeedsDB db, Entity e)
+        {
+            int? day = ColonyNeeds.ShortageDay(e, e.StarSysDateTime);
+            return new ColonyNeedsView
+            {
+                FoodPerDay = ColonyNeeds.FoodPerDay(e),
+                WaterPerDay = ColonyNeeds.WaterPerDay(e),
+                FoodStock = ColonyNeeds.Stock(e, ColonyNeeds.FoodId),
+                WaterStock = ColonyNeeds.Stock(e, ColonyNeeds.WaterId),
+                FoodDaysOfStock = ColonyNeeds.DaysOfStock(e, ColonyNeeds.FoodId),
+                WaterDaysOfStock = ColonyNeeds.DaysOfStock(e, ColonyNeeds.WaterId),
+                ShortageState = day switch
+                {
+                    null => "Supplied",
+                    < ColonyNeeds.DeclineDay => "Short",
+                    < ColonyNeeds.DeathDay => "Declining",
+                    _ => "Dying",
+                },
+                ShortageDay = day,
+                FoodShort = db.FoodShort,
+                WaterShort = db.WaterShort,
+                SuppliedDays = db.SuppliedDays,
+                DeathsTotal = db.DeathsTotal,
+                LeftTotal = db.LeftTotal,
+                Satisfaction = db.Satisfaction,
+                SatisfactionTarget = db.SatisfactionTarget,
+                GrowthFactor = ColonyNeeds.GrowthStopped(e) ? 0 : ColonyNeeds.GrowthFactor(e),
+                OutputFactor = ColonyNeeds.OutputFactor(e),
+            };
         }
 
         private static WorkforceView ToWorkforceView(ColonyWorkforceDB db, Entity e)

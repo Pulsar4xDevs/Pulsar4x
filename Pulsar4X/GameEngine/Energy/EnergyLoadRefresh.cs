@@ -17,7 +17,11 @@ namespace Pulsar4X.Energy
             {
                 // Multi-faction phase 5: an old save gets Employed = min(population, required), so output is unchanged.
                 foreach (var colony in manager.GetAllEntitiesWithDataBlob<Pulsar4X.Colonies.ColonyInfoDB>())
+                {
                     Pulsar4X.Colonies.Workforce.Ensure(colony);
+                    // Phase 7a: an old save starts its shortage clock at load (never backdated).
+                    Pulsar4X.Colonies.ColonyNeeds.Ensure(colony);
+                }
                 foreach (var ship in manager.GetAllEntitiesWithDataBlob<EnergyGenAbilityDB>())
                     EnergyGenAbilityDB.RecomputeStoreRates(ship);
                 foreach (var colony in manager.GetAllEntitiesWithDataBlob<ColonyPowerDB>())

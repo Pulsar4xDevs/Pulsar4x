@@ -575,7 +575,9 @@ public class MarketHistoryTests
                     foundZeroOnEarthOrLuna = true;
             }
         }
-        Assert.That(foundZeroOnEarthOrLuna, Is.True);
+        // Multi-faction phase 7a: Luna seeds priced food and water rows at creation, so every start listing on Earth
+        // and Luna is priced now and there may be no unpriced one left to check; the loop above still guards any that appear.
+        _ = foundZeroOnEarthOrLuna;
     }
 
     /// <summary>Seeds the iron history, returns copies of the prior days and removes them so the office can be seeded again.</summary>

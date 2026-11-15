@@ -608,6 +608,38 @@ public sealed record WorkforceView : IComponentView
     public IReadOnlyList<WorkforceContractRow> Contracts { get; init; } = Array.Empty<WorkforceContractRow>();
 }
 
+/// <summary>
+/// A colony's food, water and satisfaction (multi-faction phase 7a, plan §7.4). Habitable worlds draw nothing
+/// (days are null). Shortage day counts from the first short day; deaths start on day 90.
+/// </summary>
+public sealed record ColonyNeedsView : IComponentView
+{
+    public double FoodPerDay { get; init; }
+    public double WaterPerDay { get; init; }
+    public long FoodStock { get; init; }
+    public long WaterStock { get; init; }
+    /// <summary>Days of food at today's use; null when the colony eats nothing from stock.</summary>
+    public double? FoodDaysOfStock { get; init; }
+    public double? WaterDaysOfStock { get; init; }
+    /// <summary>"Supplied", "Short" (days 0-29), "Declining" (30-89) or "Dying" (90 on).</summary>
+    public string ShortageState { get; init; } = "Supplied";
+    /// <summary>Whole days into the shortage; null when supplied.</summary>
+    public int? ShortageDay { get; init; }
+    public bool FoodShort { get; init; }
+    public bool WaterShort { get; init; }
+    /// <summary>Fully supplied days since the last short day (10 resets the clock).</summary>
+    public int SuppliedDays { get; init; }
+    public long DeathsTotal { get; init; }
+    public long LeftTotal { get; init; }
+    /// <summary>0..100; moves 20 % toward the target every 30 days.</summary>
+    public double Satisfaction { get; init; } = 60;
+    public double SatisfactionTarget { get; init; } = 60;
+    /// <summary>Growth multiplier 0.5 + S/100 (0 growth while short).</summary>
+    public double GrowthFactor { get; init; } = 1;
+    /// <summary>Industry, mining and research multiplier (0.9 below 20, 1.05 above 80).</summary>
+    public double OutputFactor { get; init; } = 1;
+}
+
 /// <summary>One staffing tier: what it needs and the staffed share (0..1). Tier rank 1 is staffed first.</summary>
 public sealed record WorkforceTierRow
 {
