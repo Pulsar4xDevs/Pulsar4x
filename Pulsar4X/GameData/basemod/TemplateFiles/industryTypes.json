@@ -38,5 +38,13 @@
       "Name": "Ship Assembly",
       "EnergyPerPoint": 5
     }
+  },
+  {
+    "Type": "IndustryType",
+    "Payload": {
+      "UniqueID": "agriculture",
+      "Name": "Agriculture",
+      "EnergyPerPoint": 1
+    }
   }
 ]

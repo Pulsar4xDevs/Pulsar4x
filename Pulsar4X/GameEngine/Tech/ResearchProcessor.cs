@@ -155,7 +155,8 @@ namespace Pulsar4X.Technology
                 return 1;
             return Pulsar4X.Energy.ColonyPowerProcessor.Satisfaction(colony, Pulsar4X.Energy.PowerTier.Research)
                 // Multi-faction phase 5: and at the Research staffing tier's share (1 when fully staffed).
-                * Pulsar4X.Colonies.Workforce.Share(colony, Pulsar4X.Colonies.StaffTier.Research);
+                * Pulsar4X.Colonies.Workforce.Share(colony, Pulsar4X.Colonies.StaffTier.Research)
+                * Pulsar4X.Colonies.ColonyNeeds.OutputFactor(colony);
         }
 
         // The dequeue mutates the lab in place (no DataBlob add/remove), so signal the change

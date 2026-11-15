@@ -219,6 +219,9 @@ public class CeresDirectOfferTests
             var blocPurse = Faction(game, bloc.GetDataBlob<NameDB>().DefaultName).GetDataBlob<FactionInfoDB>().Money;
             blocPurse.AddExpense(ship.StarSysDateTime, TransactionCategory.Trade, "test", blocPurse.GetCurrentFunds());
         }
+        // Multi-faction phase 7a: Luna Concord has a trade purse for its food and water gap, so empty it too.
+        var lunaPurse = Faction(game, "Luna Concord").GetDataBlob<FactionInfoDB>().Money;
+        lunaPurse.AddExpense(ship.StarSysDateTime, TransactionCategory.Trade, "test", lunaPurse.GetCurrentFunds());
 
         AgentProcessor.RunAgentNow(ship);
 

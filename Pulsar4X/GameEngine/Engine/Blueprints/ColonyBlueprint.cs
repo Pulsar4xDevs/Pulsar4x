@@ -58,6 +58,10 @@ public class ColonyBlueprint : Blueprint
         public double HoldDays { get; set; } = 30;
         public double BidFactor { get; set; } = 0.75;
         public double UsePerDayPerMillion { get; set; }
+        /// <summary>Phase 7a: an absolute daily gap (kg/day) held for HoldDays on top of the per-million use; not consumed by the bloc sink.</summary>
+        public double GapPerDay { get; set; }
+        /// <summary>Phase 7a: the stock farms grow food up to (food rows); 0 = the default cap.</summary>
+        public long Max { get; set; }
     }
 
     public struct StartingItemBlueprint

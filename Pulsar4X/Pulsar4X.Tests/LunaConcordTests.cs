@@ -114,10 +114,16 @@ public class LunaConcordTests
 
         Assert.That(colony.GetDataBlob<GoalsDB>().ActiveGoal!.Type, Is.EqualTo(GoalType.OfferStock));
         Assert.That(colony.TryGetDataBlob<LogiBaseDB>(out var book), Is.True);
-        Assert.That(book!.Listings.Keys, Is.EquivalentTo(new[] { "iron", "titanium", "silicon", "methalox", "fissile-fuels" }),
-            "fissile fuel is the seeded reactor's runway (energy phase 2)");
+        Assert.That(book!.Listings.Keys, Is.EquivalentTo(new[] { "food", "water", "iron", "titanium", "silicon", "methalox", "fissile-fuels" }),
+            "fissile fuel is the seeded reactor's runway (energy phase 2); food and water are the phase 7a gap rows");
         foreach (var listing in book.Listings.Values)
         {
+            // Phase 7a gap rows: held at 180 days of the gap, so nothing to sell yet; they bid once stock dips.
+            if (listing.CargoId is "food" or "water")
+            {
+                Assert.That(listing.Bid, Is.GreaterThan(0m), listing.CargoId);
+                continue;
+            }
             if (listing.CargoId == "fissile-fuels")
             {
                 // The reactor's runway is held back. A placed faction starts with every tech at level 1,
@@ -141,7 +147,7 @@ public class LunaConcordTests
         Assert.That(view, Is.Not.Null);
         Assert.That(view!.CanEdit, Is.False);
         Assert.That(view.Goods.Select(good => good.CargoId), Is.EquivalentTo(book.Listings.Keys));
-        Assert.That(view.Goods.Where(good => good.CargoId != "fissile-fuels").All(good => good.SellQuantity > 0));
+        Assert.That(view.Goods.Where(good => good.CargoId is not ("fissile-fuels" or "food" or "water")).All(good => good.SellQuantity > 0));
         if (colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
             Assert.That(industry.ProductionLines.Values.All(line => line.Jobs.Count == 0), Is.True);
     }

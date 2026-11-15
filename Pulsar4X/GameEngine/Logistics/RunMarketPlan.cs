@@ -98,7 +98,8 @@ public class RunMarketPlan : IGoalPlanner
                 continue;
             }
 
-            bool needsJob = item.Row.AutoProduce && item.Queued < item.Row.Max && item.Stock < item.Row.Max - item.Queued;
+            // Phase 7a: farms grow food on their own (ColonyNeeds.FarmDays); no food jobs.
+            bool needsJob = item.CargoId != Pulsar4X.Colonies.ColonyNeeds.FoodId && item.Row.AutoProduce && item.Queued < item.Row.Max && item.Stock < item.Row.Max - item.Queued;
             if (needsJob)
             {
                 if (TryFindLine(managedEntity, info, item.CargoId, out var lineId))
@@ -182,6 +183,8 @@ public class RunMarketPlan : IGoalPlanner
     {
         // Power plant fuel is held back for the plants' runway, and bid for when short.
         long sum = Pulsar4X.Energy.ColonyPowerProcessor.FuelReserveUnits(colony, cargoId);
+        // Multi-faction phase 7a: an off-world colony holds its food and water runway too.
+        sum += Pulsar4X.Colonies.ColonyNeeds.HoldUnits(colony, cargoId);
         if (!colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
             return sum;
         foreach (var line in industry.ProductionLines.Values)

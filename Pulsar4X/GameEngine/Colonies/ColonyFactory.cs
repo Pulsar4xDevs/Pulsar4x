@@ -214,6 +214,7 @@ namespace Pulsar4X.Colonies
             SeedMarketRows(colonyEntity, colonyBlueprint, factionInfo);
             // Multi-faction phase 5: staff start at min(population, required).
             Workforce.Ensure(colonyEntity);
+            ColonyNeeds.Ensure(colonyEntity);
             if (colonyEntity.HasDataBlob<LogiBaseDB>())
                 AgentProcessor.AssignGoal(colonyEntity, new Goal(GoalType.OfferStock) { Name = "Offer stock" });
 
@@ -373,7 +374,8 @@ namespace Pulsar4X.Colonies
                 policy.Rows[spec.CargoId] = new MarketPolicyRow
                 {
                     CargoId = spec.CargoId,
-                    Min = buy ? (long)Math.Ceiling(spec.HoldDays * use) : 0,
+                    Min = buy ? (long)Math.Ceiling(spec.HoldDays * (use + Math.Max(0, spec.GapPerDay))) : 0,
+                    Max = spec.Max,
                     Ask = ask,
                     Bid = buy ? Math.Round(ask * (decimal)spec.BidFactor, 2, MidpointRounding.AwayFromZero) : 0,
                     UsePerDay = use,
@@ -485,6 +487,7 @@ namespace Pulsar4X.Colonies
             // Sum the grid once now: a colony with people and no installations still has life support.
             Pulsar4X.Energy.ColonyPowerProcessor.Recalc(colonyEntity);
             Workforce.Ensure(colonyEntity);
+            ColonyNeeds.Ensure(colonyEntity);
 
             return colonyEntity;
         }

@@ -24,7 +24,10 @@ public static class BlocDemand
     public static decimal ReserveFor(Entity colony)
     {
         var game = colony.Manager?.Game;
-        return game == null ? 0 : FactionSpending.MonthlyRunningCosts(game, colony.FactionOwnerID) * (decimal)ReserveMonths;
+        // Phase 7a: a trade-only NPC (Luna, Ceres) pays no wages, so it keeps no running-cost reserve.
+        if (game == null || !FactionSpending.PaysWages(game, colony.FactionOwnerID))
+            return 0;
+        return FactionSpending.MonthlyRunningCosts(game, colony.FactionOwnerID) * (decimal)ReserveMonths;
     }
 
     /// <summary>Days short at which the premium reaches its cap (x2 of the base bid, 1.5 x seed ask at factor 0.75).</summary>
