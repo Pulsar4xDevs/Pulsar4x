@@ -29,18 +29,23 @@ namespace Pulsar4X.Ships
     /// </para>
     /// <para>
     /// A ship with a captain (ShipInfoDB.CommanderID) counts the captain as one more crew: one more required,
-    /// one berth, life support and wages. The captain is counted in ShipCrewDB.Aboard (so pay and life support
-    /// follow) but is never drawn from or returned to a colony pool, and does not crew the engines.
+    /// life support and wages. The captain is counted in ShipCrewDB.Aboard (so pay and life support follow)
+    /// but is never drawn from or returned to a colony pool, and does not crew the engines. The captain always
+    /// boards even when that puts the ship one over its berths, so a ship whose berths cover its part crew can
+    /// still be fully staffed.
     /// TODO(crew): weapon crew waits for the damage rework.
     /// </para>
     /// </summary>
     public static class ShipCrew
     {
         /// <summary>Crew of a part list split by what the crew does. Capacity is the most that can be aboard.</summary>
-        /// <para>Captain is 1 when a captain sits the ship: counted in Required and Bridge, never drawn from a pool.</para>
+        /// <para>Captain is 1 when a captain sits the ship: counted in Required and Bridge, never drawn from a pool.
+        /// The captain always boards, even when that puts the ship one over its berths, so Capacity is the part
+        /// crew the berths can house plus the captain.</para>
         public readonly record struct CrewSplit(int Required, int Berths, int Engine, int Bridge, int Work, int Captain = 0)
         {
-            public int Capacity => Math.Min(Required, Berths);
+            /// <summary>Part crew the berths can house, plus the captain when one sits the ship.</summary>
+            public int Capacity => Math.Min(Math.Max(0, Required - Captain), Berths) + Captain;
         }
 
         // ---- phase 1: berths ----
@@ -431,7 +436,8 @@ namespace Pulsar4X.Ships
             return null;
         }
 
-        /// <summary>Tops up crew from the colony to min(required, berths), or by <paramref name="count"/> when ≥ 0. Returns how many boarded.</summary>
+        /// <summary>Tops up crew from the colony up to <see cref="CrewSplit.Capacity"/> (part crew the berths can
+        /// house, plus the captain), or by <paramref name="count"/> when ≥ 0. Returns how many boarded.</summary>
         public static int TopUp(Entity ship, Entity colony, int count = -1)
         {
             var db = ship.GetDataBlob<ShipCrewDB>();
@@ -453,7 +459,7 @@ namespace Pulsar4X.Ships
             return leave;
         }
 
-        /// <summary>After a refit: crew above min(required, berths) of the parts now mounted go to the yard colony's pool.</summary>
+        /// <summary>After a refit: crew above the new capacity (part crew the berths can house, plus the captain) go to the yard colony's pool.</summary>
         public static int AfterRefit(Entity ship, Entity yard)
         {
             if (!ship.TryGetDataBlob<ShipCrewDB>(out var db))
