@@ -340,6 +340,17 @@ namespace Pulsar4X.Engine.Api
             return MovePlanner.Preview(ship, body, ship.StarSysDateTime, options);
         }
 
+        public GoodAppraisal AppraiseGood(PlayerSession session, int colonyId, string cargoId, long quantity = 1)
+        {
+            if (!_game.Factions.ContainsKey(session.FactionId))
+                return GoodAppraisal.None(cargoId ?? "", cargoId ?? "", quantity, "Unknown faction for session.");
+            if (!_game.GlobalManager.TryGetGlobalEntityById(colonyId, out var colony))
+                return GoodAppraisal.None(cargoId ?? "", cargoId ?? "", quantity, "colony not found");
+            if (colony.FactionOwnerID != session.FactionId)
+                return GoodAppraisal.None(cargoId ?? "", cargoId ?? "", quantity, "colony not found");
+            return Pulsar4X.Logistics.MarketAppraisal.Appraise(_game, colony, cargoId, quantity);
+        }
+
         public CommandResult SubmitCommand(PlayerSession session, GameCommand command)
         {
             if (command is null)
