@@ -640,9 +640,12 @@ namespace Pulsar4X.Client
             var planet = colonyView?.PlanetEntityId is { } planetId ? system.GetEntity(planetId) : null;
 
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
-            var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
-            var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
+            var crewMarket = !readOnly ? colony.GetView<CrewMarketView>() : null;
+            float marketReserve = crewMarket != null ? Math.Min(380f, Math.Max(240f, windowContentSize.Y * 0.50f)) : 0f;
+            float columnHeight = Math.Max(120f, windowContentSize.Y - marketReserve);
+            var firstChildSize = new Vector2(windowContentSize.X * 0.33f, columnHeight);
+            var secondChildSize = new Vector2(windowContentSize.X * 0.33f, columnHeight);
+            var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), columnHeight);
             if(ImGui.BeginChild("ColonySummary1", firstChildSize, ImGuiChildFlags.Borders))
             {
                 var colonyName = colony.GetView<NameView>()?.Name ?? "Unknown";
@@ -816,6 +819,11 @@ namespace Pulsar4X.Client
                 }
             }
             ImGui.EndChild();
+
+            if (crewMarket != null
+                && ImGui.CollapsingHeader("Crew market", ImGuiTreeNodeFlags.DefaultOpen))
+                ColonyCrewMarketDisplay.Display(colony.Id, crewMarket, _uiState);
+
         }
 
         private void DisplayAdministratorButton(ColonyView? colonyView, int colonyId)

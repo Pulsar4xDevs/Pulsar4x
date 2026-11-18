@@ -43,6 +43,7 @@ namespace Pulsar4X.Client
                 ("PlantOutOfFuel", "Power plant out of fuel"),
                 ("PowerShortage", "Power shortage"),
                 ("BudgetDay", "Budget day"),
+                ("CrewTransferred", "Crew transferred"),
             }),
             ("Combat", new[]
             {

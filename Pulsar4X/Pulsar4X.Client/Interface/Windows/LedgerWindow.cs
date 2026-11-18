@@ -161,6 +161,7 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
         FactionSnapshot.WagesCategory => "Wages (monthly)",
         FactionSnapshot.StaffWagesCategory => "Staff wages (monthly)",
         FactionSnapshot.TaxCategory => "Tax",
+        "CrewTransfer" => "Crew transfer",
         _ => category
     };
 }
