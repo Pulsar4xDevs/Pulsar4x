@@ -814,6 +814,25 @@ namespace Pulsar4X.Engine.Api
                 SatisfactionTarget = db.SatisfactionTarget,
                 GrowthFactor = ColonyNeeds.GrowthStopped(e) ? 0 : ColonyNeeds.GrowthFactor(e),
                 OutputFactor = ColonyNeeds.OutputFactor(e),
+                ConsumerGoodsPerDay = ColonyNeeds.GoodsPerDay(e, ColonyNeeds.ConsumerGoodsId),
+                MedicalPerDay = ColonyNeeds.GoodsPerDay(e, ColonyNeeds.MedicalId),
+                LuxuryPerDay = ColonyNeeds.GoodsPerDay(e, ColonyNeeds.LuxuryId),
+                ConsumerGoodsStock = ColonyNeeds.Stock(e, ColonyNeeds.ConsumerGoodsId),
+                MedicalStock = ColonyNeeds.Stock(e, ColonyNeeds.MedicalId),
+                LuxuryStock = ColonyNeeds.Stock(e, ColonyNeeds.LuxuryId),
+                ConsumerGoodsDaysOfStock = ColonyNeeds.GoodsDaysOfStock(e, ColonyNeeds.ConsumerGoodsId),
+                MedicalDaysOfStock = ColonyNeeds.GoodsDaysOfStock(e, ColonyNeeds.MedicalId),
+                LuxuryDaysOfStock = ColonyNeeds.GoodsDaysOfStock(e, ColonyNeeds.LuxuryId),
+                ConsumerGoodsMet = db.ConsumerMet,
+                MedicalMet = db.MedicalMet,
+                LuxuryMet = db.LuxuryMet,
+                ConsumerGoodsShort = db.ConsumerMet == false,
+                MedicalShort = db.MedicalMet == false,
+                LuxuryShort = db.LuxuryMet == false,
+                MedicalFactor = ColonyNeeds.MedicalFactor(e),
+                GoodsGrowthFactor = ColonyNeeds.GoodsGrowthFactor(e),
+                LuxuryMigrationPull = ColonyNeeds.MigrationPull(e),
+                SatisfactionParts = ColonyNeeds.Breakdown(e, db).Select(p => new SatisfactionPartView(p.Label, p.Delta)).ToList(),
             };
         }
 
@@ -1005,13 +1024,19 @@ namespace Pulsar4X.Engine.Api
                 armorThickness = damage.Armor.thickness;
             }
 
-            var crewRows = (shipInfo.Design?.Components ?? new List<(ComponentDesign design, int count)>())
+            // The crew numbers come from the parts mounted now (what the engine's under-crewed test uses), plus the
+            // captain; the ship's design can differ after a refit and leaves the captain out.
+            var parts = ShipCrew.Tracked(ship) && ShipCrew.Mounted(ship) is { Count: > 0 } mounted
+                ? mounted
+                : shipInfo.Design?.Components ?? new List<(ComponentDesign design, int count)>();
+            var crewRows = parts
                 .Where(c => c.design != null && c.design.CrewReq != 0 && c.count > 0)
                 .GroupBy(c => c.design.UniqueID)
                 .Select(g => new ShipCrewRow(g.Key, g.First().design.Name, g.Sum(c => c.count), g.First().design.CrewReq))
                 .OrderByDescending(r => r.Crew).ThenBy(r => r.Name)
                 .ToList();
-            var parts = shipInfo.Design?.Components ?? new List<(ComponentDesign design, int count)>();
+            if (ShipCrew.Tracked(ship) && ShipCrew.HasCaptain(ship))
+                crewRows.Add(new ShipCrewRow("captain", "Captain", 1, 1));
             var berthRows = parts
                 .Where(c => c.design != null && c.count > 0)
                 .GroupBy(c => c.design.UniqueID)
@@ -1022,7 +1047,7 @@ namespace Pulsar4X.Engine.Api
 
             return new ShipView(
                 shipInfo.Design?.Name ?? "",
-                shipInfo.Design?.CrewReq ?? 0,
+                ShipCrew.Tracked(ship) ? ShipCrew.SplitOf(ship).Required : shipInfo.Design?.CrewReq ?? 0,
                 commander,
                 totalCount > 0 ? totalHealth / totalCount : 1,
                 operationalCount,
@@ -1861,7 +1886,7 @@ namespace Pulsar4X.Engine.Api
                     {
                         long available = 0;
                         if (storage != null && TryResolveCargoable(factionInfo, resourceId, out var cargoable))
-                            available = storage.GetUnitsStored(cargoable, false);
+                            available = storage.GetUnitsStoredByDesign(cargoable, false);
 
                         bool canProduce = factionInfo.IndustryDesigns.ContainsKey(resourceId)
                             || factionInfo.Data.CargoGoods.IsMineral(resourceId);
@@ -2037,7 +2062,7 @@ namespace Pulsar4X.Engine.Api
                 {
                     long available = 0;
                     if (storage != null && TryResolveCargoable(factionInfo, resourceId, out var cargoable))
-                        available = storage.GetUnitsStored(cargoable, false);
+                        available = storage.GetUnitsStoredByDesign(cargoable, false);
                     bool canProduce = factionInfo.IndustryDesigns.ContainsKey(resourceId)
                         || factionInfo.Data.CargoGoods.IsMineral(resourceId);
                     costs.Add(new IndustryCostItem(ResolveItemName(factionInfo, resourceId), amount, available, canProduce));
@@ -2252,7 +2277,7 @@ namespace Pulsar4X.Engine.Api
                         continue;
                     long available = 0;
                     if (storage != null && TryResolveCargoable(factionInfo, resourceId, out var cargoable))
-                        available = storage.GetUnitsStored(cargoable, false);
+                        available = storage.GetUnitsStoredByDesign(cargoable, false);
                     if (available < amount)
                         missing.Add(ResolveItemName(factionInfo, resourceId));
                 }
@@ -2827,8 +2852,8 @@ namespace Pulsar4X.Engine.Api
                 ReachFixWell = CommandSpan.Fix(ship, CommandSpanKind.Well) ?? "",
                 ReachFixSystem = CommandSpan.Fix(ship, CommandSpanKind.System) ?? "",
                 LogisticsSystemIds = LogisticsSpan.SystemIds(ship),
-                CrewRequired = shipInfo?.Design?.CrewReq ?? 0,
-                CrewBerths = shipInfo?.Design?.CrewBerths ?? 0,
+                CrewRequired = ShipCrew.Tracked(ship) ? ShipCrew.SplitOf(ship).Required : shipInfo?.Design?.CrewReq ?? 0,
+                CrewBerths = ShipCrew.Tracked(ship) ? ShipCrew.SplitOf(ship).Berths : shipInfo?.Design?.CrewBerths ?? 0,
                 CrewAboard = ShipCrew.Aboard(ship),
                 CrewTracked = ShipCrew.Tracked(ship),
                 UnderCrewed = ShipCrew.Tracked(ship) && ShipCrew.Aboard(ship) < ShipCrew.SplitOf(ship).Required,

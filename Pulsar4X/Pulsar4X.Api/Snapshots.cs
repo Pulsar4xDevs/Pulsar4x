@@ -638,7 +638,39 @@ public sealed record ColonyNeedsView : IComponentView
     public double GrowthFactor { get; init; } = 1;
     /// <summary>Industry, mining and research multiplier (0.9 below 20, 1.05 above 80).</summary>
     public double OutputFactor { get; init; } = 1;
+
+    // ---- Phase 7b: consumer goods, medical supplies and luxuries (kg; monthly wants per 1,000 people). ----
+    /// <summary>Average kg a day wanted (monthly want / 30): 2, 1 and 0.5 kg per 1,000 people a month.</summary>
+    public double ConsumerGoodsPerDay { get; init; }
+    public double MedicalPerDay { get; init; }
+    public double LuxuryPerDay { get; init; }
+    public long ConsumerGoodsStock { get; init; }
+    public long MedicalStock { get; init; }
+    public long LuxuryStock { get; init; }
+    /// <summary>Days of stock at the average want; null when the colony wants none (empty colony).</summary>
+    public double? ConsumerGoodsDaysOfStock { get; init; }
+    public double? MedicalDaysOfStock { get; init; }
+    public double? LuxuryDaysOfStock { get; init; }
+    /// <summary>Last month's want met in full: true met, false short, null before the first monthly draw.</summary>
+    public bool? ConsumerGoodsMet { get; init; }
+    public bool? MedicalMet { get; init; }
+    public bool? LuxuryMet { get; init; }
+    /// <summary>Convenience flags: <c>Met == false</c>.</summary>
+    public bool ConsumerGoodsShort { get; init; }
+    public bool MedicalShort { get; init; }
+    public bool LuxuryShort { get; init; }
+    /// <summary>Shortage-death multiplier: 0.5 while medical supplies are met, else 1.</summary>
+    public double MedicalFactor { get; init; } = 1;
+    /// <summary>Population growth multiplier from goods alone (consumer met ×1.10; medical met ×1.10, missing ×0.75); already part of <see cref="GrowthFactor"/>.</summary>
+    public double GoodsGrowthFactor { get; init; } = 1;
+    /// <summary>Migration destination rank multiplier: 1.2 while luxuries are met.</summary>
+    public double LuxuryMigrationPull { get; init; } = 1;
+    /// <summary>The satisfaction target itemised for a tooltip: Base 50, then each term (food/water short, goods, wages, overcrowding).</summary>
+    public IReadOnlyList<SatisfactionPartView> SatisfactionParts { get; init; } = Array.Empty<SatisfactionPartView>();
 }
+
+/// <summary>One line of the satisfaction target breakdown.</summary>
+public sealed record SatisfactionPartView(string Label, double Delta);
 
 /// <summary>One staffing tier: what it needs and the staffed share (0..1). Tier rank 1 is staffed first.</summary>
 public sealed record WorkforceTierRow

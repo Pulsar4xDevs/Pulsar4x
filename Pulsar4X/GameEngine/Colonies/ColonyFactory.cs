@@ -374,7 +374,8 @@ namespace Pulsar4X.Colonies
                 policy.Rows[spec.CargoId] = new MarketPolicyRow
                 {
                     CargoId = spec.CargoId,
-                    Min = buy ? (long)Math.Ceiling(spec.HoldDays * (use + Math.Max(0, spec.GapPerDay))) : 0,
+                    // Phase 7b: a Sell row with a GapPerDay keeps that many days of the faction's own use back from sale.
+                    Min = buy || spec.GapPerDay > 0 ? (long)Math.Ceiling(spec.HoldDays * (use + Math.Max(0, spec.GapPerDay))) : 0,
                     Max = spec.Max,
                     Ask = ask,
                     Bid = buy ? Math.Round(ask * (decimal)spec.BidFactor, 2, MidpointRounding.AwayFromZero) : 0,

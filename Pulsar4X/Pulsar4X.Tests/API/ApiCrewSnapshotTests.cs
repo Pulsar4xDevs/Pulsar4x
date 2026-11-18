@@ -48,7 +48,8 @@ public class ApiCrewSnapshotTests
         {
             var design = ship.GetDataBlob<ShipInfoDB>().Design;
             var view = _projector.ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
-            Assert.That(view.CrewRequired, Is.EqualTo(design.CrewReq), design.Name);
+            // The need counts the captain too (the engine's under-crewed test does), so needed and aboard agree.
+            Assert.That(view.CrewRequired, Is.EqualTo(design.CrewReq + (ShipCrew.HasCaptain(ship) ? 1 : 0)), design.Name);
             Assert.That(view.CrewBerths, Is.EqualTo(design.CrewBerths).And.GreaterThanOrEqualTo(design.CrewReq), design.Name);
             Assert.That(view.BerthsByComponent, Is.Not.Empty, "a bridge or crew quarters");
             Assert.That(view.BerthsByComponent.Sum(r => r.Berths), Is.EqualTo(view.CrewBerths));
@@ -68,7 +69,7 @@ public class ApiCrewSnapshotTests
         {
             var entity = ships.Single(s => s.Id == snapshot.Id);
             var design = entity.GetDataBlob<ShipInfoDB>().Design;
-            Assert.That(snapshot.CrewRequired, Is.EqualTo(design.CrewReq), snapshot.Name);
+            Assert.That(snapshot.CrewRequired, Is.EqualTo(design.CrewReq + (ShipCrew.HasCaptain(entity) ? 1 : 0)), snapshot.Name);
             Assert.That(snapshot.CrewBerths, Is.EqualTo(design.CrewBerths));
             Assert.That(snapshot.CrewTracked, Is.True);
             Assert.That(snapshot.CrewAboard, Is.EqualTo(design.CrewReq + (ShipCrew.HasCaptain(entity) ? 1 : 0)), "crew plus the captain");
