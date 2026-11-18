@@ -23,7 +23,13 @@
         "MeanAnomaly_d": 115.3654
       },
       "Minerals": [
-        { "Id": "iron", "Abundance": 0.5, "Accessibility": 1 }
+        { "Id": "iron", "Abundance": 0.5, "Accessibility": 1 },
+        { "Id": "aluminium", "Abundance": 0.4, "Accessibility": 0.9 },
+        { "Id": "silicon", "Abundance": 0.5, "Accessibility": 0.9 },
+        { "Id": "titanium", "Abundance": 0.25, "Accessibility": 0.8 },
+        { "Id": "chromium", "Abundance": 0.15, "Accessibility": 0.6 },
+        { "Id": "nickel", "Abundance": 0.1, "Accessibility": 0.5 },
+        { "Id": "rare-earth-elements", "Abundance": 0.08, "Accessibility": 0.4 }
       ]
     }
   }

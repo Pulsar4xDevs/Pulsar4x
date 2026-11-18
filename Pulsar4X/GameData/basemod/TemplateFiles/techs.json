@@ -647,7 +647,7 @@
       "UniqueID": "tech-asteroid-mining",
       "Name": "Asteroid Mining",
       "Description": "Research into mining asteroids from a ship",
-      "Category": "tech-category-designs",
+      "Category": "tech-category-construction-production",
       "MaxLevel": 1,
       "DataFormula": "(1 + [Level]) * 5000",
       "CostFormula":"(1 + [Level]) * 500",
