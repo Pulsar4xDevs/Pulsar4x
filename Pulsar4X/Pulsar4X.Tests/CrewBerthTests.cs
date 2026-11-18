@@ -16,8 +16,8 @@ using Pulsar4X.Ships;
 namespace Pulsar4X.Tests;
 
 /// <summary>
-/// Crew plan phase 1: crew quarters and bridges give berths, the designer warns when a design has
-/// fewer berths than crew, and every stock design sleeps its crew.
+/// Crew plan phase 1 (crew rules phase 1): crew quarters give crew bunks, bridges give officer slots (2 / 4 / 6),
+/// the designer warns when a bridged design has fewer bunks than crew, and every stock design bunks its crew.
 /// </summary>
 [TestFixture]
 public class CrewBerthTests
@@ -68,10 +68,24 @@ public class CrewBerthTests
     [TestCase(2, 12, 6)]
     [TestCase(0, 20, 10)]
     [TestCase(0, 1, 2)]
-    public void Bridges_SleepAFew(int span, int console, int berths)
+    public void Bridges_GiveOfficerSlots_NotCrewBunks(int span, int console, int slots)
     {
         var bridge = Design("ship-command", ("Command Span", span), ("Console Space", console));
-        Assert.That(ShipCrew.BerthsPer(bridge), Is.EqualTo(berths));
+        Assert.That(ShipCrew.SlotsPer(bridge), Is.EqualTo(slots), "officer slots: half the console space, at least 2");
+        Assert.That(ShipCrew.BerthsPer(bridge), Is.Zero, "a bridge sleeps no crew");
+        Assert.That(bridge.HasAttribute<OfficerSlotsAtb>(), Is.True);
+        Assert.That(bridge.HasAttribute<CrewQuartersAtb>(), Is.False, "the bridge no longer carries crew quarters");
+    }
+
+    [Test]
+    public void OldSavedBridge_WithCrewQuarters_IsReadAsOfficerSlots()
+    {
+        // A bridge design saved before OfficerSlotsAtb carries CrewQuartersAtb: its berths are officer slots, not crew bunks.
+        var legacy = Design("ship-command", ("Command Span", 1), ("Console Space", 8));
+        legacy.AttributesByType.Remove(typeof(OfficerSlotsAtb));
+        legacy.AttributesByType[typeof(CrewQuartersAtb)] = new CrewQuartersAtb(4);
+        Assert.That(ShipCrew.SlotsPer(legacy), Is.EqualTo(4));
+        Assert.That(ShipCrew.BerthsPer(legacy), Is.Zero);
     }
 
     [Test]
@@ -82,7 +96,8 @@ public class CrewBerthTests
         var bay = Design("ship-construction", ("Size", 1));
         var parts = new List<(ComponentDesign, int)> { (quarters, 3), (bridge, 1), (bay, 2) };
         Assert.That(ShipCrew.BerthsPer(bay), Is.EqualTo(0));
-        Assert.That(ShipCrew.Berths(parts), Is.EqualTo(34));
+        Assert.That(ShipCrew.Berths(parts), Is.EqualTo(30), "crew quarters only; the bridge's 4 are officer slots");
+        Assert.That(ShipCrew.OfficerSlots(parts), Is.EqualTo(4));
         Assert.That(ShipCrew.CrewRequired(parts), Is.EqualTo(bridge.CrewReq + 2 * bay.CrewReq));
     }
 
@@ -95,9 +110,9 @@ public class CrewBerthTests
         var shortParts = new List<(ComponentDesign, int)> { (bridge, 1), (bay, 1) };
         var warnings = ShipCrew.DesignCrewWarnings(shortParts);
         Assert.That(warnings, Has.Count.EqualTo(1));
-        Assert.That(warnings[0], Does.Contain("Crew 21").And.Contain("only 4 berths").And.Contain("17 more"));
+        Assert.That(warnings[0], Does.Contain("Crew 21").And.Contain("only 0 crew bunks").And.Contain("21 more"));
 
-        var fullParts = new List<(ComponentDesign, int)> { (bridge, 1), (bay, 1), (quarters, 2) };
+        var fullParts = new List<(ComponentDesign, int)> { (bridge, 1), (bay, 1), (quarters, 3) };
         Assert.That(ShipCrew.DesignCrewWarnings(fullParts), Is.Empty);
         Assert.That(ShipCrew.DesignCrewWarnings(new List<(ComponentDesign, int)>()), Is.Empty);
     }
@@ -111,7 +126,9 @@ public class CrewBerthTests
         Data.Unlock("plastic-armor");
         var design = new ShipDesign(Info, "Berthed", new List<(ComponentDesign, int)> { (bridge, 1), (quarters, 2) },
             (Data.Armor["plastic-armor"], 0f));
-        Assert.That(design.CrewBerths, Is.EqualTo(22));
+        Assert.That(design.CrewBerths, Is.EqualTo(20), "two 10-bunk quarters; the bridge's 2 are officer slots");
+        Assert.That(design.OfficerSlots, Is.EqualTo(2));
+        Assert.That(design.NeedsCaptain, Is.True);
         Assert.That(design.CrewReq, Is.EqualTo(bridge.CrewReq));
     }
 
@@ -124,7 +141,11 @@ public class CrewBerthTests
         new ModLoader().LoadScenario("Data/scenarios/early-tech/scenarioInfo.json", store);
         Assert.That(store.ShipDesigns, Is.Not.Empty);
         foreach (var design in store.ShipDesigns.Values)
-            Assert.That(design.Components.Any(c => c.Id.StartsWith("default-design-crew-quarters")), Is.True, design.UniqueID);
+        {
+            bool bridged = design.Components.Any(c => c.Id is "default-design-Cockpit" or "default-design-bridge-well" or "default-design-bridge-system");
+            // Crewed (bridged) designs carry crew quarters; the automated Sensor Sat and Target Drone carry none.
+            Assert.That(design.Components.Any(c => c.Id.StartsWith("default-design-crew-quarters")), Is.EqualTo(bridged), design.UniqueID);
+        }
     }
 
     [TestCase("Pulsar4x.Scenario.WarpTechStart")]
@@ -138,43 +159,55 @@ public class CrewBerthTests
         var store = GameLifecycle.LoadModStore(paths, mods.Select(m => m.Path), scenario);
         var game = GameLifecycle.CreateGameCore(store, GameLifecycle.BuildQuickstartRequest(paths, GameLifecycle.BuildCatalog(store), 12345))!.Value.game;
 
-        var berths = new Dictionary<string, (int crew, int berths)>();
+        var stock = new Dictionary<string, (int crew, int bunks, int slots)>();
         foreach (var faction in game.Factions.Values.Where(f => f.HasDataBlob<FactionInfoDB>()))
         foreach (var design in faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values)
         {
-            berths[design.Name] = (design.CrewReq, design.CrewBerths);
-            TestContext.Out.WriteLine($"{design.Name} ({faction.GetDataBlob<NameDB>().DefaultName}): crew {design.CrewReq}, berths {design.CrewBerths}, mass {design.MassPerUnit}");
+            stock[design.Name] = (design.CrewReq, design.CrewBerths, design.OfficerSlots);
+            TestContext.Out.WriteLine($"{design.Name} ({faction.GetDataBlob<NameDB>().DefaultName}): crew {design.CrewReq}, bunks {design.CrewBerths}, slots {design.OfficerSlots}, mass {design.MassPerUnit}");
             Assert.That(design.CrewBerths, Is.EqualTo(ShipCrew.Berths(design.Components)), design.Name);
             Assert.That(design.CrewBerths, Is.GreaterThanOrEqualTo(design.CrewReq), design.Name);
             Assert.That(ShipCrew.DesignCrewWarnings(design.Components), Is.Empty, design.Name);
+            if (design.NeedsCaptain)
+                Assert.That(design.OfficerSlots, Is.AnyOf(2, 4, 6), design.Name + ": officer slots 2 / 4 / 6");
+            else
+                Assert.That((design.CrewReq, design.CrewBerths, design.OfficerSlots), Is.EqualTo((0, 0, 0)), design.Name + ": automated");
         }
 
-        // Every starting ship berths everyone it carries: its crew, plus its captain when it has one.
-        // The Sensor Sat (one berth, one crew) starts uncaptained rather than carrying spare quarters.
+        // Every starting ship bunks its crew; a bridged ship also has an officer slot for its captain.
         var ships = game.Systems.SelectMany(s => s.GetAllEntitiesWithDataBlob<ShipInfoDB>()).ToList();
         Assert.That(ships, Is.Not.Empty);
         foreach (var ship in ships)
         {
             var design = ship.GetDataBlob<ShipInfoDB>().Design;
             int captain = ShipCrew.HasCaptain(ship) ? 1 : 0;
-            Assert.That(design.CrewBerths, Is.GreaterThanOrEqualTo(design.CrewReq + captain), design.Name + ": a berth for everyone aboard");
+            Assert.That(design.CrewBerths, Is.GreaterThanOrEqualTo(design.CrewReq), design.Name + ": a bunk for every crew member");
+            Assert.That(design.OfficerSlots, Is.GreaterThanOrEqualTo(captain), design.Name + ": a slot for the captain");
             if (design.Name == "Sensor Sat")
-                Assert.That(captain, Is.Zero, "the Sensor Sat starts without a captain");
+                Assert.That(captain, Is.Zero, "the Sensor Sat has no bridge, so no captain");
         }
 
         if (scenario.EndsWith("WarpTechStart"))
         {
-            Assert.That(berths.Keys, Does.Contain("Geo Surveyor").And.Contain("Prospector"), "the NPC factions' designs");
-            // Courier: a third 1-berth quarters for the captain (2026-11-15). Bridge crew now scale with console^0.75.
-            Assert.That(berths["Cargo Courier"], Is.EqualTo((14, 15)));
-            Assert.That(berths["Colony Ship"], Is.EqualTo((43, 49)));
-            Assert.That(berths["Ob'enn Dropship"], Is.EqualTo((51, 56)));
-            Assert.That(berths["Sensor Sat"], Is.EqualTo((1, 1)));
+            Assert.That(stock.Keys, Does.Contain("Geo Surveyor").And.Contain("Prospector"), "the NPC factions' designs");
+            // The crew plan table (crew, crew bunks, officer slots): bunks equal the part crew, slots 2 / 4 / 6.
+            Assert.That(stock["Cargo Courier"], Is.EqualTo((14, 14, 2)));
+            Assert.That(stock["Freighter"], Is.EqualTo((24, 24, 4)));
+            Assert.That(stock["Colony Ship"], Is.EqualTo((43, 45, 4)), "two spare bunks");
+            Assert.That(stock["Tanker"], Is.EqualTo((21, 21, 4)));
+            Assert.That(stock["Sanctum Adroit Gunship"], Is.EqualTo((28, 28, 4)));
+            Assert.That(stock["Ob'enn Dropship"], Is.EqualTo((51, 51, 6)));
+            Assert.That(stock["Starship"], Is.EqualTo((6, 6, 4)));
+            Assert.That(stock["Surveyor"], Is.EqualTo((36, 36, 6)));
+            Assert.That(stock["Miner"], Is.EqualTo((16, 16, 6)));
+            Assert.That(stock["Geo Surveyor"], Is.EqualTo((17, 17, 4)));
+            Assert.That(stock["Prospector"], Is.EqualTo((15, 15, 4)));
+            Assert.That(stock["Sensor Sat"], Is.EqualTo((0, 0, 0)), "automated: no bridge");
         }
         else
         {
-            Assert.That(berths["Newton Tug"], Is.EqualTo((2, 3)));
-            Assert.That(berths["Starship"], Is.EqualTo((3, 4)), "a second 1-berth quarters for the captain");
+            Assert.That(stock["Newton Tug"], Is.EqualTo((2, 2, 2)));
+            Assert.That(stock["Starship"], Is.EqualTo((3, 3, 2)));
         }
     }
 

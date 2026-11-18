@@ -136,7 +136,7 @@ public class ApiPayAndLifeSupportSnapshotTests
     [Test]
     public void ShipPower_HasTheLifeSupportRowShape_WithTheCrewAboard()
     {
-        var ships = Owned<ShipCrewDB>().Where(s => s.HasDataBlob<Pulsar4X.Energy.EnergyGenAbilityDB>()).ToList();
+        var ships = Owned<ShipCrewDB>().Where(s => s.HasDataBlob<Pulsar4X.Energy.EnergyGenAbilityDB>() && !ShipCrew.Automated(s)).ToList(); // an automated ship (Sensor Sat) has no life support
         Assert.That(ships, Is.Not.Empty);
         foreach (var ship in ships)
         {

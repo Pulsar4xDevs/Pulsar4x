@@ -332,7 +332,8 @@ public class EnergyPhase6Tests
         var bay = Design("ship-construction", ("Size", 1));
         var ship = new ShipDesign(info, "crew-test", new List<(ComponentDesign, int)> { (drive, 1), (bay, 3) },
             (Data.Armor.Values.Concat(Data.LockedArmor.Values).First(), 0f), "crew-test-" + Guid.NewGuid().ToString("N"));
-        Assert.That(ship.CrewReq, Is.EqualTo(drive.CrewReq + 3 * bay.CrewReq));
+        Assert.That(ShipCrew.PartCrew(ship.Components), Is.EqualTo(drive.CrewReq + 3 * bay.CrewReq));
+        Assert.That(ship.CrewReq, Is.EqualTo(0), "no bridge: an automated design needs no crew");
     }
 
     // ---- stock ships ----

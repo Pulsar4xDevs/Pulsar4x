@@ -322,12 +322,13 @@ public class MultiFactionEarthPhase7bTests
 
         var design = info.ShipDesigns["default-ship-design-starship"];
         var ship = ShipFactory.CreateShip(design, _player, earth.GetDataBlob<ColonyInfoDB>().PlanetEntity, "Crewview Starship");
-        ship.GetDataBlob<ShipInfoDB>().CommanderID = 4242; // a captain sits the ship: one more crew
+        ship.GetDataBlob<ShipInfoDB>().CommanderID = 4242; // a captain sits the ship: an officer, not crew
         var projector = new GameProjector(_game);
         ShipView View() => projector.ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
 
         var v0 = View();
-        Assert.That(v0.CrewRequired, Is.EqualTo(design.CrewReq + 1), "needed counts the captain, as the engine's test does");
+        Assert.That(v0.CrewRequired, Is.EqualTo(design.CrewReq), "needed is the part crew; the captain is an officer");
+        Assert.That(v0.OfficersAboard, Is.EqualTo(1));
         Assert.That(v0.CrewByComponent.Sum(r => r.Crew), Is.EqualTo(v0.CrewRequired), "the rows add up to the need");
         Assert.That(v0.CrewAboard, Is.EqualTo(v0.CrewRequired));
         Assert.That(v0.UnderCrewed, Is.False);

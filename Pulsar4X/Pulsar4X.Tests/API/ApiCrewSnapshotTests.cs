@@ -48,14 +48,20 @@ public class ApiCrewSnapshotTests
         {
             var design = ship.GetDataBlob<ShipInfoDB>().Design;
             var view = _projector.ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
-            // The need counts the captain too (the engine's under-crewed test does), so needed and aboard agree.
-            Assert.That(view.CrewRequired, Is.EqualTo(design.CrewReq + (ShipCrew.HasCaptain(ship) ? 1 : 0)), design.Name);
-            Assert.That(view.CrewBerths, Is.EqualTo(design.CrewBerths).And.GreaterThanOrEqualTo(design.CrewReq), design.Name);
-            Assert.That(view.BerthsByComponent, Is.Not.Empty, "a bridge or crew quarters");
+            // Crew rules phase 1: the need is part crew only (no captain); a bridgeless ship is automated and needs none.
+            Assert.That(view.CrewRequired, Is.EqualTo(design.CrewReq), design.Name);
+            Assert.That(view.Automated, Is.EqualTo(!design.NeedsCaptain), design.Name);
+            Assert.That(view.CrewBerths, Is.EqualTo(view.Automated ? 0 : design.CrewBerths).And.GreaterThanOrEqualTo(design.CrewReq), design.Name);
+            if (!view.Automated)
+                Assert.That(view.BerthsByComponent, Is.Not.Empty, "crew quarters");
             Assert.That(view.BerthsByComponent.Sum(r => r.Berths), Is.EqualTo(view.CrewBerths));
+            Assert.That(view.OfficerSlots, Is.EqualTo(design.OfficerSlots), design.Name);
             Assert.That(view.CrewTracked, Is.True, "crew plan phase 3 tracks crew aboard");
-            // The captain counts as one more crew aboard (2026-11-15).
-            Assert.That(view.CrewAboard, Is.EqualTo(design.CrewReq + (ShipCrew.HasCaptain(ship) ? 1 : 0)), "scenario ships start fully crewed");
+            // The captain is an officer, not crew: crew aboard is the part crew, the captain is counted apart.
+            Assert.That(view.CrewAboard, Is.EqualTo(design.CrewReq), "scenario ships start fully crewed");
+            Assert.That(view.OfficersAboard, Is.EqualTo(ShipCrew.HasCaptain(ship) && !view.Automated ? 1 : 0));
+            Assert.That(view.PeopleAboard, Is.EqualTo(view.CrewAboard + view.OfficersAboard));
+            Assert.That(view.NoCaptain, Is.False);
             Assert.That(view.CrewFactor, Is.EqualTo(1));
             Assert.That(view.EngineCrewFactor, Is.EqualTo(1));
             Assert.That(view.UnderCrewed, Is.False);
@@ -69,10 +75,13 @@ public class ApiCrewSnapshotTests
         {
             var entity = ships.Single(s => s.Id == snapshot.Id);
             var design = entity.GetDataBlob<ShipInfoDB>().Design;
-            Assert.That(snapshot.CrewRequired, Is.EqualTo(design.CrewReq + (ShipCrew.HasCaptain(entity) ? 1 : 0)), snapshot.Name);
-            Assert.That(snapshot.CrewBerths, Is.EqualTo(design.CrewBerths));
+            Assert.That(snapshot.CrewRequired, Is.EqualTo(design.CrewReq), snapshot.Name);
+            Assert.That(snapshot.CrewBerths, Is.EqualTo(design.NeedsCaptain ? design.CrewBerths : 0).Or.EqualTo(design.CrewBerths));
+            Assert.That(snapshot.OfficerSlots, Is.EqualTo(design.OfficerSlots));
+            Assert.That(snapshot.Automated, Is.EqualTo(!design.NeedsCaptain));
             Assert.That(snapshot.CrewTracked, Is.True);
-            Assert.That(snapshot.CrewAboard, Is.EqualTo(design.CrewReq + (ShipCrew.HasCaptain(entity) ? 1 : 0)), "crew plus the captain");
+            Assert.That(snapshot.CrewAboard, Is.EqualTo(design.CrewReq), "crew only");
+            Assert.That(snapshot.OfficersAboard, Is.EqualTo(ShipCrew.HasCaptain(entity) && design.NeedsCaptain ? 1 : 0), "the captain, apart");
             Assert.That(snapshot.UnderCrewed, Is.False);
         }
     }
@@ -125,6 +134,10 @@ public class ApiCrewSnapshotTests
         Assert.That(laser.CrewRequired, Is.EqualTo(info.InternalComponentDesigns["default-design-laser-weapon"].CrewReq).And.EqualTo(5));
         Assert.That(laser.Berths, Is.EqualTo(0));
         Assert.That(snapshot.Designs.Single(d => d.Id == "default-design-crew-quarters-10").Berths, Is.EqualTo(10));
-        Assert.That(snapshot.Designs.Single(d => d.Id == "default-design-Cockpit").Berths, Is.EqualTo(2));
+        var cockpit = snapshot.Designs.Single(d => d.Id == "default-design-Cockpit");
+        Assert.That(cockpit.Berths, Is.EqualTo(0), "a bridge gives no crew bunks");
+        Assert.That(cockpit.OfficerSlots, Is.EqualTo(2));
+        Assert.That(cockpit.IsBridge, Is.True);
+        Assert.That(snapshot.Designs.Single(d => d.Id == "default-design-crew-quarters-10").IsBridge, Is.False);
     }
 }

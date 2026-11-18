@@ -85,15 +85,16 @@ namespace Pulsar4X.Tests
         {
             var parts = new Parts(Design("solarArray"), Design("rtg"), Design("steam-turbine-reactor"), Design("fuel-cell"),
                 Design("passive-sensor"), Design("alcubierre-warp-drive"), Design("asteroid-miner"));
+            var bridge = Design("ship-command"); // a bridgeless hull is automated and carries no crew
             var components = new List<(ComponentDesign, int)>
             {
                 (parts.Solar, 1), (parts.Rtg, 2), (parts.Reactor, 1), (parts.Cell, 1),
-                (parts.Sensor, 2), (parts.Warp, 1), (parts.Miner, 1),
+                (parts.Sensor, 2), (parts.Warp, 1), (parts.Miner, 1), (bridge, 1),
             };
             var design = new ShipDesign(Info, "Power Tab Test", components, (Data.Armor["plastic-armor"], 0f));
             design.Initialise(Info);
             var ship = ShipFactory.CreateShip(design, _faction, _planet, "Tabby");
-            // The test hull has no bridge or quarters, so it would sail with nobody aboard; crew it fully
+            // The test hull has a bridge but no quarters, so it would sail with nobody aboard; crew it fully
             // so its miner runs (crew plan phase 3).
             ship.GetDataBlob<ShipCrewDB>().Aboard = ShipCrew.SplitOf(ship).Required;
 
