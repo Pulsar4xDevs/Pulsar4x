@@ -700,6 +700,14 @@ namespace Pulsar4X.Client
                 }
             }
 
+            // Keep Cost and Queue refit sticky under the lists: a long parts list used to
+            // push the button past the child's scroll limit so it could not be reached.
+            float reserve = ImGui.GetTextLineHeightWithSpacing()
+                + ImGui.GetFrameHeightWithSpacing() * 2
+                + ImGui.GetStyle().WindowPadding.Y;
+            float listHeight = Math.Max(0f, ImGui.GetContentRegionAvail().Y - reserve);
+            if (ImGui.BeginChild("##refit-parts", new Vector2(0, listHeight)))
+            {
             ImGui.Text("On the ship");
             if (selected.Parts.Count == 0)
                 ImGui.BulletText("None");
@@ -730,24 +738,6 @@ namespace Pulsar4X.Client
                 }
             }
 
-            long cost = 0;
-            var removeIds = new List<int>();
-            var mountIds = new List<int>();
-            foreach (var part in selected.Parts)
-            {
-                if (!_refitRemove.Contains(part.ComponentId))
-                    continue;
-                cost += part.Cost;
-                removeIds.Add(part.ComponentId);
-            }
-            foreach (var part in line.RefitCargo)
-            {
-                if (!_refitMount.Contains(part.ComponentId))
-                    continue;
-                cost += part.Cost;
-                mountIds.Add(part.ComponentId);
-            }
-
             if (diff != null && diff.Missing.Count > 0)
             {
                 // Missing parts do not block the refit: the job is queued and waits until a factory produces them.
@@ -776,6 +766,26 @@ namespace Pulsar4X.Client
                 }
                 if (buildable.Count == 0)
                     ImGui.EndDisabled();
+            }
+            }
+            ImGui.EndChild();
+
+            long cost = 0;
+            var removeIds = new List<int>();
+            var mountIds = new List<int>();
+            foreach (var part in selected.Parts)
+            {
+                if (!_refitRemove.Contains(part.ComponentId))
+                    continue;
+                cost += part.Cost;
+                removeIds.Add(part.ComponentId);
+            }
+            foreach (var part in line.RefitCargo)
+            {
+                if (!_refitMount.Contains(part.ComponentId))
+                    continue;
+                cost += part.Cost;
+                mountIds.Add(part.ComponentId);
             }
 
             ImGui.Text("Cost " + cost);
