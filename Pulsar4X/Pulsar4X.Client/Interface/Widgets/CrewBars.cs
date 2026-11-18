@@ -184,7 +184,7 @@ public static class CrewBars
                 Chip = RequiredColour,
                 Name = "Needed",
                 Value = required.ToString("N0"),
-                Tooltip = "Each component's crew per copy, times its copies.",
+                Tooltip = "Each component's crew per copy, times its copies, plus the captain when one is assigned.",
                 Detail = ship.CrewByComponent.Select(r => (r.Name + "  " + r.CrewPerCopy.ToString("N0") + " x " + r.Count.ToString("N0"), r.Crew.ToString("N0"))).ToList(),
             },
         };

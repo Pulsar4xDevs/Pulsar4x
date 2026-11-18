@@ -29,9 +29,12 @@ namespace Pulsar4X.Tests
         {
             var earth = new ColonyNeedsView { FoodPerDay = 0, WaterPerDay = 0, FoodStock = 0, WaterStock = 100, ShortageState = "Supplied" };
             var goods = ColonyWorkforceDisplay.Goods(earth);
-            Assert.That(goods.Length, Is.EqualTo(2));
+            Assert.That(goods.Length, Is.EqualTo(5));
             Assert.That(goods[0].Name, Is.EqualTo("Food"));
             Assert.That(goods[1].Name, Is.EqualTo("Water"));
+            Assert.That(goods[2].Name, Is.EqualTo("Consumer Goods"));
+            Assert.That(goods[3].Name, Is.EqualTo("Medical Supplies"));
+            Assert.That(goods[4].Name, Is.EqualTo("Luxury Goods"));
             Assert.That(ColonyWorkforceDisplay.FormatDaysOfStock(null), Is.EqualTo("—"));
             Assert.That(ColonyWorkforceDisplay.FormatDaysOfStock(12.34), Is.EqualTo("12.3 days"));
             Assert.That(ColonyWorkforceDisplay.FormatPerDay(0), Is.EqualTo("0 a day"));
