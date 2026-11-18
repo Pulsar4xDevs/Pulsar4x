@@ -102,5 +102,10 @@ namespace Pulsar4X.Events
         /// <summary>A month's wages, research and staff billing was settled (monthly billing, "budget day").</summary>
         BudgetDay,
         #endregion
+
+        #region Crew market (appended so saved ordinals stay put)
+        /// <summary>Trained crew bought on a crew market arrived (multi-faction phase 8).</summary>
+        CrewTransferred,
+        #endregion
     }
 }

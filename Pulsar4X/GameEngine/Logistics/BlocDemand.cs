@@ -41,7 +41,7 @@ public static class BlocDemand
         var info = InfoOf(colony);
         if (info == null)
             return;
-        bool anyDemand = policy.Rows.Values.Any(r => r.IsDemand());
+        bool anyDemand = policy.Rows.Values.Any(r => r.IsDemand() || r.OutputPerDay > 0);
         if (!anyDemand)
             return;
 
@@ -49,6 +49,8 @@ public static class BlocDemand
         policy.LastConsumption = now;
         colony.TryGetDataBlob<CargoStorageDB>(out var storage);
         var game = colony.Manager?.Game;
+
+        Produce(policy, info, storage, days);
 
         foreach (var row in policy.Rows.Values.Where(r => r.IsDemand()).OrderBy(r => r.CargoId, StringComparer.Ordinal))
         {
@@ -72,6 +74,31 @@ public static class BlocDemand
 
             decimal ask = EnergyPricing.SeedAsk(game, info.Data, row.CargoId);
             row.Bid = Math.Round(ask * (decimal)(row.BidFactor * Premium(row, now)), 2, MidpointRounding.AwayFromZero);
+        }
+    }
+
+    /// <summary>
+    /// Phase 8: a Sell row with <see cref="MarketPolicyRow.OutputPerDay"/> is the bloc's abstract industry: it adds
+    /// that many units a day to stock, held at the row's Max (90 days of output when Max is 0). Output the stock has no
+    /// room for is not carried.
+    /// </summary>
+    static void Produce(ColonyMarketPolicyDB policy, FactionInfoDB info, Pulsar4X.Storage.CargoStorageDB? storage, double days)
+    {
+        if (storage == null || days <= 0)
+            return;
+        foreach (var row in policy.Rows.Values.Where(r => r.OutputPerDay > 0).OrderBy(r => r.CargoId, StringComparer.Ordinal))
+        {
+            if (!info.Data.CargoGoods.Contains(row.CargoId))
+                continue;
+            var cargo = info.Data.CargoGoods.GetAny(row.CargoId);
+            row.OutputOwed += row.OutputPerDay * days;
+            long whole = (long)Math.Floor(row.OutputOwed);
+            row.OutputOwed -= whole;
+            long cap = row.Max > 0 ? row.Max : (long)Math.Ceiling(PremiumDays * row.OutputPerDay);
+            long room = cap - storage.GetUnitsStored(cargo, false);
+            long add = Math.Min(whole, room);
+            if (add > 0)
+                storage.AddCargoByUnit(cargo, add);
         }
     }
 

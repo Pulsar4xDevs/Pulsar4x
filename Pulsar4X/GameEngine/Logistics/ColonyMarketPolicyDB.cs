@@ -23,6 +23,12 @@ public sealed class MarketPolicyRow
     /// <summary>Bloc demand: fractional use carried to the next pass.</summary>
     public double UseOwed;
 
+    /// <summary>Bloc output: units the colony's abstract industry adds to stock per day, up to <see cref="Max"/>
+    /// (90 days of output when Max is 0). 0 = none. Lets a manufacturing bloc keep its inputs flowing to the others.</summary>
+    public double OutputPerDay;
+    /// <summary>Bloc output: fractional output carried to the next pass.</summary>
+    public double OutputOwed;
+
     /// <summary>True for a data-driven bloc demand row (bid follows the shortage premium, capped by the reserve).</summary>
     public bool IsDemand() => BidFactor > 0;
 
@@ -38,6 +44,8 @@ public sealed class MarketPolicyRow
         BidFactor = BidFactor,
         ShortSince = ShortSince,
         UseOwed = UseOwed,
+        OutputPerDay = OutputPerDay,
+        OutputOwed = OutputOwed,
     };
 }
 

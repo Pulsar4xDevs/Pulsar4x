@@ -672,6 +672,36 @@ public sealed record ColonyNeedsView : IComponentView
 /// <summary>One line of the satisfaction target breakdown.</summary>
 public sealed record SatisfactionPartView(string Label, double Delta);
 
+/// <summary>
+/// Multi-faction phase 8: a colony's crew market. Its own pool and listing, and the crew on offer from other
+/// factions' colonies on the same body. The fee is per crew; the buyer pays it at once and the crew join the pool.
+/// </summary>
+public sealed record CrewMarketView : IComponentView
+{
+    /// <summary>Trained crew in this colony's pool.</summary>
+    public long PoolTotal { get; init; }
+    public bool Listed { get; init; }
+    /// <summary>Crew this colony keeps back from the market.</summary>
+    public long Reserve { get; init; }
+    /// <summary>Crew this colony would sell now (listed pool above the reserve).</summary>
+    public long SpareToSell { get; init; }
+    /// <summary>This colony's fee per crew when it sells (the default, or its higher ask).</summary>
+    public decimal Fee { get; init; }
+    /// <summary>The lowest fee anyone may ask: 1.5 x <see cref="TuitionEquivalent"/>.</summary>
+    public decimal DefaultFee { get; init; }
+    /// <summary>The course months at the crew wage: what an academy graduate costs to make.</summary>
+    public decimal TuitionEquivalent { get; init; }
+    /// <summary>Share of the fee the seller banks (the rest is the transfer levy).</summary>
+    public decimal SellerShare { get; init; }
+    /// <summary>Crew on offer from other colonies on this body, with why each can or cannot be bought.</summary>
+    public IReadOnlyList<CrewOfferView> Offers { get; init; } = Array.Empty<CrewOfferView>();
+}
+
+/// <summary>One crew listing: a seller colony's spare crew of one species. <see cref="Reason"/> is empty when it can be bought.</summary>
+public sealed record CrewOfferView(
+    int SellerColonyId, string SellerColonyName, int SellerFactionId, string SellerFactionName,
+    int SpeciesId, string SpeciesName, long Available, decimal Fee, string Reason);
+
 /// <summary>One staffing tier: what it needs and the staffed share (0..1). Tier rank 1 is staffed first.</summary>
 public sealed record WorkforceTierRow
 {

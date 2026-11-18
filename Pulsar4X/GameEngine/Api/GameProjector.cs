@@ -357,6 +357,7 @@ namespace Pulsar4X.Engine.Api
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ComponentInstancesDB>(out var ci) ? ToInstallationsView(ci, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyWorkforceDB>(out var wf) ? ToWorkforceView(wf, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyNeedsDB>(out var needs) ? ToColonyNeedsView(needs, e) : null,
+            (e, f) => e.FactionOwnerID == f && e.HasDataBlob<ColonyInfoDB>() ? ToCrewMarketView(e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyInfoDB>(out var col) ? ToColonyMiningView(col, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<NavalAcademyDB>(out var na) ? ToNavalAcademyView(na, e) : null,
             (e, f) => e.FactionOwnerID == f && e.HasDataBlob<ColonyInfoDB>() ? ToRecruitmentView(e, f) : null,
@@ -784,6 +785,41 @@ namespace Pulsar4X.Engine.Api
             var hash = value.GetHashCode();
             var factor = (hash % 41 - 20) / 100.0;
             return (long)(value * (1 + factor));
+        }
+
+        private static CrewMarketView ToCrewMarketView(Entity e, int factionId)
+        {
+            var game = e.Manager!.Game;
+            e.TryGetDataBlob<ColonyCrewPoolDB>(out var pool);
+            var offers = new List<CrewOfferView>();
+            if (e.TryGetDataBlob<ColonyInfoDB>(out var info) && info.PlanetEntity.IsValid)
+            {
+                foreach (var seller in info.PlanetEntity.ColoniesOnBody().Where(c => c.Id != e.Id && c.FactionOwnerID != factionId).OrderBy(c => c.Id))
+                {
+                    string reason = Pulsar4X.Colonies.CrewMarket.CannotTrade(e, seller) ?? "";
+                    string factionName = game.Factions.TryGetValue(seller.FactionOwnerID, out var sf) && sf.TryGetDataBlob<NameDB>(out var sn)
+                        ? sn.GetName(factionId) : seller.FactionOwnerID.ToString();
+                    foreach (var (speciesId, available) in Pulsar4X.Colonies.CrewMarket.Offers(seller))
+                    {
+                        string species = e.Manager.TryGetGlobalEntityById(speciesId, out var sp) && sp.TryGetDataBlob<NameDB>(out var spn)
+                            ? spn.GetName(factionId) : speciesId.ToString();
+                        offers.Add(new CrewOfferView(seller.Id, seller.GetName(factionId), seller.FactionOwnerID, factionName,
+                            speciesId, species, available, Pulsar4X.Colonies.CrewMarket.Fee(seller), reason));
+                    }
+                }
+            }
+            return new CrewMarketView
+            {
+                PoolTotal = pool?.Total ?? 0,
+                Listed = pool?.Listed ?? false,
+                Reserve = pool?.Reserve ?? 0,
+                SpareToSell = pool != null && pool.Listed ? Math.Max(0, pool.Total - pool.Reserve) : 0,
+                Fee = Pulsar4X.Colonies.CrewMarket.Fee(e),
+                DefaultFee = Pulsar4X.Colonies.CrewMarket.DefaultFee(game),
+                TuitionEquivalent = Pulsar4X.Colonies.CrewMarket.TuitionEquivalent(game),
+                SellerShare = Pulsar4X.Colonies.CrewMarket.SellerShare,
+                Offers = offers,
+            };
         }
 
         private static ColonyNeedsView ToColonyNeedsView(ColonyNeedsDB db, Entity e)

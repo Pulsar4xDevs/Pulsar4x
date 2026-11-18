@@ -66,6 +66,8 @@ namespace Pulsar4X.Engine.Api
                 [typeof(ContractStaffCommand)] = TranslateStaff,
                 [typeof(RelocateCommutersCommand)] = TranslateStaff,
                 [typeof(SetStaffTargetCommand)] = TranslateStaff,
+                [typeof(ListCrewCommand)] = TranslateCrewMarket,
+                [typeof(BuyCrewCommand)] = TranslateCrewMarket,
                 [typeof(BootstrapColonyCommand)] = TranslateBootstrapColony,
                 [typeof(FleetBootstrapCommand)] = TranslateFleetBootstrap,
                 [typeof(QueueMoveGoodsCommand)] = TranslateQueueMoveGoods,
@@ -808,6 +810,30 @@ namespace Pulsar4X.Engine.Api
                     break;
                 default:
                     return CommandResult.Reject("Unknown workforce command.");
+            }
+            return refusal == null ? CommandResult.Ok("") : CommandResult.Reject(refusal);
+        }
+
+        /// <summary>Multi-faction phase 8: crew market commands on the faction's own colony.</summary>
+        private CommandResult TranslateCrewMarket(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (!commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("Not a colony.");
+            if (commanded.FactionOwnerID != faction.Id)
+                return CommandResult.Reject("The colony is not yours.");
+            string? refusal;
+            switch (command)
+            {
+                case ListCrewCommand l:
+                    refusal = Pulsar4X.Colonies.CrewMarket.TryList(commanded, l.Listed, l.Reserve, l.Ask);
+                    break;
+                case BuyCrewCommand b:
+                    if (!TryResolve(b.SellerColonyId, out var seller) || !seller.HasDataBlob<ColonyInfoDB>())
+                        return CommandResult.Reject("The seller's colony is gone.");
+                    refusal = Pulsar4X.Colonies.CrewMarket.TryBuy(commanded, seller, b.SpeciesId, b.Count);
+                    break;
+                default:
+                    return CommandResult.Reject("Unknown crew market command.");
             }
             return refusal == null ? CommandResult.Ok("") : CommandResult.Reject(refusal);
         }

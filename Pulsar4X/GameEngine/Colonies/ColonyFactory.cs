@@ -380,6 +380,7 @@ namespace Pulsar4X.Colonies
                     Ask = ask,
                     Bid = buy ? Math.Round(ask * (decimal)spec.BidFactor, 2, MidpointRounding.AwayFromZero) : 0,
                     UsePerDay = use,
+                    OutputPerDay = buy ? 0 : spec.OutputPerDayPerMillion * millions,
                     BidFactor = buy ? spec.BidFactor : 0,
                 };
             }

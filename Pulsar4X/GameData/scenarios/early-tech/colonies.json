@@ -440,6 +440,9 @@
         "farm-site",
         "ice-mine",
         "tech-early-technology",
+        "tech-mining-production",
+        "tech-life-support-efficiency",
+        "tech-solid-fuel",
         "tech-conventional-engine",
         "stainless-steel-armor",
         "plastic-armor",
@@ -579,7 +582,7 @@
         { "CargoId": "lithium", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 83 },
         { "CargoId": "methalox", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 1667 },
         { "CargoId": "stainless-steel", "Role": "Sell" },
-        { "CargoId": "plastic", "Role": "Sell" }
+        { "CargoId": "plastic", "Role": "Sell", "OutputPerDayPerMillion": 150 }
       ],
       "StartingItems": [
         "food",
@@ -590,6 +593,10 @@
         "farm-site",
         "ice-mine",
         "tech-early-technology",
+        "tech-construction-automation",
+        "tech-industrial-energy-efficiency",
+        "tech-factory-max-size",
+        "tech-shipyard-slip-max-size",
         "tech-conventional-engine",
         "stainless-steel-armor",
         "plastic-armor",
@@ -721,7 +728,8 @@
         { "Id": "aluminium", "Amount": 20000 }
       ],
       "Market": [
-        { "CargoId": "plastic", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "GapPerDay": 50 },
+        { "CargoId": "plastic", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 50 },
+        { "CargoId": "hydrocarbons", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 25 },
         { "CargoId": "consumer-goods", "Role": "Buy", "HoldDays": 60, "BidFactor": 0.75, "GapPerDay": 66.7 },
         { "CargoId": "medical-supplies", "Role": "Sell", "HoldDays": 60, "GapPerDay": 33.3 },
         { "CargoId": "luxury-goods", "Role": "Sell", "HoldDays": 60, "GapPerDay": 16.7 },
@@ -740,6 +748,13 @@
         "farm-site",
         "ice-mine",
         "tech-early-technology",
+        "tech-early-nuclear-power",
+        "tech-early-directed-energy",
+        "tech-conductors",
+        "tech-capacitors",
+        "tech-battery-capacity",
+        "tech-academy-better-instruction",
+        "tech-academy-larger-classes",
         "tech-conventional-engine",
         "stainless-steel-armor",
         "plastic-armor",

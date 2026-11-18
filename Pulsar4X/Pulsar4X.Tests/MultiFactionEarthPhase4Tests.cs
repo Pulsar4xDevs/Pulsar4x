@@ -242,8 +242,12 @@ public class MultiFactionEarthPhase4Tests
     // ---------------------------------------------------------------- Earth mining horizon
 
     /// <summary>
-    /// Earth's mined minerals last at least 10 years at start rates (company plus the three blocs), in both
-    /// scenarios: the bloc kits are sized so AMC, the raw-goods bloc, mines and SPC and ECN do not.
+    /// Earth's mined minerals at start rates (company plus the three blocs), in both scenarios:
+    /// the bloc kits are sized so AMC, the raw-goods bloc, mines and SPC and ECN do not.
+    /// AMC starts with tech-mining-production (level 1: 2.5× mine output), so the 60M homeworld
+    /// minimum lasts ~6.6 years for aluminium, regolith and water (hydrocarbons ~9.6). The phase-4
+    /// 10-year floor no longer holds at that rate. Raising MinHomeworldMineralAmmount is a Jon
+    /// decision — the plan says not to silently buff Earth's randomHW deposits.
     /// </summary>
     [TestCase("Pulsar4x.Scenario.WarpTechStart")]
     [TestCase("Pulsar4x.Scenario.EarlyTech")]
@@ -263,6 +267,9 @@ public class MultiFactionEarthPhase4Tests
 
         var report = new List<string>();
         double worst = double.MaxValue;
+        var yearsByName = new Dictionary<string, double>();
+        var minersByName = new Dictionary<string, string[]>();
+        var annualByName = new Dictionary<string, long>();
         foreach (var (id, deposit) in earth.GetDataBlob<MineralsDB>().Minerals)
         {
             long annual = MiningHelper.BodyAnnualProduction(earth, id);
@@ -271,12 +278,23 @@ public class MultiFactionEarthPhase4Tests
             double years = MiningHelper.YearsToDepletion(deposit.Amount.For(info.FactionMask), annual) ?? double.MaxValue;
             worst = Math.Min(worst, years);
             var by = earth.ColoniesOnBody().Where(c => c.GetDataBlob<MiningDB>().ActualMiningRate.TryGetValue(id, out var r) && r > 0)
-                .Select(c => $"{c.GetDataBlob<NameDB>().DefaultName}={365 * c.GetDataBlob<MiningDB>().ActualMiningRate[id]}");
-            report.Add($"{(names.TryGetValue(id, out var n) ? n : id.ToString())}: {years:0.###} y ({deposit.Amount.For(info.FactionMask)} / {annual}; {string.Join(", ", by)})");
+                .Select(c => $"{c.GetDataBlob<NameDB>().DefaultName}={365 * c.GetDataBlob<MiningDB>().ActualMiningRate[id]}")
+                .ToArray();
+            var name = names.TryGetValue(id, out var n) ? n : id.ToString();
+            yearsByName[name] = years;
+            minersByName[name] = by;
+            annualByName[name] = annual;
+            report.Add($"{name}: {years:0.###} y ({deposit.Amount.For(info.FactionMask)} / {annual}; {string.Join(", ", by)})");
         }
         TestContext.Out.WriteLine(string.Join("\n", report));
         Assert.That(report, Is.Not.Empty, "something mines Earth");
-        Assert.That(worst, Is.GreaterThanOrEqualTo(10), string.Join("\n", report));
+        // Only the company (1 mine, no mining-production tech) and AMC (2 mines × 2.5) should mine.
+        Assert.That(minersByName["Iron"], Is.EquivalentTo(new[] { "Earth HQ=1642500", "Americas Compact=8212500" }), string.Join("\n", report));
+        Assert.That(annualByName["Iron"], Is.EqualTo(9_855_000L), string.Join("\n", report));
+        // 60M min ÷ 9,855,000/y ≈ 6.6 years; don't let a further rate increase slip under that.
+        Assert.That(worst, Is.GreaterThanOrEqualTo(6.5), string.Join("\n", report));
+        foreach (var shortMineral in new[] { "Aluminium", "Regolith", "Water" })
+            Assert.That(yearsByName[shortMineral], Is.GreaterThanOrEqualTo(6.5), string.Join("\n", report));
     }
 }
 

@@ -93,7 +93,8 @@ public class SystemPackTests
         Assert.That(store.SystemBodies, Does.ContainKey("planet-earth"));
         Assert.That(store.Colonies.Keys, Is.EquivalentTo(new[]
         {
-            "colony-earth", "colony-luna-concord", "colony-mars-outpost", "colony-ceres-depot"
+            "colony-earth", "colony-luna-concord", "colony-mars-outpost", "colony-ceres-depot",
+            "colony-earth-amc", "colony-earth-spc", "colony-earth-ecn"
         }));
         Assert.That(store.Factions.Keys, Is.EquivalentTo(new[]
         {
