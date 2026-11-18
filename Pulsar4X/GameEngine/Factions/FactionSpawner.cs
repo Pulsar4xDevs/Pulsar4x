@@ -11,7 +11,9 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Industry;
 using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
+using Pulsar4X.Fleets;
 using Pulsar4X.Names;
+using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Factions
@@ -336,17 +338,18 @@ namespace Pulsar4X.Factions
 
             if (colony != null)
             {
-                colony.FactionOwnerID = sponsor.Id;
                 info.Colonies.Remove(colony);
                 if (!sponsorInfo.Colonies.Contains(colony))
                     sponsorInfo.Colonies.Add(colony);
-                company.GetDataBlob<FactionOwnerDB>().RemoveEntity(colony);
-                sponsor.GetDataBlob<FactionOwnerDB>().SetOwned(colony);
-                colony.FactionOwnerID = sponsor.Id;
+                Rehome(colony, company, sponsor);
                 if (colony.TryGetDataBlob<ColonyInfoDB>(out var colonyInfo)
                     && colonyInfo.PlanetEntity.TryGetDataBlob<MineralsDB>(out var minerals))
                     minerals.GrantFactionAccess(sponsorInfo.FactionMask);
             }
+
+            RehomeShipsAndFleets(game, company, sponsor);
+            RetargetShipments(game, company.Id, sponsor.Id);
+            MoveCommuters(game, company.Id, sponsor.Id);
 
             decimal leftover = info.Money.GetCurrentFunds();
             if (leftover > 0)
@@ -370,6 +373,83 @@ namespace Pulsar4X.Factions
                     continue;
                 otherInfo.Stances.Remove(company.Id);
                 otherInfo.Grants.Remove(company.Id);
+            }
+        }
+
+        static void Rehome(Entity entity, Entity from, Entity to)
+        {
+            from.GetDataBlob<FactionOwnerDB>().RemoveEntity(entity);
+            to.GetDataBlob<FactionOwnerDB>().SetOwned(entity);
+            entity.FactionOwnerID = to.Id;
+            if (entity.TryGetDataBlob<NameDB>(out var names))
+            {
+                string name = names.GetName(from.Id);
+                if (string.IsNullOrEmpty(name))
+                    name = names.DefaultName;
+                if (!string.IsNullOrEmpty(name))
+                    names.SetName(to.Id, name);
+            }
+        }
+
+        static void RehomeShipsAndFleets(Game game, Entity company, Entity sponsor)
+        {
+            var seen = new HashSet<int>();
+            void Take(Entity entity)
+            {
+                if (entity == null || entity.Id == company.Id || !seen.Add(entity.Id))
+                    return;
+                if (entity.FactionOwnerID == company.Id || company.GetDataBlob<FactionOwnerDB>().OwnedEntities.ContainsKey(entity.Id))
+                    Rehome(entity, company, sponsor);
+            }
+
+            foreach (var entity in company.GetDataBlob<FactionOwnerDB>().OwnedEntities.Values.ToList())
+                Take(entity);
+            foreach (var system in game.Systems)
+            {
+                foreach (var ship in system.GetAllEntitiesWithDataBlob<ShipInfoDB>())
+                    Take(ship);
+                foreach (var fleet in system.GetAllEntitiesWithDataBlob<FleetDB>())
+                    Take(fleet);
+            }
+        }
+
+        static void RetargetShipments(Game game, int companyId, int sponsorId)
+        {
+            foreach (var system in game.Systems)
+            {
+                foreach (var holder in system.GetAllEntitiesWithDataBlob<CargoStorageDB>())
+                {
+                    foreach (var shipment in ShipmentBook.At(holder))
+                    {
+                        if (shipment.BuyerFactionId != companyId && shipment.SellerFactionId != companyId)
+                            continue;
+                        if (shipment.BuyerFactionId == companyId)
+                            shipment.BuyerFactionId = sponsorId;
+                        if (shipment.SellerFactionId == companyId)
+                            shipment.SellerFactionId = sponsorId;
+                    }
+                }
+            }
+        }
+
+        static void MoveCommuters(Game game, int companyId, int sponsorId)
+        {
+            foreach (var system in game.Systems)
+            {
+                foreach (var colony in system.GetAllEntitiesWithDataBlob<ColonyWorkforceDB>())
+                {
+                    var db = colony.GetDataBlob<ColonyWorkforceDB>();
+                    if (!db.Commuters.TryGetValue(companyId, out var n) || n == 0)
+                    {
+                        db.Commuters.Remove(companyId);
+                        continue;
+                    }
+                    db.Commuters.Remove(companyId);
+                    if (sponsorId == companyId)
+                        continue;
+                    db.Commuters.TryGetValue(sponsorId, out var have);
+                    db.Commuters[sponsorId] = have + n;
+                }
             }
         }
 
