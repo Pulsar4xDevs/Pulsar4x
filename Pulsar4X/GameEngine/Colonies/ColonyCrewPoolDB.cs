@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.Colonies
@@ -15,11 +16,23 @@ namespace Pulsar4X.Colonies
     {
         public Dictionary<int, long> Trained { get; internal set; } = new();
 
+        /// <summary>Phase 8: crew offered on this colony's crew market (the crew above <see cref="Reserve"/>).</summary>
+        [JsonProperty] public bool Listed { get; internal set; }
+        /// <summary>Phase 8: crew the seller keeps back from the market.</summary>
+        [JsonProperty] public long Reserve { get; internal set; }
+        /// <summary>Phase 8: the seller's asking fee per crew; null means the default fee. Never below the default.</summary>
+        [JsonProperty] public decimal? Ask { get; internal set; }
+        /// <summary>Phase 8: an NPC bloc has set its listing up (so a player's later change is not overwritten).</summary>
+        [JsonProperty] public bool NpcSetUp { get; internal set; }
+        /// <summary>Phase 8: last academy refill of an NPC colony's pool.</summary>
+        [JsonProperty] public DateTime? LastRefill { get; internal set; }
+
         public ColonyCrewPoolDB() { }
 
         public ColonyCrewPoolDB(ColonyCrewPoolDB db)
         {
             Trained = new Dictionary<int, long>(db.Trained);
+            Listed = db.Listed; Reserve = db.Reserve; Ask = db.Ask; NpcSetUp = db.NpcSetUp; LastRefill = db.LastRefill;
         }
 
         public override object Clone() => new ColonyCrewPoolDB(this);

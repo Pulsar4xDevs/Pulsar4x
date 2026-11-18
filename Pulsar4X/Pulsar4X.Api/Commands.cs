@@ -115,6 +115,18 @@ public sealed record ContractStaffCommand(int TargetEntityId, int BlocColonyId, 
 /// <summary>Multi-faction phase 5: turn this many commuters from that bloc into residents ("Relocate to company"), 100 cr each, paid to the bloc.</summary>
 public sealed record RelocateCommutersCommand(int TargetEntityId, int BlocColonyId, long Count) : GameCommand(TargetEntityId);
 
+/// <summary>
+/// Multi-faction phase 8: list (or delist) this colony's spare trained crew on its crew market. The colony keeps
+/// <paramref name="Reserve"/> crew back; <paramref name="Ask"/> is the fee per crew (null or below the default fee uses the default).
+/// </summary>
+public sealed record ListCrewCommand(int TargetEntityId, bool Listed, long Reserve, decimal? Ask) : GameCommand(TargetEntityId);
+
+/// <summary>
+/// Multi-faction phase 8: buy <paramref name="Count"/> trained crew of a species from the listed colony
+/// <paramref name="SellerColonyId"/> on the same body. The fee is charged now; the crew join this colony's pool at once.
+/// </summary>
+public sealed record BuyCrewCommand(int TargetEntityId, int SellerColonyId, int SpeciesId, long Count) : GameCommand(TargetEntityId);
+
 /// <summary>Multi-faction phase 5: the colony's wanted headcount; null resets it to Required. Lay-offs (contract staff first) apply at once, hiring ramps daily.</summary>
 public sealed record SetStaffTargetCommand(int TargetEntityId, long? Target) : GameCommand(TargetEntityId);
 

@@ -18,6 +18,8 @@ public enum TransactionCategory
     StaffWages,
     /// <summary>Multi-faction phase 6: a bloc's tax income, booked on the 1st for the month before.</summary>
     Tax,
+    /// <summary>Multi-faction phase 8: the transfer fee for trained crew bought on (or sold on) a crew market.</summary>
+    CrewTransfer,
 }
 
 public class Transaction
