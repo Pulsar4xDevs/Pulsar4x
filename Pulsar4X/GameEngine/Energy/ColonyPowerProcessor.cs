@@ -178,8 +178,8 @@ namespace Pulsar4X.Energy
             if (!colonyEntity.TryGetDataBlob<Pulsar4X.Industry.LocalConstructionDB>(out var queue))
                 return false;
             bool installs = construction.ConstructionPoints.TryGetValue("installation", out int i) && i != 0;
-            bool refits = construction.ConstructionPoints.TryGetValue("refit", out int r) && r != 0;
-            return (installs && queue.BuildQueue.Count > 0) || (refits && queue.RefitQueue.Count > 0);
+            // Refits are jobs on the shipyard line now, so they never keep a construction office "working".
+            return installs && queue.BuildQueue.Count > 0;
         }
 
         /// <summary>Every idle-capable facility's working (1) or idle (0) state, per enabled instance.</summary>

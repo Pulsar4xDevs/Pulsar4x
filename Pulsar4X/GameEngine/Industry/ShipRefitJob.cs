@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pulsar4X.Components;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Datablobs;
@@ -25,35 +27,31 @@ public class ShipRefitJob
     public const string NothingToRefit = "Nothing to refit.";
     public const string NotAShipyard = "That line is not a shipyard.";
     public const string AlreadyListed = "That part is already in a refit.";
+    public const string NoRoom = "The warehouse has no room for the parts that come off.";
     public const string UnknownDesign = "That design is not available.";
 
     public int ShipEntityId { get; set; }
-
-    public string ProductionLineId { get; set; } = "";
 
     public List<ComponentInstance> Remove { get; set; } = new();
 
     public List<ComponentInstance> Mount { get; set; } = new();
 
-    public long PointsAccumulated { get; set; }
-
-    /// <summary>Copied at queue time. A later edit to a part's mass does not change it.</summary>
+    /// <summary>Copied at queue time. A later edit to a part's mass does not change it. The industry job spends it.</summary>
     public long PointCost { get; set; }
 
     /// <summary>When set, a finished refit whose parts match this design adopts it. Null keeps the old design.</summary>
     public string? TargetDesignId { get; set; }
 
-    public bool IsComplete => PointCost > 0 && PointsAccumulated >= PointCost;
+    public ShipRefitJob()
+    {
+    }
 
-    public double Progress => PointCost <= 0 ? 0 : (double)PointsAccumulated / PointCost;
-
-    public ShipRefitJob(int shipEntityId, string productionLineId, List<ComponentInstance> remove, List<ComponentInstance> mount)
+    public ShipRefitJob(int shipEntityId, List<ComponentInstance> remove, List<ComponentInstance> mount)
     {
         ShipEntityId = shipEntityId;
-        ProductionLineId = productionLineId;
         Remove = remove;
         Mount = mount;
-        PointCost = CostOf(remove) + CostOf(mount);
+        PointCost = Math.Max(1, CostOf(remove) + CostOf(mount));
     }
 
     public static long CostOf(IEnumerable<ComponentInstance> parts)
@@ -126,18 +124,33 @@ public class ShipRefitJob
         return null;
     }
 
-    public static bool TryFind(Entity ship, out Entity yard, out ShipRefitJob job)
+    /// <summary>Every refit job on a yard's lines, with the line that holds it.</summary>
+    public static IEnumerable<(string LineId, IndustryJob Job)> JobsOf(Entity yard)
+    {
+        if (!yard.TryGetDataBlob<IndustryAbilityDB>(out var industry))
+            yield break;
+        foreach (var (lineId, line) in industry.ProductionLines)
+        {
+            foreach (var job in line.Jobs.ToArray())
+            {
+                if (job.Refit != null)
+                    yield return (lineId, job);
+            }
+        }
+    }
+
+    public static bool TryFind(Entity ship, out Entity yard, out IndustryJob job)
     {
         yard = null!;
         job = null!;
         if (ship.Manager == null)
             return false;
 
-        foreach (var holder in ship.Manager.GetAllEntitiesWithDataBlob<LocalConstructionDB>())
+        foreach (var holder in ship.Manager.GetAllEntitiesWithDataBlob<IndustryAbilityDB>())
         {
-            foreach (var queued in holder.GetDataBlob<LocalConstructionDB>().RefitQueue)
+            foreach (var (_, queued) in JobsOf(holder))
             {
-                if (queued.ShipEntityId != ship.Id)
+                if (queued.Refit!.ShipEntityId != ship.Id)
                     continue;
                 yard = holder;
                 job = queued;
@@ -164,10 +177,11 @@ public class ShipRefitJob
     {
         if (yard.Manager == null)
             return false;
-        foreach (var holder in yard.Manager.GetAllEntitiesWithDataBlob<LocalConstructionDB>())
+        foreach (var holder in yard.Manager.GetAllEntitiesWithDataBlob<IndustryAbilityDB>())
         {
-            foreach (var job in holder.GetDataBlob<LocalConstructionDB>().RefitQueue)
+            foreach (var (_, queued) in JobsOf(holder))
             {
+                var job = queued.Refit!;
                 foreach (var part in job.Remove)
                     if (part.ID == componentId)
                         return true;

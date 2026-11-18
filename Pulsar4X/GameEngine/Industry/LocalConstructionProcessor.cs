@@ -45,7 +45,6 @@ public class LocalConstructionProcessor : IHotloopProcessor
         // Crew plan phase 3: a ship's construction bay short of crew builds at F² (colonies are 1).
         long pointsLeft = (long)Math.Floor(constructionDB.PointsPerDay * Pulsar4X.Ships.ShipCrew.WorkRate(entity) + 1e-9);
         int queuedBefore = constructionDB.BuildQueue.Count;
-        int refitsBefore = constructionDB.RefitQueue.Count;
         double scrapBefore = Pulsar4X.Energy.ColonyPowerProcessor.Scrapping_kW(entity);
         while (pointsLeft > 0 && constructionDB.BuildQueue.Count > 0)
         {
@@ -74,75 +73,35 @@ public class LocalConstructionProcessor : IHotloopProcessor
                     entity.Id));
         }
 
-        SpendRefit(entity, storage, constructionDB);
-
         // A finished job (an upgrade's scrapping done, the next job's starting) changes the grid
         // load: refresh demand now rather than at the next daily power pass.
         if (constructionDB.BuildQueue.Count != queuedBefore
-            || constructionDB.RefitQueue.Count != refitsBefore
             || Math.Abs(Pulsar4X.Energy.ColonyPowerProcessor.Scrapping_kW(entity) - scrapBefore) > 1e-9)
             Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(entity);
     }
 
     /// <summary>
-    /// Spends ship-refit points on the head refit. Installation points are not used.
-    /// Parts move when the job finishes. A ship that is out of range waits at the head.
+    /// Null when a refit can run: the ship is in range, its parts are aboard, the mounts are in the
+    /// warehouse and the warehouse has room for what comes off. Otherwise what is missing.
     /// </summary>
-    static void SpendRefit(Entity yard, CargoStorageDB storage, LocalConstructionDB construction)
-    {
-        long pointsLeft = (long)Math.Floor(construction.RefitPointsPerDay * Pulsar4X.Ships.ShipCrew.WorkRate(yard) + 1e-9);
-        while (pointsLeft > 0 && construction.RefitQueue.Count > 0)
-        {
-            var job = construction.RefitQueue.Peek();
-            if (!RefitReady(yard, storage, job))
-                break;
-
-            long needed = job.PointCost - job.PointsAccumulated;
-            if (needed <= 0)
-            {
-                if (!TryApplyRefit(yard, storage, job))
-                    break;
-                construction.RefitQueue.Dequeue();
-                PublishRefitCompleted(yard, job);
-                continue;
-            }
-
-            long spend = Math.Min(pointsLeft, needed);
-            if (spend < needed)
-            {
-                job.PointsAccumulated += spend;
-                break;
-            }
-
-            if (!TryApplyRefit(yard, storage, job))
-                break;
-
-            job.PointsAccumulated += spend;
-            pointsLeft -= spend;
-            construction.RefitQueue.Dequeue();
-            PublishRefitCompleted(yard, job);
-        }
-    }
-
-    static bool RefitReady(Entity yard, CargoStorageDB storage, ShipRefitJob job)
+    internal static string? RefitBlocker(Entity yard, CargoStorageDB storage, ShipRefitJob job)
     {
         if (job.PointCost <= 0)
-            return false;
-        if (yard.Manager == null || !yard.Manager.TryGetEntityById(job.ShipEntityId, out var ship))
-            return false;
-        if (ship.FactionOwnerID != yard.FactionOwnerID || !InTransferRange(yard, ship))
-            return false;
+            return ShipRefitJob.NothingToRefit;
+        if (yard.Manager == null || !yard.Manager.TryGetEntityById(job.ShipEntityId, out var ship)
+            || ship.FactionOwnerID != yard.FactionOwnerID || !InTransferRange(yard, ship))
+            return ShipRefitJob.OutOfRange;
         foreach (var part in job.Remove)
         {
             if (!ShipRefitJob.OnShip(ship, part.ID))
-                return false;
+                return ShipRefitJob.NotOnShip;
         }
         foreach (var part in job.Mount)
         {
             if (storage.GetUnitsStored(part, false) < 1)
-                return false;
+                return ShipRefitJob.NotInWarehouse;
         }
-        return CargoFits(storage, job);
+        return CargoFits(storage, job) ? null : ShipRefitJob.NoRoom;
     }
 
     static bool CargoFits(CargoStorageDB storage, ShipRefitJob job)
@@ -171,7 +130,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
         need[cargoType] = current + volume;
     }
 
-    static bool TryApplyRefit(Entity yard, CargoStorageDB storage, ShipRefitJob job)
+    internal static bool TryApplyRefit(Entity yard, CargoStorageDB storage, ShipRefitJob job)
     {
         if (!yard.Manager!.TryGetEntityById(job.ShipEntityId, out var ship))
             return false;
@@ -293,7 +252,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
         }
     }
 
-    static void PublishRefitCompleted(Entity yard, ShipRefitJob job)
+    internal static void PublishRefitCompleted(Entity yard, ShipRefitJob job)
     {
         EventManager.Instance.Publish(
             Event.Create(

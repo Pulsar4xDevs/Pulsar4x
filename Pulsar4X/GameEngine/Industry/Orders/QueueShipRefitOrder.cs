@@ -59,16 +59,17 @@ public class QueueShipRefitOrder : EntityAction
 
     internal override void Execute(DateTime atDateTime)
     {
-        if (!_yard.TryGetDataBlob<LocalConstructionDB>(out var construction))
+        if (!_yard.TryGetDataBlob<IndustryAbilityDB>(out var industry)
+            || !industry.ProductionLines.ContainsKey(_lineId))
             return;
 
-        var job = new ShipRefitJob(_ship.Id, _lineId, _remove, _mount);
-        job.TargetDesignId = _targetDesignId;
-        construction.RefitQueue.Enqueue(job);
-        Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(_yard);
+        var refit = new ShipRefitJob(_ship.Id, _remove, _mount);
+        refit.TargetDesignId = _targetDesignId;
         string shipName = _ship.TryGetDataBlob<NameDB>(out var name)
             ? name.GetName(_yard.FactionOwnerID)
             : _ship.Id.ToString();
+        // A normal industry job on the yard's line: it shares the line and its points like any other job.
+        IndustryTools.AddJob(_yard, _lineId, IndustryJob.ForRefit(refit, JobName(shipName)));
         EventManager.Instance.Publish(
             Event.Create(
                 EventType.ShipRefitBegan,
@@ -77,6 +78,18 @@ public class QueueShipRefitOrder : EntityAction
                 _yard.FactionOwnerID,
                 _yard.Manager.ManagerID,
                 _ship.Id));
+    }
+
+    string JobName(string shipName)
+    {
+        string name = "Refit " + shipName;
+        if (!string.IsNullOrEmpty(_targetDesignId)
+            && _yard.Manager?.Game is { } game
+            && game.Factions.TryGetValue(_yard.FactionOwnerID, out var faction)
+            && faction.TryGetDataBlob<Pulsar4X.Factions.FactionInfoDB>(out var info)
+            && info.ShipDesigns.TryGetValue(_targetDesignId, out var design))
+            name += " to " + design.Name;
+        return name;
     }
 
     internal override bool IsFinished()

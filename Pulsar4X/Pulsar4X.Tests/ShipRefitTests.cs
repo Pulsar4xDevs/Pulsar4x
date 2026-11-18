@@ -60,6 +60,7 @@ public class ShipRefitTests
         Assert.That(colony.GetDataBlob<CargoStorageDB>().AddCargoByUnit(spare, 1), Is.EqualTo(1));
         long expected = LocalConstructionJob.MountCost(mounted.MassPerUnit) + LocalConstructionJob.MountCost(spare.MassPerUnit);
         var office = MountColonyPart(colony);
+        colony.RemoveDataBlob<InfrastructureDB>(); // the stand-in office would otherwise demand capacity the test yard lacks
         int ships = ShipCount(world);
         var translator = new CommandTranslator(Game);
 
@@ -67,9 +68,10 @@ public class ShipRefitTests
             colony.Id, LineId, ship.Id, new[] { mounted.ID }, new[] { spare.ID }));
         Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
 
-        var job = colony.GetDataBlob<LocalConstructionDB>().RefitQueue.Single();
-        Assert.That(job.PointCost, Is.EqualTo(expected));
-        Assert.That(job.PointCost, Is.EqualTo(2));
+        var job = Refits(colony).Single();
+        Assert.That(job.Refit!.PointCost, Is.EqualTo(expected));
+        Assert.That(job.ProductionPointsCost, Is.EqualTo(expected));
+        Assert.That(job.ProductionPointsCost, Is.EqualTo(2));
         var blocked = translator.Translate(world.Faction, ship, new AddToConstructionQueueCommand(ship.Id, "no-such-design"));
         Assert.That(blocked.Accepted, Is.False);
         Assert.That(blocked.RejectionReason, Does.Contain("in refit"));
@@ -83,11 +85,19 @@ public class ShipRefitTests
         Assert.That(shipView.Mounting, Does.Contain(spare.Name));
         var line = YardLine(world, colony);
         Assert.That(line.RefitPointsPerDay, Is.EqualTo(5));
-        Assert.That(line.RefitJobs.Single().PointCost, Is.EqualTo(expected));
+        var listed = line.Jobs.Single();
+        Assert.That(listed.IsRefit, Is.True);
+        Assert.That(listed.Refit!.ShipEntityId, Is.EqualTo(ship.Id));
+        Assert.That(listed.Refit.Removing, Does.Contain(mounted.Name));
+        Assert.That(listed.Refit.Mounting, Does.Contain(spare.Name));
+        Assert.That(listed.ProductionPointsLeft, Is.EqualTo(expected));
+        Assert.That(listed.PercentComplete, Is.EqualTo(0));
+        Assert.That(listed.NumberOrdered, Is.EqualTo(1));
+        Assert.That(line.RefitJobs, Is.Empty);
 
-        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+        new IndustryProcessor().ProcessEntity(colony, 0);
 
-        Assert.That(colony.GetDataBlob<LocalConstructionDB>().RefitQueue, Is.Empty);
+        Assert.That(Refits(colony), Is.Empty, Refits(colony).FirstOrDefault()?.Status + " " + Refits(colony).FirstOrDefault()?.WaitReason + " left " + Refits(colony).FirstOrDefault()?.ProductionPointsLeft);
         Assert.That(colony.GetDataBlob<LocalConstructionDB>().BuildQueue, Is.Empty);
         Assert.That(colony.GetDataBlob<CargoStorageDB>().GetUnitsStored(mounted, false), Is.EqualTo(1));
         Assert.That(colony.GetDataBlob<CargoStorageDB>().GetUnitsStored(spare, false), Is.EqualTo(0));
@@ -116,7 +126,7 @@ public class ShipRefitTests
 
         Assert.That(refused.Accepted, Is.False);
         Assert.That(refused.RejectionReason, Does.Contain("refit"));
-        Assert.That(colony.GetDataBlob<LocalConstructionDB>().RefitQueue, Is.Empty);
+        Assert.That(Refits(colony), Is.Empty);
         Assert.That(colony.GetDataBlob<LocalConstructionDB>().PointsPerDay, Is.EqualTo(5));
     }
 
@@ -137,13 +147,13 @@ public class ShipRefitTests
         var refused = translator.Translate(world.Faction, colony, command);
         Assert.That(refused.Accepted, Is.False);
         Assert.That(refused.RejectionReason, Does.Contain("slip"));
-        Assert.That(colony.GetDataBlob<LocalConstructionDB>().RefitQueue, Is.Empty);
+        Assert.That(Refits(colony), Is.Empty);
         Assert.That(YardLine(world, colony).RefitShips.Single().OverSlip, Is.True);
 
         colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[LineId].MaxVolume = design.MassPerUnit;
         var fits = translator.Translate(world.Faction, colony, command);
         Assert.That(fits.Accepted, Is.True, fits.RejectionReason);
-        Assert.That(colony.GetDataBlob<LocalConstructionDB>().RefitQueue, Has.Count.EqualTo(1));
+        Assert.That(Refits(colony), Has.Count.EqualTo(1));
     }
 
     [Test]
@@ -169,7 +179,7 @@ public class ShipRefitTests
 
         Assert.That(refused.Accepted, Is.False);
         Assert.That(refused.RejectionReason, Does.Contain("installation"));
-        Assert.That(colony.GetDataBlob<LocalConstructionDB>().RefitQueue, Is.Empty);
+        Assert.That(Refits(colony), Is.Empty);
         Assert.That(colony.GetDataBlob<CargoStorageDB>().GetUnitsStored(crate, false), Is.EqualTo(1));
     }
 
@@ -298,7 +308,7 @@ public class ShipRefitTests
             colony.Id, FactoryLineId, bay.UniqueID, 1, false, false));
 
         Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
-        Assert.That(colony.GetDataBlob<LocalConstructionDB>().RefitQueue, Is.Empty);
+        Assert.That(Refits(colony), Is.Empty);
         var job = colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[FactoryLineId].Jobs.Single();
         Assert.That(job.ItemGuid, Is.EqualTo(bay.UniqueID));
         Assert.That(job.InstallOn, Is.Null);
@@ -365,9 +375,9 @@ public class ShipRefitTests
         var queued = new CommandTranslator(Game).Translate(world.Faction, colony, new QueueShipRefitCommand(
             colony.Id, LineId, ship.Id, Array.Empty<int>(), new[] { spare.ID }, colonyShip.UniqueID));
         Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
-        Assert.That(colony.GetDataBlob<LocalConstructionDB>().RefitQueue.Single().TargetDesignId, Is.EqualTo(colonyShip.UniqueID));
+        Assert.That(Refits(colony).Single().Refit!.TargetDesignId, Is.EqualTo(colonyShip.UniqueID));
 
-        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+        new IndustryProcessor().ProcessEntity(colony, 0);
 
         Assert.That(ship.GetDataBlob<ShipInfoDB>().Design.UniqueID, Is.EqualTo(colonyShip.UniqueID));
         Assert.That(ship.GetDataBlob<ShipInfoDB>().Tanker, Is.False);
@@ -387,7 +397,7 @@ public class ShipRefitTests
             colony.Id, LineId, ship.Id, Array.Empty<int>(), new[] { spare.ID }));
         Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
 
-        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+        new IndustryProcessor().ProcessEntity(colony, 0);
 
         Assert.That(ship.GetDataBlob<ShipInfoDB>().Design.UniqueID, Is.EqualTo(freighter.UniqueID));
         Assert.That(ShipRefitJob.OnShip(ship, spare.ID), Is.True);
@@ -408,7 +418,7 @@ public class ShipRefitTests
             colony.Id, LineId, ship.Id, new[] { kept.ID }, new[] { spare.ID }, colonyShip.UniqueID));
         Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
 
-        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+        new IndustryProcessor().ProcessEntity(colony, 0);
 
         Assert.That(ship.GetDataBlob<ShipInfoDB>().Design.UniqueID, Is.EqualTo(freighter.UniqueID));
         Assert.That(ShipRefitJob.OnShip(ship, spare.ID), Is.True);
@@ -520,6 +530,9 @@ public class ShipRefitTests
         colony.GetDataBlob<NameDB>().SetName(world.Faction.Id, "Yard");
         return colony;
     }
+
+    static List<IndustryJob> Refits(Entity colony)
+        => ShipRefitJob.JobsOf(colony).Select(found => found.Job).ToList();
 
     static ProductionLineView YardLine(World world, Entity colony)
         => new GameProjector(Game).ProjectEntity(colony, colony.FactionOwnerID).GetView<IndustryView>()!

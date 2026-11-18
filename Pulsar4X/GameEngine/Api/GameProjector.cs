@@ -1914,6 +1914,7 @@ namespace Pulsar4X.Engine.Api
                             ? jobShip.CrewReq : 0,
                         CrewWarning = jobDesign is ShipDesign crewed ? JobCrewWarning(entity, crewed) : "",
                         FundsReason = fundsReason,
+                        Refit = job.Refit == null ? null : ToRefitJobInfo(entity, factionInfo, factionId, job),
                     });
                 }
 
@@ -2138,21 +2139,12 @@ namespace Pulsar4X.Engine.Api
                 return;
 
             var reserved = new HashSet<int>();
-            if (construction != null)
+            foreach (var (_, queued) in ShipRefitJob.JobsOf(yard))
             {
-                foreach (var job in construction.RefitQueue)
-                {
-                    foreach (var part in job.Remove)
-                        reserved.Add(part.ID);
-                    foreach (var part in job.Mount)
-                        reserved.Add(part.ID);
-                    if (job.ProductionLineId != lineId)
-                        continue;
-                    string shipName = yard.Manager.TryGetEntityById(job.ShipEntityId, out var named)
-                        ? named.GetName(factionId)
-                        : job.ShipEntityId.ToString();
-                    jobs.Add(new RefitJobView(shipName, job.PointCost, job.PointsAccumulated, job.Progress));
-                }
+                foreach (var part in queued.Refit!.Remove)
+                    reserved.Add(part.ID);
+                foreach (var part in queued.Refit.Mount)
+                    reserved.Add(part.ID);
             }
 
             var found = new List<Entity>();
@@ -2257,10 +2249,36 @@ namespace Pulsar4X.Engine.Api
         {
             if (!ShipRefitJob.TryFind(ship, out var yard, out var job))
                 return null;
-            return new ShipRefitView(yard.GetName(factionId), job.PointCost, job.PointsAccumulated, job.Progress)
+            var refit = job.Refit!;
+            long cost = job.ProductionPointsCost;
+            long done = cost - job.ProductionPointsLeft;
+            return new ShipRefitView(yard.GetName(factionId), cost, done, cost <= 0 ? 0 : (double)done / cost)
             {
-                Removing = job.Remove.Select(part => part.Name).ToList(),
-                Mounting = job.Mount.Select(part => part.Name).ToList(),
+                Removing = refit.Remove.Select(part => part.Name).ToList(),
+                Mounting = refit.Mount.Select(part => part.Name).ToList(),
+            };
+        }
+
+        static RefitJobInfo ToRefitJobInfo(Entity yard, FactionInfoDB factionInfo, int factionId, IndustryJob job)
+        {
+            var refit = job.Refit!;
+            string shipName = refit.ShipEntityId.ToString();
+            string fromDesign = "";
+            if (yard.Manager != null && yard.Manager.TryGetEntityById(refit.ShipEntityId, out var ship))
+            {
+                shipName = ship.GetName(factionId);
+                if (ship.TryGetDataBlob<ShipInfoDB>(out var info))
+                    fromDesign = info.Design.Name;
+            }
+            string toDesign = !string.IsNullOrEmpty(refit.TargetDesignId)
+                && factionInfo.ShipDesigns.TryGetValue(refit.TargetDesignId, out var target) ? target.Name : "";
+            long perDay = yard.TryGetDataBlob<LocalConstructionDB>(out var construction) ? construction.RefitPointsPerDay : 0;
+            return new RefitJobInfo(refit.ShipEntityId, shipName, fromDesign, toDesign)
+            {
+                Removing = refit.Remove.Select(part => part.Name).ToList(),
+                Mounting = refit.Mount.Select(part => part.Name).ToList(),
+                WaitReason = job.WaitReason,
+                PointsPerDay = perDay,
             };
         }
 

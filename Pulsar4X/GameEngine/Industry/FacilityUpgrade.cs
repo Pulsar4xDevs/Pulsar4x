@@ -221,14 +221,6 @@ public static class FacilityUpgrade
 
         newLine!.Jobs.AddRange(oldLine.Jobs);
         newLine.Hulls.AddRange(oldLine.Hulls);
-        if (colony.TryGetDataBlob<LocalConstructionDB>(out var construction))
-        {
-            foreach (var refit in construction.RefitQueue)
-            {
-                if (refit.ProductionLineId == lineId)
-                    refit.ProductionLineId = fresh.UniqueID;
-            }
-        }
         return true;
     }
 

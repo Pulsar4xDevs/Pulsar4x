@@ -11,7 +11,7 @@ public class LocalConstructionDB : BaseDataBlob
     public long PointsPerDay { get; set; }
 
     /// <summary>
-    /// Ship-refit points per day. Spent only on refit jobs, never on installation work.
+    /// Ship-refit points per day. Spent only on refit jobs (normal jobs on a shipyard line), never on installation work.
     /// </summary>
     public long RefitPointsPerDay { get; set; }
 
@@ -19,11 +19,6 @@ public class LocalConstructionDB : BaseDataBlob
     /// Queue of construction jobs to be processed in FIFO order.
     /// </summary>
     public Queue<LocalConstructionJob> BuildQueue { get; set; } = new Queue<LocalConstructionJob>();
-
-    /// <summary>
-    /// Refit jobs. The head blocks. Installation jobs do not spend this queue.
-    /// </summary>
-    public Queue<ShipRefitJob> RefitQueue { get; set; } = new Queue<ShipRefitJob>();
 
     public LocalConstructionDB()
     {
@@ -34,7 +29,6 @@ public class LocalConstructionDB : BaseDataBlob
         PointsPerDay = other.PointsPerDay;
         RefitPointsPerDay = other.RefitPointsPerDay;
         BuildQueue = new Queue<LocalConstructionJob>(other.BuildQueue);
-        RefitQueue = new Queue<ShipRefitJob>(other.RefitQueue);
     }
 
     public override object Clone()

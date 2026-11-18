@@ -60,9 +60,40 @@ public class AdminSpaceAtb  : IComponentDesignAttribute
         }
     }
 
+    /// <summary>
+    /// A bridge or admin space comes off (a shipyard refit, a scrapped site): its seat goes with it.
+    /// An empty seat of that component goes first, so a ship that keeps another bridge keeps its captain.
+    /// A commander in the seat that goes is unseated and free to be assigned again.
+    /// </summary>
     public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        throw new System.NotImplementedException();
+        if (!parentEntity.TryGetDataBlob<AdminSpaceDB>(out var adminSpaceDB))
+            return;
+
+        var seats = adminSpaceDB.CommanderSeats;
+        AdminSpaceAbilityState? gone = null;
+        foreach (var seat in seats)
+        {
+            if (seat.SeatType != AdminLevel || seat.ComponentName != componentInstance.Name)
+                continue;
+            if (seat.CommanderID < 0 && seat.Commander == null)
+            {
+                gone = seat;
+                break;
+            }
+            gone ??= seat;
+        }
+        // The seat list is rebuilt from the parts, so a renamed part can leave no name match: take any seat of the level.
+        gone ??= seats.Find(seat => seat.SeatType == AdminLevel && seat.CommanderID < 0 && seat.Commander == null)
+            ?? seats.Find(seat => seat.SeatType == AdminLevel);
+        if (gone == null)
+            return;
+
+        if (gone.Commander != null)
+            gone.Commander.AssignedTo = -1;
+        gone.CommanderID = -1;
+        gone.Commander = null;
+        seats.Remove(gone);
     }
 
     public string AtbName()

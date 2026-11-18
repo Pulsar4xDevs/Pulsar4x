@@ -74,6 +74,20 @@ namespace Pulsar4X.Industry
 
         public Entity? InstallOn { get; set; } = null;
 
+        /// <summary>Set on a shipyard refit job: the ship and the parts it moves. Null on every other job.</summary>
+        public ShipRefitJob? Refit { get; set; }
+
+        /// <summary>Why a refit job waits (ship out of range, part missing, no room), else empty. Set each daily pass.</summary>
+        public string WaitReason { get; internal set; } = "";
+
+        /// <summary>A refit as a normal industry job: one item, the yard's ship-refit points, no resources.</summary>
+        internal static IndustryJob ForRefit(ShipRefitJob refit, string name)
+        {
+            var job = new IndustryJob(new ShipRefitDesign(name, refit.PointCost)) { Refit = refit };
+            job.NumberOrdered = 1;
+            return job;
+        }
+
         public override void InitialiseJob(ushort numberOrderd, bool auto)
         {
             NumberOrdered = numberOrderd;

@@ -1371,6 +1371,7 @@ public sealed record ProductionLineView(
 
     public IReadOnlyList<RefitPartView> RefitCargo { get; init; } = Array.Empty<RefitPartView>();
 
+    /// <summary>Obsolete: always empty. Refit jobs are IndustryJobView entries in the line's Jobs, with <see cref="IndustryJobView.Refit"/> set.</summary>
     public IReadOnlyList<RefitJobView> RefitJobs { get; init; } = Array.Empty<RefitJobView>();
 
     /// <summary>Faction ship designs the refit pane can target. Empty when this line is not a yard.</summary>
@@ -1438,7 +1439,7 @@ public sealed record RefitDesignDiffResult(
     IReadOnlyList<int> MountInstanceIds,
     IReadOnlyList<RefitMissingPartView> Missing);
 
-/// <summary>A refit job queued on this line.</summary>
+/// <summary>Obsolete: refit jobs are <see cref="IndustryJobView"/> entries now.</summary>
 public sealed record RefitJobView(string ShipName, long PointCost, long PointsAccumulated, double Progress);
 
 /// <summary>Shown on the ship while a refit names it. Not an editor.</summary>
@@ -1477,6 +1478,32 @@ public sealed record IndustryJobView(
 
     /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while the job spends no points for negative funds. Empty otherwise.</summary>
     public string FundsReason { get; init; } = "";
+
+    /// <summary>Non-null on a shipyard refit job: the ship, the designs and the parts. Null on every other job.</summary>
+    public RefitJobInfo? Refit { get; init; }
+
+    /// <summary>True for a shipyard refit job.</summary>
+    public bool IsRefit => Refit != null;
+}
+
+/// <summary>
+/// What a refit job in a shipyard line's job list adds to its <see cref="IndustryJobView"/>.
+/// Progress is the job's own PercentComplete and ProductionPointsLeft; a refit is one item (1 of 1).
+/// <see cref="WaitReason"/> is why a MissingResources refit waits.
+/// </summary>
+public sealed record RefitJobInfo(int ShipEntityId, string ShipName, string FromDesign, string ToDesign)
+{
+    /// <summary>Names of the parts coming off the ship.</summary>
+    public IReadOnlyList<string> Removing { get; init; } = Array.Empty<string>();
+
+    /// <summary>Names of the parts going on from the warehouse.</summary>
+    public IReadOnlyList<string> Mounting { get; init; } = Array.Empty<string>();
+
+    /// <summary>Why the refit is stalled (ship out of range, part missing, no warehouse room). Empty when it can run.</summary>
+    public string WaitReason { get; init; } = "";
+
+    /// <summary>The yard's ship-refit points per day, shared by every refit job on the colony. Days left is about ProductionPointsLeft / PointsPerDay.</summary>
+    public long PointsPerDay { get; init; }
 }
 
 public sealed record ResourceRequirement(string Name, long Amount);

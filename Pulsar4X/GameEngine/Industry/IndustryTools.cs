@@ -26,6 +26,8 @@ namespace Pulsar4X.Industry
         {
             if (line == null || design == null || line.IndustryTypeRates == null)
                 return false;
+            if (design is ShipRefitDesign)
+                return IsShipyardLine(line);
             if (!line.IndustryTypeRates.ContainsKey(design.IndustryTypeID))
                 return false;
             if (IsShipyardLine(line) && design is not ShipDesign)
@@ -159,6 +161,10 @@ namespace Pulsar4X.Industry
             // What the lines draw now; if a job finishes or stalls today, demand is refreshed at the end.
             string drawBefore = Pulsar4X.Energy.ColonyPowerProcessor.ProductionDrawKey(industryDB);
             int queuedBefore = industryEntity.TryGetDataBlob<LocalConstructionDB>(out var siteQueue) ? siteQueue.BuildQueue.Count : 0;
+            // Ship-refit points are one pool a day for the colony's shipyard lines, spent in line and job order.
+            long refitPool = siteQueue == null ? 0
+                : (long)Math.Floor(siteQueue.RefitPointsPerDay * infraEfficiency * powerEfficiency
+                    * Pulsar4X.Ships.ShipCrew.WorkRate(industryEntity) + 1e-9);
 
             foreach (var (prodLineID, prodLine) in industryDB.ProductionLines.ToArray())
             {
@@ -176,6 +182,12 @@ namespace Pulsar4X.Industry
 
                 foreach(var batchJob in prodLine.Jobs.ToArray())
                 {
+                    if (batchJob.Refit != null)
+                    {
+                        AdvanceRefit(industryEntity, stockpile, prodLine, batchJob, ref refitPool);
+                        continue;
+                    }
+
                     IConstructableDesign designInfo = factionInfo.IndustryDesigns[batchJob.ItemGuid];
                     float industryPointsToUse = industryPointsRemaining[designInfo.IndustryTypeID];// * productionPercentage;
 
@@ -276,6 +288,46 @@ namespace Pulsar4X.Industry
             else
                 // Jobs took minerals out of the stores: a mine that was full may resume.
                 Pulsar4X.Energy.ColonyPowerProcessor.RefreshIfIdleStateChanged(industryEntity);
+        }
+
+        /// <summary>
+        /// A refit job spends the yard's ship-refit points like any job spends its type's points.
+        /// A job that cannot run (ship out of range, part missing) spends none and says why.
+        /// When its points are paid the parts move, the job completes and leaves the line.
+        /// </summary>
+        static void AdvanceRefit(Entity yard, CargoStorageDB storage, IndustryAbilityDB.ProductionLine line, IndustryJob job, ref long pool)
+        {
+            var refit = job.Refit!;
+            string? blocker = LocalConstructionProcessor.RefitBlocker(yard, storage, refit);
+            job.WaitReason = blocker ?? "";
+            if (blocker != null)
+            {
+                job.Status = IndustryJobStatus.MissingResources;
+                return;
+            }
+
+            job.Status = IndustryJobStatus.Queued;
+            long spend = Math.Min(pool, job.ProductionPointsLeft);
+            if (spend > 0)
+            {
+                job.ProductionPointsLeft -= spend;
+                pool -= spend;
+                job.Status = IndustryJobStatus.Processing;
+            }
+            if (job.ProductionPointsLeft > 0)
+                return;
+
+            if (!LocalConstructionProcessor.TryApplyRefit(yard, storage, refit))
+            {
+                job.WaitReason = ShipRefitJob.NoRoom;
+                job.Status = IndustryJobStatus.MissingResources;
+                return;
+            }
+
+            job.Status = IndustryJobStatus.Completed;
+            job.NumberCompleted = 1;
+            line.Jobs.Remove(job);
+            LocalConstructionProcessor.PublishRefitCompleted(yard, refit);
         }
 
         /// <summary>
