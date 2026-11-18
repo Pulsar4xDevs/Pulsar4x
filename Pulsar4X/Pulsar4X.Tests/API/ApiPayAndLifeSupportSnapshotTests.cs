@@ -52,12 +52,25 @@ public class ApiPayAndLifeSupportSnapshotTests
             .Where(r => r.TechQueue.Count > 0 && r.PointsPerDay.GetValue() > 0).Sum(r => r.CostPerDay.GetValue());
 
         var faction = _projector.ProjectFaction(_player.Id)!;
+        var info = _player.GetDataBlob<FactionInfoDB>();
+        // Phase 6: the day's running cost is crew pay + lab costs + staff wages (own staff and commuters at the staff wage).
+        long staff = FactionSpending.StaffOnPayroll(info);
+        long commuters = FactionSpending.CommutersByBloc(info).Values.Sum();
+        decimal staffWage = FactionSpending.StaffWagePerDay(_game, _player.Id);
+        decimal staffPerDay = (staff + commuters) * staffWage;
         Assert.That(crew, Is.GreaterThan(100), "ships aboard plus the 100 Earth pool");
         Assert.That(faction.CrewOnPayroll, Is.EqualTo(crew));
         Assert.That(faction.CrewWagePerDay, Is.EqualTo(100m), "the player pays GameSettings.CrewWagePerDay");
         Assert.That(faction.PayrollPerDay, Is.EqualTo(crew * 100m));
         Assert.That(faction.LabCostsPerDay, Is.EqualTo(labs));
-        Assert.That(faction.RunningCostsPerDay, Is.EqualTo(crew * 100m + labs));
+        Assert.That(faction.StaffOnPayroll, Is.EqualTo(staff));
+        Assert.That(faction.CommutersOnPayroll, Is.EqualTo(commuters));
+        Assert.That(faction.StaffWagePerDay, Is.EqualTo(staffWage));
+        Assert.That(staff, Is.GreaterThan(0), "the company's Earth and Mars colonies employ staff");
+        Assert.That(faction.StaffWagesPerDay, Is.EqualTo(staffPerDay));
+        Assert.That(faction.RunningCostsPerDay, Is.EqualTo(faction.PayrollPerDay + faction.LabCostsPerDay + faction.StaffWagesPerDay),
+            "crew pay + labs + staff wages; a bloc's tax is income, not a running cost, and the player owes none");
+        Assert.That(faction.RunningCostsPerDay, Is.EqualTo(crew * 100m + labs + staffPerDay));
         Assert.That(faction.DaysUntilBroke, Is.EqualTo((double)((faction.Funds - faction.AccruedThisMonth) / faction.RunningCostsPerDay)));
         // Monthly billing: the per-month rates are the daily ones times this game month's days.
         var now = _game.TimePulse.GameGlobalDateTime;
@@ -65,7 +78,8 @@ public class ApiPayAndLifeSupportSnapshotTests
         Assert.That(faction.DaysInMonth, Is.EqualTo(days));
         Assert.That(faction.PayrollPerMonth, Is.EqualTo(crew * 100m * days));
         Assert.That(faction.LabCostsPerMonth, Is.EqualTo(labs * days));
-        Assert.That(faction.RunningCostsPerMonth, Is.EqualTo((crew * 100m + labs) * days));
+        Assert.That(faction.StaffWagesPerMonth, Is.EqualTo(staffPerDay * days));
+        Assert.That(faction.RunningCostsPerMonth, Is.EqualTo((crew * 100m + labs + staffPerDay) * days));
         Assert.That(faction.NextPayday, Is.EqualTo(new DateTime(now.Year, now.Month, 1).AddMonths(1)));
         Assert.That(faction.AccruedThisMonth, Is.EqualTo(0m), "nothing accrued before the first day runs");
         Assert.That(faction.MonthsUntilBroke, Is.EqualTo((double)(faction.Funds / faction.RunningCostsPerMonth)));
@@ -83,14 +97,19 @@ public class ApiPayAndLifeSupportSnapshotTests
     {
         var info = _player.GetDataBlob<FactionInfoDB>();
         var now = _game.TimePulse.GameGlobalDateTime;
-        decimal accrued = FactionSpending.PayDay(_game, now);
+        decimal accrued = FactionSpending.PayDay(_game, now); // the crew wages of the run
         Assert.That(accrued, Is.GreaterThan(0m));
+        // Phase 6: the same run also accrues one day of staff wages (own staff and commuters at the staff wage).
+        decimal staffAccrued = (FactionSpending.StaffOnPayroll(info) + FactionSpending.CommutersByBloc(info).Values.Sum())
+            * FactionSpending.StaffWagePerDay(_game, _player.Id);
+        Assert.That(staffAccrued, Is.GreaterThan(0m));
         var faction = _projector.ProjectFaction(_player.Id)!;
-        Assert.That(faction.AccruedThisMonth, Is.EqualTo(accrued));
-        Assert.That(faction.AccruedWagesThisMonth, Is.EqualTo(accrued));
+        Assert.That(faction.AccruedWagesThisMonth, Is.EqualTo(accrued), "crew wages");
+        Assert.That(faction.AccruedStaffWagesThisMonth, Is.EqualTo(staffAccrued), "staff wages");
         Assert.That(faction.AccruedResearchThisMonth, Is.EqualTo(0m));
+        Assert.That(faction.AccruedThisMonth, Is.EqualTo(accrued + staffAccrued), "owed = crew + staff + research");
         Assert.That(faction.Funds, Is.EqualTo(info.Money.GetCurrentFunds()), "owed is not yet taken from funds");
-        Assert.That(faction.DaysUntilBroke, Is.EqualTo((double)((faction.Funds - accrued) / faction.RunningCostsPerDay)));
+        Assert.That(faction.DaysUntilBroke, Is.EqualTo((double)((faction.Funds - faction.AccruedThisMonth) / faction.RunningCostsPerDay)));
     }
 
     [Test]
