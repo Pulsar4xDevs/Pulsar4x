@@ -555,6 +555,7 @@
           "tech-grid-distribution",
           "tech-industrial-energy-efficiency",
           "tech-construction-automation",
+          "tech-construction-bay",
           "tech-life-support-efficiency",
           "tech-fuel-cells",
           "tech-reactor-power-density",
@@ -747,6 +748,7 @@
           "tech-grid-distribution",
           "tech-industrial-energy-efficiency",
           "tech-construction-automation",
+          "tech-construction-bay",
           "tech-life-support-efficiency",
           "tech-fuel-cells"
         ]
@@ -929,6 +931,23 @@
       "MaxLevel": 8,
       "DataFormula": "Pow(0.85, [Level])",
       "CostFormula": "(1 + [Level]) * 1000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-construction-bay",
+      "Name": "Construction Bay",
+      "Description": "A crew-served module for a colony ship that can install buildings on a new world. Unlocks the Construction Bay.",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "ship-construction"
+        ]
+      }
     }
   },
   {

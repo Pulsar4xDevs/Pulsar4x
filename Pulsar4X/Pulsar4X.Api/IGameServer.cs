@@ -23,8 +23,8 @@ public interface IGameServer
     /// A null <paramref name="options"/> is today's defaults.</summary>
     TripPreview PreviewMove(PlayerSession session, int shipId, int bodyId, MoveOrderOptions? options = null);
 
-    /// <summary>Estimate what a good costs to make, from its recipe at current market prices on this colony's body.
-    /// Does not change any state. Quantity defaults to 1.</summary>
+    /// <summary>Estimate what a good or component design costs to make, from its recipe or factory job at current market prices on this colony's body.
+    /// For a component, <paramref name="cargoId"/> is the design's UniqueID. Does not change any state. Quantity defaults to 1.</summary>
     GoodAppraisal AppraiseGood(PlayerSession session, int colonyId, string cargoId, long quantity = 1);
 
     /// <summary>Tell the server which system this session is watching, so the engine can

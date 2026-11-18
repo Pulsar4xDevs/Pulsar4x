@@ -1,7 +1,7 @@
 namespace Pulsar4X.Api;
 
 /// <summary>
-/// An estimate of what a good costs to make, from its recipe at current market prices on a colony's body.
+/// An estimate of what a good or component design costs to make, from its recipe or factory job at current market prices on a colony's body.
 /// Null cost fields mean that part could not be priced. <see cref="Reason"/> is empty when the estimate is usable.
 /// </summary>
 public sealed record GoodAppraisal(

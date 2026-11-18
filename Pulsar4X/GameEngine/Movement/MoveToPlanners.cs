@@ -811,7 +811,13 @@ public static class MovePlanner
         double r = state.pos.Length();
         if (!double.IsFinite(r) || r < 1)
             return MoveOption.No(mode, "no usable radius");
-        if (parent.TryGetDataBlob<MassVolumeDB>(out var parentMass) && r <= parentMass.RadiusInM)
+        // A one-level capture that undershoots parking can leave a circular orbit
+        // a few kilometres under the surface. Still plan a transfer from that
+        // bound orbit so the ship can leave. Refuse only an inbound hyperbola
+        // that is genuinely inside the body.
+        if (parent.TryGetDataBlob<MassVolumeDB>(out var parentMass)
+            && r <= parentMass.RadiusInM
+            && shipOrbit.Eccentricity >= 1)
             return MoveOption.No(mode, "inside the parent body");
 
         double sgp = OrbitMath.SGP(parent, ship);

@@ -159,12 +159,13 @@ public class YardHoldsHullTests
         colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[LineId].IndustryTypeRates["component-construction"] = 10;
         var componentJob = translator.Translate(world.Faction, colony, new QueueIndustryJobCommand(
             colony.Id, LineId, widget.UniqueID, 1, false, false));
-        Assert.That(componentJob.Accepted, Is.True, componentJob.RejectionReason);
+        Assert.That(componentJob.Accepted, Is.False);
+        Assert.That(componentJob.RejectionReason, Does.Contain("Shipyards build only ships"));
 
         var line = YardLine(world, colony);
         Assert.That(line.Constructibles.Single(item => item.DesignId == design.UniqueID).OverSlip, Is.True);
         Assert.That(line.Constructibles.Single(item => item.DesignId == design.UniqueID).SlipReason, Does.Contain("slip"));
-        Assert.That(line.Constructibles.Single(item => item.DesignId == widget.UniqueID).OverSlip, Is.False);
+        Assert.That(line.Constructibles.Select(item => item.DesignId), Does.Not.Contain(widget.UniqueID));
     }
 
     static void Complete(World world, Entity colony, ShipDesign design)

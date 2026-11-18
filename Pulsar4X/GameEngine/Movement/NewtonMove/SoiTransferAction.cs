@@ -641,22 +641,64 @@ public class SoiTransferAction : EntityAction
         if (!_entityCommanding.TryGetDataBlob<OrbitDB>(out var orbit) || orbit.Parent == null)
             return;
 
-        if (!TryPeriapsis(orbit, at, out DateTime peri))
-        {
-            Fail("Missed the encounter with " + TargetName());
-            _isFinished = true;
-            return;
-        }
-        if (peri > at.AddSeconds(2))
-        {
-            Wake(peri);
-            return;
-        }
-
         var parent = orbit.Parent;
+        double parking = ArrivalPeriapsis > 0 ? ArrivalPeriapsis : OrbitMath.LowOrbitRadius(parent);
+        if (parent.TryGetDataBlob<MassVolumeDB>(out var body) && parking <= body.RadiusInM)
+            parking = OrbitMath.LowOrbitRadius(parent);
+
         var state = StateAt(orbit, at);
         Vector3 pos = state.pos;
         Vector3 vel = state.vel;
+        double rHere = pos.Length();
+        bool periapsisUndershoots = orbit.Periapsis > 1 && orbit.Periapsis < parking;
+
+        // Don't follow a lithobrake periapsis. Burn at the parking altitude on the
+        // way in, or now if a time step already carried us to or below it.
+        if (periapsisUndershoots && rHere <= parking + 1)
+        {
+            // Capture at the current radius (clamped to parking below).
+        }
+        else if (periapsisUndershoots
+                 && TryAltitudeCrossing(orbit, at, parking, out DateTime cross)
+                 && cross > at.AddSeconds(2))
+        {
+            Wake(cross);
+            return;
+        }
+        else
+        {
+            if (!TryPeriapsis(orbit, at, out DateTime peri))
+            {
+                Fail("Missed the encounter with " + TargetName());
+                _isFinished = true;
+                return;
+            }
+            if (peri > at.AddSeconds(2))
+            {
+                Wake(peri);
+                return;
+            }
+            state = StateAt(orbit, at);
+            pos = state.pos;
+            vel = state.vel;
+            rHere = pos.Length();
+        }
+
+        if (rHere < parking && parking > 1 && rHere > 1)
+        {
+            // A time step landed us below parking (a lithobrake periapsis). Snap
+            // to a circular parking orbit rather than burning between two radii.
+            pos = Vector3.Normalise(pos) * parking;
+            double sgpLift = OrbitMath.SGP(parent, _entityCommanding);
+            double myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassDry;
+            double parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
+            Vector3 circ = ProgradeCircular(pos, vel, sgpLift);
+            _entityCommanding.SetDataBlob(OrbitDB.FromVector(parent, myMass, parentMass, pos, circ, at));
+            _isFinished = true;
+            _details = "Arrived at " + parent.GetName(_entityCommanding.FactionOwnerID) + ".";
+            return;
+        }
+
         double budget = _entityCommanding.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust)
             ? thrust.DeltaV
             : 0;
@@ -749,6 +791,50 @@ public class SoiTransferAction : EntityAction
             seconds = fuel / thrust.FuelBurnRate + 5;
         }
         Wake(at.AddSeconds(Math.Clamp(seconds, 5, 86400)));
+    }
+
+    /// <summary>
+    /// Next time the orbit's radius falls to <paramref name="radius"/> while inbound.
+    /// Used so a capture burns at parking altitude instead of a subsurface periapsis.
+    /// </summary>
+    static bool TryAltitudeCrossing(OrbitDB orbit, DateTime at, double radius, out DateTime when)
+    {
+        when = at;
+        var state = StateAt(orbit, at);
+        double r = state.pos.Length();
+        if (!(r > 1) || !double.IsFinite(r) || !double.IsFinite(radius) || radius < 1)
+            return false;
+        if (r <= radius)
+            return true;
+
+        double lo = 0;
+        double hi = 60;
+        while (hi < 86400.0 * 40)
+        {
+            var ahead = StateAt(orbit, at.AddSeconds(hi));
+            double rr = ahead.pos.Length();
+            if (!(rr > 1) || !double.IsFinite(ahead.vel.X))
+                return false;
+            if (rr <= radius)
+                break;
+            if (hi > 60 && Vector3.Dot(ahead.pos, ahead.vel) / Math.Max(rr, 1) > 0 && rr > r)
+                return false;
+            hi *= 2;
+        }
+        if (hi >= 86400.0 * 40)
+            return false;
+
+        for (int i = 0; i < 40; i++)
+        {
+            double mid = (lo + hi) / 2.0;
+            var ahead = StateAt(orbit, at.AddSeconds(mid));
+            if (ahead.pos.Length() > radius)
+                lo = mid;
+            else
+                hi = mid;
+        }
+        when = at.AddSeconds(hi);
+        return true;
     }
 
     static bool TryPeriapsis(OrbitDB orbit, DateTime at, out DateTime peri)

@@ -30,7 +30,8 @@ public interface IGameClient
     /// <summary>Plan a move for the clicked target. A null <paramref name="options"/> is today's defaults.</summary>
     TripPreview PreviewMove(int shipId, int bodyId, MoveOrderOptions? options = null);
 
-    /// <summary>Estimate what a good costs to make, from its recipe at current market prices on this colony's body.</summary>
+    /// <summary>Estimate what a good or component design costs to make, from its recipe or factory job at current market prices on this colony's body.
+    /// For a component, <paramref name="cargoId"/> is the design's UniqueID.</summary>
     GoodAppraisal AppraiseGood(int colonyId, string cargoId, long quantity = 1);
     Task SetTimeControlAsync(TimeControlRequest request, CancellationToken cancellationToken = default);
 

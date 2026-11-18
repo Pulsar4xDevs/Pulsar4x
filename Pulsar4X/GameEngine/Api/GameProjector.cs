@@ -1915,7 +1915,7 @@ namespace Pulsar4X.Engine.Api
                 var constructibles = new List<ConstructibleItemView>();
                 foreach (var design in sortedDesigns)
                 {
-                    if (!line.IndustryTypeRates.ContainsKey(design.IndustryTypeID)) continue;
+                    if (!IndustryTools.LineAccepts(line, design)) continue;
 
                     var costs = new List<IndustryCostItem>(design.ResourceCosts.Count);
                     foreach (var (resourceId, perUnit) in design.ResourceCosts)
