@@ -200,7 +200,6 @@ namespace Pulsar4X.Client
 
             ui.SelectedId = selectedId;
             ImGui.PopID();
-            MarketAppraisalDisplay.DrawWindow();
         }
 
         static void DrawToolbar(EntitySnapshot entity, MarketView market, OfficeUi ui, GlobalUIState uiState, List<MarketGoodView> listed)

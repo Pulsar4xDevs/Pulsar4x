@@ -118,6 +118,10 @@ namespace Pulsar4X.Client
                         DisplaySelectedColony(selectedSystem, selectedColony);
                     }
 
+                    // Top-level appraisal window: raw Begin/End so it can nest inside Window.Scope.
+                    // One call site so Production and the market share a single panel.
+                    MarketAppraisalDisplay.DrawWindow();
+
                     DisplayAdministratorChooser(galaxy);
             
                 }

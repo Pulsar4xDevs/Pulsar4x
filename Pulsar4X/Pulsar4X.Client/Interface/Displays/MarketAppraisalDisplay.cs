@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Numerics;
 using System.Text;
@@ -8,8 +9,9 @@ using Pulsar4X.Api;
 namespace Pulsar4X.Client
 {
     /// <summary>
-    /// Market-window appraisal popup (multi-faction phase 9): a good's recipe cost at current market
-    /// prices, compared with the listing ask. Formatters are pure for tests.
+    /// Appraisal popup: a cargo good or component design's recipe cost at current market prices,
+    /// compared with a listing ask when one is given. Opened from the market or the Production tab.
+    /// Formatters and resolvers are pure for tests.
     /// </summary>
     public static class MarketAppraisalDisplay
     {
@@ -115,18 +117,116 @@ namespace Pulsar4X.Client
         public static bool IsPriced(GoodAppraisal appraisal)
             => string.IsNullOrEmpty(appraisal.Reason) && appraisal.UnitCost != null;
 
+        /// <summary>
+        /// A component constructible (not a ship design or a processed material).
+        /// </summary>
+        public static bool IsComponentDesign(ConstructibleItemView item)
+            => !item.IsShipDesign && !item.IsMaterial;
+
+        /// <summary>
+        /// Resolves a cargo or component UniqueID to the id and display name the panel should use.
+        /// Looks up <paramref name="designs"/> first, then constructible rows that share that UniqueID.
+        /// </summary>
+        public static bool TryResolve(
+            string cargoOrComponentId,
+            ComponentDesignsSnapshot? designs,
+            IEnumerable<ConstructibleItemView>? constructibles,
+            out string id,
+            out string name)
+        {
+            id = "";
+            name = "";
+            if (string.IsNullOrEmpty(cargoOrComponentId))
+                return false;
+
+            if (designs?.Designs != null)
+            {
+                foreach (var design in designs.Designs)
+                {
+                    if (design.Id == cargoOrComponentId)
+                    {
+                        id = design.Id;
+                        name = string.IsNullOrEmpty(design.Name) ? design.Id : design.Name;
+                        return true;
+                    }
+                }
+            }
+
+            if (constructibles != null)
+            {
+                foreach (var item in constructibles)
+                {
+                    if (item.DesignId == cargoOrComponentId)
+                    {
+                        id = item.DesignId;
+                        name = string.IsNullOrEmpty(item.Name) ? item.DesignId : item.Name;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Resolves a production-line job to a component UniqueID and name when exactly one
+        /// component constructible on the line shares the job's name. Jobs have no design id on the view.
+        /// </summary>
+        public static bool TryResolveJob(
+            IndustryJobView job,
+            IEnumerable<ConstructibleItemView> constructibles,
+            out string id,
+            out string name)
+        {
+            id = "";
+            name = "";
+            if (job == null || string.IsNullOrEmpty(job.Name) || constructibles == null)
+                return false;
+
+            ConstructibleItemView? match = null;
+            foreach (var item in constructibles)
+            {
+                if (!IsComponentDesign(item) || item.Name != job.Name)
+                    continue;
+                if (match != null)
+                    return false;
+                match = item;
+            }
+            if (match == null || string.IsNullOrEmpty(match.DesignId))
+                return false;
+            id = match.DesignId;
+            name = string.IsNullOrEmpty(match.Name) ? match.DesignId : match.Name;
+            return true;
+        }
+
+        /// <summary>
+        /// Opens the single appraisal panel for a cargo good or component design.
+        /// A later open replaces the previous one. One unit is fetched; Per 100 / Per 1,000 are scaled on the client.
+        /// </summary>
+        public static void Open(int colonyId, string cargoOrComponentId, string name, IGameClient? client, decimal? ask = null)
+        {
+            if (string.IsNullOrEmpty(cargoOrComponentId))
+                return;
+            _shown = client?.AppraiseGood(colonyId, cargoOrComponentId, 1)
+                ?? GoodAppraisal.None(cargoOrComponentId, name, 1, "not connected");
+            _ask = ask;
+            _open = true;
+        }
+
         public static void DrawButton(int colonyId, string cargoId, string name, decimal? ask, IGameClient? client)
         {
             if (cargoId.Length == 0)
                 return;
             if (ImGui.Button("Appraise"))
-            {
-                // One read for a single unit; Per 100 / Per 1,000 are scaled on the client.
-                _shown = client?.AppraiseGood(colonyId, cargoId, 1)
-                    ?? GoodAppraisal.None(cargoId, name, 1, "not connected");
-                _ask = ask;
-                _open = true;
-            }
+                Open(colonyId, cargoId, name, client, ask);
+        }
+
+        public static void DrawSmallButton(int colonyId, string cargoId, string name, decimal? ask, IGameClient? client)
+        {
+            if (cargoId.Length == 0)
+                return;
+            if (ImGui.SmallButton("Appraise"))
+                Open(colonyId, cargoId, name, client, ask);
         }
 
         /// <summary>Top-level window so the panel is not clipped inside the market detail child.</summary>

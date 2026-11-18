@@ -380,6 +380,13 @@ namespace Pulsar4X.Client
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Cancel the job.");
+
+            var job = line.Jobs[jobIndex];
+            if (MarketAppraisalDisplay.TryResolveJob(job, line.Constructibles, out var appraiseId, out var appraiseName))
+            {
+                ImGui.SameLine();
+                MarketAppraisalDisplay.DrawSmallButton(entityId, appraiseId, appraiseName, null, uiState.GameClient);
+            }
             ImGui.PopID();
         }
 
@@ -462,6 +469,11 @@ namespace Pulsar4X.Client
             }
 
             ImGui.Columns(1);
+            if (MarketAppraisalDisplay.IsComponentDesign(selectedDesign))
+            {
+                ImGui.NewLine();
+                MarketAppraisalDisplay.DrawButton(entityId, selectedDesign.DesignId, selectedDesign.Name, null, uiState.GameClient);
+            }
             ImGui.NewLine();
             ImGui.Checkbox("##repeat", ref _newJobRepeat);
             ImGui.SameLine();

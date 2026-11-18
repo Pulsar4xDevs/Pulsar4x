@@ -139,5 +139,94 @@ namespace Pulsar4X.Tests
             Assert.That(ForeignEntities.FactionName(stances, 7), Is.EqualTo("Ceres Depot Authority"));
             Assert.That(ForeignEntities.FactionName(stances, 99), Is.EqualTo("Folded company"));
         }
+
+        static ConstructibleItemView Constructible(string id, string name, bool ship = false, bool material = false)
+            => new ConstructibleItemView(id, name, 10, 1, false)
+            {
+                IsShipDesign = ship,
+                IsMaterial = material,
+                ComponentType = ship ? "Ship" : material ? "Material" : "Factory",
+            };
+
+        static IndustryJobView Job(string name, string jobId = "job-1")
+            => new IndustryJobView(jobId, name, 0, 1, false, "Queued", false, 0, 100);
+
+        [Test]
+        public void TryResolve_ComponentId_ReturnsPanelNameAndId()
+        {
+            var designs = new ComponentDesignsSnapshot
+            {
+                Designs = new[]
+                {
+                    new ComponentDesignSummary("uid-factory", "Prefab Factory", "tmpl-factory", "Factory"),
+                    new ComponentDesignSummary("uid-mine", "Mine", "tmpl-mine", "Mine"),
+                }
+            };
+            var constructibles = new[]
+            {
+                Constructible("uid-factory", "Prefab Factory"),
+                Constructible("uid-steel", "Steel", material: true),
+                Constructible("uid-hull", "Starship", ship: true),
+            };
+
+            Assert.That(MarketAppraisalDisplay.TryResolve("uid-factory", designs, constructibles, out var id, out var name), Is.True);
+            Assert.That(id, Is.EqualTo("uid-factory"));
+            Assert.That(name, Is.EqualTo("Prefab Factory"));
+
+            Assert.That(MarketAppraisalDisplay.TryResolve("uid-factory", designs, null, out id, out name), Is.True);
+            Assert.That(id, Is.EqualTo("uid-factory"));
+            Assert.That(name, Is.EqualTo("Prefab Factory"));
+
+            Assert.That(MarketAppraisalDisplay.TryResolve("uid-steel", null, constructibles, out id, out name), Is.True);
+            Assert.That(id, Is.EqualTo("uid-steel"));
+            Assert.That(name, Is.EqualTo("Steel"));
+
+            Assert.That(MarketAppraisalDisplay.TryResolve("missing", designs, constructibles, out id, out name), Is.False);
+            Assert.That(id, Is.EqualTo(""));
+            Assert.That(name, Is.EqualTo(""));
+            Assert.That(MarketAppraisalDisplay.TryResolve("", designs, constructibles, out _, out _), Is.False);
+        }
+
+        [Test]
+        public void TryResolveJob_UniqueComponentName_ReturnsDesignId()
+        {
+            var constructibles = new[]
+            {
+                Constructible("uid-factory", "Prefab Factory"),
+                Constructible("uid-mine", "Mine"),
+                Constructible("uid-steel", "Steel", material: true),
+                Constructible("uid-hull", "Starship", ship: true),
+            };
+
+            Assert.That(MarketAppraisalDisplay.TryResolveJob(Job("Prefab Factory"), constructibles, out var id, out var name), Is.True);
+            Assert.That(id, Is.EqualTo("uid-factory"));
+            Assert.That(name, Is.EqualTo("Prefab Factory"));
+
+            // Materials and ships are not component jobs.
+            Assert.That(MarketAppraisalDisplay.TryResolveJob(Job("Steel"), constructibles, out _, out _), Is.False);
+            Assert.That(MarketAppraisalDisplay.TryResolveJob(Job("Starship"), constructibles, out _, out _), Is.False);
+            Assert.That(MarketAppraisalDisplay.TryResolveJob(Job("Unknown"), constructibles, out _, out _), Is.False);
+        }
+
+        [Test]
+        public void TryResolveJob_AmbiguousComponentName_ReturnsFalse()
+        {
+            var constructibles = new[]
+            {
+                Constructible("uid-factory-a", "Factory"),
+                Constructible("uid-factory-b", "Factory"),
+            };
+            Assert.That(MarketAppraisalDisplay.TryResolveJob(Job("Factory"), constructibles, out var id, out var name), Is.False);
+            Assert.That(id, Is.EqualTo(""));
+            Assert.That(name, Is.EqualTo(""));
+        }
+
+        [Test]
+        public void IsComponentDesign_ExcludesShipsAndMaterials()
+        {
+            Assert.That(MarketAppraisalDisplay.IsComponentDesign(Constructible("a", "Factory")), Is.True);
+            Assert.That(MarketAppraisalDisplay.IsComponentDesign(Constructible("b", "Steel", material: true)), Is.False);
+            Assert.That(MarketAppraisalDisplay.IsComponentDesign(Constructible("c", "Starship", ship: true)), Is.False);
+        }
     }
 }
