@@ -67,13 +67,17 @@ namespace Pulsar4X.Client
 
         public static string RelocateButtonLabel() => "Relocate (" + RelocateFee.ToString("0", CultureInfo.InvariantCulture) + " cr each)";
 
-        /// <summary>One consumption good, so later goods (consumer, medical, luxuries) can append to the same table.</summary>
-        public readonly record struct NeedGoodRow(string Name, double PerDay, long Stock, double? DaysOfStock, bool Short);
+        /// <summary>One consumption good. Food and water use <see cref="Short"/>; 7b goods use <see cref="Met"/> (null before the first monthly draw).</summary>
+        public readonly record struct NeedGoodRow(
+            string Name, double PerDay, long Stock, double? DaysOfStock, bool Short, bool? Met = null, bool MonthlyMet = false);
 
         public static NeedGoodRow[] Goods(ColonyNeedsView needs) => new[]
         {
             new NeedGoodRow("Food", needs.FoodPerDay, needs.FoodStock, needs.FoodDaysOfStock, needs.FoodShort),
             new NeedGoodRow("Water", needs.WaterPerDay, needs.WaterStock, needs.WaterDaysOfStock, needs.WaterShort),
+            new NeedGoodRow("Consumer Goods", needs.ConsumerGoodsPerDay, needs.ConsumerGoodsStock, needs.ConsumerGoodsDaysOfStock, needs.ConsumerGoodsShort, needs.ConsumerGoodsMet, true),
+            new NeedGoodRow("Medical Supplies", needs.MedicalPerDay, needs.MedicalStock, needs.MedicalDaysOfStock, needs.MedicalShort, needs.MedicalMet, true),
+            new NeedGoodRow("Luxury Goods", needs.LuxuryPerDay, needs.LuxuryStock, needs.LuxuryDaysOfStock, needs.LuxuryShort, needs.LuxuryMet, true),
         };
 
         public static string FormatPerDay(double amount)
@@ -105,6 +109,23 @@ namespace Pulsar4X.Client
 
         public static string FactorText(double factor)
             => factor.ToString("0.##", CultureInfo.InvariantCulture) + "×";
+
+        /// <summary>"-" before the first monthly draw; "Met" or "Short" after; food and water stay Supplied/Short.</summary>
+        public static string StatusText(NeedGoodRow good)
+        {
+            if (good.MonthlyMet)
+                return good.Met is bool met ? (met ? "Met" : "Short") : "-";
+            return good.Short ? "Short" : "Supplied";
+        }
+
+        public static bool StatusIsShort(NeedGoodRow good)
+            => good.MonthlyMet ? good.Met == false : good.Short;
+
+        public static string FormatSatisfactionDelta(double delta)
+            => delta.ToString("+0.#;-0.#;0", CultureInfo.InvariantCulture);
+
+        public static string SatisfactionPartLine(SatisfactionPartView part)
+            => part.Label + "  " + FormatSatisfactionDelta(part.Delta);
 
         public static void Display(int colonyId, WorkforceView view, GlobalUIState uiState, ColonyNeedsView? needs = null, DateTime? now = null)
         {
@@ -294,10 +315,11 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     ImGui.TextUnformatted(FormatDaysOfStock(good.DaysOfStock));
                     ImGui.TableNextColumn();
-                    if (good.Short)
+                    bool shortStatus = StatusIsShort(good);
+                    if (shortStatus)
                         ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
-                    ImGui.TextUnformatted(good.Short ? "Short" : "Supplied");
-                    if (good.Short)
+                    ImGui.TextUnformatted(StatusText(good));
+                    if (shortStatus)
                         ImGui.PopStyleColor();
                 }
                 ImGui.EndTable();
@@ -317,11 +339,30 @@ namespace Pulsar4X.Client
                     ImGui.PopStyleColor();
                 SummaryRow("Deaths", needs.DeathsTotal.ToString("N0"), "Deaths from shortage since the clock started.");
                 SummaryRow("Leavers", needs.LeftTotal.ToString("N0"), "People who left because of the shortage.");
-                SummaryRow("Satisfaction", SatisfactionText(needs), "Current satisfaction and the target it moves toward (20% every 30 days).");
-                SummaryRow("Growth", FactorText(needs.GrowthFactor), "Population growth multiplier. 0 while short.");
+                SatisfactionRow(needs);
+                SummaryRow("Growth", FactorText(needs.GrowthFactor), "Population growth multiplier. 0 while short. Includes the goods growth factor.");
                 SummaryRow("Output", FactorText(needs.OutputFactor), "Industry, mining and research multiplier.");
+                SummaryRow("Medical", FactorText(needs.MedicalFactor), "Shortage-death multiplier: 0.5 while medical supplies are met, else 1.");
+                SummaryRow("Goods growth", FactorText(needs.GoodsGrowthFactor), "Population growth from goods alone (already part of Growth).");
+                SummaryRow("Luxury pull", FactorText(needs.LuxuryMigrationPull), "Migration destination rank multiplier: 1.2 while luxuries are met.");
                 ImGui.EndTable();
             }
+        }
+
+        static void SatisfactionRow(ColonyNeedsView needs)
+        {
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+            ImGui.TextColored(Styles.DescriptiveColor, "Satisfaction");
+            ImGui.TableNextColumn();
+            ImGui.TextUnformatted(SatisfactionText(needs));
+            if (!ImGui.IsItemHovered())
+                return;
+            ImGui.BeginTooltip();
+            ImGui.TextUnformatted("Current satisfaction and the target it moves toward (20% every 30 days).");
+            foreach (var part in needs.SatisfactionParts)
+                ImGui.TextUnformatted(SatisfactionPartLine(part));
+            ImGui.EndTooltip();
         }
 
         static void SummaryRow(string name, string value, string tip)
@@ -332,7 +373,11 @@ namespace Pulsar4X.Client
             ImGui.TableNextColumn();
             ImGui.TextUnformatted(value);
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(tip);
+            {
+                ImGui.BeginTooltip();
+                ImGui.TextUnformatted(tip);
+                ImGui.EndTooltip();
+            }
         }
 
         static void ActionButton(string label, string? reason, Action submit)

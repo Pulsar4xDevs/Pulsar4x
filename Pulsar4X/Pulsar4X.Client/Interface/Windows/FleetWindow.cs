@@ -529,7 +529,7 @@ namespace Pulsar4X.Client
                     ImGui.SetTooltip("Crew aboard and the crew fraction show once ships carry crew (crew plan phase 3).");
                 if (shipView.CrewTracked && shipView.UnderCrewed)
                     CrewBars.Badge("Under-crewed", CrewBars.ShortColour,
-                        string.IsNullOrEmpty(shipView.CrewNote) ? "Fewer crew aboard than the design needs." : shipView.CrewNote);
+                        string.IsNullOrEmpty(shipView.CrewNote) ? "Fewer crew aboard than the ship needs." : shipView.CrewNote);
 
                 CrewBars.CompactRows("##shipCrewRows", CrewBars.ShipRows(shipView));
 
