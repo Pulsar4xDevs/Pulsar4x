@@ -135,6 +135,37 @@ public class SoiCaptureTests
         Assert.That(LogText(ship), Does.Contain("Capture burn"));
     }
 
+    /// <summary>
+    /// A capture that undershoots parking can leave a circular orbit a few km
+    /// under the surface. Preview and the move-to-parent order must still work.
+    /// </summary>
+    [Test]
+    public void LunaToEarth_FromSlightlySubsurfaceOrbit_CapturesWithinThirtyDays()
+    {
+        var ship = ShipInLowLunaOrbit("ReturnFromUndershoot");
+        double surface = _luna.GetDataBlob<MassVolumeDB>().RadiusInM;
+        var moon = MoonState(_luna, ship.StarSysDateTime);
+        Vector3 normal = Vector3.Normalise(Vector3.Cross(moon.pos, moon.vel));
+        PlaceCircular(ship, _luna, normal, moon.pos, surface - 3500);
+        Assert.That(ship.GetDataBlob<OrbitDB>().Periapsis, Is.LessThan(surface));
+
+        var preview = MovePlanner.Preview(ship, _earth, ship.StarSysDateTime);
+        Assert.That(preview.Feasible, Is.True, preview.Reason);
+
+        double planned = PlannedDeltaV(ship, _earth);
+        double fuelBefore = Fuel(ship);
+        double wet = ship.GetDataBlob<MassVolumeDB>().MassTotal;
+        double ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+
+        var goal = OrderMove(ship, _earth);
+        Pulse(30);
+
+        AssertCaptured(ship, _earth, goal, fuelBefore, wet, ve, planned);
+        Assert.That(LogText(ship), Does.Contain("Arrived at Earth"));
+        Assert.That(LogText(ship), Does.Contain("Departure burn"));
+        Assert.That(LogText(ship), Does.Contain("Capture burn"));
+    }
+
     [Test]
     public void ShortTank_RefusesBeforeBurning()
     {
