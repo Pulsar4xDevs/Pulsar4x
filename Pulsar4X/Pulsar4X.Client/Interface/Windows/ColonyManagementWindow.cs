@@ -72,53 +72,56 @@ namespace Pulsar4X.Client
             if(galaxy == null) return;
 
             ImGui.SetNextWindowSize(new Vector2(1200, 780), ImGuiCond.FirstUseEver);
-            if(Window.Begin("Manage Colonies", ref IsActive))
+            using (var w = Window.Scope("Manage Colonies", ref IsActive))
             {
-                // A missing selection, or one the latest push no longer has, opens on the first owned colony.
-                // A selection that resolves, owned or not, is left alone.
-                var resolved = ForeignEntities.ResolveColonySelection(
-                    SelectedColonyId,
-                    _selectedSystemId,
-                    galaxy.KnownSystems.Select(s => (s.SystemId, (IEnumerable<EntitySnapshot>?)galaxy.GetSystem(s.SystemId)?.Entities)));
-                if (resolved is { } pick)
+                if (w.Visible)
                 {
-                    if (pick.ColonyId != SelectedColonyId || pick.SystemId != _selectedSystemId)
-                        SelectColony(pick.ColonyId, pick.SystemId);
-                }
-                else
-                {
-                    SelectedColonyId = null;
-                    _selectedSystemId = null;
-                }
-
-                Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
-                {
-                    var systems = new List<(string SystemId, string SystemName, IEnumerable<EntitySnapshot>? Entities)>();
-                    foreach (var summary in galaxy.KnownSystems)
+                    // A missing selection, or one the latest push no longer has, opens on the first owned colony.
+                    // A selection that resolves, owned or not, is left alone.
+                    var resolved = ForeignEntities.ResolveColonySelection(
+                        SelectedColonyId,
+                        _selectedSystemId,
+                        galaxy.KnownSystems.Select(s => (s.SystemId, (IEnumerable<EntitySnapshot>?)galaxy.GetSystem(s.SystemId)?.Entities)));
+                    if (resolved is { } pick)
                     {
-                        var system = galaxy.GetSystem(summary.SystemId);
-                        systems.Add((summary.SystemId, summary.Name, system?.Entities));
+                        if (pick.ColonyId != SelectedColonyId || pick.SystemId != _selectedSystemId)
+                            SelectColony(pick.ColonyId, pick.SystemId);
                     }
-                    DisplayColonySections(
-                        ForeignEntities.OwnedBySystem(systems),
-                        ForeignEntities.ForeignByFaction(systems, galaxy.Stances));
+                    else
+                    {
+                        SelectedColonyId = null;
+                        _selectedSystemId = null;
+                    }
+
+                    Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                    if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
+                    {
+                        var systems = new List<(string SystemId, string SystemName, IEnumerable<EntitySnapshot>? Entities)>();
+                        foreach (var summary in galaxy.KnownSystems)
+                        {
+                            var system = galaxy.GetSystem(summary.SystemId);
+                            systems.Add((summary.SystemId, summary.Name, system?.Entities));
+                        }
+                        DisplayColonySections(
+                            ForeignEntities.OwnedBySystem(systems),
+                            ForeignEntities.ForeignByFaction(systems, galaxy.Stances));
+                    }
+                    ImGui.EndChild();
+
+                    // Re-resolve after the list so a click this frame opens that colony.
+                    var selectedSystem = _selectedSystemId == null ? null : galaxy.GetSystem(_selectedSystemId);
+                    var selectedColony = SelectedColonyId is { } id ? selectedSystem?.GetEntity(id) : null;
+
+                    if (selectedColony != null && selectedSystem != null)
+                    {
+                        ImGui.SameLine();
+                        DisplaySelectedColony(selectedSystem, selectedColony);
+                    }
+
+                    DisplayAdministratorChooser(galaxy);
+            
                 }
-                ImGui.EndChild();
-
-                // Re-resolve after the list so a click this frame opens that colony.
-                var selectedSystem = _selectedSystemId == null ? null : galaxy.GetSystem(_selectedSystemId);
-                var selectedColony = SelectedColonyId is { } id ? selectedSystem?.GetEntity(id) : null;
-
-                if (selectedColony != null && selectedSystem != null)
-                {
-                    ImGui.SameLine();
-                    DisplaySelectedColony(selectedSystem, selectedColony);
-                }
-
-                DisplayAdministratorChooser(galaxy);
             }
-            Window.End();
         }
 
         private void DisplayColonySections(

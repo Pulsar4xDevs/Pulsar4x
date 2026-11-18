@@ -32,45 +32,41 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
             return;
 
         ImGui.SetNextWindowSize(new Vector2(820, 520), ImGuiCond.FirstUseEver);
-        if (!Window.Begin("Transactions", ref IsActive))
+        using (var w = Window.Scope("Transactions", ref IsActive))
         {
-            Window.End();
-            return;
+            if (!w.Visible)
+                return;
+
+            var faction = _uiState.GameClient?.Galaxy.Faction;
+            if (faction == null)
+            {
+                ImGui.TextUnformatted("No corporation.");
+                return;
+            }
+
+            ImGui.TextUnformatted(faction.Name);
+            if (faction.Funds < 0)
+                Finances.ColouredText(Finances.BannerColour, "Balance " + faction.Funds.ToString("C2", CultureInfo.CurrentCulture));
+            else
+                ImGui.TextUnformatted("Balance " + faction.Funds.ToString("C2", CultureInfo.CurrentCulture));
+            // The galaxy's faction is the player's own; NPC factions pay no wages and have no books here.
+            Finances.Draw(faction);
+            ImGui.Separator();
+
+            var years = LedgerTree.Build(faction.Transactions);
+            if (years.Count == 0)
+            {
+                ImGui.TextUnformatted("No transactions.");
+                return;
+            }
+
+            if (ImGui.BeginChild("LedgerTree", new Vector2(0, ImGui.GetContentRegionAvail().Y), ImGuiChildFlags.None))
+            {
+                for (int y = 0; y < years.Count; y++)
+                    DrawYear(years[y]);
+            }
+            ImGui.EndChild();
         }
-
-        var faction = _uiState.GameClient?.Galaxy.Faction;
-        if (faction == null)
-        {
-            ImGui.TextUnformatted("No corporation.");
-            Window.End();
-            return;
-        }
-
-        ImGui.TextUnformatted(faction.Name);
-        if (faction.Funds < 0)
-            Finances.ColouredText(Finances.BannerColour, "Balance " + faction.Funds.ToString("C2", CultureInfo.CurrentCulture));
-        else
-            ImGui.TextUnformatted("Balance " + faction.Funds.ToString("C2", CultureInfo.CurrentCulture));
-        // The galaxy's faction is the player's own; NPC factions pay no wages and have no books here.
-        Finances.Draw(faction);
-        ImGui.Separator();
-
-        var years = LedgerTree.Build(faction.Transactions);
-        if (years.Count == 0)
-        {
-            ImGui.TextUnformatted("No transactions.");
-            Window.End();
-            return;
-        }
-
-        if (ImGui.BeginChild("LedgerTree", new Vector2(0, ImGui.GetContentRegionAvail().Y), ImGuiChildFlags.None))
-        {
-            for (int y = 0; y < years.Count; y++)
-                DrawYear(years[y]);
-        }
-        ImGui.EndChild();
-
-        Window.End();
     }
 
     static void DrawYear(LedgerYearStatement year)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
@@ -42,8 +43,10 @@ namespace Pulsar4X.Client
         internal override void Display()
         {
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(150, 200), ImGuiCond.Once);
-            if (ImGui.Begin("Actions", _flags))
+            using (var w = Window.Scope("Actions", _flags))
             {
+                if (w.Visible)
+                {
                 //check if ANY entity has been clicked
                 //if true, display all possible toolbar menu icons for it
                 if (_uiState.LastClickedEntity != null)
@@ -148,7 +151,7 @@ namespace Pulsar4X.Client
                     ActionButton(typeof(WarpOrderWindow));
                     ActionButton(typeof(ChangeCurrentOrbitWindow));
                 }
-                ImGui.End();
+                }
             }
         }
     }

@@ -114,13 +114,13 @@ namespace Pulsar4X.Client
             ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
 
             // ImGui.Begin must always be paired with End, even when it returns false
-            // (the window is collapsed or clipped). The wrapper increments its nest
-            // count in Begin before ImGui.Begin runs, so skipping End leaves the next
-            // Window.Begin (e.g. an EntityCard) throwing InvalidOperationException.
-            bool visible = Window.Begin("GameLog", ref IsActive);
-            try
+            // (the window is collapsed or clipped). Window.Scope Ends in Dispose, so a
+            // collapsed Begin, an early return, or a throw cannot skip End. That used
+            // to leave the next Window.Begin (e.g. an EntityCard) throwing
+            // InvalidOperationException.
+            using (var w = Window.Scope("GameLog", ref IsActive))
             {
-                if (!visible)
+                if (!w.Visible)
                     return;
 
                 DisplayPauseSettings();
@@ -191,10 +191,6 @@ namespace Pulsar4X.Client
                 }
 
                 ImGui.Separator();
-            }
-            finally
-            {
-                Window.End();
             }
         }
 

@@ -67,56 +67,59 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            if(Window.Begin("Map Scale", ref IsActive, _flags))//Lets the user close the ruler
+            using (var w = Window.Scope("Map Scale", ref IsActive, _flags))
             {
-                //displays the size in meters of the current screen area account for zoom and window dimensions
-                var windowCornerInWorldCoordinate = _uiState.Camera.WorldCoordinate_m(
-                        _uiState.ViewPort.Size.Width,
-                        _uiState.ViewPort.Size.Height);
+                if (w.Visible)
+                {
+                    //displays the size in meters of the current screen area account for zoom and window dimensions
+                    var windowCornerInWorldCoordinate = _uiState.Camera.WorldCoordinate_m(
+                            _uiState.ViewPort.Size.Width,
+                            _uiState.ViewPort.Size.Height);
 
-                ImGui.Text("Current screen is:");
-                ImGui.Text(Stringify.Distance(((windowCornerInWorldCoordinate.X - _uiState.Camera.CameraWorldPosition.X)*2))+" wide.");
-                ImGui.Text(Stringify.Distance((-(windowCornerInWorldCoordinate.Y - _uiState.Camera.CameraWorldPosition.Y)*2))+" tall.");
-                //ImGui.Text((_uiState.Camera.WorldCoordinate_m((int)_uiState.Camera.ViewPortSize.X, (int)_uiState.Camera.ViewPortSize.Y).X - _uiState.Camera.CameraWorldPosition_m.X).ToString());
-                var mpp = _uiState.Camera.WorldDistance_m(1);
-                /* I can't math. why can't I math?
-                var lightMetersPerS = 299792458;
-                var lightsecondsPerMeter = 3.33564e-9;
-                var lspp = lightsecondsPerMeter * mpp;
-                var ppls = mpp / 299792458;
-                ImGui.Text("Meters Per Pixel: " + mpp);
-                ImGui.Text("Light Seconds Per Pixel: " + lspp);
-                ImGui.Text("Pixels Per Light Second: " + ppls);
-                */
-                //the measure button, when clicked class starts listening for first mouse click to start measuring stick, wherever the mouse goes after that is the other end of the measuring stick.
-                if (ImGui.Button("Measure"))
-                {
-                    _measuring = true;
-                }
-                //if the first click hasnt been done but the Measure button has been clicked, then display tooltip indicating you are measuring.
-                if (_measuring && !_firstClickDone)
-                {
-                    ImGui.SetTooltip("measuring...");
-                }
-                //if the first click has already been done, then start showing distance and draw line between first click and the latest mouse position
-                else if (_firstClickDone)
-                {
-                    if(_zoomLevelAtFirstClick != _uiState.Camera.ZoomLevel){
-                        _stopMeasuring();
-                    }else{
-                        Orbital.Vector3 lastMousePos = _uiState.Camera.MouseWorldCoordinate_m();
-                        System.Numerics.Vector2 lastMousePosInViewCoord = ImGui.GetMousePos();
-
-                        SDL.SetRenderDrawColor(_uiState.SDLRendererPtr, 255,255,255,255);
-                        SDL.RenderLine(_uiState.SDLRendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);
-                        double metricDistance = Math.Sqrt(Math.Pow(_firstClick.X - lastMousePos.X, 2) + Math.Pow(_firstClick.Y - lastMousePos.Y, 2));
-                        double lightseconds = metricDistance / 299792458;
-                        string tooltipString = Stringify.Distance(metricDistance) + "\r\n" + lightseconds + "ls";
-                        ImGui.SetTooltip(tooltipString);
+                    ImGui.Text("Current screen is:");
+                    ImGui.Text(Stringify.Distance(((windowCornerInWorldCoordinate.X - _uiState.Camera.CameraWorldPosition.X)*2))+" wide.");
+                    ImGui.Text(Stringify.Distance((-(windowCornerInWorldCoordinate.Y - _uiState.Camera.CameraWorldPosition.Y)*2))+" tall.");
+                    //ImGui.Text((_uiState.Camera.WorldCoordinate_m((int)_uiState.Camera.ViewPortSize.X, (int)_uiState.Camera.ViewPortSize.Y).X - _uiState.Camera.CameraWorldPosition_m.X).ToString());
+                    var mpp = _uiState.Camera.WorldDistance_m(1);
+                    /* I can't math. why can't I math?
+                    var lightMetersPerS = 299792458;
+                    var lightsecondsPerMeter = 3.33564e-9;
+                    var lspp = lightsecondsPerMeter * mpp;
+                    var ppls = mpp / 299792458;
+                    ImGui.Text("Meters Per Pixel: " + mpp);
+                    ImGui.Text("Light Seconds Per Pixel: " + lspp);
+                    ImGui.Text("Pixels Per Light Second: " + ppls);
+                    */
+                    //the measure button, when clicked class starts listening for first mouse click to start measuring stick, wherever the mouse goes after that is the other end of the measuring stick.
+                    if (ImGui.Button("Measure"))
+                    {
+                        _measuring = true;
                     }
+                    //if the first click hasnt been done but the Measure button has been clicked, then display tooltip indicating you are measuring.
+                    if (_measuring && !_firstClickDone)
+                    {
+                        ImGui.SetTooltip("measuring...");
+                    }
+                    //if the first click has already been done, then start showing distance and draw line between first click and the latest mouse position
+                    else if (_firstClickDone)
+                    {
+                        if(_zoomLevelAtFirstClick != _uiState.Camera.ZoomLevel){
+                            _stopMeasuring();
+                        }else{
+                            Orbital.Vector3 lastMousePos = _uiState.Camera.MouseWorldCoordinate_m();
+                            System.Numerics.Vector2 lastMousePosInViewCoord = ImGui.GetMousePos();
+
+                            SDL.SetRenderDrawColor(_uiState.SDLRendererPtr, 255,255,255,255);
+                            SDL.RenderLine(_uiState.SDLRendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);
+                            double metricDistance = Math.Sqrt(Math.Pow(_firstClick.X - lastMousePos.X, 2) + Math.Pow(_firstClick.Y - lastMousePos.Y, 2));
+                            double lightseconds = metricDistance / 299792458;
+                            string tooltipString = Stringify.Distance(metricDistance) + "\r\n" + lightseconds + "ls";
+                            ImGui.SetTooltip(tooltipString);
+                        }
+                    }
+            
                 }
             }
-            Window.End();
 
         }
     }

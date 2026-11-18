@@ -69,26 +69,29 @@ namespace Pulsar4X.Client
             }
 
             string entityName = entity.GetView<NameView>()?.Name ?? "Unknown";
-            if (Window.Begin("Change Orbit: " + entityName, ref IsActive, _flags))
+            using (var w = Window.Scope("Change Orbit: " + entityName, ref IsActive, _flags))
             {
-                if (_orbitWidget == null && orbit.ParentId is int parentId
-                    && system.GetEntity(parentId) is { } parent)
+                if (w.Visible)
                 {
-                    double soi = parent.SoiRadiusM();
-                    _orbitWidget = new OrbitOrderIcon(
-                        new SnapshotPosition(_uiState, _systemId, parentId),
-                        double.IsInfinity(soi) ? 0 : soi,
-                        parent.GetView<MassVolumeView>()?.RadiusMetres ?? 0);
-                    _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(OrbitOrderIcon), _orbitWidget);
+                    if (_orbitWidget == null && orbit.ParentId is int parentId
+                        && system.GetEntity(parentId) is { } parent)
+                    {
+                        double soi = parent.SoiRadiusM();
+                        _orbitWidget = new OrbitOrderIcon(
+                            new SnapshotPosition(_uiState, _systemId, parentId),
+                            double.IsInfinity(soi) ? 0 : soi,
+                            parent.GetView<MassVolumeView>()?.RadiusMetres ?? 0);
+                        _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(OrbitOrderIcon), _orbitWidget);
+                    }
+
+                    if (_newtonUI.Display(thrust.DeltaVMps, thrust.ExhaustVelocityMps, thrust.FuelBurnRateKgPerSec, massVolume.MassKg) || _recalc)
+                        Calcs(orbit);
+
+                    if (ImGui.Button("Action Command"))
+                        ActionCmd(thrust, massVolume);
+            
                 }
-
-                if (_newtonUI.Display(thrust.DeltaVMps, thrust.ExhaustVelocityMps, thrust.FuelBurnRateKgPerSec, massVolume.MassKg) || _recalc)
-                    Calcs(orbit);
-
-                if (ImGui.Button("Action Command"))
-                    ActionCmd(thrust, massVolume);
             }
-            Window.End();
         }
 
         public override void OnSystemTickChange(DateTime newDate)

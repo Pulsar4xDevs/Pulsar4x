@@ -170,46 +170,48 @@ namespace Pulsar4X.Client
 
         void DisplayButtons(string name, List<ToolBarOption> DisplayToolButtons)
         {
-            if (Window.Begin(name, _flags))
+            using (var w = Window.Scope(name, _flags))
             {
-                ImGuiCol buttonidx = ImGuiCol.Button;
-
-                uint iterations = 0;
-                //displays the default toolbar menu icons
-                foreach (var button in DisplayToolButtons)//For each button
+                if (w.Visible)
                 {
-                    ImGui.PushID(iterations.ToString());
+                    ImGuiCol buttonidx = ImGuiCol.Button;
 
-                    if (button.GetActive != null)//If the windows state can be checked
+                    uint iterations = 0;
+                    //displays the default toolbar menu icons
+                    foreach (var button in DisplayToolButtons)//For each button
                     {
-                        if (button.GetActive())//If the window is open
+                        ImGui.PushID(iterations.ToString());
+
+                        if (button.GetActive != null)//If the windows state can be checked
                         {
-                            ImGui.PushStyleColor(buttonidx, ClickedColour);//Have the button be "pressed"
+                            if (button.GetActive())//If the window is open
+                            {
+                                ImGui.PushStyleColor(buttonidx, ClickedColour);//Have the button be "pressed"
+                            }
+                            else//If closed
+                            {
+                                ImGui.PushStyleColor(buttonidx, UnClickedColour);//Have the button be colored normally
+                            }
                         }
-                        else//If closed
+
+                        if (button.OnClick != null && ImGui.ImageButton($"###{name}-nonblank", button.Picture.ToTextureRef(), ButtonSize))//Make the button
                         {
-                            ImGui.PushStyleColor(buttonidx, UnClickedColour);//Have the button be colored normally
+                            button.OnClick();
                         }
+
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip(button.TooltipText);
+
+                        if (button.GetActive != null)//If the windows state can be checked
+                        {
+                            ImGui.PopStyleColor();
+                        }
+
+                        ImGui.PopID();
+                        iterations++;
                     }
 
-                    if (button.OnClick != null && ImGui.ImageButton($"###{name}-nonblank", button.Picture.ToTextureRef(), ButtonSize))//Make the button
-                    {
-                        button.OnClick();
-                    }
-
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip(button.TooltipText);
-
-                    if (button.GetActive != null)//If the windows state can be checked
-                    {
-                        ImGui.PopStyleColor();
-                    }
-
-                    ImGui.PopID();
-                    iterations++;
                 }
-
-                Window.End();
             }
         }
     }

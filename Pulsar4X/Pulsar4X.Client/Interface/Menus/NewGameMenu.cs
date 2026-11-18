@@ -79,21 +79,23 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
         ImGui.SetNextWindowPos((viewport - openSize) / 2f, ImGuiCond.Appearing);
         ImGui.SetNextWindowSizeConstraints(new Vector2(Math.Min(480f, openSize.X), Math.Min(360f, openSize.Y)),
             new Vector2(float.MaxValue, float.MaxValue));
-        if (Window.Begin("New Game Setup", _flags | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse))
+        using (var w = Window.Scope("New Game Setup", _flags | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse))
         {
-            _contentRegion = ImGui.GetContentRegionAvail();
-            // Get window dimensions
-            _windowPos = ImGui.GetWindowPos();
-            _windowSize = ImGui.GetContentRegionAvail();
-            _footerHeight = ImGui.GetFrameHeightWithSpacing();
+            if (w.Visible)
+            {
+                _contentRegion = ImGui.GetContentRegionAvail();
+                // Get window dimensions
+                _windowPos = ImGui.GetWindowPos();
+                _windowSize = ImGui.GetContentRegionAvail();
+                _footerHeight = ImGui.GetFrameHeightWithSpacing();
 
-            // Calculate content area height (window height minus footer)
-            _contentHeight = _windowSize.Y - _footerHeight;// - ImGui.GetFrameHeightWithSpacing();
+                // Calculate content area height (window height minus footer)
+                _contentHeight = _windowSize.Y - _footerHeight;// - ImGui.GetFrameHeightWithSpacing();
 
-            DisplayPage();
+                DisplayPage();
+        
+            }
         }
-        // ImGui needs End() even when Begin() returned false (collapsed or clipped window).
-        Window.End();
     }
 
     private void DisplayError()

@@ -57,72 +57,74 @@ namespace Pulsar4X.Client
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
 
-                if (Window.Begin("Game Settings", ref IsActive, _flags))
+                using (var w = Window.Scope("Game Settings", ref IsActive, _flags))
                 {
-                    if (ImGui.BeginTabBar("SettingsTabs"))
+                    if (w.Visible)
                     {
-                        if (ImGui.BeginTabItem("Display"))
+                        if (ImGui.BeginTabBar("SettingsTabs"))
                         {
-                            DisplayVideoSettings();
-                            ImGui.EndTabItem();
+                            if (ImGui.BeginTabItem("Display"))
+                            {
+                                DisplayVideoSettings();
+                                ImGui.EndTabItem();
+                            }
+
+                            if (ImGui.BeginTabItem("Audio"))
+                            {
+                                DisplayAudioSettings();
+                                ImGui.EndTabItem();
+                            }
+
+                            if (ImGui.BeginTabItem("Interface"))
+                            {
+                                DisplayInterfaceSettings();
+                                ImGui.EndTabItem();
+                            }
+
+                            if (ImGui.BeginTabItem("Debug"))
+                            {
+                                DisplayDebugSettings();
+                                ImGui.EndTabItem();
+                            }
+
+                            if (_uiState.IsGameLoaded && ImGui.BeginTabItem("Game"))
+                            {
+                                DisplayGameSettings();
+                                ImGui.EndTabItem();
+                            }
+
+                            if (ImGui.BeginTabItem("Map"))
+                            {
+                                DisplayMapSettings();
+                                ImGui.EndTabItem();
+                            }
+
+                            ImGui.EndTabBar();
                         }
 
-                        if (ImGui.BeginTabItem("Audio"))
-                        {
-                            DisplayAudioSettings();
-                            ImGui.EndTabItem();
-                        }
-
-                        if (ImGui.BeginTabItem("Interface"))
-                        {
-                            DisplayInterfaceSettings();
-                            ImGui.EndTabItem();
-                        }
-
-                        if (ImGui.BeginTabItem("Debug"))
-                        {
-                            DisplayDebugSettings();
-                            ImGui.EndTabItem();
-                        }
-
-                        if (_uiState.IsGameLoaded && ImGui.BeginTabItem("Game"))
-                        {
-                            DisplayGameSettings();
-                            ImGui.EndTabItem();
-                        }
-
-                        if (ImGui.BeginTabItem("Map"))
-                        {
-                            DisplayMapSettings();
-                            ImGui.EndTabItem();
-                        }
-
-                        ImGui.EndTabBar();
-                    }
-
-                    ImGui.Separator();
+                        ImGui.Separator();
                     
-                    if (ImGui.Button("Apply Settings"))
-                    {
-                        ApplySettings();
-                    }
+                        if (ImGui.Button("Apply Settings"))
+                        {
+                            ApplySettings();
+                        }
                     
-                    ImGui.SameLine();
+                        ImGui.SameLine();
                     
-                    if (ImGui.Button("Save Settings"))
-                    {
-                        SaveSettings();
-                    }
+                        if (ImGui.Button("Save Settings"))
+                        {
+                            SaveSettings();
+                        }
                     
-                    ImGui.SameLine();
+                        ImGui.SameLine();
                     
-                    if (ImGui.Button("Reset to Defaults"))
-                    {
-                        ResetToDefaults();
+                        if (ImGui.Button("Reset to Defaults"))
+                        {
+                            ResetToDefaults();
+                        }
+                
                     }
                 }
-
-                Window.End();
             }
         }
 

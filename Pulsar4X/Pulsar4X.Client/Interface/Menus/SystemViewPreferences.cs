@@ -310,67 +310,70 @@ public class SystemViewPreferences : UniquePulsarGuiWindow<SystemViewPreferences
         if(_selectedEditorViewNames == null)
                 throw new NullReferenceException();
 
-        if(Window.Begin("System View Preferences", ref IsActive))
+        using (var w = Window.Scope("System View Preferences", ref IsActive))
         {
-            if(ImGui.Combo("###view-selector", ref _selectedEditorViewIndex, _selectedEditorViewNames, _selectedEditorViewNames.Length))
+            if (w.Visible)
             {
-                ImGui.EndCombo();
-            }
-            ImGui.SameLine();
-            if(ImGui.Button("New..."))
-            {
-                _showModal = true;
-            }
-
-            if(_showModal)
-            {
-                TextModal.GetInstance().DisplayModal("New View Preference", returnedString => {
-                    // Create new preference file here
-                    var view = new View(returnedString.Trim().ToLower() + ".ini", returnedString, -1)
-                    {
-                        FilterCheckmarks = new ()
-                        {
-                            { UserOrbitSettings.OrbitBodyType.Asteroid, false },
-                            { UserOrbitSettings.OrbitBodyType.Colony, true },
-                            { UserOrbitSettings.OrbitBodyType.Comet, true },
-                            { UserOrbitSettings.OrbitBodyType.Moon, true },
-                            { UserOrbitSettings.OrbitBodyType.Planet, true },
-                            { UserOrbitSettings.OrbitBodyType.DwarfPlanet, true },
-                            { UserOrbitSettings.OrbitBodyType.Ship, true },
-                            { UserOrbitSettings.OrbitBodyType.Star, true },
-                            { UserOrbitSettings.OrbitBodyType.Unknown, true }
-                        }
-                    };
-
-                    SaveViewIni(view);
-                    LoadAllIni();
-                    _showModal = false;
-                    ViewUpdateOccured?.Invoke(this, view);
-                }, delegate
+                if(ImGui.Combo("###view-selector", ref _selectedEditorViewIndex, _selectedEditorViewNames, _selectedEditorViewNames.Length))
                 {
-                    // Cancel was clicked
-                    _showModal = false;
-                });
-            }
-
-
-            ImGui.Separator();
-
-            foreach (UserOrbitSettings.OrbitBodyType type in Enum.GetValues(typeof(UserOrbitSettings.OrbitBodyType)))
-            {
-                var idx = (int)type;
-                var tip = UserOrbitSettings.OrbitBodyTypeTooltips[idx];
-
-                bool isChecked = Views[_selectedEditorViewIndex].FilterCheckmarks[type];
-                if(ImGui.Checkbox(tip, ref isChecked))
-                {
-                    Views[_selectedEditorViewIndex].FilterCheckmarks[type] = isChecked;
-                    SaveViewIni(Views[_selectedEditorViewIndex]);
-                    ViewUpdateOccured?.Invoke(this, Views[_selectedEditorViewIndex]);
+                    ImGui.EndCombo();
                 }
+                ImGui.SameLine();
+                if(ImGui.Button("New..."))
+                {
+                    _showModal = true;
+                }
+
+                if(_showModal)
+                {
+                    TextModal.GetInstance().DisplayModal("New View Preference", returnedString => {
+                        // Create new preference file here
+                        var view = new View(returnedString.Trim().ToLower() + ".ini", returnedString, -1)
+                        {
+                            FilterCheckmarks = new ()
+                            {
+                                { UserOrbitSettings.OrbitBodyType.Asteroid, false },
+                                { UserOrbitSettings.OrbitBodyType.Colony, true },
+                                { UserOrbitSettings.OrbitBodyType.Comet, true },
+                                { UserOrbitSettings.OrbitBodyType.Moon, true },
+                                { UserOrbitSettings.OrbitBodyType.Planet, true },
+                                { UserOrbitSettings.OrbitBodyType.DwarfPlanet, true },
+                                { UserOrbitSettings.OrbitBodyType.Ship, true },
+                                { UserOrbitSettings.OrbitBodyType.Star, true },
+                                { UserOrbitSettings.OrbitBodyType.Unknown, true }
+                            }
+                        };
+
+                        SaveViewIni(view);
+                        LoadAllIni();
+                        _showModal = false;
+                        ViewUpdateOccured?.Invoke(this, view);
+                    }, delegate
+                    {
+                        // Cancel was clicked
+                        _showModal = false;
+                    });
+                }
+
+
+                ImGui.Separator();
+
+                foreach (UserOrbitSettings.OrbitBodyType type in Enum.GetValues(typeof(UserOrbitSettings.OrbitBodyType)))
+                {
+                    var idx = (int)type;
+                    var tip = UserOrbitSettings.OrbitBodyTypeTooltips[idx];
+
+                    bool isChecked = Views[_selectedEditorViewIndex].FilterCheckmarks[type];
+                    if(ImGui.Checkbox(tip, ref isChecked))
+                    {
+                        Views[_selectedEditorViewIndex].FilterCheckmarks[type] = isChecked;
+                        SaveViewIni(Views[_selectedEditorViewIndex]);
+                        ViewUpdateOccured?.Invoke(this, Views[_selectedEditorViewIndex]);
+                    }
+                }
+        
             }
         }
-        Window.End();
     }
 
     internal void DisplayCombo(string key, Action<int> onItemSelected)

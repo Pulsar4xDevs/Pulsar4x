@@ -66,95 +66,100 @@ namespace Pulsar4X.Client
             ImGui.SetNextWindowSize(_windowSize, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(_windowPosition, ImGuiCond.Appearing);
 
-            Window.Begin("TimeControl", ref IsActive, _flags);
-            ImGui.PushItemWidth(100);
-
-            DateTime currenttime = time?.GameDateTime ?? default;
-
-            // Small arrow button for expanding time frequency menu
-            if (ImGui.ArrowButton("##expand", _expanded ? ImGuiDir.Down : ImGuiDir.Right))
-                _expanded = !_expanded;
-
-            // Date display
-            ImGui.SameLine();
-            ImGui.Text(DateDisplay.FormatDate(currenttime));
-
-            // Time span slider
-            ImGui.SameLine();
-            ImGui.BeginDisabled(!isPaused);
-            if (ImGui.SliderInt("##spnSldr", ref _timeSpanValue, 1, 60, _timeSpanValue.ToString()))
-                AdjustTimeSpan();
-
-            // Time duration combo
-            ImGui.SameLine();
-            if (ImGui.Combo("##spnCmbo", ref _timeSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
-                AdjustTimeSpan();
-
-            ImGui.EndDisabled();
-
-            ImGui.SameLine();
-
-            if (isStopping) ImGui.BeginDisabled();
-            
-            if (ImGui.ImageButton("playpause", buttonTexture.ToTextureRef(), _iconSize))
+            using (var w = Window.Scope("TimeControl", ref IsActive, _flags))
             {
-                PausePlayPressed();
-            }
-
-            if (isStopping) ImGui.EndDisabled();
-
-            // Step button only shown when paused; the invisible placeholder keeps the layout
-            // from jumping while time runs.
-            if (isPaused)
-            {
-                ImGui.SameLine();
-                if (ImGui.ImageButton("onestep", _uiState.Img_OneStep().ToTextureRef(), _iconSize))
+                if (w.Visible)
                 {
-                    OneStepPressed();
-                }
-            }
-            else
-            {
-                ImGui.SameLine();
-                ImGui.InvisibleButton("##onestep_invisbtn", _iconSize);
-            }
-
-            // Pause reason goes last on the row so a long reason only widens the window to the
-            // right and never covers or displaces the play/pause and step buttons.
-            if (isPaused)
-                DisplayPauseReason();
-
-            //When the submenu is expanded allow the user to adjust time frequency
-            if (_expanded)
-            {
                 ImGui.PushItemWidth(100);
-                ImGui.Indent();
-                ImGui.Text(DateDisplay.FormatTime(currenttime, seconds: true));
 
-                ImGui.BeginDisabled(!isPaused);
+                DateTime currenttime = time?.GameDateTime ?? default;
+
+                // Small arrow button for expanding time frequency menu
+                if (ImGui.ArrowButton("##expand", _expanded ? ImGuiDir.Down : ImGuiDir.Right))
+                    _expanded = !_expanded;
+
+                // Date display
                 ImGui.SameLine();
-                float freqSliderMin = _freqSpanType == 0 ? 1 : 0.001f;
-                float freqSliderMax = _freqSpanType == 0 ? 1000 : 60;
-                if (_freqTimeSpanValue > freqSliderMax)
-                    freqSliderMax = _freqTimeSpanValue;
-                if (_freqTimeSpanValue > 0 && _freqTimeSpanValue < freqSliderMin)
-                    freqSliderMin = _freqTimeSpanValue;
+                ImGui.Text(DateDisplay.FormatDate(currenttime));
 
-                string freqFormat = _freqSpanType == 0 ? "%.0f" : "%.3g";
-                if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, freqSliderMin, freqSliderMax, freqFormat, ImGuiSliderFlags.None))
+                // Time span slider
+                ImGui.SameLine();
+                ImGui.BeginDisabled(!isPaused);
+                if (ImGui.SliderInt("##spnSldr", ref _timeSpanValue, 1, 60, _timeSpanValue.ToString()))
+                    AdjustTimeSpan();
+
+                // Time duration combo
+                ImGui.SameLine();
+                if (ImGui.Combo("##spnCmbo", ref _timeSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
+                    AdjustTimeSpan();
+
+                ImGui.EndDisabled();
+
+                ImGui.SameLine();
+
+                if (isStopping) ImGui.BeginDisabled();
+            
+                if (ImGui.ImageButton("playpause", buttonTexture.ToTextureRef(), _iconSize))
                 {
-                    _freqTimeSpanValue = _freqSpanType == 0
-                        ? (float)Math.Round(_freqTimeSpanValue)
-                        : (float)Math.Round(_freqTimeSpanValue, 3);
-                    AdjustFreqency();
+                    PausePlayPressed();
                 }
 
-                ImGui.SameLine();
-                if (ImGui.Combo("##freqCmbo", ref _freqSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
-                    ReadFreqency();
-                ImGui.EndDisabled();
+                if (isStopping) ImGui.EndDisabled();
+
+                // Step button only shown when paused; the invisible placeholder keeps the layout
+                // from jumping while time runs.
+                if (isPaused)
+                {
+                    ImGui.SameLine();
+                    if (ImGui.ImageButton("onestep", _uiState.Img_OneStep().ToTextureRef(), _iconSize))
+                    {
+                        OneStepPressed();
+                    }
+                }
+                else
+                {
+                    ImGui.SameLine();
+                    ImGui.InvisibleButton("##onestep_invisbtn", _iconSize);
+                }
+
+                // Pause reason goes last on the row so a long reason only widens the window to the
+                // right and never covers or displaces the play/pause and step buttons.
+                if (isPaused)
+                    DisplayPauseReason();
+
+                //When the submenu is expanded allow the user to adjust time frequency
+                if (_expanded)
+                {
+                    ImGui.PushItemWidth(100);
+                    ImGui.Indent();
+                    ImGui.Text(DateDisplay.FormatTime(currenttime, seconds: true));
+
+                    ImGui.BeginDisabled(!isPaused);
+                    ImGui.SameLine();
+                    float freqSliderMin = _freqSpanType == 0 ? 1 : 0.001f;
+                    float freqSliderMax = _freqSpanType == 0 ? 1000 : 60;
+                    if (_freqTimeSpanValue > freqSliderMax)
+                        freqSliderMax = _freqTimeSpanValue;
+                    if (_freqTimeSpanValue > 0 && _freqTimeSpanValue < freqSliderMin)
+                        freqSliderMin = _freqTimeSpanValue;
+
+                    string freqFormat = _freqSpanType == 0 ? "%.0f" : "%.3g";
+                    if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, freqSliderMin, freqSliderMax, freqFormat, ImGuiSliderFlags.None))
+                    {
+                        _freqTimeSpanValue = _freqSpanType == 0
+                            ? (float)Math.Round(_freqTimeSpanValue)
+                            : (float)Math.Round(_freqTimeSpanValue, 3);
+                        AdjustFreqency();
+                    }
+
+                    ImGui.SameLine();
+                    if (ImGui.Combo("##freqCmbo", ref _freqSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
+                        ReadFreqency();
+                    ImGui.EndDisabled();
+                }
+            
+                }
             }
-            Window.End();
         }
 
         // Converts a (value, unit-index) pair from the combo boxes into a TimeSpan.

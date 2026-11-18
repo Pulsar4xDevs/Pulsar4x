@@ -327,26 +327,29 @@ namespace Pulsar4X.Client
             selectedFleet = selectedFleetId is { } id ? FindFleet(galaxy.Fleets, id) : null;
 
             ImGui.SetNextWindowSize(new Vector2(1000, 600), ImGuiCond.FirstUseEver);
-            if(Window.Begin("Fleets and Ships", ref IsActive, _flags))
+            using (var w = Window.Scope("Fleets and Ships", ref IsActive, _flags))
             {
-                DisplayFleetList(galaxy);
-
-                if (inspectShip != null)
+                if (w.Visible)
                 {
-                    ImGui.SameLine();
-                    ImGui.SetCursorPosY(27f);
-                    DisplayInspectedShip(galaxy, inspectShip, inspectSystemId!);
-                }
-                else if(selectedFleet != null || orderShip != null)
-                {
-                    ImGui.SameLine();
-                    ImGui.SetCursorPosY(27f);
-                    DisplayTabs(galaxy);
-                }
+                    DisplayFleetList(galaxy);
 
-                DisplayCaptainChooser(galaxy);
+                    if (inspectShip != null)
+                    {
+                        ImGui.SameLine();
+                        ImGui.SetCursorPosY(27f);
+                        DisplayInspectedShip(galaxy, inspectShip, inspectSystemId!);
+                    }
+                    else if(selectedFleet != null || orderShip != null)
+                    {
+                        ImGui.SameLine();
+                        ImGui.SetCursorPosY(27f);
+                        DisplayTabs(galaxy);
+                    }
+
+                    DisplayCaptainChooser(galaxy);
+            
+                }
             }
-            Window.End();
         }
 
         private void DisplayTabs(IClientGalaxy galaxy)
