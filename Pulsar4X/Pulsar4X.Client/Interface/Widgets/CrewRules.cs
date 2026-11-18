@@ -6,8 +6,8 @@ using Pulsar4X.Api;
 namespace Pulsar4X.Client.Interface.Widgets;
 
 /// <summary>
-/// Client-side copy of the crew-rules display and design checks. The Client project does not
-/// reference the engine, so the wording lives here and must stay in step with
+/// Client-side crew-rules display and design checks. Automated order and span wording comes
+/// from <see cref="CrewText"/>. Other refusal strings must stay in step with
 /// <c>CommandTranslator</c> and <c>ShipCrew.DesignCrewWarnings</c>.
 /// </summary>
 public static class CrewRules
@@ -15,8 +15,7 @@ public static class CrewRules
     public const string AutomatedState = "Automated, no crew needed";
     public const string AutomatedLabel = "Automated";
 
-    public const string AutomatedShipNoOrders =
-        "This ship has no bridge: it is automated and takes no orders of its own. Put it in a fleet to have it follow the flagship.";
+    public const string AutomatedShipNoOrders = CrewText.AutomatedNoOrders;
 
     public const string AssignCaptainAutomated =
         "This ship has no bridge: it is automated and has no captain.";
@@ -92,8 +91,40 @@ public static class CrewRules
     public static string PeopleAboardLine(int people)
         => $"Life support: {people:N0} {(people == 1 ? "person" : "people")} aboard";
 
+    /// <summary>
+    /// Player actions that may be gated on an automated ship. Goal, move, well/system
+    /// freight (Trade, Haul, Move goods) and destination picks use <see cref="GoalOrMove"/>.
+    /// Cargo transfer, refit, fire control and cancel stay allowed.
+    /// </summary>
+    public enum ShipAction
+    {
+        GoalOrMove,
+        SetFlagship,
+        AssignCaptain,
+        TopUp,
+        CargoTransfer,
+        Refit,
+        FireControl,
+        Cancel,
+    }
+
+    /// <summary>Refusal tooltip for <paramref name="action"/> on this ship, or null if allowed.</summary>
+    public static string? RefusalFor(ShipAction action, ShipSnapshot? ship)
+    {
+        bool automated = ship is { Automated: true };
+        return action switch
+        {
+            ShipAction.GoalOrMove => automated ? CrewText.AutomatedNoOrders : null,
+            ShipAction.SetFlagship => automated ? SetFlagshipAutomated : null,
+            ShipAction.AssignCaptain => ship == null ? null : AssignCaptainRefusal(ship),
+            ShipAction.TopUp => automated ? TopUpAutomated : null,
+            ShipAction.CargoTransfer or ShipAction.Refit or ShipAction.FireControl or ShipAction.Cancel => null,
+            _ => automated ? CrewText.AutomatedNoOrders : null,
+        };
+    }
+
     public static string? OrderRefusal(ShipSnapshot? ship)
-        => ship is { Automated: true } ? AutomatedShipNoOrders : null;
+        => RefusalFor(ShipAction.GoalOrMove, ship);
 
     public static string? SetFlagshipRefusal(ShipSnapshot ship)
         => ship.Automated ? SetFlagshipAutomated : null;

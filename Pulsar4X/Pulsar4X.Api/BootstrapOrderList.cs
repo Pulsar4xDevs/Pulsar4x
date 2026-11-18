@@ -124,13 +124,15 @@ public sealed class BootstrapOrderList
 
     /// <summary>
     /// Why the fleet order cannot be sent yet, or null. <paramref name="inReach"/> is the client's span test
-    /// of the pair. <paramref name="captainedShips"/> counts the fleet's captained ships. A ship needs no
+    /// of the pair. <paramref name="captainedShips"/> counts the fleet's captained ships. When there is no
+    /// captained ship and <paramref name="allAutomated"/> is true, the refusal is
+    /// <see cref="CrewText.AutomatedNoOrders"/> rather than a missing captain. A ship needs no
     /// Construction Bay, because the destination colony can mount the crates.
     /// </summary>
-    public static string? Validate(int captainedShips, int sourceId, int destId, IReadOnlyList<BootstrapCrateRequest> lines, bool inReach)
+    public static string? Validate(int captainedShips, int sourceId, int destId, IReadOnlyList<BootstrapCrateRequest> lines, bool inReach, bool allAutomated = false)
     {
         if (captainedShips == 0)
-            return "No ship in this fleet has a captain.";
+            return allAutomated ? CrewText.AutomatedNoOrders : "No ship in this fleet has a captain.";
         if (sourceId < 0)
             return "Pick a source colony.";
         if (destId < 0)

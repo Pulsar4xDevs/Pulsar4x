@@ -75,15 +75,40 @@ public class CrewRulesTests
         var noSlot = new ShipSnapshot(1, "Test", "sys") { OfficerSlots = 0 };
 
         Assert.That(CrewRules.OrderRefusal(crewed), Is.Null);
-        Assert.That(CrewRules.OrderRefusal(automated), Is.EqualTo(CrewRules.AutomatedShipNoOrders));
+        Assert.That(CrewRules.OrderRefusal(automated), Is.EqualTo(CrewText.AutomatedNoOrders));
         Assert.That(CrewRules.SetFlagshipRefusal(crewed), Is.Null);
         Assert.That(CrewRules.SetFlagshipRefusal(automated), Is.EqualTo(CrewRules.SetFlagshipAutomated));
         Assert.That(CrewRules.AssignCaptainRefusal(crewed), Is.Null);
         Assert.That(CrewRules.AssignCaptainRefusal(automated), Is.EqualTo(CrewRules.AssignCaptainAutomated));
         Assert.That(CrewRules.AssignCaptainRefusal(noSlot), Is.EqualTo(CrewRules.AssignCaptainNoSlot));
 
-        Assert.That(CrewRules.AutomatedShipNoOrders, Does.Contain("automated").IgnoreCase.And.Contain("follow the flagship"));
+        Assert.That(CrewRules.AutomatedShipNoOrders, Is.EqualTo(CrewText.AutomatedNoOrders));
+        Assert.That(CrewText.AutomatedNoOrders, Does.Contain("automated").IgnoreCase.And.Contain("follow the flagship"));
         Assert.That(CrewRules.SetFlagshipAutomated, Does.Contain("cannot be a flagship"));
+    }
+
+    [Test]
+    public void AutomatedShips_BlockOwnOrders_ButAllowTransferRefitFireControlAndCancel()
+    {
+        var automated = new ShipSnapshot(1, "SensorSat I", "sys") { Automated = true };
+        var crewed = new ShipSnapshot(2, "Surveyor I", "sys") { OfficerSlots = 4 };
+
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.GoalOrMove, automated), Is.EqualTo(CrewText.AutomatedNoOrders));
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.SetFlagship, automated), Is.EqualTo(CrewRules.SetFlagshipAutomated));
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.AssignCaptain, automated), Is.EqualTo(CrewRules.AssignCaptainAutomated));
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.TopUp, automated), Is.EqualTo(CrewRules.TopUpAutomated));
+
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.CargoTransfer, automated), Is.Null);
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.Refit, automated), Is.Null);
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.FireControl, automated), Is.Null);
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.Cancel, automated), Is.Null);
+
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.GoalOrMove, crewed), Is.Null);
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.CargoTransfer, crewed), Is.Null);
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.Refit, crewed), Is.Null);
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.FireControl, crewed), Is.Null);
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.Cancel, crewed), Is.Null);
+        Assert.That(CrewRules.RefusalFor(CrewRules.ShipAction.GoalOrMove, null), Is.Null);
     }
 
     [Test]

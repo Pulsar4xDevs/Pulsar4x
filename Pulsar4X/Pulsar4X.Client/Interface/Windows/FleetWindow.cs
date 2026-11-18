@@ -766,7 +766,7 @@ namespace Pulsar4X.Client
             if (orderShip != null && orderShip.Automated)
             {
                 DisplayHelpers.Header("Orders");
-                ImGui.TextWrapped(CrewRules.AutomatedShipNoOrders);
+                ImGui.TextWrapped(CrewText.AutomatedNoOrders);
             }
             else if (orderShip != null && !ShipHasCaptain(orderShip))
             {
@@ -842,16 +842,26 @@ namespace Pulsar4X.Client
 
         void DisplayBand(OrderBand band, Action body)
         {
+            // Well and system groups (Trade, Haul, Move goods) are refused on an automated ship,
+            // even when span would otherwise open the band. The tooltip is CrewText.AutomatedNoOrders.
+            string? refusal = band != OrderBand.Ship ? CrewRules.OrderRefusal(orderShip) : null;
             bool openBand = BandOpen(band);
-            if (!openBand)
+            bool disabled = !openBand || refusal != null;
+            if (disabled)
                 ImGui.BeginDisabled();
             ImGui.SetNextItemOpen(true, ImGuiCond.Once);
             bool open = ImGui.CollapsingHeader(BandTitle(band) + "###band-" + band);
-            if (!openBand && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                ImGui.SetTooltip(BandFix(band));
+            if (disabled && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                ImGui.BeginTooltip();
+                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
+                ImGui.TextUnformatted(refusal ?? BandFix(band));
+                ImGui.PopTextWrapPos();
+                ImGui.EndTooltip();
+            }
             if (open)
                 body();
-            if (!openBand)
+            if (disabled)
                 ImGui.EndDisabled();
         }
 
@@ -882,11 +892,32 @@ namespace Pulsar4X.Client
 
         // Bootstrap is the fleet's order: it hands packages to its captained ships, sub-fleets included. A ship needs no
         // Construction Bay, because the destination colony can mount the crates.
-        bool BootstrapFleet => orderShip == null && selectedFleet != null && CapableShips(selectedFleet) > 0;
+        bool BootstrapFleet => orderShip == null && selectedFleet != null
+            && (CapableShips(selectedFleet) > 0 || AllShipsAutomated(selectedFleet));
 
         static int CapableShips(FleetSnapshot fleet)
             => fleet.Ships.Count(ShipHasCaptain)
                 + fleet.SubFleets.Sum(CapableShips);
+
+        static bool AllShipsAutomated(FleetSnapshot fleet)
+        {
+            bool any = false;
+            bool all = true;
+            Walk(fleet);
+            return any && all;
+
+            void Walk(FleetSnapshot f)
+            {
+                foreach (var ship in f.Ships)
+                {
+                    any = true;
+                    if (!ship.Automated)
+                        all = false;
+                }
+                foreach (var sub in f.SubFleets)
+                    Walk(sub);
+            }
+        }
 
         bool ManualPlot => orderShip != null && (!ShipHasCaptain(orderShip) || plotting);
 
@@ -1893,6 +1924,7 @@ namespace Pulsar4X.Client
             string doneTooltip = systemSpan
                 ? "This body is surveyed. Unsurveyed bodies under it are still included."
                 : "This body is surveyed. Unsurveyed bodies in its well are still included.";
+            string? autoRefusal = CrewRules.OrderRefusal(orderShip);
             if(clickable)
             {
                 int colors = 0;
@@ -1908,7 +1940,10 @@ namespace Pulsar4X.Client
                     ImGui.PushStyleColor(ImGuiCol.Button, Styles.HighlightColor);
                     colors = 1;
                 }
-                if(ImGui.SmallButton($"{name}###{buttonPrefix}-{node.Id}"))
+                bool pressed = autoRefusal != null
+                    ? CrewBars.GatedSmallButton($"{name}###{buttonPrefix}-{node.Id}", autoRefusal)
+                    : ImGui.SmallButton($"{name}###{buttonPrefix}-{node.Id}");
+                if(pressed)
                 {
                     if(selectOnClick)
                         select?.Invoke(node.Id);
@@ -2357,7 +2392,8 @@ namespace Pulsar4X.Client
             var dest = pickedDest;
             string? problem = BootstrapOrderList.Validate(
                 CapableShips(fleet), source?.Id ?? -1, dest?.Id ?? -1, lines,
-                source != null && dest != null && InBand(source, dest.Id))
+                source != null && dest != null && InBand(source, dest.Id),
+                allAutomated: AllShipsAutomated(fleet))
                 ?? infraProblem;
             if(problem != null)
                 ImGui.TextWrapped(problem);

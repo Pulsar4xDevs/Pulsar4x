@@ -1395,12 +1395,15 @@ public class BootstrapColonyTests
     {
         var one = new[] { new BootstrapCrateRequest("a", 1) };
         Assert.That(BootstrapOrderList.Validate(0, 1, 2, one, true), Is.EqualTo("No ship in this fleet has a captain."));
+        Assert.That(BootstrapOrderList.Validate(0, 1, 2, one, true, allAutomated: true), Is.EqualTo(CrewText.AutomatedNoOrders));
         Assert.That(BootstrapOrderList.Validate(1, -1, 2, one, true), Is.EqualTo("Pick a source colony."));
         Assert.That(BootstrapOrderList.Validate(1, 1, -1, one, true), Is.EqualTo("Pick a destination colony."));
         Assert.That(BootstrapOrderList.Validate(1, 1, 1, one, true), Is.EqualTo("Pick two different colonies."));
         Assert.That(BootstrapOrderList.Validate(1, 1, 2, Array.Empty<BootstrapCrateRequest>(), true), Is.EqualTo("Nothing to build."));
         Assert.That(BootstrapOrderList.Validate(1, 1, 2, one, false), Does.Contain("outside"));
         Assert.That(BootstrapOrderList.Validate(1, 1, 2, one, true), Is.Null);
+        Assert.That(BootstrapOrderList.Validate(1, 1, 2, one, true, allAutomated: true), Is.Null,
+            "A captained fleet is not blocked by the all-automated flag.");
     }
 
     static IEnumerable<ShipSnapshot> AllShips(FleetSnapshot fleet)
