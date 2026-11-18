@@ -234,13 +234,18 @@ namespace Pulsar4X.Tests
                 | ForeignEntities.ColonyTabs.Construction
                 | ForeignEntities.ColonyTabs.Market
                 | ForeignEntities.ColonyTabs.Shipping
-                | ForeignEntities.ColonyTabs.Log;
+                | ForeignEntities.ColonyTabs.Log
+                | ForeignEntities.ColonyTabs.Crew;
             const ForeignEntities.ColonyTabs foreignTabs =
                 ForeignEntities.ColonyTabs.Summary
                 | ForeignEntities.ColonyTabs.Market
                 | ForeignEntities.ColonyTabs.Shipping;
 
-            Assert.AreEqual(ownedBase, ForeignEntities.ColonyTabsFor(Colony(1, OwnerRelation.Owned, 1, 9, "Earth")));
+            var ownedBare = Colony(1, OwnerRelation.Owned, 1, 9, "Earth");
+            Assert.AreEqual(ownedBase, ForeignEntities.ColonyTabsFor(ownedBare));
+            Assert.IsTrue(ForeignEntities.ColonyTabsFor(ownedBare).HasFlag(ForeignEntities.ColonyTabs.Crew));
+            Assert.IsFalse(ownedBare.HasView<NavalAcademyView>());
+            Assert.IsFalse(ownedBare.HasView<RecruitmentView>());
 
             var ownedFull = With(
                 Colony(1, OwnerRelation.Owned, 1, 9, "Earth"),
@@ -252,11 +257,12 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(
                 ownedBase
                 | ForeignEntities.ColonyTabs.Mining
-                | ForeignEntities.ColonyTabs.NavalAcademy
-                | ForeignEntities.ColonyTabs.Recruitment
                 | ForeignEntities.ColonyTabs.Power
                 | ForeignEntities.ColonyTabs.Workforce,
                 ForeignEntities.ColonyTabsFor(ownedFull));
+            Assert.IsTrue(ForeignEntities.ColonyTabsFor(ownedFull).HasFlag(ForeignEntities.ColonyTabs.Crew));
+            Assert.IsFalse(ForeignEntities.ColonyTabsFor(ownedFull).HasFlag(ForeignEntities.ColonyTabs.NavalAcademy));
+            Assert.IsFalse(ForeignEntities.ColonyTabsFor(ownedFull).HasFlag(ForeignEntities.ColonyTabs.Recruitment));
 
             var foreignFull = With(
                 Colony(5, OwnerRelation.Friendly, 7, 8, "Ceres Depot"),
@@ -275,6 +281,7 @@ namespace Pulsar4X.Tests
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Log));
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Power));
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Workforce));
+            Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Crew));
 
             Assert.AreEqual(foreignTabs, ForeignEntities.ColonyTabsFor(Colony(8, OwnerRelation.Neutral, 8, 6, "Luna Concord")));
             Assert.AreEqual(foreignTabs, ForeignEntities.ColonyTabsFor(Colony(9, OwnerRelation.Hostile, 3, 3, "Raid Camp")));

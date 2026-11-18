@@ -93,7 +93,9 @@ namespace Pulsar4X.Client
             ImGui.PushStyleColor(ImGuiCol.TableHeaderBg, headerBg);
 
             // Clip to the content region and paint an opaque background so the system tree cannot show through.
-            if (ImGui.BeginChild("##crew-market-panel", new System.Numerics.Vector2(avail.X, avail.Y)))
+            // A floor keeps the listing usable when this panel sits under other Crew tab sections.
+            float height = Math.Max(280f, avail.Y);
+            if (ImGui.BeginChild("##crew-market-panel", new System.Numerics.Vector2(avail.X, height)))
             {
                 ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + ImGui.GetContentRegionAvail().X);
                 ImGui.TextUnformatted("The fee is 1.5× tuition (three months of crew wage), and no ask can go below it. The seller receives "

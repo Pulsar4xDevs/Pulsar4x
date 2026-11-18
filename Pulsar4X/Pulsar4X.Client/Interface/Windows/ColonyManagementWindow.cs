@@ -44,8 +44,8 @@ namespace Pulsar4X.Client
             _selectedSystemId = systemId;
         }
 
-        // Set by OpenRecruitment so the Recruitment tab is brought forward once.
-        private bool _focusRecruitmentTab;
+        // Set by OpenRecruitment so the Crew tab is brought forward once.
+        private bool _focusCrewTab;
 
         // ImGui.NET only exposes the flags overload together with p_open, which adds a close
         // button; call the native entry with a null p_open instead.
@@ -56,11 +56,11 @@ namespace Pulsar4X.Client
                 return ImGuiNative.igBeginTabItem(text, null, flags) != 0;
         }
 
-        /// <summary>Open this window on a colony with its Recruitment tab selected.</summary>
+        /// <summary>Open this window on a colony with its Crew tab selected.</summary>
         public void OpenRecruitment(int colonyId, string systemId)
         {
             SelectColony(colonyId, systemId);
-            _focusRecruitmentTab = true;
+            _focusCrewTab = true;
             SetActive(true);
         }
 
@@ -266,18 +266,11 @@ namespace Pulsar4X.Client
                     mining.Display();
                     ImGui.EndTabItem();
                 }
-                if (tabs.HasFlag(ForeignEntities.ColonyTabs.NavalAcademy)
-                    && selectedColony.GetView<NavalAcademyView>() is { } academy && ImGui.BeginTabItem("Naval Academy"))
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Crew)
+                    && BeginTabItem("Crew", _focusCrewTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
                 {
-                    DisplayNavalAcademy(selectedColony.Id, academy);
-                    ImGui.EndTabItem();
-                }
-                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Recruitment)
-                    && selectedColony.GetView<RecruitmentView>() is { } recruitment
-                    && BeginTabItem("Recruitment", _focusRecruitmentTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
-                {
-                    _focusRecruitmentTab = false;
-                    DisplayRecruitment(selectedColony.Id, recruitment);
+                    _focusCrewTab = false;
+                    DisplayCrewTab(selectedColony);
                     ImGui.EndTabItem();
                 }
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Power)
@@ -643,12 +636,9 @@ namespace Pulsar4X.Client
             var planet = colonyView?.PlanetEntityId is { } planetId ? system.GetEntity(planetId) : null;
 
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            var crewMarket = !readOnly ? colony.GetView<CrewMarketView>() : null;
-            float marketReserve = crewMarket != null ? Math.Min(380f, Math.Max(240f, windowContentSize.Y * 0.50f)) : 0f;
-            float columnHeight = Math.Max(120f, windowContentSize.Y - marketReserve);
-            var firstChildSize = new Vector2(windowContentSize.X * 0.33f, columnHeight);
-            var secondChildSize = new Vector2(windowContentSize.X * 0.33f, columnHeight);
-            var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), columnHeight);
+            var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
+            var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
+            var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
             if(ImGui.BeginChild("ColonySummary1", firstChildSize, ImGuiChildFlags.Borders))
             {
                 var colonyName = colony.GetView<NameView>()?.Name ?? "Unknown";
@@ -693,11 +683,6 @@ namespace Pulsar4X.Client
                         ImGui.PopTextWrapPos();
                     }
                 }
-
-                // Owner-only: CrewPool is filled for the owning faction only.
-                if(!readOnly && colonyView != null
-                    && ImGui.CollapsingHeader("Crew pool", ImGuiTreeNodeFlags.DefaultOpen))
-                    DisplayCrewPool(colonyView);
 
                 if(colony.GetView<InfrastructureView>() is { } infrastructure
                     && ImGui.CollapsingHeader("Infrastructure", ImGuiTreeNodeFlags.DefaultOpen))
@@ -822,11 +807,6 @@ namespace Pulsar4X.Client
                 }
             }
             ImGui.EndChild();
-
-            if (crewMarket != null
-                && ImGui.CollapsingHeader("Crew market", ImGuiTreeNodeFlags.DefaultOpen))
-                ColonyCrewMarketDisplay.Display(colony.Id, crewMarket, _uiState);
-
         }
 
         private void DisplayAdministratorButton(ColonyView? colonyView, int colonyId)
@@ -911,6 +891,44 @@ namespace Pulsar4X.Client
             => candidate.WagePerMonth > 0
                 ? candidate.WagePerMonth.ToString("N0", System.Globalization.CultureInfo.CurrentCulture) + " a month"
                 : candidate.Wage.ToString("N0", System.Globalization.CultureInfo.CurrentCulture) + " a day";
+
+        private void DisplayCrewTab(EntitySnapshot colony)
+        {
+            if (ImGui.BeginChild("ColonyCrewTab"))
+            {
+                var colonyView = colony.GetView<ColonyView>();
+                if (colonyView != null)
+                {
+                    if (ImGui.CollapsingHeader("Crew pool", ImGuiTreeNodeFlags.DefaultOpen))
+                        DisplayCrewPool(colonyView);
+                }
+
+                if (ImGui.CollapsingHeader("Recruitment", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    if (colony.GetView<RecruitmentView>() is { } recruitment)
+                        DisplayRecruitment(colony.Id, recruitment);
+                    else
+                        ImGui.TextDisabled("Recruitment is not available at this colony.");
+                }
+
+                if (ImGui.CollapsingHeader("Naval Academy", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    if (colony.GetView<NavalAcademyView>() is { } academy)
+                        DisplayNavalAcademy(colony.Id, academy);
+                    else
+                        ImGui.TextDisabled("This colony has no naval academy.");
+                }
+
+                if (ImGui.CollapsingHeader("Crew market", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    if (colony.GetView<CrewMarketView>() is { } crewMarket)
+                        ColonyCrewMarketDisplay.Display(colony.Id, crewMarket, _uiState);
+                    else
+                        ImGui.TextDisabled("No crew market at this colony.");
+                }
+            }
+            ImGui.EndChild();
+        }
 
         private void DisplayRecruitment(int colonyId, RecruitmentView view)
         {
