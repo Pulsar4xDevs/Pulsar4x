@@ -7,12 +7,39 @@ using Pulsar4X.Extensions;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Factions;
 using Pulsar4X.Engine;
+using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Industry
 {
     public static class IndustryTools
     {
+        public const string ShipAssemblyIndustryType = "ship-assembly";
+
+        public static bool IsShipyardLine(IndustryAbilityDB.ProductionLine line)
+            => line?.IndustryTypeRates != null && line.IndustryTypeRates.ContainsKey(ShipAssemblyIndustryType);
+
+        /// <summary>
+        /// Shipyards build only ships. Component, material, and installation jobs belong on a factory.
+        /// </summary>
+        public static bool LineAccepts(IndustryAbilityDB.ProductionLine line, IConstructableDesign design)
+        {
+            if (line == null || design == null || line.IndustryTypeRates == null)
+                return false;
+            if (!line.IndustryTypeRates.ContainsKey(design.IndustryTypeID))
+                return false;
+            if (IsShipyardLine(line) && design is not ShipDesign)
+                return false;
+            return true;
+        }
+
+        public static string RejectionReason(IndustryAbilityDB.ProductionLine line, IConstructableDesign design)
+        {
+            if (IsShipyardLine(line) && design is not ShipDesign)
+                return "Shipyards build only ships.";
+            return "This line cannot build that design.";
+        }
+
         public static void AddJob(Entity industryEntity, string plineID, IndustryJob job)
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
@@ -355,6 +382,10 @@ namespace Pulsar4X.Industry
             foreach (var line in plines)
             {
                 if (!line.Value.IndustryTypeRates.TryGetValue(typID, out int rate))
+                    rate = -1;
+                // A shipyard may still list component-construction from an older design.
+                // Missing parts belong on a factory, not in a slip.
+                if (IsShipyardLine(line.Value) && typID != ShipAssemblyIndustryType)
                     rate = -1;
                 if (rate > bestLine.rate)
                     bestLine = (line.Key, rate);

@@ -282,18 +282,74 @@ public class ShipRefitTests
         };
         world.Info.IndustryDesigns[bay.UniqueID] = bay;
         var colony = Colony(world, 1_000_000, refitPoints: 5);
-        colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[LineId]
-            .IndustryTypeRates["component-construction"] = 100;
+        const string FactoryLineId = "factory-line";
+        colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[FactoryLineId] = new IndustryAbilityDB.ProductionLine
+        {
+            Name = "Factory",
+            IndustryTypeRates = new Dictionary<string, int> { ["component-construction"] = 100 },
+        };
+
+        var onYard = new CommandTranslator(Game).Translate(world.Faction, colony, new QueueIndustryJobCommand(
+            colony.Id, LineId, bay.UniqueID, 1, false, false));
+        Assert.That(onYard.Accepted, Is.False);
+        Assert.That(onYard.RejectionReason, Does.Contain("Shipyards build only ships"));
 
         var queued = new CommandTranslator(Game).Translate(world.Faction, colony, new QueueIndustryJobCommand(
-            colony.Id, LineId, bay.UniqueID, 1, false, false));
+            colony.Id, FactoryLineId, bay.UniqueID, 1, false, false));
 
         Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
         Assert.That(colony.GetDataBlob<LocalConstructionDB>().RefitQueue, Is.Empty);
-        var job = colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[LineId].Jobs.Single();
+        var job = colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[FactoryLineId].Jobs.Single();
         Assert.That(job.ItemGuid, Is.EqualTo(bay.UniqueID));
         Assert.That(job.InstallOn, Is.Null);
-        Assert.That(YardLine(world, colony).Constructibles.Select(item => item.DesignId), Does.Contain(bay.UniqueID));
+        Assert.That(YardLine(world, colony).Constructibles.Select(item => item.DesignId), Does.Not.Contain(bay.UniqueID));
+        var factoryLine = new GameProjector(Game).ProjectEntity(colony, colony.FactionOwnerID).GetView<IndustryView>()!
+            .ProductionLines.Single(line => line.Id == FactoryLineId);
+        Assert.That(factoryLine.Constructibles.Select(item => item.DesignId), Does.Contain(bay.UniqueID));
+    }
+
+    [Test]
+    public void AutoAddSubJobs_QueuesMissingComponentsAtAFactory_NotTheShipyard()
+    {
+        var world = NewSystem();
+        var part = new ComponentDesign
+        {
+            UniqueID = "part-" + Guid.NewGuid().ToString("N"),
+            Name = "Part",
+            IndustryTypeID = "component-construction",
+            ComponentMountType = ComponentMountType.ShipComponent,
+            CargoTypeID = "general-storage",
+            MassPerUnit = 100,
+            VolumePerUnit = 10,
+            IndustryPointCosts = 10,
+        };
+        world.Info.IndustryDesigns[part.UniqueID] = part;
+        world.Info.Data.Unlock("plastic");
+        world.Info.Data.Unlock("plastic-armor");
+        var ship = new ShipDesign(
+            world.Info, "Hull",
+            new List<(ComponentDesign, int)> { (part, 1) },
+            (world.Info.Data.Armor["plastic-armor"], 0f));
+        ship.Initialise(world.Info);
+        Assert.That(ship.ResourceCosts.ContainsKey(part.UniqueID), Is.True);
+
+        var colony = Colony(world, 1_000_000, refitPoints: 5);
+        var lines = colony.GetDataBlob<IndustryAbilityDB>().ProductionLines;
+        // A leftover component-construction rate on the yard must not win the sub-job.
+        lines[LineId].IndustryTypeRates["component-construction"] = 1000;
+        const string FactoryLineId = "factory-line";
+        lines[FactoryLineId] = new IndustryAbilityDB.ProductionLine
+        {
+            Name = "Factory",
+            IndustryTypeRates = new Dictionary<string, int> { ["component-construction"] = 10 },
+        };
+
+        var job = new IndustryJob(world.Info, ship.UniqueID);
+        job.InitialiseJob(1, false);
+        IndustryTools.AutoAddSubJobs(colony, job);
+
+        Assert.That(lines[LineId].Jobs.Select(j => j.ItemGuid), Does.Not.Contain(part.UniqueID));
+        Assert.That(lines[FactoryLineId].Jobs.Single().ItemGuid, Is.EqualTo(part.UniqueID));
     }
 
     [Test]

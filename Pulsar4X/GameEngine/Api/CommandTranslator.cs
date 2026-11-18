@@ -2597,10 +2597,13 @@ namespace Pulsar4X.Engine.Api
             if (ValidateIndustryLine(commanded, queue.ProductionLineId) is { } lineError)
                 return lineError;
 
-            if (design is ShipDesign ship
-                && commanded.TryGetDataBlob<IndustryAbilityDB>(out var industry)
-                && industry.ProductionLines.TryGetValue(queue.ProductionLineId, out var line)
-                && ship.MassPerUnit > line.MaxVolume)
+            commanded.TryGetDataBlob<IndustryAbilityDB>(out var industry);
+            industry.ProductionLines.TryGetValue(queue.ProductionLineId, out var line);
+
+            if (!IndustryTools.LineAccepts(line, design))
+                return CommandResult.Reject(IndustryTools.RejectionReason(line, design));
+
+            if (design is ShipDesign ship && ship.MassPerUnit > line.MaxVolume)
                 return CommandResult.Reject("That design is over this slip.");
 
             var job = new IndustryJob(factionInfo, queue.DesignId);

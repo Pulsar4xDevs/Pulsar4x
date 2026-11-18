@@ -132,6 +132,15 @@ namespace Pulsar4X.Industry
                 {
                     case OrderTypeEnum.NewJob:
                     {
+                        if (_entityCommanding.TryGetDataBlob<IndustryAbilityDB>(out var industry)
+                            && industry.ProductionLines.TryGetValue(productionLineID, out var line)
+                            && _factionEntity.TryGetDataBlob<FactionInfoDB>(out var factionInfo)
+                            && factionInfo.IndustryDesigns.TryGetValue(_job.ItemGuid, out var jobDesign)
+                            && !IndustryTools.LineAccepts(line, jobDesign))
+                        {
+                            Fail(IndustryTools.RejectionReason(line, jobDesign));
+                            return;
+                        }
                         if(AutoAddSubJobs)
                             IndustryTools.AutoAddSubJobs(_entityCommanding, _job);
                         IndustryTools.AddJob(_entityCommanding, productionLineID, _job);
