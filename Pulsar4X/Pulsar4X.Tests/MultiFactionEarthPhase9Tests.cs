@@ -155,6 +155,21 @@ public class MultiFactionEarthPhase9Tests
     }
 
     [Test]
+    public void MaskExhaustion_DoesNotSpawnOrTakePeopleOrFunds()
+    {
+        long people = Pop(_amc);
+        decimal funds = Funds(_amc);
+        int factions = _game.Factions.Count;
+        // Mask indexes are never recycled; once the next index hits the headroom gate, spawning must stop.
+        _game.NextFactionMaskIndex = Game.MaxFactions - FactionSpawner.FactionHeadroom;
+        var colony = FactionSpawner.TrySpawn(_game, _sol, Iron, _amc, Now);
+        Assert.That(colony, Is.Null, "no spawn when mask slots are exhausted");
+        Assert.That(_game.Factions.Count, Is.EqualTo(factions));
+        Assert.That(Pop(_amc), Is.EqualTo(people), "people were not taken");
+        Assert.That(Funds(_amc), Is.EqualTo(funds), "funds were not taken");
+    }
+
+    [Test]
     public void Caps_OnePerSystemPerSixMonths_AndTheGameLimit_AndMaxFactionsMinusFour()
     {
         var first = ForceSpawn(Iron, _amc);

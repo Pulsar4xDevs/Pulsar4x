@@ -109,6 +109,13 @@ namespace Pulsar4X.Factions
                 reason = "faction mask headroom";
                 return false;
             }
+            // Mask indexes are never recycled, so the live faction count can be well below 32
+            // after folds while the next allocation would still throw.
+            if (game.NextFactionMaskIndex >= Game.MaxFactions - FactionHeadroom)
+            {
+                reason = "faction mask exhausted";
+                return false;
+            }
             if (game.NpcCompanies.LastSpawnBySystem.TryGetValue(system.ID, out var last)
                 && (now - last).TotalDays + 0.001 < CooldownDays)
             {
@@ -214,27 +221,6 @@ namespace Pulsar4X.Factions
             string companyName = UniqueName(game, CompanyName(game, sponsor, goodName));
             string abbr = Abbreviation(companyName);
 
-            sponsorInfo.Money.AddExpense(now, TransactionCategory.Charter,
-                $"Charter of {companyName} to supply {goodName}", SeedFunds);
-
-            var company = FactionFactory.CreateBasicFaction(game, companyName, abbr, 0);
-            company.FactionOwnerID = company.Id;
-            var info = company.GetDataBlob<FactionInfoDB>();
-            info.AutoHires = true;
-            info.NpcEconomy = false;
-            info.SponsorFactionId = sponsor.Id;
-            info.SpawnedGood = cargoId;
-            info.Money.AddIncome(now, TransactionCategory.Charter,
-                $"Seed funds from {sponsor.GetDataBlob<NameDB>().DefaultName}", SeedFunds);
-            if (!info.KnownSystems.Contains(system.ID))
-                info.KnownSystems.Add(system.ID);
-            if (!info.Species.Contains(species))
-                info.Species.Add(species);
-            SpeciesCargo.Register(info.Data, info.Species);
-
-            CopyLibraries(sponsorInfo, info);
-            SeedStances(game, company, info);
-
             var blueprint = new ColonyBlueprint
             {
                 UniqueID = "npc-company-" + cargoId,
@@ -254,17 +240,49 @@ namespace Pulsar4X.Factions
                 SeatAdministrator = true,
                 TechFromStartingItems = true,
             };
+
+            Entity? company = null;
             Entity colony;
             try
             {
+                sponsorInfo.Money.AddExpense(now, TransactionCategory.Charter,
+                    $"Charter of {companyName} to supply {goodName}", SeedFunds);
+
+                // CreateBasicFaction allocates a mask index and throws once 32 have ever been handed out.
+                company = FactionFactory.CreateBasicFaction(game, companyName, abbr, 0);
+                company.FactionOwnerID = company.Id;
+                var info = company.GetDataBlob<FactionInfoDB>();
+                info.AutoHires = true;
+                info.NpcEconomy = false;
+                info.SponsorFactionId = sponsor.Id;
+                info.SpawnedGood = cargoId;
+                info.Money.AddIncome(now, TransactionCategory.Charter,
+                    $"Seed funds from {sponsor.GetDataBlob<NameDB>().DefaultName}", SeedFunds);
+                if (!info.KnownSystems.Contains(system.ID))
+                    info.KnownSystems.Add(system.ID);
+                if (!info.Species.Contains(species))
+                    info.Species.Add(species);
+                SpeciesCargo.Register(info.Data, info.Species);
+
+                CopyLibraries(sponsorInfo, info);
+                SeedStances(game, company, info);
+
                 colony = ColonyFactory.CreateFromBlueprint(game, company, species, system, body, blueprint);
             }
             catch
             {
                 ReturnPeople(sponsorColony, species, SeedPeople);
                 sponsorInfo.Money.AddIncome(now, TransactionCategory.Charter, $"Refund: {companyName} failed to found", SeedFunds);
-                info.Money.AddExpense(now, TransactionCategory.Charter, "Founding failed", info.Money.GetCurrentFunds());
-                game.Factions.Remove(company.Id);
+                if (company != null)
+                {
+                    if (company.TryGetDataBlob<FactionInfoDB>(out var failed))
+                    {
+                        decimal leftover = failed.Money.GetCurrentFunds();
+                        if (leftover > 0)
+                            failed.Money.AddExpense(now, TransactionCategory.Charter, "Founding failed", leftover);
+                    }
+                    game.Factions.Remove(company.Id);
+                }
                 throw;
             }
 
