@@ -72,7 +72,10 @@ public class ColonyPowerTests
         Assert.That(PerUnit("default-design-mine"), Is.EqualTo(140).Within(5), "extraction ~140 kW at full accessibility");
         Assert.That(PerUnit("default-design-refinery-site"), Is.InRange(100, 200), "refinery-site ~100-200 kW");
         Assert.That(PerUnit("default-design-factory-site"), Is.EqualTo(125).Within(1e-6), "factory-site 125 kW");
-        Assert.That(PerUnit("default-design-shipyard"), Is.EqualTo(167 + 50).Within(1), "shipyard 167 kW + 50 kW hotel");
+        // Ships-only yard (d918d564): the yard no longer grants component points, so its draw is
+        // 400 assembly points (Crew 2000 x 0.2) x 5 kWh / 24 h = 83.33 kW, plus the 50 kW hotel load
+        // at the 85,000 kg slip = 133.33 kW. (It was (200 x 10 + 400 x 5) / 24 + 50 = 216.67 kW.)
+        Assert.That(PerUnit("default-design-shipyard"), Is.EqualTo(400 * 5 / 24.0 + 50).Within(1e-6), "shipyard 83.3 kW assembly + 50 kW hotel");
         var sites = Line(power, "default-design-local-construction-site");
         Assert.That(sites.Nameplate_kW, Is.EqualTo(5 * 8 * 10 / 24.0).Within(1e-6), "5 sites ~17 kW nameplate");
         Assert.That(sites.Draw_kW, Is.EqualTo(0.1 * 5 * 8 * 10 / 24.0).Within(1e-6), "an empty queue: 10 % of it");
