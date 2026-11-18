@@ -9,6 +9,14 @@ namespace Pulsar4X.Client
     {
         public HashSet<string> HidenEvents = new HashSet<string>();
 
+        /// <summary>The pause-on options shown in the log, as (group, event type, label).</summary>
+        public static IEnumerable<(string Group, string Type, string Label)> PauseOptions()
+        {
+            foreach (var (group, items) in PauseGroups)
+                foreach (var (type, label) in items)
+                    yield return (group, type, label);
+        }
+
         private static readonly (string Group, (string Type, string Label)[] Items)[] PauseGroups =
         {
             ("Research", new[]
@@ -34,6 +42,7 @@ namespace Pulsar4X.Client
                 ("FuelExhausted", "Fuel exhausted"),
                 ("PlantOutOfFuel", "Power plant out of fuel"),
                 ("PowerShortage", "Power shortage"),
+                ("BudgetDay", "Budget day"),
             }),
             ("Combat", new[]
             {
