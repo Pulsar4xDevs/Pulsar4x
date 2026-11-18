@@ -22,10 +22,49 @@ public static class Window
     private static string _currentWindowTitle = "";
 #endif
 
+    /// <summary>
+    /// A disposable Begin/End pair. End always runs, even when Begin returns false
+    /// (collapsed or clipped), the body returns early, or the body throws.
+    /// </summary>
+    public readonly struct Handle : IDisposable
+    {
+        public bool Visible { get; }
+
+        internal Handle(bool visible)
+        {
+            Visible = visible;
+        }
+
+        public void Dispose() => End();
+    }
+
+    public static Handle Scope(string title, [CallerFilePath] string callerFilePath = "")
+        => new Handle(Begin(title, callerFilePath));
+
+    public static Handle Scope(string title, ref bool isActive, [CallerFilePath] string callerFilePath = "")
+        => new Handle(Begin(title, ref isActive, callerFilePath));
+
+    public static Handle Scope(string title, ref bool isActive, ImGuiWindowFlags flags, [CallerFilePath] string callerFilePath = "")
+        => new Handle(Begin(title, ref isActive, flags, callerFilePath));
+
+    public static Handle Scope(string title, ImGuiWindowFlags flags, [CallerFilePath] string callerFilePath = "")
+        => new Handle(Begin(title, flags, callerFilePath));
+
+#if DEBUG
+    /// <summary>
+    /// Test entry to Scope that does not mention ImGui types, so Pulsar4X.Tests
+    /// can call it without referencing ImGui.NET.
+    /// </summary>
+    internal static Handle DebugScope(string title, ref bool isActive)
+        => Scope(title, ref isActive);
+#endif
+
     public static bool Begin(string title, [CallerFilePath] string callerFilePath = "")
     {
 #if DEBUG
         ValidateBeginCall(title);
+        if (DebugSuppressImGui)
+            return DebugBeginVisible;
 #endif
         return ImGui.Begin(GetWindowTitle(title, callerFilePath));
     }
@@ -34,6 +73,8 @@ public static class Window
     {
 #if DEBUG
         ValidateBeginCall(title);
+        if (DebugSuppressImGui)
+            return DebugBeginVisible;
 #endif
         return ImGui.Begin(GetWindowTitle(title, callerFilePath), ref isActive);
     }
@@ -42,6 +83,8 @@ public static class Window
     {
 #if DEBUG
         ValidateBeginCall(title);
+        if (DebugSuppressImGui)
+            return DebugBeginVisible;
 #endif
         return ImGui.Begin(GetWindowTitle(title, callerFilePath), ref isActive, flags);
     }
@@ -50,6 +93,8 @@ public static class Window
     {
 #if DEBUG
         ValidateBeginCall(title);
+        if (DebugSuppressImGui)
+            return DebugBeginVisible;
 #endif
         return ImGui.Begin(GetWindowTitle(title, callerFilePath), flags);
     }
@@ -58,6 +103,8 @@ public static class Window
     {
 #if DEBUG
         LeaveBegin();
+        if (DebugSuppressImGui)
+            return;
 #endif
         ImGui.End();
     }
@@ -96,10 +143,20 @@ public static class Window
 
     internal static void DebugLeaveEnd() => LeaveBegin();
 
+    /// <summary>
+    /// When true, Begin/End skip ImGui so tests can drive Scope through the wrapper state.
+    /// </summary>
+    internal static bool DebugSuppressImGui;
+
+    /// <summary>The value Begin returns while DebugSuppressImGui is set (e.g. a collapsed window).</summary>
+    internal static bool DebugBeginVisible = true;
+
     internal static void DebugReset()
     {
         _beginCount = 0;
         _currentWindowTitle = "";
+        DebugSuppressImGui = false;
+        DebugBeginVisible = true;
     }
 #endif
 
