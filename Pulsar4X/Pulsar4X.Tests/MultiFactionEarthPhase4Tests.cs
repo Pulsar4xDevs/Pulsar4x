@@ -296,6 +296,26 @@ public class MultiFactionEarthPhase4Tests
         foreach (var shortMineral in new[] { "Aluminium", "Regolith", "Water" })
             Assert.That(yearsByName[shortMineral], Is.GreaterThanOrEqualTo(6.5), string.Join("\n", report));
     }
+
+    [Test]
+    public void OutputPerDay_ScalesWithLivePopulation_AndIsZeroWhenPopulationIsZero()
+    {
+        var spc = Named("Sino-Pacific Coalition");
+        var row = Row(spc, "plastic");
+        Assert.That(row.OutputPerDayPerMillion, Is.EqualTo(150));
+        Assert.That(BlocDemand.LiveOutputPerDay(row, spc), Is.GreaterThan(0));
+
+        var pop = spc.GetDataBlob<ColonyInfoDB>().Population;
+        foreach (var k in pop.Keys.ToList())
+            pop[k] = 0;
+        Assert.That(BlocDemand.LiveOutputPerDay(row, spc), Is.EqualTo(0));
+
+        long stock = Units(spc, "plastic");
+        var now = _game.TimePulse.GameGlobalDateTime;
+        spc.GetDataBlob<ColonyMarketPolicyDB>().LastConsumption = now;
+        BlocDemand.Run(spc, now.AddDays(10));
+        Assert.That(Units(spc, "plastic"), Is.EqualTo(stock), "zero population produces no output");
+    }
 }
 
 static class Phase4TestExtensions

@@ -24,8 +24,11 @@ public sealed class MarketPolicyRow
     public double UseOwed;
 
     /// <summary>Bloc output: units the colony's abstract industry adds to stock per day, up to <see cref="Max"/>
-    /// (90 days of output when Max is 0). 0 = none. Lets a manufacturing bloc keep its inputs flowing to the others.</summary>
+    /// (90 days of output when Max is 0). 0 = none. Lets a manufacturing bloc keep its inputs flowing to the others.
+    /// Frozen at seed from starting population; live production uses <see cref="OutputPerDayPerMillion"/> × current population.</summary>
     public double OutputPerDay;
+    /// <summary>Bloc output: units per day per million population. When set, production scales with live population.</summary>
+    public double OutputPerDayPerMillion;
     /// <summary>Bloc output: fractional output carried to the next pass.</summary>
     public double OutputOwed;
 
@@ -45,6 +48,7 @@ public sealed class MarketPolicyRow
         ShortSince = ShortSince,
         UseOwed = UseOwed,
         OutputPerDay = OutputPerDay,
+        OutputPerDayPerMillion = OutputPerDayPerMillion,
         OutputOwed = OutputOwed,
     };
 }
