@@ -13,6 +13,13 @@ namespace Pulsar4X.Client
     /// </summary>
     public static class MarketAppraisalDisplay
     {
+        public static readonly int[] ScaleFactors = { 1, 100, 1000 };
+
+        static readonly Vector4 WindowBg = new(0.08f, 0.08f, 0.10f, 1f);
+        static readonly Vector4 RowBg = new(0.08f, 0.08f, 0.10f, 1f);
+        static readonly Vector4 RowBgAlt = new(0.11f, 0.11f, 0.14f, 1f);
+        static readonly Vector4 HeaderBg = new(0.12f, 0.14f, 0.18f, 1f);
+
         static GoodAppraisal? _shown;
         static decimal? _ask;
         static bool _open;
@@ -38,6 +45,29 @@ namespace Pulsar4X.Client
                 return "0";
             return quantity.ToString("0.########", CultureInfo.InvariantCulture);
         }
+
+        /// <summary>Linear scale of a per-1 appraisal cost. Null stays null.</summary>
+        public static decimal? ScaleCost(decimal? amount, int scale)
+            => amount is decimal value ? value * scale : null;
+
+        public static string ScaledMoney(decimal? amount, int scale)
+            => Money(ScaleCost(amount, scale));
+
+        public static string ScaledQuantity(double quantity, int scale)
+            => Quantity(quantity * scale);
+
+        public static string ColumnHeader(int scale)
+        {
+            if (scale == 1)
+                return "Per 1";
+            if (scale == 1000)
+                return "Per 1,000";
+            return "Per " + scale.ToString("N0", CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>Input line cell: scaled quantity and scaled line cost.</summary>
+        public static string ScaledInputCell(double quantity, decimal? lineCost, int scale)
+            => ScaledQuantity(quantity, scale) + "  ·  " + ScaledMoney(lineCost, scale);
 
         /// <summary>Unit cost against the current ask. "Unpriced" when the cost fields are null.</summary>
         public static string UnitCostVsAsk(decimal? unitCost, decimal? ask)
@@ -91,6 +121,7 @@ namespace Pulsar4X.Client
                 return;
             if (ImGui.Button("Appraise"))
             {
+                // One read for a single unit; Per 100 / Per 1,000 are scaled on the client.
                 _shown = client?.AppraiseGood(colonyId, cargoId, 1)
                     ?? GoodAppraisal.None(cargoId, name, 1, "not connected");
                 _ask = ask;
@@ -105,10 +136,10 @@ namespace Pulsar4X.Client
                 return;
             bool open = true;
             ImGui.SetNextWindowPos(new Vector2(500f, 190f), ImGuiCond.Appearing);
-            ImGui.SetNextWindowSize(new Vector2(440f, 320f), ImGuiCond.Appearing);
-            ImGui.SetNextWindowSizeConstraints(new Vector2(400f, 120f), new Vector2(700f, 700f));
+            ImGui.SetNextWindowSize(new Vector2(560f, 360f), ImGuiCond.Appearing);
+            ImGui.SetNextWindowSizeConstraints(new Vector2(480f, 120f), new Vector2(800f, 700f));
             ImGui.SetNextWindowBgAlpha(1f);
-            ImGui.PushStyleColor(ImGuiCol.WindowBg, new Vector4(0.08f, 0.08f, 0.10f, 1f));
+            ImGui.PushStyleColor(ImGuiCol.WindowBg, WindowBg);
             ImGui.PushStyleColor(ImGuiCol.TitleBg, new Vector4(0.10f, 0.10f, 0.14f, 1f));
             ImGui.PushStyleColor(ImGuiCol.TitleBgActive, new Vector4(0.12f, 0.16f, 0.24f, 1f));
             if (ImGui.Begin("Appraisal", ref open,
@@ -125,8 +156,6 @@ namespace Pulsar4X.Client
         static void Draw(GoodAppraisal appraisal, decimal? ask)
         {
             string title = "Appraisal: " + (appraisal.Name ?? appraisal.CargoId);
-            if (appraisal.Quantity > 1)
-                title += "  × " + appraisal.Quantity.ToString("N0", CultureInfo.InvariantCulture);
             ImGui.TextUnformatted(title);
 
             if (!string.IsNullOrEmpty(appraisal.Reason))
@@ -159,48 +188,98 @@ namespace Pulsar4X.Client
             }
 
             ImGui.Spacing();
-            LabelValue("Unit cost", UnitCostVsAsk(appraisal.UnitCost, ask));
-            LabelValue("Inputs", Money(appraisal.InputCost));
-            LabelValue("Energy", Money(appraisal.EnergyCost));
-            LabelValue("Labour", Money(appraisal.LabourCost));
-            LabelValue("Total", Money(appraisal.TotalCost));
+            DrawCostGrid(appraisal, ask);
+        }
 
-            if (appraisal.Inputs == null || appraisal.Inputs.Count == 0)
-                return;
-            ImGui.Spacing();
-            ImGui.TextUnformatted("Inputs");
-            if (ImGui.BeginTable("##appraisal-inputs", 5,
-                    Styles.TableFlags | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+        static void DrawCostGrid(GoodAppraisal appraisal, decimal? ask)
+        {
+            string[] headers = { ColumnHeader(1), ColumnHeader(100), ColumnHeader(1000) };
+            string[] labels = ask != null
+                ? new[] { "Unit cost", "Inputs", "Energy", "Labour", "Total", "Ask" }
+                : new[] { "Unit cost", "Inputs", "Energy", "Labour", "Total" };
+            decimal?[] costs = ask != null
+                ? new[] { appraisal.UnitCost, appraisal.InputCost, appraisal.EnergyCost, appraisal.LabourCost, appraisal.TotalCost, ask }
+                : new[] { appraisal.UnitCost, appraisal.InputCost, appraisal.EnergyCost, appraisal.LabourCost, appraisal.TotalCost };
+
+            float labelW = TextWidth("Unit cost");
+            foreach (var label in labels)
+                labelW = Math.Max(labelW, TextWidth(label));
+            var inputs = appraisal.Inputs;
+            if (inputs != null)
             {
-                ImGui.TableSetupColumn("Input", ImGuiTableColumnFlags.WidthStretch, 1.4f);
-                ImGui.TableSetupColumn("Qty", ImGuiTableColumnFlags.WidthFixed, 50);
-                ImGui.TableSetupColumn("Price", ImGuiTableColumnFlags.WidthFixed, 80);
-                ImGui.TableSetupColumn("Cost", ImGuiTableColumnFlags.WidthFixed, 80);
-                ImGui.TableSetupColumn("Source", ImGuiTableColumnFlags.WidthStretch, 1f);
-                ImGui.TableHeadersRow();
-                foreach (var line in appraisal.Inputs)
+                foreach (var line in inputs)
                 {
-                    ImGui.TableNextRow();
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(line.Name ?? line.CargoId);
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(Quantity((double)line.Quantity));
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(Money(line.UnitPrice));
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(Money(line.LineCost));
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(LineMarker(line));
+                    string name = (line.Name ?? line.CargoId) + "  (" + LineMarker(line) + ")";
+                    labelW = Math.Max(labelW, TextWidth(name));
+                }
+            }
+
+            float[] colW = new float[3];
+            for (int c = 0; c < 3; c++)
+            {
+                int scale = ScaleFactors[c];
+                float w = TextWidth(headers[c]);
+                foreach (var cost in costs)
+                    w = Math.Max(w, TextWidth(ScaledMoney(cost, scale)));
+                if (inputs != null)
+                {
+                    foreach (var line in inputs)
+                    {
+                        w = Math.Max(w, TextWidth(ScaledInputCell((double)line.Quantity, line.LineCost, scale)));
+                    }
+                }
+                colW[c] = w;
+            }
+
+            ImGui.PushStyleColor(ImGuiCol.TableRowBg, RowBg);
+            ImGui.PushStyleColor(ImGuiCol.TableRowBgAlt, RowBgAlt);
+            ImGui.PushStyleColor(ImGuiCol.TableHeaderBg, HeaderBg);
+            ImGui.PushStyleColor(ImGuiCol.ChildBg, WindowBg);
+            var flags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingFixedFit
+                | ImGuiTableFlags.NoHostExtendX;
+            if (ImGui.BeginTable("##appraisal-grid", 4, flags))
+            {
+                ImGui.TableSetupColumn("##label", ImGuiTableColumnFlags.WidthFixed, labelW);
+                for (int c = 0; c < 3; c++)
+                    ImGui.TableSetupColumn(headers[c], ImGuiTableColumnFlags.WidthFixed, colW[c]);
+                ImGui.TableHeadersRow();
+                for (int r = 0; r < labels.Length; r++)
+                    CostRow(labels[r], costs[r]);
+
+                if (inputs != null && inputs.Count > 0)
+                {
+                    foreach (var line in inputs)
+                    {
+                        ImGui.TableNextRow();
+                        ImGui.TableNextColumn();
+                        ImGui.TextUnformatted((line.Name ?? line.CargoId) + "  (" + LineMarker(line) + ")");
+                        for (int c = 0; c < 3; c++)
+                        {
+                            ImGui.TableNextColumn();
+                            ImGui.TextUnformatted(ScaledInputCell((double)line.Quantity, line.LineCost, ScaleFactors[c]));
+                        }
+                    }
                 }
                 ImGui.EndTable();
             }
+            ImGui.PopStyleColor(4);
         }
 
-        static void LabelValue(string label, string value)
+        static void CostRow(string label, decimal? amount)
         {
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
             ImGui.TextColored(Styles.DescriptiveColor, label);
-            ImGui.SameLine();
-            ImGui.TextUnformatted(value);
+            for (int c = 0; c < 3; c++)
+            {
+                ImGui.TableNextColumn();
+                ImGui.TextUnformatted(ScaledMoney(amount, ScaleFactors[c]));
+            }
+        }
+
+        static float TextWidth(string text)
+        {
+            return ImGui.CalcTextSize(text).X + ImGui.GetStyle().CellPadding.X * 2f;
         }
     }
 }

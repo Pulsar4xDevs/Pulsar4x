@@ -43,6 +43,39 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void ScaleCost_AndScaledMoney_ScaleLinearlyAndKeepFormatting()
+        {
+            Assert.That(MarketAppraisalDisplay.ScaleCost(null, 100), Is.Null);
+            Assert.That(MarketAppraisalDisplay.ScaleCost(0m, 1000), Is.EqualTo(0m));
+            Assert.That(MarketAppraisalDisplay.ScaleCost(0.75m, 1), Is.EqualTo(0.75m));
+            Assert.That(MarketAppraisalDisplay.ScaleCost(0.75m, 100), Is.EqualTo(75m));
+            Assert.That(MarketAppraisalDisplay.ScaleCost(0.75m, 1000), Is.EqualTo(750m));
+            Assert.That(MarketAppraisalDisplay.ScaleCost(0.000625m, 100), Is.EqualTo(0.0625m));
+            Assert.That(MarketAppraisalDisplay.ScaleCost(0.000625m, 1000), Is.EqualTo(0.625m));
+
+            Assert.That(MarketAppraisalDisplay.ScaledMoney(null, 100), Is.EqualTo("—"));
+            Assert.That(MarketAppraisalDisplay.ScaledMoney(0m, 1000), Is.EqualTo("0 cr"));
+            Assert.That(MarketAppraisalDisplay.ScaledMoney(0.75m, 1), Is.EqualTo("0.75 cr"));
+            Assert.That(MarketAppraisalDisplay.ScaledMoney(0.75m, 100), Is.EqualTo("75 cr"));
+            Assert.That(MarketAppraisalDisplay.ScaledMoney(0.75m, 1000), Is.EqualTo("750 cr"));
+            Assert.That(MarketAppraisalDisplay.ScaledMoney(0.000625m, 1), Is.EqualTo("0.000625 cr"));
+            Assert.That(MarketAppraisalDisplay.ScaledMoney(0.000625m, 100), Is.EqualTo("0.0625 cr"));
+            Assert.That(MarketAppraisalDisplay.ScaledMoney(0.000625m, 1000), Is.EqualTo("0.625 cr"));
+
+            Assert.That(MarketAppraisalDisplay.ScaledQuantity(0.5, 1), Is.EqualTo("0.5"));
+            Assert.That(MarketAppraisalDisplay.ScaledQuantity(0.5, 100), Is.EqualTo("50"));
+            Assert.That(MarketAppraisalDisplay.ScaledQuantity(0.5, 1000), Is.EqualTo("500"));
+            Assert.That(MarketAppraisalDisplay.ScaledQuantity(0, 1000), Is.EqualTo("0"));
+            Assert.That(MarketAppraisalDisplay.ScaledInputCell(0.5, 0.75m, 1), Is.EqualTo("0.5  ·  0.75 cr"));
+            Assert.That(MarketAppraisalDisplay.ScaledInputCell(0.5, 0.75m, 100), Is.EqualTo("50  ·  75 cr"));
+            Assert.That(MarketAppraisalDisplay.ScaledInputCell(0.5, null, 1000), Is.EqualTo("500  ·  —"));
+
+            Assert.That(MarketAppraisalDisplay.ColumnHeader(1), Is.EqualTo("Per 1"));
+            Assert.That(MarketAppraisalDisplay.ColumnHeader(100), Is.EqualTo("Per 100"));
+            Assert.That(MarketAppraisalDisplay.ColumnHeader(1000), Is.EqualTo("Per 1,000"));
+        }
+
+        [Test]
         public void Quantity_ShowsFractions_WholeNumbers_AndZero()
         {
             Assert.That(MarketAppraisalDisplay.Quantity(0), Is.EqualTo("0"));
