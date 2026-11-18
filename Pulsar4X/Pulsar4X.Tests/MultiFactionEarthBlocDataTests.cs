@@ -70,7 +70,9 @@ public class MultiFactionEarthBlocDataTests
         Assert.That(Knows(_ecn, "tech-fuel-cells"), "ECN: high tech");
         Assert.That(Knows(_ecn, "tech-reactor-power-density"), "ECN: high tech");
         Assert.That(Knows(amc, "tech-construction-automation"), Is.False, "amc " + "tech-construction-automation");
+        Assert.That(Knows(amc, "tech-industrial-energy-efficiency"), Is.False, "amc " + "tech-industrial-energy-efficiency");
         Assert.That(Knows(spc, "tech-life-support-efficiency"), Is.False, "spc " + "tech-life-support-efficiency");
+        Assert.That(Knows(spc, "tech-mining-production"), Is.False, "spc " + "tech-mining-production");
         Assert.That(Knows(amc, "tech-reactor-power-density"), Is.False, "amc " + "tech-reactor-power-density");
         Assert.That(Knows(spc, "tech-fuel-cells"), Is.False, "spc " + "tech-fuel-cells");
         Assert.That(Knows(_ecn, "tech-construction-automation"), Is.False, "_ecn " + "tech-construction-automation");
