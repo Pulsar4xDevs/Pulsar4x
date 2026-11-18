@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
+using Pulsar4X.Events;
 using Pulsar4X.Ships;
 
 namespace Pulsar4X.Factions;
@@ -171,9 +172,10 @@ public static class FactionSpending
     /// after the accrual month, then reset. The whole bill is booked even when funds can't cover it, so the balance
     /// may go negative (the player is then blocked, as with daily wages before). Months skipped entirely (a long
     /// background gap) are billed together on the first of them. Starts the accrual month when none is set
-    /// (a new game, or a save from before monthly billing). Returns the amount billed.
+    /// (a new game, or a save from before monthly billing). Returns the amount billed. A settled month (never an early
+    /// return) publishes <see cref="EventType.BudgetDay"/> for <paramref name="factionId"/>, dated the bill date.
     /// </summary>
-    public static decimal SettleMonth(FactionInfoDB info, DateTime at, Game? game = null)
+    public static decimal SettleMonth(FactionInfoDB info, DateTime at, Game? game = null, int? factionId = null)
     {
         var month = MonthStart(at);
         if (info.AccrualMonth is not { } accrualMonth)
@@ -232,6 +234,14 @@ public static class FactionSpending
         info.AccruedResearch = 0;
         info.AccruedLabDays = 0;
         info.AccrualMonth = month;
+        int? owner = factionId ?? (info.OwningEntity is { IsValid: true } faction ? faction.Id : null);
+        EventManager.Instance.Publish(Event.Create(
+            EventType.BudgetDay,
+            billDate,
+            string.Format(System.Globalization.CultureInfo.InvariantCulture, "Monthly billing for {0:yyyy-MM}: {1:N0} cr", accrualMonth, billed),
+            owner,
+            null,
+            owner));
         return billed;
     }
 
@@ -242,7 +252,7 @@ public static class FactionSpending
     /// </summary>
     public static bool TryAccrueResearch(Game? game, int factionId, FactionInfoDB info, DateTime at, decimal cost)
     {
-        SettleMonth(info, at, game);
+        SettleMonth(info, at, game, factionId);
         if (IsBlocked(game, factionId) || FundsAfterOwed(info) < cost)
             return false;
         if (cost > 0)
@@ -285,7 +295,7 @@ public static class FactionSpending
             return 0;
         if (info.LastCrewPayday.HasValue && info.LastCrewPayday.Value.Date >= at.Date)
         {
-            SettleMonth(info, at, game);
+            SettleMonth(info, at, game, id);
             return 0;
         }
         // Background systems run hotloop processors at a tenth of the rate, so the pay run can be days
@@ -306,7 +316,7 @@ public static class FactionSpending
         decimal total = 0;
         for (var day = first; day <= at.Date; day = day.AddDays(1))
         {
-            SettleMonth(info, day, game);
+            SettleMonth(info, day, game, id);
             if (amount <= 0 && staffAmount <= 0)
                 continue;
             info.AccruedWageDays++;

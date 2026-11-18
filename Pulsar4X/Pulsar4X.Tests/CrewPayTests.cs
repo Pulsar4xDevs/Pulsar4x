@@ -355,6 +355,45 @@ public class CrewPayTests
     }
 
     [Test]
+    public void SettleMonth_PublishesBudgetDayOncePerSettledMonth_AndNotOnANoSettleCall()
+    {
+        var info = new FactionInfoDB();
+        var seen = new List<Pulsar4X.Events.Event>();
+        void OnEvent(Pulsar4X.Events.Event e) => seen.Add(e);
+        Pulsar4X.Events.EventManager.Instance.Subscribe(Pulsar4X.Events.EventType.BudgetDay, OnEvent);
+        try
+        {
+            // First call only starts the accrual month; same-month calls settle nothing.
+            FactionSpending.SettleMonth(info, new DateTime(2050, 1, 14), null, 77);
+            FactionSpending.SettleMonth(info, new DateTime(2050, 1, 31), null, 77);
+            Assert.That(seen, Is.Empty, "no month settled");
+
+            info.AccruedResearch = 707_420m;
+            info.AccruedLabDays = 5;
+            Assert.That(FactionSpending.SettleMonth(info, new DateTime(2050, 2, 1), null, 77), Is.EqualTo(707_420m));
+            Assert.That(seen, Has.Count.EqualTo(1));
+            Assert.That(seen[0].EventType, Is.EqualTo(Pulsar4X.Events.EventType.BudgetDay));
+            Assert.That(seen[0].Message, Is.EqualTo("Monthly billing for 2050-01: 707,420 cr"));
+            Assert.That(seen[0].StarDate, Is.EqualTo(new DateTime(2050, 2, 1)), "dated the bill date");
+            Assert.That(seen[0].FactionId, Is.EqualTo(77));
+            Assert.That(seen[0].EntityId, Is.EqualTo(77));
+
+            // The same month again, and a repeat call on the 1st: still one event.
+            FactionSpending.SettleMonth(info, new DateTime(2050, 2, 15), null, 77);
+            Assert.That(seen, Has.Count.EqualTo(1));
+
+            // The next month settles (nothing owed) and fires again, once.
+            FactionSpending.SettleMonth(info, new DateTime(2050, 3, 1), null, 77);
+            Assert.That(seen, Has.Count.EqualTo(2));
+            Assert.That(seen[1].Message, Is.EqualTo("Monthly billing for 2050-02: 0 cr"));
+        }
+        finally
+        {
+            Pulsar4X.Events.EventManager.Instance.Unsubscribe(Pulsar4X.Events.EventType.BudgetDay, OnEvent);
+        }
+    }
+
+    [Test]
     public void SettleMonth_WithNoAccrualMonth_StartsFresh()
     {
         var info = new FactionInfoDB();

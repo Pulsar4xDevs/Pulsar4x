@@ -70,7 +70,7 @@ namespace Pulsar4X.Technology
             FactionDataStore factionDataStore = factionInfoDB.Data;
 
             // Bill last month's wages and research on the first run of a new month, even for an idle lab.
-            Pulsar4X.Factions.FactionSpending.SettleMonth(factionInfoDB, at, entity.Manager?.Game);
+            Pulsar4X.Factions.FactionSpending.SettleMonth(factionInfoDB, at, entity.Manager?.Game, entity.FactionOwnerID);
 
             // If unable to get the db return
             if(!entity.TryGetDataBlob<ResearcherDB>(out var researcherDB))

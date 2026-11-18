@@ -97,5 +97,10 @@ namespace Pulsar4X.Events
         /// <summary>People left a colony in shortage (the −1 %/month decline).</summary>
         PopulationLeft,
         #endregion
+
+        #region Budget (appended so saved ordinals stay put)
+        /// <summary>A month's wages, research and staff billing was settled (monthly billing, "budget day").</summary>
+        BudgetDay,
+        #endregion
     }
 }
