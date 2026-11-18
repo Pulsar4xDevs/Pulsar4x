@@ -180,11 +180,6 @@
           "Type": "byCount"
         },
         {
-          "Id": "default-design-ship-construction",
-          "Amount": 1,
-          "Type": "byCount"
-        },
-        {
           "Id": "rp-1",
           "Amount": 50000000,
           "Type": "byCount"
@@ -270,7 +265,6 @@
         "solar-farm",
         "grid-battery",
         "local-construction",
-        "ship-construction",
         "launch-complex",
         "logistics-office",
         "factory-site",
@@ -315,7 +309,6 @@
         "default-design_solarpanel",
         "default-design-battery-25kg",
         "default-design-local-construction",
-        "default-design-ship-construction",
         "default-design-launch-complex",
         "default-design-Cockpit",
         "default-design-crew-quarters-1",
@@ -504,7 +497,6 @@
         "solar-farm",
         "grid-battery",
         "local-construction",
-        "ship-construction",
         "launch-complex",
         "logistics-office",
         "factory-site",
@@ -658,7 +650,6 @@
         "solar-farm",
         "grid-battery",
         "local-construction",
-        "ship-construction",
         "launch-complex",
         "logistics-office",
         "factory-site",
@@ -816,7 +807,6 @@
         "solar-farm",
         "grid-battery",
         "local-construction",
-        "ship-construction",
         "launch-complex",
         "logistics-office",
         "factory-site",

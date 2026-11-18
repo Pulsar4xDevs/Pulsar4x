@@ -381,6 +381,39 @@ public class EarlyTechStartTests
         Assert.That(data.IsResearchable("tech-geo-surveyor"), Is.True);
     }
 
+    [Test]
+    public void NewGameWithEarlyMod_LocksConstructionBayUntilTheTechIsResearched()
+    {
+        var (_, faction) = StartGameLikeTheMenu(EarlyTech);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        var data = info.Data;
+
+        Assert.That(data.ComponentTemplates.ContainsKey("ship-construction"), Is.False);
+        Assert.That(data.LockedComponentTemplates.ContainsKey("ship-construction"), Is.True);
+        Assert.That(info.ComponentDesigns.ContainsKey("default-design-ship-construction"), Is.False);
+        Assert.That(data.IsResearchable("tech-construction-bay"), Is.True);
+        Assert.That(data.Techs["tech-construction-bay"].Level, Is.EqualTo(0));
+
+        data.IncrementTechLevel("tech-construction-bay");
+        Assert.That(data.ComponentTemplates.ContainsKey("ship-construction"), Is.True);
+        Assert.That(data.LockedComponentTemplates.ContainsKey("ship-construction"), Is.False);
+        Assert.That(data.Techs["tech-construction-bay"].Level, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void NewGameWithWarpMod_StartsWithTheConstructionBayUnlocked()
+    {
+        var (_, faction) = StartGameLikeTheMenu(WarpTechStart);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        var data = info.Data;
+
+        Assert.That(data.ComponentTemplates.ContainsKey("ship-construction"), Is.True);
+        Assert.That(data.LockedComponentTemplates.ContainsKey("ship-construction"), Is.False);
+        Assert.That(info.ComponentDesigns.ContainsKey("default-design-ship-construction"), Is.True);
+        Assert.That(data.Techs["tech-construction-bay"].Level, Is.EqualTo(1));
+        Assert.That(data.IsResearchable("tech-construction-bay"), Is.False);
+    }
+
     // --- Newtonian-only start: no warp, no jump -------------------------------------------
 
     [Test]
