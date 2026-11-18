@@ -113,15 +113,22 @@ namespace Pulsar4X.Client
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
 
-            if (Window.Begin("GameLog", ref IsActive))
+            // ImGui.Begin must always be paired with End, even when it returns false
+            // (the window is collapsed or clipped). The wrapper increments its nest
+            // count in Begin before ImGui.Begin runs, so skipping End leaves the next
+            // Window.Begin (e.g. an EntityCard) throwing InvalidOperationException.
+            bool visible = Window.Begin("GameLog", ref IsActive);
+            try
             {
+                if (!visible)
+                    return;
+
                 DisplayPauseSettings();
 
                 var events = _uiState.GameClient?.Galaxy.EventLog;
                 if (events == null || events.Count == 0)
                 {
                     ImGui.Text("No events available.");
-                    Window.End();
                     return;
                 }
 
@@ -163,27 +170,37 @@ namespace Pulsar4X.Client
                             _scrollToHighlight = false;
                         }
                     }
-                    ImGui.Text(DateDisplay.FormatDateTime(e.StarDate, seconds: true));
-                    ImGui.NextColumn();
-                    ImGui.Text(e.EventType);
-                    ImGui.NextColumn();
-                    ImGui.Text(e.FactionName ?? "");
-                    ImGui.NextColumn();
-                    ImGui.Text(e.EntityName ?? "N/A");
-                    ImGui.NextColumn();
-                    ImGui.TextWrapped(e.Message);
-                    ImGui.NextColumn();
-                    if (highlighted)
-                        ImGui.PopStyleColor();
+                    try
+                    {
+                        ImGui.Text(DateDisplay.FormatDateTime(e.StarDate, seconds: true));
+                        ImGui.NextColumn();
+                        ImGui.Text(e.EventType);
+                        ImGui.NextColumn();
+                        ImGui.Text(e.FactionName ?? "");
+                        ImGui.NextColumn();
+                        ImGui.Text(e.EntityName ?? "N/A");
+                        ImGui.NextColumn();
+                        ImGui.TextWrapped(e.Message);
+                        ImGui.NextColumn();
+                    }
+                    finally
+                    {
+                        if (highlighted)
+                            ImGui.PopStyleColor();
+                    }
                 }
 
                 ImGui.Separator();
+            }
+            finally
+            {
                 Window.End();
             }
         }
 
         private void DisplayPauseSettings()
         {
+            // CollapsingHeader does not use TreePop. Returning when it is closed is correct.
             if (!ImGui.CollapsingHeader("Pause on"))
                 return;
 

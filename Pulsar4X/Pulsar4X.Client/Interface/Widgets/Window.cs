@@ -57,15 +57,7 @@ public static class Window
     public static void End()
     {
 #if DEBUG
-        if (_beginCount == 0)
-        {
-            throw new InvalidOperationException("End() called without a matching Begin()");
-        }
-        _beginCount--;
-        if (_beginCount == 0)
-        {
-            _currentWindowTitle = "";
-        }
+        LeaveBegin();
 #endif
         ImGui.End();
     }
@@ -81,6 +73,33 @@ public static class Window
         }
         _beginCount++;
         _currentWindowTitle = title;
+    }
+
+    static void LeaveBegin()
+    {
+        if (_beginCount == 0)
+        {
+            throw new InvalidOperationException("End() called without a matching Begin()");
+        }
+        _beginCount--;
+        if (_beginCount == 0)
+        {
+            _currentWindowTitle = "";
+        }
+    }
+
+    /// <summary>The wrapper's nest count. For tests; does not open an ImGui window.</summary>
+    internal static int DebugBeginCount => _beginCount;
+
+    /// <summary>Enter the nest check without ImGui, matching a collapsed Begin that still must End.</summary>
+    internal static void DebugEnterBegin(string title) => ValidateBeginCall(title);
+
+    internal static void DebugLeaveEnd() => LeaveBegin();
+
+    internal static void DebugReset()
+    {
+        _beginCount = 0;
+        _currentWindowTitle = "";
     }
 #endif
 
