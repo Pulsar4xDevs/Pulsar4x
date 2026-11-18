@@ -235,7 +235,7 @@ namespace Pulsar4X.Colonies
         /// </summary>
         /// <summary>Satisfaction band for ranking destinations; a colony in shortage ranks last.</summary>
         static int Band(Entity colony)
-            => ColonyNeeds.GrowthStopped(colony) ? -1 : (int)Math.Floor(ColonyNeeds.Satisfaction(colony) / 10);
+            => ColonyNeeds.GrowthStopped(colony) ? -1 : (int)Math.Floor(ColonyNeeds.Satisfaction(colony) * ColonyNeeds.MigrationPull(colony) / 10);
 
         public static long Support(Entity colony, Entity species)
         {

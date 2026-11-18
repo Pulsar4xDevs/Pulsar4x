@@ -297,6 +297,58 @@ namespace Pulsar4X.Storage
         }
 
         /// <summary>
+        /// Units of a component design in this store, counting both storage forms: stacked by the design's own ID
+        /// and individual <see cref="ComponentInstance"/> entries of that design (what a factory produces: one
+        /// entry per part, each with its own ID). Everything else falls back to <see cref="GetUnitsStored"/>.
+        /// </summary>
+        public static long GetUnitsStoredByDesign(this CargoStorageDB db, ICargoable cargoItem, bool includeEscro = false)
+        {
+            long units = db.GetUnitsStored(cargoItem, includeEscro);
+            if (cargoItem is not ComponentDesign design)
+                return units;
+            foreach (var (instance, count) in InstancesOf(db, design))
+                units += count;
+            return units;
+        }
+
+        /// <summary>
+        /// Removes up to <paramref name="count"/> units of a component design from either storage form: the stack
+        /// kept under the design's ID first, then individual instances of that design (lowest ID first).
+        /// Other items are removed as stacks. Returns the number removed.
+        /// </summary>
+        public static long RemoveUnitsByDesign(this CargoStorageDB db, ICargoable cargoItem, long count)
+        {
+            if (count <= 0)
+                return 0;
+            long removed = db.RemoveCargoByUnit(cargoItem, count);
+            if (cargoItem is not ComponentDesign design)
+                return removed;
+            foreach (var (instance, units) in InstancesOf(db, design))
+            {
+                if (removed >= count)
+                    break;
+                removed += db.RemoveCargoByUnit(instance, Math.Min(units, count - removed));
+            }
+            return removed;
+        }
+
+        static System.Collections.Generic.List<(ComponentInstance instance, long units)> InstancesOf(CargoStorageDB db, ComponentDesign design)
+        {
+            var found = new System.Collections.Generic.List<(ComponentInstance, long)>();
+            if (!db.TypeStores.ContainsKey(design.CargoTypeID))
+                return found;
+            var store = db.TypeStores[design.CargoTypeID];
+            foreach (var (id, cargoable) in store.Cargoables.OrderBy(kv => kv.Key))
+            {
+                if (cargoable is ComponentInstance instance && instance.Design != null
+                    && (ReferenceEquals(instance.Design, design) || instance.Design.UniqueID == design.UniqueID)
+                    && store.CurrentStoreInUnits.TryGetValue(id, out var units) && units > 0)
+                    found.Add((instance, units));
+            }
+            return found;
+        }
+
+        /// <summary>
         /// Gives the amount of units that are stored of a given item
         /// </summary>
         /// <param name="cargoItem"></param>

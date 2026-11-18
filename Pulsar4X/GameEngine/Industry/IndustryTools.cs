@@ -291,19 +291,13 @@ namespace Pulsar4X.Industry
                         throw new Exception("Cant build from non ICargoable Items");
                     }
                 }
-                string cargoTypeID = cargoItem.CargoTypeID;
-                long amountUsedThisTick = 0;
-                if (fromCargo.TypeStores.ContainsKey(cargoTypeID))
-                {
-                    if (fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
-                    {
-                        amountUsedThisTick = Math.Min(fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits[cargoItem.ID], kvp.Value);
-                    }
-                }
+                // A component design counts both stacked under its design ID and as individual instances
+                // (factory output is one entry per part); everything else is a plain stack.
+                long amountUsedThisTick = Math.Min(fromCargo.GetUnitsStoredByDesign(cargoItem, false), kvp.Value);
 
                 if (amountUsedThisTick > 0)
                 {
-                    long used = fromCargo.RemoveCargoByUnit(cargoItem, amountUsedThisTick);
+                    long used = fromCargo.RemoveUnitsByDesign(cargoItem, amountUsedThisTick);
                     toUse[kvp.Key] -= used;
                 }
             }
@@ -336,7 +330,7 @@ namespace Pulsar4X.Industry
                         continue;
                     }
                 }
-                var numStored = stockpile.GetUnitsStored(cargoItem, false);
+                var numStored = stockpile.GetUnitsStoredByDesign(cargoItem, false);
                 var numReq = kvp.Value - numStored;
                 if (numReq > 0)
                 {

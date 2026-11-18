@@ -50,6 +50,10 @@ namespace Pulsar4X.Colonies
         [JsonProperty] public double Satisfaction { get; internal set; } = ColonyNeeds.StartSatisfaction;
         [JsonProperty] public double SatisfactionTarget { get; internal set; } = ColonyNeeds.StartSatisfaction;
         [JsonProperty] public DateTime? LastSatisfactionTick { get; internal set; }
+        /// <summary>Phase 7b: whether last month's want for each good was met in full (null until the first monthly draw).</summary>
+        [JsonProperty] public bool? ConsumerMet { get; internal set; }
+        [JsonProperty] public bool? MedicalMet { get; internal set; }
+        [JsonProperty] public bool? LuxuryMet { get; internal set; }
 
         public ColonyNeedsDB() { }
         public ColonyNeedsDB(ColonyNeedsDB db)
@@ -61,6 +65,7 @@ namespace Pulsar4X.Colonies
             DeclineOwed = db.DeclineOwed; DeathsTotal = db.DeathsTotal; LeftTotal = db.LeftTotal;
             Satisfaction = db.Satisfaction; SatisfactionTarget = db.SatisfactionTarget;
             LastSatisfactionTick = db.LastSatisfactionTick;
+            ConsumerMet = db.ConsumerMet; MedicalMet = db.MedicalMet; LuxuryMet = db.LuxuryMet;
         }
         public override object Clone() => new ColonyNeedsDB(this);
     }
@@ -85,8 +90,65 @@ namespace Pulsar4X.Colonies
         public const double HoldDays = 180;
         /// <summary>Share of a starving or unhappy colony that wants to leave (posted as relocation listings).</summary>
         public const double LeavingShare = 0.05;
-        /// <summary>Hook for phase 7b medical goods: 1 now; supplied medical halves deaths.</summary>
-        public static double MedicalFactor(Entity colony) => 1.0;
+        public const string ConsumerGoodsId = "consumer-goods";
+        public const string MedicalId = "medical-supplies";
+        public const string LuxuryId = "luxury-goods";
+        /// <summary>Monthly wants per 1,000 people, kg (phase 7b, plan §7.4). Habitable worlds do not self-supply them.</summary>
+        public const double ConsumerPer1000PerMonth = 2;
+        public const double MedicalPer1000PerMonth = 1;
+        public const double LuxuryPer1000PerMonth = 0.5;
+        public static readonly string[] GoodsIds = { ConsumerGoodsId, MedicalId, LuxuryId };
+        /// <summary>Satisfaction target adjustments: consumer met +10 / missing −10, medical +10 / −15, luxuries +10 / −5.</summary>
+        public const double ConsumerMetBonus = 10, ConsumerMissPenalty = -10;
+        public const double MedicalMetBonus = 10, MedicalMissPenalty = -15;
+        public const double LuxuryMetBonus = 10, LuxuryMissPenalty = -5;
+        /// <summary>Growth: consumer goods met ×1.10; medical met ×1.10, missing ×0.75.</summary>
+        public const double ConsumerGrowth = 1.10, MedicalGrowth = 1.10, MedicalMissGrowth = 0.75;
+        /// <summary>Medical met halves shortage deaths; luxuries met raise the colony's rank as a migration destination by 20 %.</summary>
+        public const double MedicalDeathFactor = 0.5, LuxuryMigrationPull = 1.2;
+
+        /// <summary>Shortage-death multiplier: 0.5 while last month's medical want was met, else 1.</summary>
+        public static double MedicalFactor(Entity colony)
+            => colony.TryGetDataBlob<ColonyNeedsDB>(out var db) && db.MedicalMet == true ? MedicalDeathFactor : 1.0;
+
+        /// <summary>Per person per 1,000 per month for a population good; 0 for anything else.</summary>
+        public static double WantPer1000(string id) => id switch
+        {
+            ConsumerGoodsId => ConsumerPer1000PerMonth,
+            MedicalId => MedicalPer1000PerMonth,
+            LuxuryId => LuxuryPer1000PerMonth,
+            _ => 0,
+        };
+
+        /// <summary>Average kg a day this colony wants of a population good (monthly want / 30).</summary>
+        public static double GoodsPerDay(Entity colony, string id)
+            => People(colony) / 1000.0 * WantPer1000(id) / PopulationProcessor.TickDays;
+
+        /// <summary>Last month's result for a good: true met, false short, null not yet checked.</summary>
+        public static bool? GoodsMet(Entity colony, string id)
+            => !colony.TryGetDataBlob<ColonyNeedsDB>(out var db) ? null
+                : id == ConsumerGoodsId ? db.ConsumerMet : id == MedicalId ? db.MedicalMet : db.LuxuryMet;
+
+        /// <summary>Days of stock at the average daily want; null when there is no want.</summary>
+        public static double? GoodsDaysOfStock(Entity colony, string id)
+        {
+            double use = GoodsPerDay(colony, id);
+            return use > 0 ? Stock(colony, id) / use : null;
+        }
+
+        /// <summary>Growth multiplier from goods: consumer met ×1.10; medical met ×1.10, missing ×0.75. 1 until checked.</summary>
+        public static double GoodsGrowthFactor(Entity colony)
+        {
+            double f = 1;
+            if (GoodsMet(colony, ConsumerGoodsId) == true) f *= ConsumerGrowth;
+            var med = GoodsMet(colony, MedicalId);
+            if (med == true) f *= MedicalGrowth;
+            else if (med == false) f *= MedicalMissGrowth;
+            return f;
+        }
+
+        /// <summary>Migration rank multiplier: 1.2 while luxuries are supplied.</summary>
+        public static double MigrationPull(Entity colony) => GoodsMet(colony, LuxuryId) == true ? LuxuryMigrationPull : 1.0;
 
         public static void Ensure(Entity colony)
         {
@@ -166,9 +228,9 @@ namespace Pulsar4X.Colonies
         public static double Satisfaction(Entity colony)
             => colony.TryGetDataBlob<ColonyNeedsDB>(out var db) ? db.Satisfaction : StartSatisfaction;
 
-        /// <summary>Population growth multiplier: 0.5 + S/100. 1 without a needs record.</summary>
+        /// <summary>Population growth multiplier: (0.5 + S/100) x the goods factor (phase 7b). 1 without a needs record.</summary>
         public static double GrowthFactor(Entity colony)
-            => colony.TryGetDataBlob<ColonyNeedsDB>(out var db) ? 0.5 + db.Satisfaction / 100.0 : 1.0;
+            => colony.TryGetDataBlob<ColonyNeedsDB>(out var db) ? (0.5 + db.Satisfaction / 100.0) * GoodsGrowthFactor(colony) : 1.0;
 
         /// <summary>Growth stops on day 0 of a shortage.</summary>
         public static bool GrowthStopped(Entity colony) => colony.TryGetDataBlob<ColonyNeedsDB>(out var db) && db.ShortSince != null;
@@ -272,29 +334,58 @@ namespace Pulsar4X.Colonies
                 db.LastSatisfactionTick = now;
             else if ((now - tick).TotalDays >= PopulationProcessor.TickDays - 0.01)
             {
+                int months = Math.Max(1, (int)Math.Floor((now - tick).TotalDays / PopulationProcessor.TickDays + 0.01));
                 db.LastSatisfactionTick = now;
+                DrawGoods(colony, db, months);
                 db.SatisfactionTarget = Target(colony, db);
                 db.Satisfaction = Math.Clamp(db.Satisfaction + 0.2 * (db.SatisfactionTarget - db.Satisfaction), 0, 100);
             }
         }
 
-        /// <summary>Satisfaction target: 50, food short −20, water short −30, wages +5 / −15, overcrowded −15.</summary>
-        public static double Target(Entity colony, ColonyNeedsDB db)
+        /// <summary>
+        /// Monthly wants (phase 7b): per 1,000 people, drawn from the owner's stock. A want is met when the whole
+        /// amount (rounded up to a kilo) came out of stock; the result drives satisfaction, growth and shortage deaths.
+        /// </summary>
+        static void DrawGoods(Entity colony, ColonyNeedsDB db, int months)
         {
-            double t = 50;
-            if (db.ShortSince != null && db.FoodShort) t -= 20;
-            if (db.ShortSince != null && db.WaterShort) t -= 30;
+            long people = People(colony);
+            if (people <= 0)
+                return;
+            foreach (var id in GoodsIds)
+            {
+                double need = people / 1000.0 * WantPer1000(id) * months;
+                double got = Draw(colony, id, need);
+                bool met = got + 0.5 >= Math.Ceiling(need);
+                if (id == ConsumerGoodsId) db.ConsumerMet = met;
+                else if (id == MedicalId) db.MedicalMet = met;
+                else db.LuxuryMet = met;
+            }
+        }
+
+        /// <summary>The satisfaction target, itemised (the base 50 first); the sum is clamped 0-100 by <see cref="Target"/>.</summary>
+        public static List<(string Label, double Delta)> Breakdown(Entity colony, ColonyNeedsDB db)
+        {
+            var parts = new List<(string, double)> { ("Base", 50) };
+            if (db.ShortSince != null && db.FoodShort) parts.Add(("Food short", -20));
+            if (db.ShortSince != null && db.WaterShort) parts.Add(("Water short", -30));
+            if (db.ConsumerMet is bool c) parts.Add(c ? ("Consumer goods", ConsumerMetBonus) : ("Consumer goods short", ConsumerMissPenalty));
+            if (db.MedicalMet is bool m) parts.Add(m ? ("Medical supplies", MedicalMetBonus) : ("Medical supplies short", MedicalMissPenalty));
+            if (db.LuxuryMet is bool l) parts.Add(l ? ("Luxury goods", LuxuryMetBonus) : ("Luxury goods short", LuxuryMissPenalty));
             var game = colony.Manager?.Game;
             if (game != null && Pulsar4X.Factions.FactionSpending.PaysWages(game, colony.FactionOwnerID)
                 && colony.TryGetDataBlob<ColonyWorkforceDB>(out var wf) && wf.Employed > 0
                 && game.Factions.TryGetValue(colony.FactionOwnerID, out var faction)
                 && faction.TryGetDataBlob<FactionInfoDB>(out var fi))
-                t += fi.Money.GetCurrentFunds() < 0 ? -15 : 5;
+                parts.Add(fi.Money.GetCurrentFunds() < 0 ? ("Wages unpaid", -15) : ("Wages paid", 5));
             if (!SelfSupplied(colony) && colony.TryGetDataBlob<ColonyInfoDB>(out var info)
                 && info.Population.Keys.Any(id => MigrationPlanner.Crowded(colony, id, includeLeaving: false) > 0))
-                t -= 15;
-            return Math.Clamp(t, 0, 100);
+                parts.Add(("Overcrowded", -15));
+            return parts;
         }
+
+        /// <summary>Satisfaction target: 50, food short −20, water short −30, consumer +10 / −10, medical +10 / −15, luxuries +10 / −5, wages +5 / −15, overcrowded −15.</summary>
+        public static double Target(Entity colony, ColonyNeedsDB db)
+            => Math.Clamp(Breakdown(colony, db).Sum(p => p.Delta), 0, 100);
 
         static void Stage(Entity colony, ColonyNeedsDB db, ColonyInfoDB info, int day, DateTime now)
         {

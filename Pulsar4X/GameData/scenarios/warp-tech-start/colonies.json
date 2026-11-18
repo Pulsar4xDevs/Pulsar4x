@@ -26,6 +26,9 @@
         { "Id": "default-design-grid-battery-350t", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "consumer-goods", "Amount": 1000 },
+        { "Id": "medical-supplies", "Amount": 500 },
+        { "Id": "luxury-goods", "Amount": 250 },
         { "Id": "fissile-fuels", "Amount": 359 },
         { "Id": "iron", "Amount": 500000 },
         { "Id": "hydrocarbons", "Amount": 50000 },
@@ -48,6 +51,9 @@
       ],
       "StartingItems": [
         "food",
+        "consumer-goods",
+        "medical-supplies",
+        "luxury-goods",
         "agriculture",
         "farm-site",
         "ice-mine",
@@ -317,6 +323,9 @@
       "Stance": "Friendly",
       "StartingFunds": 2000000,
       "Market": [
+        { "CargoId": "consumer-goods", "Role": "Buy", "HoldDays": 360, "BidFactor": 0.75, "GapPerDay": 0.8 },
+        { "CargoId": "medical-supplies", "Role": "Buy", "HoldDays": 360, "BidFactor": 0.75, "GapPerDay": 0.4 },
+        { "CargoId": "luxury-goods", "Role": "Buy", "HoldDays": 360, "BidFactor": 0.75, "GapPerDay": 0.2 },
         { "CargoId": "food", "Role": "Buy", "HoldDays": 180, "BidFactor": 0.75, "GapPerDay": 2000, "Max": 1000000 },
         { "CargoId": "water", "Role": "Buy", "HoldDays": 180, "BidFactor": 0.75, "GapPerDay": 16000 }
       ],
@@ -334,6 +343,9 @@
         { "Id": "default-design-grid-battery-600t", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "consumer-goods", "Amount": 288 },
+        { "Id": "medical-supplies", "Amount": 144 },
+        { "Id": "luxury-goods", "Amount": 72 },
         { "Id": "food", "Amount": 360000 },
         { "Id": "water", "Amount": 2880000 },
         { "Id": "fissile-fuels", "Amount": 956 },
@@ -344,6 +356,9 @@
       ],
       "StartingItems": [
         "food",
+        "consumer-goods",
+        "medical-supplies",
+        "luxury-goods",
         "agriculture",
         "farm-site",
         "ice-mine",
@@ -398,6 +413,9 @@
         { "Id": "default-design-fuel-tank-3000", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "consumer-goods", "Amount": 120 },
+        { "Id": "medical-supplies", "Amount": 60 },
+        { "Id": "luxury-goods", "Amount": 36 },
         { "Id": "food", "Amount": 90000 },
         { "Id": "fissile-fuels", "Amount": 10 },
         { "Id": "iron", "Amount": 20000 },
@@ -427,6 +445,9 @@
       "StartingFunds": 100000,
       "SeatAdministrator": true,
       "Market": [
+        { "CargoId": "consumer-goods", "Role": "Buy", "HoldDays": 360, "BidFactor": 0.75, "GapPerDay": 0.0533 },
+        { "CargoId": "medical-supplies", "Role": "Buy", "HoldDays": 360, "BidFactor": 0.75, "GapPerDay": 0.0267 },
+        { "CargoId": "luxury-goods", "Role": "Buy", "HoldDays": 360, "BidFactor": 0.75, "GapPerDay": 0.0133 },
         { "CargoId": "food", "Role": "Buy", "HoldDays": 180, "BidFactor": 0.75, "GapPerDay": 400 }
       ],
       "Installations": [
@@ -441,6 +462,9 @@
         { "Id": "default-design-grid-battery-50t", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "consumer-goods", "Amount": 20 },
+        { "Id": "medical-supplies", "Amount": 10 },
+        { "Id": "luxury-goods", "Amount": 5 },
         { "Id": "food", "Amount": 72000 },
         { "Id": "fissile-fuels", "Amount": 15 },
         { "Id": "methalox", "Amount": 4000, "Type": "byVolume" },
@@ -505,6 +529,9 @@
         { "Id": "default-design-naval-academy", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "consumer-goods", "Amount": 60000 },
+        { "Id": "medical-supplies", "Amount": 30000 },
+        { "Id": "luxury-goods", "Amount": 15000 },
         { "Id": "food", "Amount": 150000 },
         { "Id": "fissile-fuels", "Amount": 359 },
         { "Id": "iron", "Amount": 200000 },
@@ -515,6 +542,9 @@
         { "Id": "water", "Amount": 100000 }
       ],
       "Market": [
+        { "CargoId": "consumer-goods", "Role": "Buy", "HoldDays": 60, "BidFactor": 0.75, "GapPerDay": 66.7 },
+        { "CargoId": "medical-supplies", "Role": "Buy", "HoldDays": 60, "BidFactor": 0.75, "GapPerDay": 33.3 },
+        { "CargoId": "luxury-goods", "Role": "Buy", "HoldDays": 60, "BidFactor": 0.75, "GapPerDay": 16.7 },
         { "CargoId": "food", "Role": "Sell", "Max": 450000 },
         { "CargoId": "plastic", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 10 },
         { "CargoId": "methalox", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 2500 },
@@ -524,6 +554,9 @@
       ],
       "StartingItems": [
         "food",
+        "consumer-goods",
+        "medical-supplies",
+        "luxury-goods",
         "agriculture",
         "farm-site",
         "ice-mine",
@@ -662,6 +695,9 @@
         { "Id": "default-design-naval-academy", "Amount": 1 }
       ],
       "Cargo": [
+        { "Id": "consumer-goods", "Amount": 80000 },
+        { "Id": "medical-supplies", "Amount": 30000 },
+        { "Id": "luxury-goods", "Amount": 15000 },
         { "Id": "fissile-fuels", "Amount": 359 },
         { "Id": "iron", "Amount": 200000 },
         { "Id": "stainless-steel", "Amount": 50000 },
@@ -670,6 +706,9 @@
         { "Id": "plastic", "Amount": 5000 }
       ],
       "Market": [
+        { "CargoId": "consumer-goods", "Role": "Sell", "HoldDays": 60, "GapPerDay": 66.7 },
+        { "CargoId": "medical-supplies", "Role": "Buy", "HoldDays": 60, "BidFactor": 0.75, "GapPerDay": 33.3 },
+        { "CargoId": "luxury-goods", "Role": "Buy", "HoldDays": 60, "BidFactor": 0.75, "GapPerDay": 16.7 },
         { "CargoId": "food", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 3000 },
         { "CargoId": "iron", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 5000 },
         { "CargoId": "copper", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 250 },
@@ -682,6 +721,9 @@
       ],
       "StartingItems": [
         "food",
+        "consumer-goods",
+        "medical-supplies",
+        "luxury-goods",
         "agriculture",
         "farm-site",
         "ice-mine",
@@ -821,6 +863,13 @@
         { "Id": "default-design-research-lab", "Amount": 2 }
       ],
       "Cargo": [
+        { "Id": "plastic", "Amount": 20000 },
+        { "Id": "hydrocarbons", "Amount": 20000 },
+        { "Id": "titanium", "Amount": 4000 },
+        { "Id": "rare-earth-elements", "Amount": 400 },
+        { "Id": "consumer-goods", "Amount": 60000 },
+        { "Id": "medical-supplies", "Amount": 60000 },
+        { "Id": "luxury-goods", "Amount": 30000 },
         { "Id": "fissile-fuels", "Amount": 359 },
         { "Id": "iron", "Amount": 200000 },
         { "Id": "stainless-steel", "Amount": 50000 },
@@ -828,6 +877,10 @@
         { "Id": "aluminium", "Amount": 20000 }
       ],
       "Market": [
+        { "CargoId": "plastic", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "GapPerDay": 50 },
+        { "CargoId": "consumer-goods", "Role": "Buy", "HoldDays": 60, "BidFactor": 0.75, "GapPerDay": 66.7 },
+        { "CargoId": "medical-supplies", "Role": "Sell", "HoldDays": 60, "GapPerDay": 33.3 },
+        { "CargoId": "luxury-goods", "Role": "Sell", "HoldDays": 60, "GapPerDay": 16.7 },
         { "CargoId": "food", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 3000 },
         { "CargoId": "rare-earth-elements", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 67 },
         { "CargoId": "titanium", "Role": "Buy", "HoldDays": 30, "BidFactor": 0.75, "UsePerDayPerMillion": 333 },
@@ -837,6 +890,9 @@
       ],
       "StartingItems": [
         "food",
+        "consumer-goods",
+        "medical-supplies",
+        "luxury-goods",
         "agriculture",
         "farm-site",
         "ice-mine",

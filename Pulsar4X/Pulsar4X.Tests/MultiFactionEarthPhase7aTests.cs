@@ -133,6 +133,7 @@ public class MultiFactionEarthPhase7aTests
         int species = mars.GetDataBlob<ColonyInfoDB>().Population.Keys.Single();
         NoFarms(mars);
         SetStock(mars, "food", 0);
+        SetStock(mars, "medical-supplies", 0);                  // medical met would halve the deaths (phase 7b); this pins the base rule
         var types = new[] { EventType.SupplyShortage, EventType.SupplyWarning, EventType.PopulationLeft, EventType.PopulationStarved };
         var events = Capture(types);
         try
@@ -174,6 +175,7 @@ public class MultiFactionEarthPhase7aTests
         Start(WarpTechStart);
         var mars = Named("Mars HQ");
         SetStock(mars, "water", 0);                             // food stays: 90 t
+        SetStock(mars, "medical-supplies", 0);                  // base rule; medical met would halve it (phase 7b)
         var t0 = mars.StarSysDateTime;
         var t = RunDays(mars, t0, 90);                          // days 0..89
         Assert.That(Needs(mars).DeathsTotal, Is.EqualTo(0));
@@ -230,15 +232,15 @@ public class MultiFactionEarthPhase7aTests
         var t0 = mars.StarSysDateTime;
         Assert.That(Needs(mars).Satisfaction, Is.EqualTo(60));
         var t = RunDays(mars, t0, 31);
-        // Supplied, company wages paid, not overcrowded: 50 + 5.
-        Assert.That(Needs(mars).SatisfactionTarget, Is.EqualTo(55));
-        Assert.That(Needs(mars).Satisfaction, Is.EqualTo(59).Within(1e-9));
+        // Supplied, company wages paid, not overcrowded: 50 + 5, plus 30 for the three goods met (phase 7b).
+        Assert.That(Needs(mars).SatisfactionTarget, Is.EqualTo(85));
+        Assert.That(Needs(mars).Satisfaction, Is.EqualTo(65).Within(1e-9));
 
         SetStock(mars, "water", 0);
         RunDays(mars, t, 30);
-        Assert.That(Needs(mars).SatisfactionTarget, Is.EqualTo(25), "water short −30");
-        Assert.That(Needs(mars).Satisfaction, Is.EqualTo(59 + 0.2 * (25 - 59)).Within(1e-9));
-        Assert.That(ColonyNeeds.GrowthFactor(mars), Is.EqualTo(0.5 + Needs(mars).Satisfaction / 100).Within(1e-9));
+        Assert.That(Needs(mars).SatisfactionTarget, Is.EqualTo(55), "water short −30 (goods still met)");
+        Assert.That(Needs(mars).Satisfaction, Is.EqualTo(65 + 0.2 * (55 - 65)).Within(1e-9));
+        Assert.That(ColonyNeeds.GrowthFactor(mars), Is.EqualTo((0.5 + Needs(mars).Satisfaction / 100) * ColonyNeeds.GoodsGrowthFactor(mars)).Within(1e-9));
 
         Needs(mars).Satisfaction = 15;
         Assert.That(ColonyNeeds.OutputFactor(mars), Is.EqualTo(0.9));
@@ -332,12 +334,20 @@ public class MultiFactionEarthPhase7aTests
             if (month * 30 >= 180)
             {
                 foreach (var c in new[] { luna, ceres })
+                {
                     foreach (var id in new[] { "food", "water" })
                     {
                         long target = (long)(180 * (id == "food" ? ColonyNeeds.FoodPerDay(c) : ColonyNeeds.WaterPerDay(c)));
                         if (ColonyNeeds.Stock(c, id) < target)
                             SetStock(c, id, target);
                     }
+                    foreach (var id in ColonyNeeds.GoodsIds)
+                    {
+                        long hold = (long)Math.Ceiling(360 * ColonyNeeds.GoodsPerDay(c, id));
+                        if (ColonyNeeds.Stock(c, id) < hold)
+                            SetStock(c, id, hold);
+                    }
+                }
             }
             if (month == 6)
                 Assert.That(Needs(luna).DeathsTotal, Is.EqualTo(0), "no hauls in the first 180 days");
@@ -349,6 +359,8 @@ public class MultiFactionEarthPhase7aTests
             Assert.That(Needs(c).DeathsTotal, Is.EqualTo(0), c.GetDataBlob<NameDB>().DefaultName);
         }
         Assert.That(lunaBid, Is.True, "Luna's buy rows post the gap");
+        Assert.That(Needs(luna).Satisfaction, Is.GreaterThanOrEqualTo(50), "supplied Luna settles well above the leave threshold");
+        Assert.That(Needs(ceres).Satisfaction, Is.GreaterThanOrEqualTo(50), "supplied Ceres settles well above the leave threshold");
         Assert.That(Needs(Named("Mars HQ")).ShortSince, Is.Null, "Mars feeds itself");
     }
 

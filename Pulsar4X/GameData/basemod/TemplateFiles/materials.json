@@ -235,5 +235,66 @@
       "WealthCost": 0,
       "OutputAmount": 1
     }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "consumer-goods",
+      "Name": "Consumer Goods",
+      "Description": "Everyday goods a colony wants, 2 kg per 1,000 people a month. Met: growth +10%, satisfaction +10; missing: satisfaction -10.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1,
+      "VolumePerUnit": 0.002,
+      "ResourceCosts": {
+        "plastic": 30,
+        "stainless-steel": 15
+      },
+      "IndustryPointCosts": 50,
+      "EnergyCost": 400,
+      "IndustryTypeID": "refining",
+      "WealthCost": 0,
+      "OutputAmount": 50
+    }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "medical-supplies",
+      "Name": "Medical Supplies",
+      "Description": "Pharma line: 1 kg per 1,000 people a month. Met: growth +10%, shortage deaths halved, satisfaction +10; missing: growth -25%, satisfaction -15.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1,
+      "VolumePerUnit": 0.001,
+      "ResourceCosts": {
+        "plastic": 10,
+        "hydrocarbons": 10
+      },
+      "IndustryPointCosts": 100,
+      "EnergyCost": 540,
+      "IndustryTypeID": "refining",
+      "WealthCost": 0,
+      "OutputAmount": 20
+    }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "luxury-goods",
+      "Name": "Luxury Goods",
+      "Description": "0.5 kg per 1,000 people a month. Met: migration pull +20%, satisfaction +10; missing: satisfaction -5.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1,
+      "VolumePerUnit": 0.002,
+      "ResourceCosts": {
+        "plastic": 10,
+        "rare-earth-elements": 1,
+        "titanium": 2
+      },
+      "IndustryPointCosts": 100,
+      "EnergyCost": 1120,
+      "IndustryTypeID": "refining",
+      "WealthCost": 0,
+      "OutputAmount": 20
+    }
   }
 ]
