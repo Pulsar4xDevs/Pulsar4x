@@ -90,8 +90,12 @@ namespace Pulsar4X.Client
         private double _wpow;
         private List<string> _warpWarnings = new();
         private List<string> _crewWarnings = new();
+        private int _designCrew;
         private int _crewBerths;
+        private int _officerSlots;
+        private bool _designAutomated;
         private List<string> _berthRows = new();
+        private List<string> _slotRows = new();
         //newt
         private double _tn;
         private double _ttwr;
@@ -704,9 +708,14 @@ namespace Pulsar4X.Client
                             ImGui.Text("Mass: " + Stringify.Mass(AvailableShipComponents[i].MassPerUnit));
                             ImGui.Text("Volume: " + Stringify.Volume(AvailableShipComponents[i].VolumePerUnit));
                             ImGui.Text("Crew Required: " + AvailableShipComponents[i].CrewReq);
-                            int berthsPerCopy = ShipCrew.Berths(new[] { (AvailableShipComponents[i], 1) });
-                            if (berthsPerCopy > 0)
-                                ImGui.Text("Berths: " + berthsPerCopy);
+                            int bunksPerCopy = ShipCrew.BerthsPer(AvailableShipComponents[i]);
+                            int slotsPerCopy = ShipCrew.SlotsPer(AvailableShipComponents[i]);
+                            if (bunksPerCopy > 0)
+                                ImGui.Text("Bunks: " + bunksPerCopy);
+                            if (slotsPerCopy > 0)
+                                ImGui.Text("Officer slots: " + slotsPerCopy);
+                            if (ShipCrew.IsBridge(AvailableShipComponents[i]))
+                                ImGui.Text("Bridge");
                         }
 
                         DisplayHelpers.DescriptiveTooltip(AvailableShipComponents[i].Name, AvailableShipComponents[i].TemplateName, AvailableShipComponents[i].Description, TooltipExtension);
@@ -770,31 +779,66 @@ namespace Pulsar4X.Client
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.EnergyKwh(_buildEnergy));
 
-                // Crew vs berths: each component's crew per copy times its copies (ShipDesign.CrewReq counts the
-                // same) against the berths the parts give (ShipCrew.Berths: quarters plus bridge console space).
-                var crewRows = SelectedComponents.Where(c => c.design.CrewReq != 0 && c.count > 0).ToList();
-                int crewNeed = crewRows.Sum(c => c.design.CrewReq * c.count);
                 ImGui.TableNextColumn();
-                ImGui.Text("Crew / berths");
+                ImGui.Text("Crew");
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Crew the parts need, against the berths they give.\nA ship takes aboard at most its berths.");
+                    ImGui.SetTooltip("Part crew when the design has a bridge; 0 when it is automated (no bridge).");
                 ImGui.TableNextColumn();
-                bool berthShort = _crewBerths < crewNeed;
-                ImGui.PushStyleColor(ImGuiCol.Text, berthShort ? CrewBars.ShortColour : Styles.GoodColor);
-                ImGui.TextUnformatted(crewNeed.ToString(Styles.IntFormat) + " / " + _crewBerths.ToString(Styles.IntFormat));
-                ImGui.PopStyleColor();
-                bool crewHover = ImGui.IsItemHovered();
-                ImGui.SameLine();
-                PowerBars.InlineBar(CrewBars.Fill(_crewBerths, crewNeed), berthShort ? CrewBars.ShortColour : PowerRing.FullColour, 48f);
-                crewHover |= ImGui.IsItemHovered();
-                if (crewHover)
+                if (_designAutomated)
                 {
-                    var lines = crewRows.Select(c => $"{c.design.Name}: {c.design.CrewReq} crew x {c.count} = {c.design.CrewReq * c.count}").ToList();
-                    lines.AddRange(_berthRows);
-                    if (lines.Count == 0)
-                        lines.Add("No crew needed and no berths.");
+                    ImGui.TextUnformatted("0  " + CrewRules.AutomatedLabel);
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("No bridge: this design is automated. It needs no crew, bunks or officer slots, and a finished ship takes no orders of its own.");
+                }
+                else
+                {
+                    bool berthShort = _crewBerths < _designCrew;
+                    ImGui.PushStyleColor(ImGuiCol.Text, berthShort ? CrewBars.ShortColour : Styles.GoodColor);
+                    ImGui.TextUnformatted(_designCrew.ToString(Styles.IntFormat));
+                    ImGui.PopStyleColor();
+                    if (ImGui.IsItemHovered() && _berthRows.Count + _slotRows.Count > 0)
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.TextUnformatted(string.Join("\n", SelectedComponents.Where(c => c.count > 0 && c.design != null && c.design.CrewReq != 0)
+                            .Select(c => $"{c.design.Name}: {c.design.CrewReq} crew x {c.count} = {c.design.CrewReq * c.count}")));
+                        ImGui.EndTooltip();
+                    }
+                }
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Bunks");
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Crew bunks from crew quarters only. Bridge cabins are officer slots, not bunks.");
+                ImGui.TableNextColumn();
+                bool bunkShort = !_designAutomated && _crewBerths < _designCrew;
+                ImGui.PushStyleColor(ImGuiCol.Text, bunkShort ? CrewBars.ShortColour : Styles.GoodColor);
+                ImGui.TextUnformatted(_crewBerths.ToString(Styles.IntFormat));
+                ImGui.PopStyleColor();
+                if (!_designAutomated)
+                {
+                    ImGui.SameLine();
+                    PowerBars.InlineBar(CrewBars.Fill(_crewBerths, _designCrew), bunkShort ? CrewBars.ShortColour : PowerRing.FullColour, 48f);
+                }
+                if (ImGui.IsItemHovered() && _berthRows.Count > 0)
+                {
                     ImGui.BeginTooltip();
-                    ImGui.TextUnformatted(string.Join("\n", lines));
+                    ImGui.TextUnformatted(string.Join("\n", _berthRows));
+                    ImGui.EndTooltip();
+                }
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Officer slots");
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Officer slots on the bridge, including the captain's. A bridge with no slot cannot take a captain.");
+                ImGui.TableNextColumn();
+                bool noSlot = !_designAutomated && _officerSlots < 1;
+                ImGui.PushStyleColor(ImGuiCol.Text, noSlot ? CrewBars.ShortColour : Styles.GoodColor);
+                ImGui.TextUnformatted(_officerSlots.ToString(Styles.IntFormat));
+                ImGui.PopStyleColor();
+                if (ImGui.IsItemHovered() && _slotRows.Count > 0)
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.TextUnformatted(string.Join("\n", _slotRows));
                     ImGui.EndTooltip();
                 }
 
@@ -852,9 +896,9 @@ namespace Pulsar4X.Client
 
                 ImGui.TableNextColumn();
                 ImGui.Text("Life Support");
-                string lifeTip = "Crew capacity " + _lifeSupportCapacity.ToString(Styles.IntFormat)
-                    + " (the lesser of required crew and berths).\n"
-                    + Stringify.Power(_lifeSupportPerCrew) + " per crew × "
+                string lifeTip = "People capacity " + _lifeSupportCapacity.ToString(Styles.IntFormat)
+                    + " (crew the bunks hold, plus the captain when a slot exists).\n"
+                    + Stringify.Power(_lifeSupportPerCrew) + " per person × "
                     + _lifeSupportFactor.ToString(Styles.DecimalFormat) + " life-support factor.";
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(lifeTip);
@@ -1227,13 +1271,31 @@ namespace Pulsar4X.Client
             _wsc = wsc;
             _wspd = WarpMath.MaxSpeedCalc(wp, mass);
             _wpow = wp;
-            _crewWarnings = ShipCrew.DesignCrewWarnings(SelectedComponents);
-            _crewBerths = ShipCrew.Berths(SelectedComponents);
+            var designParts = SelectedComponents
+                .Where(c => c.count > 0 && c.design != null)
+                .Select(c => new CrewRules.DesignPart(
+                    c.design.CrewReq,
+                    ShipCrew.BerthsPer(c.design),
+                    ShipCrew.SlotsPer(c.design),
+                    ShipCrew.IsBridge(c.design),
+                    c.count));
+            var crewTotals = CrewRules.Totals(designParts);
+            _designCrew = crewTotals.Crew;
+            _crewBerths = crewTotals.Bunks;
+            _officerSlots = crewTotals.OfficerSlots;
+            _designAutomated = crewTotals.Automated;
+            _crewWarnings = CrewRules.DesignWarnings(crewTotals).ToList();
             _berthRows = SelectedComponents
-                .Where(c => c.count > 0)
-                .Select(c => (c.design.Name, c.count, per: ShipCrew.Berths(new[] { (c.design, 1) })))
+                .Where(c => c.count > 0 && c.design != null)
+                .Select(c => (c.design.Name, c.count, per: ShipCrew.BerthsPer(c.design)))
                 .Where(r => r.per > 0)
-                .Select(r => $"{r.Name}: {r.per} berths x {r.count} = {r.per * r.count}")
+                .Select(r => $"{r.Name}: {r.per} bunks x {r.count} = {r.per * r.count}")
+                .ToList();
+            _slotRows = SelectedComponents
+                .Where(c => c.count > 0 && c.design != null)
+                .Select(c => (c.design.Name, c.count, per: ShipCrew.SlotsPer(c.design)))
+                .Where(r => r.per > 0)
+                .Select(r => $"{r.Name}: {r.per} officer slots x {r.count} = {r.per * r.count}")
                 .ToList();
             _egen = egen;
             _solarArea = ShipDesign.GetSolarCollectionArea(SelectedComponents);
@@ -1243,9 +1305,8 @@ namespace Pulsar4X.Client
                 ?? GameLifecycle.Instance?.Game?.Settings?.ShipLifeSupport_kWPerCrew
                 ?? Pulsar4X.Engine.GameSettings.DefaultShipLifeSupport_kWPerCrew;
             _lifeSupportFactor = CrewTech.LifeSupportFactor(_factionInfoDB.Data);
-            var crewSplit = ShipCrew.Split(SelectedComponents);
-            _lifeSupportCapacity = crewSplit.Capacity;
-            _lifeSupportPower = crewSplit.Capacity * _lifeSupportPerCrew * _lifeSupportFactor;
+            _lifeSupportCapacity = crewTotals.PeopleCapacity;
+            _lifeSupportPower = _lifeSupportCapacity * _lifeSupportPerCrew * _lifeSupportFactor;
             // The warp check counts life support at the same per-crew rate and closed-loop tech factor as the row
             // above, and warns when a Newtonian engine has no tank for its fuel.
             _warpWarnings = WarpMath.DesignWarpWarnings(SelectedComponents, _lifeSupportFactor, _lifeSupportPerCrew,

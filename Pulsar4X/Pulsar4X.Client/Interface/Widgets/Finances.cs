@@ -135,7 +135,7 @@ public static class Finances
         if (ImGui.BeginTable("##finances", 2, ImGuiTableFlags.SizingFixedFit))
         {
             Row("Last wage bill", LastWagesText(f), "The last monthly crew pay line (ledger category " + FactionSnapshot.WagesCategory + "), booked on the 1st for the month before.");
-            Row("Payroll", PayrollText(f), "Crew aboard the faction's ships plus trained crew in its colony pools. Academy students are not paid.\nWages accrue daily and are billed once, on the 1st of each month.");
+            Row("Payroll", PayrollText(f), "People aboard the faction's ships (crew and officers) plus trained crew in its colony pools. Academy students are not paid.\nWages accrue daily and are billed once, on the 1st of each month.");
             Row("Staff wages", StaffWagesText(f), "Own staff and commuters, at the staff wage (default 2 cr a day). Commuter wages are paid into their bloc's funds.\nBilled on the 1st with crew wages (ledger category " + FactionSnapshot.StaffWagesCategory + ").");
             Row("Tax income", TaxIncomeText(f), "Bloc tax: residents × tax per person per month. 0 for the company.");
             Row("Bid reserve", BidReserveText(f), "Funds a bloc keeps back before it bids: three months of running costs. 0 for factions that do not bid.");
@@ -164,14 +164,14 @@ public static class LifeSupportRows
 {
     public const string Kind = "Life support";
 
-    /// <summary>"0.80 kW per crew x 12 crew = 9.6 kW", plus the tech's effect when it lowers the 1 kW base.</summary>
+    /// <summary>"0.80 kW per person x 12 people = 9.6 kW", plus the tech's effect when it lowers the 1 kW base.</summary>
     public static string ShipTooltip(ShipPowerView p)
     {
-        string text = Kind + ": " + p.LifeSupportPerCrew_kW.ToString("0.##", CultureInfo.InvariantCulture) + " kW per crew x "
-            + p.LifeSupportCrew.ToString("N0") + " crew = " + Stringify.Power(p.LifeSupport_kW) + ".";
+        string text = Kind + ": " + p.LifeSupportPerCrew_kW.ToString("0.##", CultureInfo.InvariantCulture) + " kW per person x "
+            + p.LifeSupportCrew.ToString("N0") + " people = " + Stringify.Power(p.LifeSupport_kW) + ".";
         text += p.LifeSupportPerCrew_kW > 0 && p.LifeSupportPerCrew_kW < 1
-            ? "\nLife-support efficiency tech: " + (1 - p.LifeSupportPerCrew_kW).ToString("0%", CultureInfo.InvariantCulture) + " less than the 1 kW per crew base."
-            : "\nBase 1 kW per crew; life-support efficiency tech lowers it.";
+            ? "\nLife-support efficiency tech: " + (1 - p.LifeSupportPerCrew_kW).ToString("0%", CultureInfo.InvariantCulture) + " less than the 1 kW per person base."
+            : "\nBase 1 kW per person; life-support efficiency tech lowers it.";
         if (p.LifeSupportMustRun)
             text += "\nMust-run: served before warp and charging, and counted in the warp check.";
         return text;
@@ -230,8 +230,8 @@ public static class LifeSupportRows
                 + " (" + PowerBars.Percent(share, 1) + ").",
             Detail = new List<(string, string)>
             {
-                ("Crew aboard", p.LifeSupportCrew.ToString("N0")),
-                ("Per crew", p.LifeSupportPerCrew_kW.ToString("0.##", CultureInfo.InvariantCulture) + " kW"),
+                ("People aboard", p.LifeSupportCrew.ToString("N0")),
+                ("Per person", p.LifeSupportPerCrew_kW.ToString("0.##", CultureInfo.InvariantCulture) + " kW"),
                 ("Draw", Stringify.Power(demand)),
                 ("Powered", Stringify.Power(p.LifeSupportServed_kW)),
             },

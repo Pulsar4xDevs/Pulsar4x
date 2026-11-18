@@ -53,8 +53,8 @@ public class CrewLifeSupportAndWagesUiTests
         Assert.That(row.Value, Is.EqualTo(Stringify.Power(9.6)));
         Assert.That(row.Fill, Is.EqualTo(1f));
         Assert.That(row.Trailing, Does.StartWith("must-run"));
-        Assert.That(row.Tooltip, Does.Contain("0.8 kW per crew x 12 crew"));
-        Assert.That(row.Tooltip, Does.Contain("20% less than the 1 kW per crew base"));
+        Assert.That(row.Tooltip, Does.Contain("0.8 kW per person x 12 people"));
+        Assert.That(row.Tooltip, Does.Contain("20% less than the 1 kW per person base"));
         Assert.That(row.Tooltip, Does.Contain("Must-run"));
     }
 
@@ -66,7 +66,7 @@ public class CrewLifeSupportAndWagesUiTests
         Assert.That(row.Fill, Is.EqualTo(0.4f));
         Assert.That(row.Tooltip, Does.Contain("Powered now: " + Stringify.Power(4) + " of " + Stringify.Power(10) + " (40%)"));
         Assert.That(row.Detail.Single(d => d.Name == "Powered").Value, Is.EqualTo(Stringify.Power(4)));
-        Assert.That(row.Tooltip, Does.Contain("Base 1 kW per crew"));
+        Assert.That(row.Tooltip, Does.Contain("Base 1 kW per person"));
     }
 
     [Test]

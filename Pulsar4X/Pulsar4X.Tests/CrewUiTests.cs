@@ -27,10 +27,10 @@ public class CrewUiTests
     public void ShipRows_HideAboardAndFractions_UntilCrewIsTracked()
     {
         var rows = CrewBars.ShipRows(Ship(28, 10));
-        Assert.That(rows.Select(r => r.Id), Is.EqualTo(new[] { "required", "berths" }));
+        Assert.That(rows.Select(r => r.Id), Is.EqualTo(new[] { "required", "berths", "officers" }));
 
         var tracked = CrewBars.ShipRows(Ship(28, 30, tracked: true, aboard: 14, factor: 0.5, engine: 0.6, under: true));
-        Assert.That(tracked.Select(r => r.Id), Is.EqualTo(new[] { "required", "berths", "aboard", "engines" }));
+        Assert.That(tracked.Select(r => r.Id), Is.EqualTo(new[] { "required", "berths", "officers", "aboard", "engines" }));
         var aboard = tracked.Single(r => r.Id == "aboard");
         Assert.That(aboard.Value, Is.EqualTo("14/28"));
         Assert.That(aboard.Fill, Is.EqualTo(0.5f));
@@ -42,7 +42,7 @@ public class CrewUiTests
     public void BerthRow_FlagsTooFewBerths()
     {
         var berths = CrewBars.ShipRows(Ship(28, 10)).Single(r => r.Id == "berths");
-        Assert.That(berths.Tooltip, Does.Contain("18 berths short"));
+        Assert.That(berths.Tooltip, Does.Contain("18 bunks short"));
         Assert.That(berths.Fill, Is.EqualTo(10f / 28f).Within(1e-6));
         Assert.That(berths.Detail.Single().Value, Is.EqualTo("10"));
 
@@ -57,8 +57,8 @@ public class CrewUiTests
         Assert.That(CrewBars.Fill(0, 0), Is.EqualTo(1f));
         Assert.That(CrewBars.Fill(5, 10), Is.EqualTo(0.5f));
         Assert.That(CrewBars.Fill(50, 10), Is.EqualTo(1f));
-        Assert.That(CrewBars.RequiredVsBerths(28, 1), Is.EqualTo("28 crew, 1 berth"));
-        Assert.That(CrewBars.BerthShortfall(5, 4), Is.EqualTo("1 berth short"));
+        Assert.That(CrewBars.RequiredVsBerths(28, 1), Is.EqualTo("28 crew, 1 bunk"));
+        Assert.That(CrewBars.BerthShortfall(5, 4), Is.EqualTo("1 bunk short"));
         Assert.That(CrewBars.WorkRate(0.5), Is.EqualTo("25%"));
         Assert.That(CrewBars.WorkRate(1), Is.EqualTo("100%"));
     }
@@ -100,9 +100,10 @@ public class CrewUiTests
     [Test]
     public void SummaryIndicator_ShowsNeededAndBerths_UntilTracked_ThenAboard()
     {
-        Assert.That(CrewBars.Indicator(Ship(17, 12)), Is.EqualTo("17 needed, 12 berths"));
-        Assert.That(CrewBars.Indicator(Ship(17, 1)), Is.EqualTo("17 needed, 1 berth"));
-        Assert.That(CrewBars.Indicator(Ship(17, 20, tracked: true, aboard: 9, under: true)), Is.EqualTo("9/17 aboard"));
+        Assert.That(CrewBars.Indicator(Ship(17, 12)), Is.EqualTo("17 needed, 12 bunks"));
+        Assert.That(CrewBars.Indicator(Ship(17, 1)), Is.EqualTo("17 needed, 1 bunk"));
+        Assert.That(CrewBars.Indicator(Ship(17, 20, tracked: true, aboard: 9, under: true)), Is.EqualTo("9/17 crew"));
+        Assert.That(CrewBars.Indicator(Ship(0, 0) with { Automated = true }), Is.EqualTo(CrewRules.AutomatedState));
     }
 
     [Test]
@@ -194,6 +195,8 @@ public class CrewUiTests
         Assert.That(CrewActions.ToPoolRefusal(Ship(17, 20, tracked: true, aboard: 0), colony), Is.EqualTo("Nobody is aboard."));
         Assert.That(CrewActions.TopUpRefusal(Ship(17, 20), colony), Is.EqualTo("This ship does not carry crew."));
         Assert.That(CrewActions.ToPoolRefusal(Ship(17, 20), colony), Is.EqualTo("This ship does not carry crew."));
+        Assert.That(CrewActions.TopUpRefusal(Ship(0, 0, tracked: true) with { Automated = true }, colony),
+            Is.EqualTo(CrewRules.TopUpAutomated));
     }
 
     // ---- item 10: the academy's run buttons are always shown, disabled with a reason ----

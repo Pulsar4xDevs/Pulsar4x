@@ -457,14 +457,21 @@ namespace Pulsar4X.Client
 
             CostsDisplay(selectedDesign);
 
-            if (selectedDesign.CrewRequired > 0 || selectedDesign.CrewBerths > 0)
+            if (selectedDesign.Automated)
             {
-                bool ship = selectedDesign.CrewBerths > 0 || selectedDesign.CrewWarning.Length > 0;
-                ImGui.TextUnformatted(ship
+                ImGui.TextUnformatted(CrewRules.AutomatedState);
+            }
+            else if (selectedDesign.CrewRequired > 0 || selectedDesign.CrewBerths > 0 || selectedDesign.OfficerSlots > 0)
+            {
+                bool ship = selectedDesign.CrewBerths > 0 || selectedDesign.OfficerSlots > 0 || selectedDesign.CrewWarning.Length > 0;
+                string crewLine = ship
                     ? CrewBars.RequiredVsBerths(selectedDesign.CrewRequired, selectedDesign.CrewBerths)
-                    : selectedDesign.CrewRequired.ToString("N0") + " crew");
+                    : selectedDesign.CrewRequired.ToString("N0") + " crew";
+                if (selectedDesign.OfficerSlots > 0)
+                    crewLine += ", " + selectedDesign.OfficerSlots.ToString("N0") + " officer slots";
+                ImGui.TextUnformatted(crewLine);
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Crew come from this colony's trained-crew pool when the ship launches.");
+                    ImGui.SetTooltip("Crew come from this colony's trained-crew pool when the ship launches. The captain is assigned to an officer slot and is not taken from the pool.");
                 CrewBars.Warning(selectedDesign.CrewWarning);
             }
 

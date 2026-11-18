@@ -894,9 +894,11 @@ namespace Pulsar4X.Client
 
             DisplayShipStatusRow();
 
-            string captain = string.IsNullOrEmpty(ship?.CommanderName) ? "No captain" : ship!.CommanderName!;
+            string captain = ship?.Automated == true
+                ? CrewRules.AutomatedLabel
+                : string.IsNullOrEmpty(ship?.CommanderName) ? "No captain" : ship!.CommanderName!;
             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.TextUnformatted("Captain");
+            ImGui.TextUnformatted(ship?.Automated == true ? "Crew" : "Captain");
             ImGui.PopStyleColor();
             ImGui.SameLine();
             ImGui.TextUnformatted(captain);

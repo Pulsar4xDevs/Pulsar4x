@@ -273,9 +273,14 @@ namespace Pulsar4X.Client
         }
 
         static string CaptainTooltip(ShipSnapshot ship)
-            => ShipHasCaptain(ship)
+        {
+            string? refusal = CrewRules.AssignCaptainRefusal(ship);
+            if (refusal != null)
+                return refusal;
+            return ShipHasCaptain(ship)
                 ? "Replace this captain, or choose None and plot the ship's actions yourself."
                 : "No captain. Choose an officer, or leave None and plot this ship's actions yourself.";
+        }
 
         static bool HasGoal(GoalSnapshot? goal) => goal != null && goal.Name.Length > 0;
 
@@ -502,6 +507,14 @@ namespace Pulsar4X.Client
                     ImGui.NewLine();
                 CrewBars.Badge("Under-crewed", CrewBars.ShortColour);
             }
+            if (shipView.NoCaptain)
+            {
+                float badgeW = ImGui.CalcTextSize("No captain").X + 10f;
+                ImGui.SameLine();
+                if (ImGui.GetContentRegionAvail().X < badgeW)
+                    ImGui.NewLine();
+                CrewBars.Badge("No captain", CrewBars.ShortColour);
+            }
             ImGui.EndGroup();
             if (ImGui.IsItemHovered())
             {
@@ -509,7 +522,9 @@ namespace Pulsar4X.Client
                 ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
                 if (under && shipView.CrewNote.Length > 0)
                     ImGui.TextUnformatted(shipView.CrewNote);
-                ImGui.TextUnformatted("See the Crew tab for berths, crew fraction, engine crew and top-up.");
+                if (shipView.NoCaptain)
+                    ImGui.TextUnformatted("This ship has a bridge but no captain.");
+                ImGui.TextUnformatted("See the Crew tab for bunks, officers, crew fraction, engine crew and top-up.");
                 ImGui.PopTextWrapPos();
                 ImGui.EndTooltip();
             }
@@ -527,12 +542,28 @@ namespace Pulsar4X.Client
             var left = new Vector2(size.X * 0.35f, size.Y);
             if (ImGui.BeginChild("ShipCrewSummary", left, ImGuiChildFlags.Borders))
             {
-                ImGui.TextUnformatted(CrewBars.RequiredVsBerths(shipView.CrewRequired, shipView.CrewBerths));
-                if (!shipView.CrewTracked && ImGui.IsItemHovered())
+                if (shipView.Automated)
+                {
+                    ImGui.TextUnformatted(CrewRules.AutomatedState);
+                }
+                else
+                {
+                    ImGui.TextUnformatted(shipView.CrewTracked
+                        ? CrewRules.CrewLine(shipView.CrewAboard, shipView.CrewRequired, shipView.CrewBerths)
+                        : CrewBars.RequiredVsBerths(shipView.CrewRequired, shipView.CrewBerths));
+                    ImGui.TextUnformatted(shipView.CrewTracked
+                        ? CrewRules.OfficersLine(shipView.OfficersAboard, shipView.OfficerSlots)
+                        : "Officer slots " + shipView.OfficerSlots.ToString("N0"));
+                    if (shipView.CrewTracked)
+                        ImGui.TextDisabled(CrewRules.PeopleAboardLine(shipView.PeopleAboard));
+                }
+                if (!shipView.CrewTracked && !shipView.Automated && ImGui.IsItemHovered())
                     ImGui.SetTooltip("Crew aboard and the crew fraction show once ships carry crew (crew plan phase 3).");
                 if (shipView.CrewTracked && shipView.UnderCrewed)
                     CrewBars.Badge("Under-crewed", CrewBars.ShortColour,
                         string.IsNullOrEmpty(shipView.CrewNote) ? "Fewer crew aboard than the ship needs." : shipView.CrewNote);
+                if (shipView.NoCaptain)
+                    CrewBars.Badge("No captain", CrewBars.ShortColour, "This ship has a bridge but no captain.");
 
                 CrewBars.CompactRows("##shipCrewRows", CrewBars.ShipRows(shipView));
 
@@ -564,10 +595,15 @@ namespace Pulsar4X.Client
                     ImGui.TextDisabled("No part needs crew.");
                 PowerBars.Rows("##crewByPart", CrewBars.CrewByComponentRows(shipView), 30f);
                 ImGui.Spacing();
-                DisplayHelpers.Header("Berths by part");
+                DisplayHelpers.Header("Bunks by part");
                 if (shipView.BerthsByComponent.Count == 0)
-                    ImGui.TextDisabled("No crew quarters or bridge berths.");
+                    ImGui.TextDisabled("No crew quarters.");
                 PowerBars.Rows("##berthsByPart", CrewBars.BerthsByComponentRows(shipView), 30f);
+                ImGui.Spacing();
+                DisplayHelpers.Header("Officer slots by part");
+                if (shipView.OfficerSlotsByComponent.Count == 0)
+                    ImGui.TextDisabled(shipView.Automated ? "Automated: no officer slots." : "No officer slots.");
+                PowerBars.Rows("##slotsByPart", CrewBars.OfficerSlotsByComponentRows(shipView), 30f);
             }
             ImGui.EndChild();
         }
@@ -596,7 +632,7 @@ namespace Pulsar4X.Client
                     ImGui.Text("Captain");
                     ImGui.PopStyleColor();
                     ImGui.NextColumn();
-                    DisplayCaptainButton(ship.Id, CaptainLabel(ship), CaptainTooltip(ship));
+                    DisplayCaptainButton(ship.Id, CaptainLabel(ship), CaptainTooltip(ship), ship);
                     ImGui.NextColumn();
                     ImGui.Separator();
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
@@ -727,7 +763,12 @@ namespace Pulsar4X.Client
 
         private void DisplayOrderChoices(IClientGalaxy galaxy)
         {
-            if (orderShip != null && !ShipHasCaptain(orderShip))
+            if (orderShip != null && orderShip.Automated)
+            {
+                DisplayHelpers.Header("Orders");
+                ImGui.TextWrapped(CrewRules.AutomatedShipNoOrders);
+            }
+            else if (orderShip != null && !ShipHasCaptain(orderShip))
             {
                 DisplayHelpers.Header("Actions");
                 ImGui.TextWrapped("No captain. You plot this ship's actions. The queue does not replan.");
@@ -755,7 +796,7 @@ namespace Pulsar4X.Client
                     GoalRow("Bootstrap colony ...", IssueOrderType.Bootstrap, OrderBand.Ship, manual);
                 else if (BootstrapFleet)
                     GoalRow("Bootstrap ...", IssueOrderType.Bootstrap, OrderBand.Ship, manual);
-                if (mine && ImGui.Selectable("Mine asteroids###mine-ship", selectedIssueOrderType == IssueOrderType.MineAsteroids && !manual && selectedBand == OrderBand.Ship))
+                if (mine && CrewBars.GatedSelectable("Mine asteroids###mine-ship", selectedIssueOrderType == IssueOrderType.MineAsteroids && !manual && selectedBand == OrderBand.Ship, CrewRules.OrderRefusal(orderShip)))
                     Choose(IssueOrderType.MineAsteroids, plot: false, OrderBand.Ship);
                 if (geo)
                     GoalRow("Geo Survey ...", IssueOrderType.GeoSurvey, OrderBand.Ship, manual);
@@ -824,7 +865,7 @@ namespace Pulsar4X.Client
         void GoalRow(string label, IssueOrderType type, OrderBand band, bool manual)
         {
             bool selected = !manual && selectedIssueOrderType == type && selectedBand == band;
-            if (ImGui.Selectable(label + "###" + type + "-" + band, selected))
+            if (CrewBars.GatedSelectable(label + "###" + type + "-" + band, selected, CrewRules.OrderRefusal(orderShip)))
                 Choose(type, plot: false, band);
         }
 
@@ -860,37 +901,37 @@ namespace Pulsar4X.Client
             bool plotJump = ManualPlot && selectedIssueOrderType == IssueOrderType.Jump;
             bool plotGoods = ManualPlot && selectedIssueOrderType == IssueOrderType.MoveGoods;
             bool plotRefuel = ManualPlot && selectedIssueOrderType == IssueOrderType.RefuelAt;
-            if (ImGui.Selectable("Go to ...", plotMove))
+            if (CrewBars.GatedSelectable("Go to ...", plotMove, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.MoveTo, plot: true);
-            if (warp && ImGui.Selectable("Warp to ...", selectedIssueOrderType == IssueOrderType.PlotWarpTo))
+            if (warp && CrewBars.GatedSelectable("Warp to ...", selectedIssueOrderType == IssueOrderType.PlotWarpTo, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.PlotWarpTo, plot: true);
-            if (thrust && ImGui.Selectable("Circularise", selectedIssueOrderType == IssueOrderType.PlotCircularise))
+            if (thrust && CrewBars.GatedSelectable("Circularise", selectedIssueOrderType == IssueOrderType.PlotCircularise, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.PlotCircularise, plot: true);
-            if (thrust && ImGui.Selectable("Change altitude ...", selectedIssueOrderType == IssueOrderType.PlotChangeAltitude))
+            if (thrust && CrewBars.GatedSelectable("Change altitude ...", selectedIssueOrderType == IssueOrderType.PlotChangeAltitude, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.PlotChangeAltitude, plot: true);
-            if (thrust && ImGui.Selectable("Match orbit ...", selectedIssueOrderType == IssueOrderType.PlotMatchOrbit))
+            if (thrust && CrewBars.GatedSelectable("Match orbit ...", selectedIssueOrderType == IssueOrderType.PlotMatchOrbit, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.PlotMatchOrbit, plot: true);
             var geoSite = CurrentGeoSurveySite(galaxy);
-            if (geoSite != null && ImGui.Selectable("Geo survey " + NameOf(geoSite), plotGeo))
+            if (geoSite != null && CrewBars.GatedSelectable("Geo survey " + NameOf(geoSite), plotGeo, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.GeoSurvey, plot: true);
             var gravSite = CurrentGravSurveySite(galaxy);
-            if (gravSite != null && ImGui.Selectable("Grav survey " + NameOf(gravSite), plotGrav))
+            if (gravSite != null && CrewBars.GatedSelectable("Grav survey " + NameOf(gravSite), plotGrav, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.GravSurvey, plot: true);
             // Jump on a captained ship is the Goals row. The same command, so it is not listed again here.
             var ship = orderShip;
-            if (ship is { CanJump: true } && !ShipHasCaptain(ship) && ImGui.Selectable("Jump...", plotJump))
+            if (ship is { CanJump: true } && !ShipHasCaptain(ship) && CrewBars.GatedSelectable("Jump...", plotJump, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.Jump, plot: true);
-            if (ImGui.Selectable("Move goods (plot) ...", plotGoods))
+            if (CrewBars.GatedSelectable("Move goods (plot) ...", plotGoods, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.MoveGoods, plot: true);
-            if (ImGui.Selectable("Load at colony in range", selectedIssueOrderType == IssueOrderType.LoadGoods))
+            if (CrewBars.GatedSelectable("Load at colony in range", selectedIssueOrderType == IssueOrderType.LoadGoods, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.LoadGoods, plot: true);
-            if (ImGui.Selectable("Unload at colony in range", selectedIssueOrderType == IssueOrderType.UnloadGoods))
+            if (CrewBars.GatedSelectable("Unload at colony in range", selectedIssueOrderType == IssueOrderType.UnloadGoods, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.UnloadGoods, plot: true);
-            if (HasFuel(galaxy) && ImGui.Selectable("Refuel", plotRefuel))
+            if (HasFuel(galaxy) && CrewBars.GatedSelectable("Refuel", plotRefuel, CrewRules.OrderRefusal(orderShip)))
                 Choose(IssueOrderType.RefuelAt, plot: true);
-            if (orderShip != null && warp && ImGui.Selectable("Warp plotter..."))
+            if (orderShip != null && warp && CrewBars.GatedSelectable("Warp plotter...", false, CrewRules.OrderRefusal(orderShip)))
                 OpenPlotter(orderShip, warp: true);
-            if (orderShip != null && thrust && ImGui.Selectable("Nav plotter..."))
+            if (orderShip != null && thrust && CrewBars.GatedSelectable("Nav plotter...", false, CrewRules.OrderRefusal(orderShip)))
                 OpenPlotter(orderShip, warp: false);
         }
 
@@ -1241,16 +1282,16 @@ namespace Pulsar4X.Client
             }
 
             string name = selectedFleet.FlagshipName ?? "the flagship";
+            var flagship = FindShip(new[] { selectedFleet }, flagshipId);
             DisplayCaptainButton(flagshipId, FleetCommanderLabel(),
-                "Seats a navy officer on " + name + ". That captain commands this fleet.");
+                "Seats a navy officer on " + name + ". That captain commands this fleet.", flagship);
         }
 
-        private void DisplayCaptainButton(int shipId, string label, string tooltip)
+        private void DisplayCaptainButton(int shipId, string label, string tooltip, ShipSnapshot? ship = null)
         {
-            if (ImGui.SmallButton(label + "###captain-" + shipId))
+            string? refusal = ship == null ? null : CrewRules.AssignCaptainRefusal(ship);
+            if (CrewBars.GatedSmallButton(label + "###captain-" + shipId, refusal, tooltip))
                 captainChooserShipId = shipId;
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(tooltip);
         }
 
         private void DisplayCaptainChooser(IClientGalaxy galaxy)
@@ -1259,7 +1300,7 @@ namespace Pulsar4X.Client
                 return;
 
             var ship = FindShip(galaxy, shipId);
-            if (ship == null)
+            if (ship == null || CrewRules.AssignCaptainRefusal(ship) != null)
             {
                 captainChooserShipId = null;
                 return;
@@ -1389,7 +1430,7 @@ namespace Pulsar4X.Client
                 ImGui.Text("Captain");
                 ImGui.PopStyleColor();
                 ImGui.SameLine();
-                DisplayCaptainButton(orderShip.Id, CaptainLabel(orderShip), CaptainTooltip(orderShip));
+                DisplayCaptainButton(orderShip.Id, CaptainLabel(orderShip), CaptainTooltip(orderShip), orderShip);
             }
             else
             {
@@ -3540,6 +3581,11 @@ namespace Pulsar4X.Client
                 CrewBars.Badge("crew", CrewBars.ShortColour,
                     "Under-crewed: " + ship.CrewAboard.ToString("N0") + " of " + ship.CrewRequired.ToString("N0") + " crew aboard.");
             }
+            if (ship.NoCaptain)
+            {
+                ImGui.SameLine();
+                CrewBars.Badge("captain", CrewBars.ShortColour, "No captain.");
+            }
             ImGui.PopID();
         }
 
@@ -3624,7 +3670,16 @@ namespace Pulsar4X.Client
                     {
                         ImGui.BeginDisabled();
                     }
-                    if(ImGui.MenuItem("Promote to Flagship"))
+                    string? flagRefusal = CrewRules.SetFlagshipRefusal(ship);
+                    if (flagRefusal != null)
+                    {
+                        ImGui.BeginDisabled();
+                        ImGui.MenuItem("Promote to Flagship");
+                        ImGui.EndDisabled();
+                        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                            ImGui.SetTooltip(flagRefusal);
+                    }
+                    else if(ImGui.MenuItem("Promote to Flagship"))
                     {
                         SubmitFleetCommand(new SetFlagshipCommand(owner.Id, ship.Id));
                     }

@@ -59,32 +59,41 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void CrewTab_NeededIncludesCaptainRow_WithoutDoubleCounting()
+        public void CrewTab_PartRowsSumToNeeded_WithoutCaptainRow()
         {
-            var ship = new ShipView("Starship", 29)
+            var ship = new ShipView("Starship", 28)
             {
                 CrewByComponent = new[]
                 {
                     new ShipCrewRow("b", "Bridge", 1, 18),
                     new ShipCrewRow("a", "Laser", 2, 5),
-                    new ShipCrewRow("captain", "Captain", 1, 1),
                 },
                 CrewBerths = 30,
+                OfficerSlots = 4,
+                OfficersAboard = 1,
+                OfficersRequired = 1,
+                PeopleAboard = 29,
                 CrewTracked = true,
-                CrewAboard = 29,
+                CrewAboard = 28,
             };
             int fromParts = ship.CrewByComponent.Sum(r => r.Crew);
-            Assert.That(fromParts, Is.EqualTo(ship.CrewRequired), "part rows plus the captain equal Needed");
-            Assert.That(ship.CrewByComponent.Count(r => r.DesignId == "captain"), Is.EqualTo(1));
+            Assert.That(fromParts, Is.EqualTo(ship.CrewRequired), "part rows equal Needed; the captain is not crew");
+            Assert.That(ship.CrewByComponent.Count(r => r.DesignId == "captain"), Is.EqualTo(0));
 
             var rows = CrewBars.CrewByComponentRows(ship);
             Assert.That(rows.Select(r => (r.Name, r.Value, r.Percent)),
-                Is.EqualTo(new[] { ("Bridge", "18", "62%"), ("Laser", "10", "34%"), ("Captain", "1", "3%") }));
+                Is.EqualTo(new[] { ("Bridge", "18", "64%"), ("Laser", "10", "36%") }));
             Assert.That(CrewBars.ShipRows(ship).Single(r => r.Id == "required").Tooltip,
-                Does.Contain("captain").IgnoreCase);
+                Does.Not.Contain("plus the captain"));
             Assert.That(CrewBars.RequiredVsBerths(ship.CrewRequired, ship.CrewBerths),
-                Is.EqualTo("29 crew, 30 berths"));
-            Assert.That(CrewBars.Indicator(ship), Is.EqualTo("29/29 aboard"));
+                Is.EqualTo("28 crew, 30 bunks"));
+            Assert.That(CrewBars.Indicator(ship), Is.EqualTo("28/28 crew"));
+            Assert.That(CrewRules.CrewLine(ship.CrewAboard, ship.CrewRequired, ship.CrewBerths),
+                Is.EqualTo("Crew 28/28 (30 bunks)"));
+            Assert.That(CrewRules.OfficersLine(ship.OfficersAboard, ship.OfficerSlots),
+                Is.EqualTo("Officers 1/4"));
+            Assert.That(CrewRules.PeopleAboardLine(ship.PeopleAboard),
+                Is.EqualTo("Life support: 29 people aboard"));
         }
     }
 }

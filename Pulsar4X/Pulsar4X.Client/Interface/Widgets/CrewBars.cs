@@ -82,6 +82,8 @@ public static class CrewActions
     /// <summary>Null when Top up may fill the ship from <paramref name="colony"/>'s pool.</summary>
     public static string? TopUpRefusal(ShipView ship, EntitySnapshot? colony)
     {
+        if (ship.Automated)
+            return CrewRules.TopUpAutomated;
         if (colony == null)
             return NotInOrbit;
         if (!ship.CrewTracked)
@@ -122,22 +124,26 @@ public static class CrewBars
     /// <summary>Filled share of <paramref name="need"/>, 0..1; 1 when nothing is needed.</summary>
     public static float Fill(long have, long need) => need <= 0 ? 1f : (float)Math.Clamp((double)have / need, 0, 1);
 
-    /// <summary>"28 crew, 30 berths" for the designer and the fleet header.</summary>
+    /// <summary>"28 crew, 30 bunks" for the production line and the fleet header.</summary>
     public static string RequiredVsBerths(int required, int berths)
-        => $"{required:N0} crew, {berths:N0} {(berths == 1 ? "berth" : "berths")}";
+        => $"{required:N0} crew, {berths:N0} {(berths == 1 ? "bunk" : "bunks")}";
 
-    /// <summary>"18 berths short" when the parts house fewer than the crew they need, else empty.</summary>
+    /// <summary>"18 bunks short" when the parts house fewer than the crew they need, else empty.</summary>
     public static string BerthShortfall(int required, int berths)
-        => berths < required ? $"{required - berths:N0} {(required - berths == 1 ? "berth" : "berths")} short" : "";
+        => berths < required ? $"{required - berths:N0} {(required - berths == 1 ? "bunk" : "bunks")} short" : "";
 
     /// <summary>
-    /// The Fleet window Summary's one-line crew indicator: "9/17 aboard" once the engine tracks crew aboard,
-    /// "17 needed, 12 berths" before that. The full crew view is the Crew tab.
+    /// The Fleet window Summary's one-line crew indicator: "Automated, no crew needed",
+    /// "9/17 crew" once the engine tracks crew aboard, or "17 needed, 12 bunks" before that.
     /// </summary>
     public static string Indicator(ShipView ship)
-        => ship.CrewTracked
-            ? $"{ship.CrewAboard:N0}/{ship.CrewRequired:N0} aboard"
-            : $"{ship.CrewRequired:N0} needed, {ship.CrewBerths:N0} {(ship.CrewBerths == 1 ? "berth" : "berths")}";
+    {
+        if (ship.Automated)
+            return CrewRules.AutomatedState;
+        if (ship.CrewTracked)
+            return $"{ship.CrewAboard:N0}/{ship.CrewRequired:N0} crew";
+        return $"{ship.CrewRequired:N0} needed, {ship.CrewBerths:N0} {(ship.CrewBerths == 1 ? "bunk" : "bunks")}";
+    }
 
     /// <summary>Crew Tab detail: one row per component design, crew per copy x copies, its share of the crew.</summary>
     public static List<PowerRow> CrewByComponentRows(ShipView ship)
@@ -164,17 +170,34 @@ public static class CrewBars
             Percent = PowerBars.Percent(r.Berths, ship.CrewBerths),
             Fill = ship.CrewBerths > 0 ? Fill(r.Berths, ship.CrewBerths) : 0f,
             FillColour = PowerBars.GroupColour(i),
-            Tooltip = r.Name + ": " + r.BerthsPerCopy.ToString("N0") + " berths x " + r.Count.ToString("N0") + " = " + r.Berths.ToString("N0") + ".",
+            Tooltip = r.Name + ": " + r.BerthsPerCopy.ToString("N0") + " bunks x " + r.Count.ToString("N0") + " = " + r.Berths.ToString("N0") + ".",
+        }).ToList();
+
+    /// <summary>Crew tab detail: one row per bridge design that gives officer slots.</summary>
+    public static List<PowerRow> OfficerSlotsByComponentRows(ShipView ship)
+        => ship.OfficerSlotsByComponent.Select((r, i) => new PowerRow
+        {
+            Id = "slot-" + r.DesignId,
+            Chip = PowerBars.GroupColour(i),
+            Name = r.Name,
+            Value = r.Berths.ToString("N0"),
+            Percent = PowerBars.Percent(r.Berths, ship.OfficerSlots),
+            Fill = ship.OfficerSlots > 0 ? Fill(r.Berths, ship.OfficerSlots) : 0f,
+            FillColour = PowerBars.GroupColour(i),
+            Tooltip = r.Name + ": " + r.BerthsPerCopy.ToString("N0") + " officer slots x " + r.Count.ToString("N0") + " = " + r.Berths.ToString("N0") + ".",
         }).ToList();
 
     /// <summary>
     /// The Fleet window's rows, narrow enough for its summary column: a chip, a name, a value and a thin
     /// bar, with the share and what it limits in the hover. Aboard and engine crew show only while
     /// <see cref="ShipView.CrewTracked"/>; before crew plan phase 3 they are defaults and would read as a
-    /// full or an empty ship.
+    /// full or an empty ship. Automated ships have no rows: the tab shows the automated state instead.
     /// </summary>
     public static List<PowerRow> ShipRows(ShipView ship)
     {
+        if (ship.Automated)
+            return new List<PowerRow>();
+
         int required = ship.CrewRequired;
         var rows = new List<PowerRow>
         {
@@ -184,7 +207,7 @@ public static class CrewBars
                 Chip = RequiredColour,
                 Name = "Needed",
                 Value = required.ToString("N0"),
-                Tooltip = "Each component's crew per copy, times its copies, plus the captain when one is assigned.",
+                Tooltip = "Each component's crew per copy, times its copies. The captain is an officer, not crew.",
                 Detail = ship.CrewByComponent.Select(r => (r.Name + "  " + r.CrewPerCopy.ToString("N0") + " x " + r.Count.ToString("N0"), r.Crew.ToString("N0"))).ToList(),
             },
         };
@@ -195,13 +218,29 @@ public static class CrewBars
         {
             Id = "berths",
             Chip = BerthColour,
-            Name = "Berths",
+            Name = "Bunks",
             Value = ship.CrewBerths.ToString("N0"),
             Fill = Fill(ship.CrewBerths, required),
             FillColour = berthShort ? ShortColour : PowerRing.FullColour,
-            Tooltip = "Crew quarters plus bridge berths: " + PowerBars.Percent(ship.CrewBerths, required) + " of the crew needed."
-                + (shortfall.Length > 0 ? " " + shortfall + "." : "") + " A ship takes aboard at most its berths.",
+            Tooltip = "Crew bunks from crew quarters only (bridge cabins are officer slots): "
+                + PowerBars.Percent(ship.CrewBerths, required) + " of the crew needed."
+                + (shortfall.Length > 0 ? " " + shortfall + "." : "") + " A ship takes aboard at most its bunks.",
             Detail = ship.BerthsByComponent.Select(r => (r.Name + "  " + r.BerthsPerCopy.ToString("N0") + " x " + r.Count.ToString("N0"), r.Berths.ToString("N0"))).ToList(),
+        });
+
+        rows.Add(new PowerRow
+        {
+            Id = "officers",
+            Chip = RequiredColour,
+            Name = "Officers",
+            Value = ship.CrewTracked
+                ? ship.OfficersAboard.ToString("N0") + "/" + ship.OfficerSlots.ToString("N0")
+                : ship.OfficerSlots.ToString("N0"),
+            Fill = Fill(ship.CrewTracked ? ship.OfficersAboard : ship.OfficerSlots, Math.Max(ship.OfficerSlots, 1)),
+            FillColour = ship.CrewTracked && ship.NoCaptain ? ShortColour : PowerRing.FullColour,
+            Tooltip = "Officers, including the captain, are housed in the bridge's officer slots, not in crew bunks."
+                + (ship.NoCaptain ? " No captain is assigned." : ""),
+            Detail = ship.OfficerSlotsByComponent.Select(r => (r.Name + "  " + r.BerthsPerCopy.ToString("N0") + " x " + r.Count.ToString("N0"), r.Berths.ToString("N0"))).ToList(),
         });
 
         if (!ship.CrewTracked)
@@ -216,8 +255,9 @@ public static class CrewBars
             Value = ship.CrewAboard.ToString("N0") + "/" + required.ToString("N0"),
             Fill = (float)Math.Clamp(ship.CrewFactor, 0, 1),
             FillColour = shortAboard ? ShortColour : PowerRing.FullColour,
-            Tooltip = "Crew fraction " + PowerBars.Percent(ship.CrewFactor, 1) + " (aboard / required)."
-                + " Surveyors, miners, shuttlebays and construction bays run at its square: " + WorkRate(ship.CrewFactor) + ".",
+            Tooltip = "Crew fraction " + PowerBars.Percent(ship.CrewFactor, 1) + " (crew aboard / part crew)."
+                + " Surveyors, miners, shuttlebays and construction bays run at its square: " + WorkRate(ship.CrewFactor) + "."
+                + " Life support covers everyone aboard (crew and officers): " + ship.PeopleAboard.ToString("N0") + ".",
         });
         bool engineShort = ship.EngineCrewFactor < 1;
         rows.Add(new PowerRow
@@ -407,7 +447,6 @@ public static class CrewBars
         ImGui.PopStyleColor();
     }
 
-    /// <summary>A disabled button whose hover (allowed while disabled) says why.</summary>
     /// <summary>
     /// A button that is disabled with <paramref name="refusal"/> on hover when that is non-null, or shows
     /// <paramref name="tooltip"/> when enabled. True when clicked while enabled.
@@ -430,5 +469,47 @@ public static class CrewBars
             ImGui.EndTooltip();
         }
         return clicked;
+    }
+
+    /// <summary>A small button with the same refusal / tooltip gating as <see cref="GatedButton"/>.</summary>
+    public static bool GatedSmallButton(string label, string? refusal, string? tooltip = null)
+    {
+        bool disabled = refusal != null;
+        if (disabled)
+            ImGui.BeginDisabled();
+        bool clicked = ImGui.SmallButton(label) && !disabled;
+        if (disabled)
+            ImGui.EndDisabled();
+        string? hover = refusal ?? tooltip;
+        if (hover != null && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+        {
+            ImGui.BeginTooltip();
+            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
+            ImGui.TextUnformatted(hover);
+            ImGui.PopTextWrapPos();
+            ImGui.EndTooltip();
+        }
+        return clicked;
+    }
+
+    /// <summary>A selectable that is disabled with <paramref name="refusal"/> on hover when that is non-null.</summary>
+    public static bool GatedSelectable(string label, bool selected, string? refusal)
+    {
+        if (refusal != null)
+        {
+            ImGui.BeginDisabled();
+            ImGui.Selectable(label, selected);
+            ImGui.EndDisabled();
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                ImGui.BeginTooltip();
+                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
+                ImGui.TextUnformatted(refusal);
+                ImGui.PopTextWrapPos();
+                ImGui.EndTooltip();
+            }
+            return false;
+        }
+        return ImGui.Selectable(label, selected);
     }
 }

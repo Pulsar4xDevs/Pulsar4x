@@ -6,6 +6,8 @@ using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Api;
 
+using Pulsar4X.Client.Interface.Widgets;
+
 namespace Pulsar4X.Client
 {
     public static class DisplayHelpers
@@ -79,9 +81,22 @@ namespace Pulsar4X.Client
                 }
             }
 
-            var meta = ship.CommanderName == null ? "" : "Commanded by: " + ship.CommanderName;
+            var meta = ship.Automated
+                ? CrewRules.AutomatedState
+                : (ship.CommanderName == null ? "" : "Commanded by: " + ship.CommanderName);
 
-            DescriptiveTooltip(ship.Name, ship.DesignName, description, () => ImGui.Text(meta));
+            DescriptiveTooltip(ship.Name, ship.DesignName, description, () =>
+            {
+                if (meta.Length > 0)
+                    ImGui.Text(meta);
+                if (!ship.Automated && ship.CrewTracked)
+                {
+                    ImGui.TextUnformatted(CrewRules.CrewLine(ship.CrewAboard, ship.CrewRequired, ship.CrewBerths));
+                    ImGui.TextUnformatted(CrewRules.OfficersLine(ship.OfficersAboard, ship.OfficerSlots));
+                    if (ship.NoCaptain)
+                        ImGui.TextUnformatted("No captain");
+                }
+            });
         }
 
         public static void DescriptiveTooltipRaw(string name, string type, string description, Action? callback = null, bool hideTypeIfSameAsName = false, bool hideDescriptionColor = false)
