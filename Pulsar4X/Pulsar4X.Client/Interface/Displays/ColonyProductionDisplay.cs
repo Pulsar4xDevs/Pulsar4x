@@ -171,7 +171,7 @@ namespace Pulsar4X.Client
                             ImGui.Text("Progress per day:");
                             ImGui.SameLine();
                             ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                            ImGui.Text(line.CurrentRatePerDay.ToString());
+                            ImGui.Text(RefitJobDisplay.ProgressPerDay(line).ToString());
                             ImGui.PopStyleColor();
                             if (ImGui.IsItemHovered())
                                 ImGui.SetTooltip("Assuming all resources needed are available.");
@@ -180,10 +180,7 @@ namespace Pulsar4X.Client
                         }
 
                         if (line.IsShipyard)
-                        {
                             YardList(line);
-                            RefitQueue(line);
-                        }
                     }
                     if (pop)
                     {
@@ -261,10 +258,11 @@ namespace Pulsar4X.Client
                     var job = line.Jobs[jobIndex];
 
                     ImGui.TableNextColumn();
-                    ImGui.Text(job.Name);
+                    ImGui.Text(RefitJobDisplay.Name(job));
+                    bool nameHovered = ImGui.IsItemHovered();
 
                     ImGui.TableNextColumn();
-                    ImGui.Text(job.NumberCompleted + "/" + job.NumberOrdered);
+                    ImGui.Text(RefitJobDisplay.Batch(job));
 
                     if (job.Repeat)
                     {
@@ -273,15 +271,23 @@ namespace Pulsar4X.Client
                     }
 
                     ImGui.TableNextColumn();
-                    var color = job.MissingResources ? Styles.BadColor : Styles.GoodColor;
+                    var color = job.MissingResources || (job.Refit is { WaitReason.Length: > 0 })
+                        ? Styles.BadColor : Styles.GoodColor;
 
                     ImGui.PushStyleColor(ImGuiCol.Text, color);
-                    if (job.Status == "Processing")
+                    if (job.Refit is { WaitReason.Length: > 0 } stalled)
+                        ImGui.TextUnformatted(RefitJobDisplay.WaitReasonText(stalled.WaitReason));
+                    else if (job.Status == "Processing")
                         ImGui.Text("Processing (" + job.PercentComplete.ToString("0.#") + "%%)");
                     else
                         ImGui.Text(job.Status);
                     ImGui.PopStyleColor();
                     bool statusHovered = ImGui.IsItemHovered();
+                    if (job.IsRefit && RefitJobDisplay.Eta(job) is { } eta)
+                    {
+                        ImGui.SameLine();
+                        ImGui.TextDisabled(eta);
+                    }
                     if (job.FundsReason.Length > 0)
                     {
                         ImGui.SameLine();
@@ -293,7 +299,15 @@ namespace Pulsar4X.Client
                         CrewBars.Badge("crew", CrewBars.ShortColour, job.CrewWarning);
                     }
 
-                    if (statusHovered)
+                    if (job.IsRefit && (nameHovered || statusHovered))
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
+                        ImGui.TextUnformatted(RefitJobDisplay.Tooltip(job));
+                        ImGui.PopTextWrapPos();
+                        ImGui.EndTooltip();
+                    }
+                    else if (statusHovered)
                     {
                         ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 0f);
                         ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 0f);
@@ -736,7 +750,8 @@ namespace Pulsar4X.Client
 
             if (diff != null && diff.Missing.Count > 0)
             {
-                ImGui.Text("To build");
+                // Missing parts do not block the refit: the job is queued and waits until a factory produces them.
+                ImGui.Text("Not in the warehouse yet (the refit will wait)");
                 var buildable = new List<RefitMissingPartView>();
                 foreach (var missing in diff.Missing)
                 {
@@ -747,11 +762,11 @@ namespace Pulsar4X.Client
                         ImGui.BulletText(missing.Name + "  x" + missing.Count);
                     }
                     else
-                        ImGui.BulletText(missing.Name + "  x" + missing.Count + "  this line cannot build it");
+                        ImGui.BulletText(missing.Name + "  x" + missing.Count + "  this line cannot produce it");
                 }
                 if (buildable.Count == 0)
                     ImGui.BeginDisabled();
-                if (ImGui.Button("Queue missing parts"))
+                if (ImGui.Button("Queue production of missing parts"))
                 {
                     foreach (var missing in buildable)
                     {
@@ -764,13 +779,15 @@ namespace Pulsar4X.Client
             }
 
             ImGui.Text("Cost " + cost);
-            bool blocked = cost <= 0 || selected.OverSlip;
+            var missingParts = diff?.Missing;
+            bool blocked = selected.OverSlip || !RefitJobDisplay.HasWork(removeIds, mountIds, missingParts);
             if (blocked)
                 ImGui.BeginDisabled();
             if (ImGui.Button("Queue refit"))
             {
                 uiState.GameClient?.SubmitCommandAsync(new QueueShipRefitCommand(
-                    entityId, line.Id, selected.EntityId, removeIds, mountIds, target?.DesignId));
+                    entityId, line.Id, selected.EntityId, removeIds, mountIds, target?.DesignId,
+                    MountDesignIds: RefitJobDisplay.MountDesignIds(missingParts)));
                 _refitRemove.Clear();
                 _refitMount.Clear();
             }
@@ -786,29 +803,17 @@ namespace Pulsar4X.Client
                         : "That ship is over this slip.";
                     reason += " Ship " + selected.Mass + " kg, slip " + line.SlipSize.ToString("0") + " kg.";
                 }
-                if (cost <= 0)
+                if (!RefitJobDisplay.HasWork(removeIds, mountIds, missingParts))
                     reason = reason.Length == 0 ? "Nothing to refit." : reason + "\nNothing to refit.";
                 ImGui.SetTooltip(reason);
             }
-        }
-
-        private static void RefitQueue(ProductionLineView line)
-        {
-            ImGui.Text("Refit " + line.RefitPointsPerDay.ToString("0") + " / day");
-            if (line.RefitJobs.Count == 0)
-            {
-                ImGui.BulletText("None");
-                return;
-            }
-
-            foreach (var job in line.RefitJobs)
-                ImGui.BulletText(job.ShipName + "  " + job.PointsAccumulated + " / " + job.PointCost);
         }
 
         private static void YardList(ProductionLineView line)
         {
             if (!double.IsPositiveInfinity(line.SlipSize))
                 ImGui.Text("Slip " + line.SlipSize.ToString("0"));
+            ImGui.Text("Refit " + line.RefitPointsPerDay.ToString("0") + " / day");
 
             ImGui.Text("In yard");
             if (line.Hulls.Count == 0)

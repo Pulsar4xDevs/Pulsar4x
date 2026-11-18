@@ -969,6 +969,15 @@ namespace Pulsar4X.Client
                 ImGui.PopStyleColor();
                 ImGui.SameLine();
                 ImGui.TextUnformatted(refit.YardName + "  " + refit.PointsAccumulated + " / " + refit.PointCost);
+                if (ImGui.IsItemHovered())
+                {
+                    var info = new RefitJobInfo(0, "", "", "")
+                    {
+                        Removing = refit.Removing,
+                        Mounting = refit.Mounting,
+                    };
+                    ImGui.SetTooltip(RefitJobDisplay.PartsText(info));
+                }
             }
 
             if (_entity.Relation == OwnerRelation.Owned)
