@@ -80,6 +80,26 @@ namespace Pulsar4X.Client
         public static string FormatDateTime(DateTime value, DateStyle date, TimeStyle time, bool seconds = false)
             => FormatDate(value, date) + " " + FormatTime(value, time, seconds);
 
+        /// <summary>A calendar year in the user's date style: "2026" in every style.</summary>
+        public static string FormatYear(int year, DateStyle style)
+            => new DateTime(year, 1, 1).ToString("yyyy", Invariant);
+
+        public static string FormatYear(int year) => FormatYear(year, Date);
+
+        /// <summary>A month and year in the user's date style: "Jan 2026", "2026-01", or "01/2026".</summary>
+        public static string FormatMonthYear(DateTime month, DateStyle style)
+        {
+            var d = new DateTime(month.Year, month.Month, 1);
+            return style switch
+            {
+                DateStyle.Iso => d.ToString("yyyy-MM", Invariant),
+                DateStyle.DayFirst or DateStyle.MonthFirst => d.ToString("MM/yyyy", Invariant),
+                _ => d.ToString("MMM yyyy", Invariant),
+            };
+        }
+
+        public static string FormatMonthYear(DateTime month) => FormatMonthYear(month, Date);
+
         /// <summary>A game date in the user's format: "15 Nov 2026" by default.</summary>
         public static string FormatDate(DateTime value) => FormatDate(value, Date);
 

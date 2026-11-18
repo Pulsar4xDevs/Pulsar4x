@@ -10,6 +10,17 @@ using Pulsar4X.Client;
 
 namespace Pulsar4X.Client.Rendering
 {
+    /// <summary>Pure map-icon helpers, kept out of ImGui / SDL so they can be unit tested.</summary>
+    public static class SystemMapIcons
+    {
+        /// <summary>
+        /// False when a snapshot has no views. SM mode can surface those (the GameMaster sees
+        /// entities the player projection left empty). <c>Views[0]</c> used to throw on them.
+        /// </summary>
+        public static bool CanIcon(EntitySnapshot entity)
+            => entity.Views is { Count: > 0 };
+    }
+
     internal class SystemMapRendering : UpdateWindowState
     {
         static readonly ProfileMarker s_DrawUpdatePerfMark = new("DrawUpdate");
@@ -220,9 +231,8 @@ namespace Pulsar4X.Client.Rendering
 
         void AddIconable(EntitySnapshot entity)
         {
-            if (_systemId == null)
+            if (_systemId == null || !SystemMapIcons.CanIcon(entity))
                 return;
-            var name = entity.Views[0];
             var position = new SnapshotPosition(_state, _systemId, entity.Id);
             var bodyType = UserOrbitSettings.FromBodyKind(entity.Kind);
             var massVolume = entity.GetView<MassVolumeView>();
