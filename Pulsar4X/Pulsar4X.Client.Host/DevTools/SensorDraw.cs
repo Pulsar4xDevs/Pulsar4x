@@ -107,111 +107,115 @@ namespace Pulsar4X.Client
                 return;
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(1500, 800));
 
-            if (Window.Begin("Sensor Display: " + _selectedEntitySate.Name, ref IsActive))
+            using (var w = Window.Scope("Sensor Display: " + _selectedEntitySate.Name, ref IsActive))
             {
-                
-                ImGui.Columns(2, "##sensor-draw", true);
-                ImGui.SetColumnWidth(0, 300);
-                if (_potentialTargetNames != null
-                    && _potentialTargetEntities != null
-                    && ImGui.Combo("Sensors", ref _targetIndex, _potentialTargetNames, _potentialTargetNames.Length))
+                if (w.Visible)
                 {
-                    _sensorAbilityDB = _potentialTargetEntities[_targetIndex].GetDataBlob<SensorAbilityDB>();
-                    SetBoundsData();
-                }
-                if (ImGui.Button("Refresh ReflectionProfile"))
-                {
-                    SetBoundsData();
-                }
                 
-                
-                if (_sensorAbilityDB != null)
-                {
-                    if (ImGui.Button("Scan"))
+                    ImGui.Columns(2, "##sensor-draw", true);
+                    ImGui.SetColumnWidth(0, 300);
+                    if (_potentialTargetNames != null
+                        && _potentialTargetEntities != null
+                        && ImGui.Combo("Sensors", ref _targetIndex, _potentialTargetNames, _potentialTargetNames.Length))
                     {
-                        var ss = new SensorScan();
-                        ss.TriggerProcess(_selectedEntity, _selectedStarSysState.StarSystem.StarSysDateTime);
+                        _sensorAbilityDB = _potentialTargetEntities[_targetIndex].GetDataBlob<SensorAbilityDB>();
+                        SetBoundsData();
                     }
-                }
-
-                if (ImGui.Checkbox("LogScale", ref _logScale))
-                {
-                    SetBoundsData();
-                }
-
-                if (_sensorAbilityDB != null)
-                {
-                    BorderGroup.Begin("Sensors");
-                    for (int i = 0; i < _sensorAbilityDB.InstanceAtributes.Count; i++)
-                    {
-                        SensorReceiverAtb? recever = _sensorAbilityDB.InstanceAtributes[i];
-                        float low = (float)recever.RecevingWaveformCapabilty.WavelengthMin_nm;
-                        float mid = (float)recever.RecevingWaveformCapabilty.WavelengthAverage_nm;
-                        float high = (float)recever.RecevingWaveformCapabilty.WavelengthMax_nm;
-
-                        float mag1 = (float)recever.WorstSensitivity_kW;
-                        float mag2 = (float)recever.BestSensitivity_kW;
-                        ImGui.Text(_sensorAbilityDB.InstanceStates[i].Name);
-                        if (ImGui.IsItemHovered())
-                        {
-                            _highlightIndex = (0, i);
-                        }
-                        ImGui.Indent();
-                        ImGui.Text(Stringify.Power(recever.BestSensitivity_kW));
-                        ImGui.Unindent();
-                    }
-                    BorderGroup.End();
-                }
-                
-                if (_emitSensorProfile != null)
-                {
-                    var emitted = _emitSensorProfile.EmittedEMSpectra;
-                    var reflected = _emitSensorProfile.ReflectedEMSpectra;
-                    if (ImGui.Checkbox("At Range", ref _atRange))
+                    if (ImGui.Button("Refresh ReflectionProfile"))
                     {
                         SetBoundsData();
                     }
-                    ImGui.Text("Range: " + Stringify.Distance(_distance));
-
-                    BorderGroup.Begin("Reflected");
-                    for (int i = 0; i < reflected.Count; i++)
+                
+                
+                    if (_sensorAbilityDB != null)
                     {
-                        EMData emdat = reflected[i];
-                        ImGui.Text(emdat.GetName);
-                        if (ImGui.IsItemHovered())
+                        if (ImGui.Button("Scan"))
                         {
-                            _highlightIndex = (1, i);
+                            var ss = new SensorScan();
+                            ss.TriggerProcess(_selectedEntity, _selectedStarSysState.StarSystem.StarSysDateTime);
                         }
-                        ImGui.Indent();
-                        ImGui.Text(Stringify.Power(emdat.Magnitude * _attenuationFactor));
-                        ImGui.Unindent();
                     }
 
-                    BorderGroup.End();
+                    if (ImGui.Checkbox("LogScale", ref _logScale))
+                    {
+                        SetBoundsData();
+                    }
+
+                    if (_sensorAbilityDB != null)
+                    {
+                        BorderGroup.Begin("Sensors");
+                        for (int i = 0; i < _sensorAbilityDB.InstanceAtributes.Count; i++)
+                        {
+                            SensorReceiverAtb? recever = _sensorAbilityDB.InstanceAtributes[i];
+                            float low = (float)recever.RecevingWaveformCapabilty.WavelengthMin_nm;
+                            float mid = (float)recever.RecevingWaveformCapabilty.WavelengthAverage_nm;
+                            float high = (float)recever.RecevingWaveformCapabilty.WavelengthMax_nm;
+
+                            float mag1 = (float)recever.WorstSensitivity_kW;
+                            float mag2 = (float)recever.BestSensitivity_kW;
+                            ImGui.Text(_sensorAbilityDB.InstanceStates[i].Name);
+                            if (ImGui.IsItemHovered())
+                            {
+                                _highlightIndex = (0, i);
+                            }
+                            ImGui.Indent();
+                            ImGui.Text(Stringify.Power(recever.BestSensitivity_kW));
+                            ImGui.Unindent();
+                        }
+                        BorderGroup.End();
+                    }
+                
+                    if (_emitSensorProfile != null)
+                    {
+                        var emitted = _emitSensorProfile.EmittedEMSpectra;
+                        var reflected = _emitSensorProfile.ReflectedEMSpectra;
+                        if (ImGui.Checkbox("At Range", ref _atRange))
+                        {
+                            SetBoundsData();
+                        }
+                        ImGui.Text("Range: " + Stringify.Distance(_distance));
+
+                        BorderGroup.Begin("Reflected");
+                        for (int i = 0; i < reflected.Count; i++)
+                        {
+                            EMData emdat = reflected[i];
+                            ImGui.Text(emdat.GetName);
+                            if (ImGui.IsItemHovered())
+                            {
+                                _highlightIndex = (1, i);
+                            }
+                            ImGui.Indent();
+                            ImGui.Text(Stringify.Power(emdat.Magnitude * _attenuationFactor));
+                            ImGui.Unindent();
+                        }
+
+                        BorderGroup.End();
                     
-                    BorderGroup.Begin("Emitted");
-                    for (int i = 0; i < emitted.Count; i++)
-                    {
-                        EMData em = emitted[i];
-                        ImGui.Text(em.GetName);
-                        if (ImGui.IsItemHovered())
+                        BorderGroup.Begin("Emitted");
+                        for (int i = 0; i < emitted.Count; i++)
                         {
-                            _highlightIndex = (2, i);
-                        }
-                        ImGui.Indent();
-                        ImGui.Text(Stringify.Power(em.Magnitude * _attenuationFactor));
-                        ImGui.Unindent();
+                            EMData em = emitted[i];
+                            ImGui.Text(em.GetName);
+                            if (ImGui.IsItemHovered())
+                            {
+                                _highlightIndex = (2, i);
+                            }
+                            ImGui.Indent();
+                            ImGui.Text(Stringify.Power(em.Magnitude * _attenuationFactor));
+                            ImGui.Unindent();
                         
+                        }
+                        BorderGroup.End();
                     }
-                    BorderGroup.End();
+                
+                    ImGui.NextColumn();
+                    if(_emitSensorProfile != null)
+                        Draw();
+                    _highlightIndex = (-1, -1);
+                
+
+            
                 }
-                
-                ImGui.NextColumn();
-                if(_emitSensorProfile != null)
-                    Draw();
-                _highlightIndex = (-1, -1);
-                
-                Window.End();
             }
         }
 

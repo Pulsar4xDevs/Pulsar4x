@@ -44,6 +44,7 @@ public class TechBlueprintUI : BluePrintsUI
         string editStr;
         if (ImGui.Begin($"Tech Editor: {name}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
+
             ImGui.Columns(2, "##tech-bp", true);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
@@ -118,7 +119,7 @@ public class TechBlueprintUI : BluePrintsUI
             }
 
 
-            ImGui.End();
         }
+        ImGui.End();
     }
 }

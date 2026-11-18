@@ -45,15 +45,17 @@ namespace Pulsar4X.Client
         /// <param name="entity"></param>
         public static void Begin(Entity entity)
         {
-            if (Window.Begin("Entity Inspector", ref _isActive))
+            using (var w = Window.Scope("Entity Inspector", ref _isActive))
             {
-                if(entity.Id != _entityID || (entity.Manager != null && entity.Manager.GetAllDataBlobsForEntity(entity.Id).Count != _dataBlobs.Length))
-                    Refresh(entity);
+                if (w.Visible)
+                {
+                    if(entity.Id != _entityID || (entity.Manager != null && entity.Manager.GetAllDataBlobsForEntity(entity.Id).Count != _dataBlobs.Length))
+                        Refresh(entity);
 
-                DisplayDatablobs(entity);
+                    DisplayDatablobs(entity);
+            
+                }
             }
-
-            Window.End();
 
         }
 

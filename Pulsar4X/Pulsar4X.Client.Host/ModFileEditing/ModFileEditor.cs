@@ -1,5 +1,6 @@
 using System.IO;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Client.Host;
 using Pulsar4X.Modding;
@@ -61,29 +62,30 @@ public class ModFileEditor : UniquePulsarGuiWindow<ModFileEditor>
 
         if (IsActive)
         {
-            if (ImGui.Begin("Editor", ref IsActive))
+            using (var w = Window.Scope("Editor", ref IsActive))
             {
-                _modInfoUI.Display("Mod Info");
-                ImGui.NewLine();
-                _techCatBlueprintUI.Display("Tech Categorys");
-                ImGui.NewLine();
-                _techBlueprintUI.Display("Techs");
-                ImGui.NewLine();
-                _componentBluprintUI.Display("Components");
-                ImGui.NewLine();
-                _cargoTypeBlueprintUI.Display("Cargo Types");
-                ImGui.NewLine();
-                _armorBlueprintUI.Display("Armor");
-                ImGui.NewLine();
-                _processedMaterialsUI.Display("Processed Materials");
-                ImGui.NewLine();
-                _mineralsBlueprintUI.Display("Minerals");
-                ImGui.NewLine();
-                _shipDesignBlueprintUI.Display("Ship Designs");
-                ImGui.NewLine();
+                if (w.Visible)
+                {
+                    _modInfoUI.Display("Mod Info");
+                    ImGui.NewLine();
+                    _techCatBlueprintUI.Display("Tech Categorys");
+                    ImGui.NewLine();
+                    _techBlueprintUI.Display("Techs");
+                    ImGui.NewLine();
+                    _componentBluprintUI.Display("Components");
+                    ImGui.NewLine();
+                    _cargoTypeBlueprintUI.Display("Cargo Types");
+                    ImGui.NewLine();
+                    _armorBlueprintUI.Display("Armor");
+                    ImGui.NewLine();
+                    _processedMaterialsUI.Display("Processed Materials");
+                    ImGui.NewLine();
+                    _mineralsBlueprintUI.Display("Minerals");
+                    ImGui.NewLine();
+                    _shipDesignBlueprintUI.Display("Ship Designs");
+                    ImGui.NewLine();
+                }
             }
-
-            ImGui.End();
         }
     }
 }

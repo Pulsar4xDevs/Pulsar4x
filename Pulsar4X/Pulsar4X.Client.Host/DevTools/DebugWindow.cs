@@ -164,20 +164,23 @@ namespace Pulsar4X.Client
             if (!IsActive) return;
 
             _isRunningFrame = true;
-            if(Window.Begin("Debug Window", ref IsActive))
+            using (var w = Window.Scope("Debug Window", ref IsActive))
             {
-                if(ImGui.BeginTabBar("DebugTabs"))
+                if (w.Visible)
                 {
-                    DisplayInfoTab();
-                    DisplayEntitiesTab();
-                    DisplaySystemsTab();
-                    DisplayInstanceProcessorsTab();
-                    DisplayHotLoopProcessorsTab();
+                    if(ImGui.BeginTabBar("DebugTabs"))
+                    {
+                        DisplayInfoTab();
+                        DisplayEntitiesTab();
+                        DisplaySystemsTab();
+                        DisplayInstanceProcessorsTab();
+                        DisplayHotLoopProcessorsTab();
 
-                    ImGui.EndTabBar();
+                        ImGui.EndTabBar();
+                    }
+            
                 }
             }
-            Window.End();
 
             _isRunningFrame = false;
             _dateChangeSinceLastFrame = false;

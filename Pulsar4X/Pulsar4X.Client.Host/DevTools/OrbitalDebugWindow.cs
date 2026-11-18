@@ -76,8 +76,12 @@ namespace Pulsar4X.Client
 
             if(_debugWidget == null) return;
 
-            if(IsActive && Window.Begin("Orbit Lines"))
+            if (IsActive)
             {
+                using (var w = Window.Scope("Orbit Lines"))
+                {
+                    if (w.Visible)
+                    {
                 ImGui.Text($"Parent: {_debugWidget.parentname}");
                 ImGui.Text($"ParentPos: {_debugWidget.parentPos}");
                 ImGui.Text($"focal point abs: { _debugWidget._f1a}");
@@ -121,11 +125,15 @@ namespace Pulsar4X.Client
                     ImGui.Text(item.DataString);
                 }
 
-                Window.End();
-
-                if (!_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_debugWidget))
-                    _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_debugWidget);
-
+                    if (!_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_debugWidget))
+                        _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_debugWidget);
+                    }
+                    else
+                    {
+                        if (_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_debugWidget))
+                            _uiState.SelectedSysMapRender.SelectedEntityExtras.Remove(_debugWidget);
+                    }
+                }
             }
             else
             {

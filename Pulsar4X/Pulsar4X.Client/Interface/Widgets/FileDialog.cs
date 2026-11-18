@@ -92,7 +92,8 @@ public static class FileDialog
 
         ImGui.NextColumn();
 
-        ImGui.BeginTable("table", 4);
+        if (ImGui.BeginTable("table", 4))
+        {
         ImGui.TableNextColumn();
         ImGui.TableHeader("Name");
         ImGui.TableNextColumn();
@@ -172,7 +173,9 @@ public static class FileDialog
 
             ImGui.Text(fi.LastWriteTime.ToString());
         }
-        ImGui.EndTable();
+            ImGui.EndTable();
+        }
+
 
         ImGui.Columns(1);
         if (!string.IsNullOrEmpty(error))

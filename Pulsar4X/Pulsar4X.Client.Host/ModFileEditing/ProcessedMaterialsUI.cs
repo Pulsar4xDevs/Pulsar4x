@@ -43,6 +43,7 @@ public class ProcessedMaterialsUI : BluePrintsUI
 
         if (ImGui.Begin($"Processed Materials Editor: {selectedItem.Name}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
+
             ImGui.Columns(2, "##processed-materials-bp", true);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
@@ -162,7 +163,7 @@ public class ProcessedMaterialsUI : BluePrintsUI
                 selectedItem.MassPerUnit = _editInt;
             }
             ImGui.NextColumn();
-            ImGui.End();
         }
+        ImGui.End();
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Industry;
 using Pulsar4X.Extensions;
@@ -50,14 +51,16 @@ public class DataViewerWindow : UniquePulsarGuiWindow<DataViewerWindow>
     {
         if (!IsActive || _modDataStore == null) return;
 
-        if (ImGui.Begin("Mod Data", ref IsActive))
+        using (var w = Window.Scope("Mod Data", ref IsActive))
         {
-            Type objType = _modDataStore.GetType();
-            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-            MemberInfo[] memberInfos = objType.GetMembers(flags);
-            ModDataInspector.DisplayDataObj(_modDataStore);
+            if (w.Visible)
+            {
+                Type objType = _modDataStore.GetType();
+                BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+                MemberInfo[] memberInfos = objType.GetMembers(flags);
+                ModDataInspector.DisplayDataObj(_modDataStore);
+            }
         }
-        ImGui.End();
     }
 
 }

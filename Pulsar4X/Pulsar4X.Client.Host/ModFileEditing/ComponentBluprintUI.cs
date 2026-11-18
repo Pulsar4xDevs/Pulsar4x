@@ -74,6 +74,7 @@ public class ComponentBluprintUI : BluePrintsUI
         ImGui.SetNextWindowSize(new Vector2(1500,  900));
         if (ImGui.Begin("Component Editor: " + name, ref _isActive[selectedIndex]))
         {
+
             if (ImGui.BeginTable("table", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.Resizable))
             {
                 ImGui.TableSetupColumn("Field", ImGuiTableColumnFlags.WidthFixed, 150f);
@@ -165,8 +166,8 @@ public class ComponentBluprintUI : BluePrintsUI
 
             }
 
-            ImGui.End();
         }
+        ImGui.End();
     }
 
     public void ResourceList(ComponentTemplateBlueprint selectedItem)

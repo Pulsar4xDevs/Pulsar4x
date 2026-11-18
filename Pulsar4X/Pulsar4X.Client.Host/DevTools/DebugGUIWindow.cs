@@ -1,5 +1,6 @@
 ﻿using System;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
@@ -25,18 +26,17 @@ namespace Pulsar4X.Client
 
             if (IsActive)
             {
-                if (ImGui.Begin("Debug GUI Window", ref IsActive))
+                using (var w = Window.Scope("Debug GUI Window", ref IsActive))
                 {
-                    ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
-                    ImGui.Text("Window Height: " + ImGui.GetContentRegionAvail().Y);
-                    ImGui.Text("Window Width: " + ImGui.GetContentRegionAvail().X);
+                    if (w.Visible)
+                    {
+                        ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
+                        ImGui.Text("Window Height: " + ImGui.GetContentRegionAvail().Y);
+                        ImGui.Text("Window Width: " + ImGui.GetContentRegionAvail().X);
 
-                    string datetimenow = DateTime.Now.ToString();
-
-
+                        string datetimenow = DateTime.Now.ToString();
+                    }
                 }
-
-                ImGui.End();
             }
         }
     }

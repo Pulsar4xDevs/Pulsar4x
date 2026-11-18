@@ -231,8 +231,10 @@ namespace Pulsar4X.Client
         {
             if (IsActive)
             {
-                if (Window.Begin("DamageViewer Testing") && _damageMap != null)
+                using (var scope = Window.Scope("DamageViewer Testing"))
                 {
+                    if (scope.Visible && _damageMap != null)
+                    {
                     var availableSize = ImGui.GetContentRegionAvail();
                     float aspectRatio = (float)_damageMap.Width / _damageMap.Height;
                     float scaleX = availableSize.X / _damageMap.Width;
@@ -550,7 +552,7 @@ namespace Pulsar4X.Client
                         ImGui.Image(_showDmgFrametx.ToTextureRef(), new System.Numerics.Vector2(w, h));
                     }
                 }
-                Window.End();
+                }
             }
         }
 

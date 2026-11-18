@@ -49,77 +49,81 @@ public class BlueprintsWindow : UniquePulsarGuiWindow<BlueprintsWindow>
     {
         if(!IsActive) return;
 
-        if(Window.Begin("Blueprints Window"))
+        using (var w = Window.Scope("Blueprints Window"))
         {
-            Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("BlueprintListSelection", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
+            if (w.Visible)
             {
-                DisplayHelpers.Header("Blueprints", "Select a blueprint to view details.");
+                Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                if(ImGui.BeginChild("BlueprintListSelection", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
+                {
+                    DisplayHelpers.Header("Blueprints", "Select a blueprint to view details.");
 
-                DisplayBlueprintCategory("Armor", GameLifecycle.Instance!.Game!.StartingGameData.Armor.Keys.ToList());
-                DisplayBlueprintCategory("Cargo Types", GameLifecycle.Instance!.Game!.StartingGameData.CargoTypes.Keys.ToList());
-                DisplayBlueprintCategory("Colonies", GameLifecycle.Instance!.Game!.StartingGameData.Colonies.Keys.ToList());
-                DisplayBlueprintCategory("Component Templates", GameLifecycle.Instance!.Game!.StartingGameData.ComponentTemplates.Keys.ToList());
-                DisplayBlueprintCategory("Gas", GameLifecycle.Instance!.Game!.StartingGameData.AtmosphericGas.Keys.ToList());
-                DisplayBlueprintCategory("Industry Types", GameLifecycle.Instance!.Game!.StartingGameData.IndustryTypes.Keys.ToList());
-                DisplayBlueprintCategory("Minerals", GameLifecycle.Instance!.Game!.StartingGameData.Minerals.Keys.ToList());
-                DisplayBlueprintCategory("Processed Materials", GameLifecycle.Instance!.Game!.StartingGameData.ProcessedMaterials.Keys.ToList());
-                DisplayBlueprintCategory("Stars", GameLifecycle.Instance!.Game!.StartingGameData.Stars.Keys.ToList());
-                DisplayBlueprintCategory("Systems", GameLifecycle.Instance!.Game!.StartingGameData.Systems.Keys.ToList());
-                DisplayBlueprintCategory("System Bodies", GameLifecycle.Instance!.Game!.StartingGameData.SystemBodies.Keys.ToList());
-                DisplayBlueprintCategory("System Gen Settings", GameLifecycle.Instance!.Game!.StartingGameData.SystemGenSettings.Keys.ToList());
-                DisplayBlueprintCategory("Techs", GameLifecycle.Instance!.Game!.StartingGameData.Techs.Keys.ToList());
-                DisplayBlueprintCategory("Tech Categories", GameLifecycle.Instance!.Game!.StartingGameData.TechCategories.Keys.ToList());
-                DisplayBlueprintCategory("Themes", GameLifecycle.Instance!.Game!.StartingGameData.Themes.Keys.ToList());
+                    DisplayBlueprintCategory("Armor", GameLifecycle.Instance!.Game!.StartingGameData.Armor.Keys.ToList());
+                    DisplayBlueprintCategory("Cargo Types", GameLifecycle.Instance!.Game!.StartingGameData.CargoTypes.Keys.ToList());
+                    DisplayBlueprintCategory("Colonies", GameLifecycle.Instance!.Game!.StartingGameData.Colonies.Keys.ToList());
+                    DisplayBlueprintCategory("Component Templates", GameLifecycle.Instance!.Game!.StartingGameData.ComponentTemplates.Keys.ToList());
+                    DisplayBlueprintCategory("Gas", GameLifecycle.Instance!.Game!.StartingGameData.AtmosphericGas.Keys.ToList());
+                    DisplayBlueprintCategory("Industry Types", GameLifecycle.Instance!.Game!.StartingGameData.IndustryTypes.Keys.ToList());
+                    DisplayBlueprintCategory("Minerals", GameLifecycle.Instance!.Game!.StartingGameData.Minerals.Keys.ToList());
+                    DisplayBlueprintCategory("Processed Materials", GameLifecycle.Instance!.Game!.StartingGameData.ProcessedMaterials.Keys.ToList());
+                    DisplayBlueprintCategory("Stars", GameLifecycle.Instance!.Game!.StartingGameData.Stars.Keys.ToList());
+                    DisplayBlueprintCategory("Systems", GameLifecycle.Instance!.Game!.StartingGameData.Systems.Keys.ToList());
+                    DisplayBlueprintCategory("System Bodies", GameLifecycle.Instance!.Game!.StartingGameData.SystemBodies.Keys.ToList());
+                    DisplayBlueprintCategory("System Gen Settings", GameLifecycle.Instance!.Game!.StartingGameData.SystemGenSettings.Keys.ToList());
+                    DisplayBlueprintCategory("Techs", GameLifecycle.Instance!.Game!.StartingGameData.Techs.Keys.ToList());
+                    DisplayBlueprintCategory("Tech Categories", GameLifecycle.Instance!.Game!.StartingGameData.TechCategories.Keys.ToList());
+                    DisplayBlueprintCategory("Themes", GameLifecycle.Instance!.Game!.StartingGameData.Themes.Keys.ToList());
 
-                ImGui.EndChild();
+                    ImGui.EndChild();
+                }
+
+                ImGui.SameLine();
+                //ImGui.SetCursorPosY(27f);
+
+                windowContentSize = ImGui.GetContentRegionAvail();
+                if(_selectedBlueprint != null && ImGui.BeginChild("BlueprintContent", windowContentSize, ImGuiChildFlags.Borders))
+                {
+                    DisplayKeyValue("Full ID", _selectedBlueprint.FullIdentifier);
+                    DisplayKeyValue("Unique ID", _selectedBlueprint.UniqueID);
+                    DisplayKeyValue("Json File Name", _selectedBlueprint.JsonFileName);
+
+                    if(_selectedBlueprint is ArmorBlueprint)
+                        DisplayArmorBlueprint((ArmorBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is CargoTypeBlueprint)
+                        DisplayCargoTypeBlueprint((CargoTypeBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is ColonyBlueprint)
+                        DisplayColonyBlueprint((ColonyBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is ComponentTemplateBlueprint)
+                        DisplayComponentTemplateBlueprint((ComponentTemplateBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is GasBlueprint)
+                        DisplayGasBlueprint((GasBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is IndustryTypeBlueprint)
+                        DisplayIndustryTypeBlueprint((IndustryTypeBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is MineralBlueprint)
+                        DisplayMineralBlueprint((MineralBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is ProcessedMaterialBlueprint)
+                        DisplayProcessedMaterialBlueprint((ProcessedMaterialBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is StarBlueprint)
+                        DisplayStarBlueprint((StarBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is SystemBlueprint)
+                        DisplaySystemBlueprint((SystemBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is SystemBodyBlueprint)
+                        DisplaySystemBodyBlueprint((SystemBodyBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is SystemGenSettingsBlueprint)
+                        DisplaySystemGenSettingsBlueprint((SystemGenSettingsBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is TechBlueprint)
+                        DisplayTechBlueprint((TechBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is TechCategoryBlueprint)
+                        DisplayTechCategoryBlueprint((TechCategoryBlueprint)_selectedBlueprint);
+                    else if(_selectedBlueprint is ThemeBlueprint)
+                        DisplayThemeBlueprint((ThemeBlueprint)_selectedBlueprint);
+
+                    ImGui.EndChild();
+                }
+
+
+        
             }
-
-            ImGui.SameLine();
-            //ImGui.SetCursorPosY(27f);
-
-            windowContentSize = ImGui.GetContentRegionAvail();
-            if(_selectedBlueprint != null && ImGui.BeginChild("BlueprintContent", windowContentSize, ImGuiChildFlags.Borders))
-            {
-                DisplayKeyValue("Full ID", _selectedBlueprint.FullIdentifier);
-                DisplayKeyValue("Unique ID", _selectedBlueprint.UniqueID);
-                DisplayKeyValue("Json File Name", _selectedBlueprint.JsonFileName);
-
-                if(_selectedBlueprint is ArmorBlueprint)
-                    DisplayArmorBlueprint((ArmorBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is CargoTypeBlueprint)
-                    DisplayCargoTypeBlueprint((CargoTypeBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is ColonyBlueprint)
-                    DisplayColonyBlueprint((ColonyBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is ComponentTemplateBlueprint)
-                    DisplayComponentTemplateBlueprint((ComponentTemplateBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is GasBlueprint)
-                    DisplayGasBlueprint((GasBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is IndustryTypeBlueprint)
-                    DisplayIndustryTypeBlueprint((IndustryTypeBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is MineralBlueprint)
-                    DisplayMineralBlueprint((MineralBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is ProcessedMaterialBlueprint)
-                    DisplayProcessedMaterialBlueprint((ProcessedMaterialBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is StarBlueprint)
-                    DisplayStarBlueprint((StarBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is SystemBlueprint)
-                    DisplaySystemBlueprint((SystemBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is SystemBodyBlueprint)
-                    DisplaySystemBodyBlueprint((SystemBodyBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is SystemGenSettingsBlueprint)
-                    DisplaySystemGenSettingsBlueprint((SystemGenSettingsBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is TechBlueprint)
-                    DisplayTechBlueprint((TechBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is TechCategoryBlueprint)
-                    DisplayTechCategoryBlueprint((TechCategoryBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is ThemeBlueprint)
-                    DisplayThemeBlueprint((ThemeBlueprint)_selectedBlueprint);
-
-                ImGui.EndChild();
-            }
-
-            Window.End();
         }
     }
 

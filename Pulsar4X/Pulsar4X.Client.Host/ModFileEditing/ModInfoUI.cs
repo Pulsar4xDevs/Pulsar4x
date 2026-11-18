@@ -131,6 +131,7 @@ public class ModInfoUI
 
         if (ImGui.Begin($"Tech Category Editor: {name}###{selectedItem.Namespace}", ref _isActive[selectedIndex]))
         {
+
             ImGui.Columns(2, "##mod-info-body", true);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
@@ -203,8 +204,8 @@ public class ModInfoUI
             {
                 selectedItem.DataFiles.Add(_fileName);
             }
-            ImGui.End();
         }
+        ImGui.End();
     }
 
     private void Save()

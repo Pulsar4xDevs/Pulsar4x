@@ -40,6 +40,7 @@ public class MineralBlueprintUI : BluePrintsUI
 
         if (ImGui.Begin($"Processed Materials Editor: {selectedItem.Name}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
+
             ImGui.Columns(2, "##mineral-bp", true);
             ImGui.SetColumnWidth(0, 150);
             ImGui.SetColumnWidth(1, 500);
@@ -101,7 +102,7 @@ public class MineralBlueprintUI : BluePrintsUI
             }
             ImGui.NextColumn();
 
-            ImGui.End();
         }
+        ImGui.End();
     }
 }

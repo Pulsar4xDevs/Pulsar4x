@@ -92,242 +92,245 @@ namespace Pulsar4X.Client
         {
             if (!IsActive || _systemState == null || GameLifecycle.Instance?.Game == null) return;
 
-            if(Window.Begin("Performance Display"))
+            using (var w = Window.Scope("Performance Display"))
             {
-                SetFrameRateArray();
-                SampleGameTickRate();
-                SampleSystemTickRate();
-                ImGui.Text("Global Tick: "); ImGui.SameLine();
-                var t_lpt = GameLifecycle.Instance!.Game!.TimePulse.LastProcessingTime.TotalMilliseconds;
-                var t_tf = GameLifecycle.Instance!.Game!.TimePulse.TickFrequency.TotalMilliseconds;
-                var txt_lpt = t_lpt.ToString();
-                var col = new Vector4(0, 1, 0, 1);
-                if (t_lpt > GameLifecycle.Instance!.Game!.TimePulse.TickFrequency.TotalMilliseconds)
-                    col = new Vector4(1, 0, 0, 1);
-                ImGui.Text(txt_lpt); ImGui.SameLine();
-                var overtime = t_lpt - t_tf;
-                ImGui.TextColored(col, overtime.ToString());
-
-                System.Diagnostics.Process p = System.Diagnostics.Process.GetCurrentProcess();
-                ImGui.Text("Physical mem usage:"); ImGui.SameLine();
-                ImGui.Text((p.WorkingSet64 / 1048576).ToString() + "MiB");
-                ImGui.Text("Paged system mem size:"); ImGui.SameLine();
-                ImGui.Text((p.PagedSystemMemorySize64 / 1048576).ToString() + "MiB");
-                ImGui.Text("Paged mem size:"); ImGui.SameLine();
-                ImGui.Text((p.PagedMemorySize64 / 1048576).ToString() + "MiB");
-
-                ImGui.BeginGroup();
-
-                //plot vars: (label, values, valueOffset, overlayText, scaleMin, scaleMax, graphSize, Stride)
-                //core game processing rate.
-                //ImGui.PlotHistogram("##GRHistogram", _gameRatesDisplay, 10, _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
-                //ImGui.PlotHistogram("##GRHistogram1", _gameRatesDisplay, 0 , _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
-                //string label, ref float values...
-                //ImGui.PlotHistogram(
-                ImGui.PlotHistogram("Game Tick ##GTHistogram", ref _gameRates[0], _gameRates.Length, _gameRateIndex, _currentGFPS.ToString(), 0f, largestGFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
-                ImGui.PlotLines("Game Tick ##GTPlotlines", ref _gameRates[0], _gameRates.Length, _gameRateIndex, _currentGFPS.ToString(), 0, largestGFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
-                //current star system processing rate.
-                ImGui.PlotHistogram("System Tick ##STHistogram", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0f, largestSFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
-                ImGui.PlotLines("System Tick ##STPlotlines", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0, largestSFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
-                //ui framerate
-                ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new System.Numerics.Vector2(248, 60), sizeof(float));
-
-                ImGui.EndGroup();
-
-                ImGui.SameLine();
-
-                ImGui.BeginGroup();
-
-                if (ImGui.CollapsingHeader("Profile Markers"))
+                if (w.Visible)
                 {
-                    foreach(var (key, value) in Profiler.Metrics)
+                    SetFrameRateArray();
+                    SampleGameTickRate();
+                    SampleSystemTickRate();
+                    ImGui.Text("Global Tick: "); ImGui.SameLine();
+                    var t_lpt = GameLifecycle.Instance!.Game!.TimePulse.LastProcessingTime.TotalMilliseconds;
+                    var t_tf = GameLifecycle.Instance!.Game!.TimePulse.TickFrequency.TotalMilliseconds;
+                    var txt_lpt = t_lpt.ToString();
+                    var col = new Vector4(0, 1, 0, 1);
+                    if (t_lpt > GameLifecycle.Instance!.Game!.TimePulse.TickFrequency.TotalMilliseconds)
+                        col = new Vector4(1, 0, 0, 1);
+                    ImGui.Text(txt_lpt); ImGui.SameLine();
+                    var overtime = t_lpt - t_tf;
+                    ImGui.TextColored(col, overtime.ToString());
+
+                    System.Diagnostics.Process p = System.Diagnostics.Process.GetCurrentProcess();
+                    ImGui.Text("Physical mem usage:"); ImGui.SameLine();
+                    ImGui.Text((p.WorkingSet64 / 1048576).ToString() + "MiB");
+                    ImGui.Text("Paged system mem size:"); ImGui.SameLine();
+                    ImGui.Text((p.PagedSystemMemorySize64 / 1048576).ToString() + "MiB");
+                    ImGui.Text("Paged mem size:"); ImGui.SameLine();
+                    ImGui.Text((p.PagedMemorySize64 / 1048576).ToString() + "MiB");
+
+                    ImGui.BeginGroup();
+
+                    //plot vars: (label, values, valueOffset, overlayText, scaleMin, scaleMax, graphSize, Stride)
+                    //core game processing rate.
+                    //ImGui.PlotHistogram("##GRHistogram", _gameRatesDisplay, 10, _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
+                    //ImGui.PlotHistogram("##GRHistogram1", _gameRatesDisplay, 0 , _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
+                    //string label, ref float values...
+                    //ImGui.PlotHistogram(
+                    ImGui.PlotHistogram("Game Tick ##GTHistogram", ref _gameRates[0], _gameRates.Length, _gameRateIndex, _currentGFPS.ToString(), 0f, largestGFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
+                    ImGui.PlotLines("Game Tick ##GTPlotlines", ref _gameRates[0], _gameRates.Length, _gameRateIndex, _currentGFPS.ToString(), 0, largestGFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
+                    //current star system processing rate.
+                    ImGui.PlotHistogram("System Tick ##STHistogram", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0f, largestSFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
+                    ImGui.PlotLines("System Tick ##STPlotlines", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0, largestSFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
+                    //ui framerate
+                    ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new System.Numerics.Vector2(248, 60), sizeof(float));
+
+                    ImGui.EndGroup();
+
+                    ImGui.SameLine();
+
+                    ImGui.BeginGroup();
+
+                    if (ImGui.CollapsingHeader("Profile Markers"))
                     {
-                        ImGui.Text(key);
-                        ImGui.SameLine();
-                        ImGui.Text(value.Last.TotalMilliseconds.ToString("0.00ms"));
-                    }
-                }
-
-                ImGui.EndGroup();
-
-                var data = _systemState.StarSystem.ManagerSubpulses.Performance.GetLatestEntry();
-                ImGui.Text($"StarSystemID: {_systemState.StarSystem.ID}");
-                ImGui.Columns(4, "##performance", true);
-                ImGui.SetColumnWidth(0, 160);
-                ImGui.SetColumnWidth(1, 64);
-                ImGui.SetColumnWidth(2, 128);
-                ImGui.SetColumnWidth(3, 128);
-
-
-                ImGui.Text("Name"); ImGui.NextColumn();
-                ImGui.Text("Count"); ImGui.NextColumn();
-                ImGui.Text("Run Time"); ImGui.NextColumn();
-                ImGui.Text("Average"); ImGui.NextColumn();
-                string str = "";
-                foreach (var (key, values) in data.TimesById)
-                {
-
-                    ImGui.Text(key);
-                    ImGui.NextColumn();
-                    ImGui.Text( values.times.Count.ToString());
-
-                    ImGui.NextColumn();
-                    str = $"{(values.sum):0.00}ms";
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
-                    ImGui.Text(str);
-                    ImGui.NextColumn();
-                    str = $"{(values.sum / values.times.Count):0.00}ms";
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
-                    ImGui.Text( str );
-                    ImGui.NextColumn();
-                }
-                ImGui.Columns(1);
-                ImGui.Text($"    IsProcecssing: {_systemState.StarSystem.ManagerSubpulses.IsProcessing}");
-                ImGui.Text($"    CurrentProcess: {_systemState.StarSystem.ManagerSubpulses.CurrentProcess}");
-                ImGui.Text($"    Last Total ProcessTime: {data.FullIntervalTime}");
-
-                var numDB = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>().Count;
-                ImGui.Text($"ObitDB Count: {numDB}");
-                numDB = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>().Count;
-                ImGui.Text($"NewtonMoveDB Count: {numDB}");
-                numDB = _systemState.StarSystem.GetAllDataBlobsOfType<SensorAbilityDB>().Count;
-                ImGui.Text($"SensorAbilityDB Count: {numDB}");
-
-
-                if(ImGui.CollapsingHeader("All Systems"))
-                {
-                    foreach (var starsys in GameLifecycle.Instance!.Game!.Systems)
-                    {
-                        ImGui.Text(((StarSystem)starsys).ID.ToString());
-                        ImGui.Text($"    IsProcecssing: {starsys.ManagerSubpulses.IsProcessing}");
-                        ImGui.Text($"    CurrentProcess: {starsys.ManagerSubpulses.CurrentProcess}");
-                        ImGui.Text($"    Last Total ProcessTime: {starsys.ManagerSubpulses.Performance.GetLatestEntry().FullIntervalTime}");
-
-                    }
-                }
-
-
-                if (ImGui.CollapsingHeader("Call Times"))
-                {
-
-
-
-                    if (ImGui.Button("Time"))
-                    {
-                        _callData = new List<(string txt, double time, double count)>();
-                        _sw.Restart();
-                        List<Entity> entites = _systemState.StarSystem.GetAllEntitiesWithDataBlob<OrbitDB>();
-                        _sw.Stop();
-                        _callData.Add((
-                              "Using GetEntitysWithDatablob\n {0,0} ticks to retreave {1,24} Entites",
-                              _sw.Elapsed.Ticks,
-                              entites.Count
-                              ));
-
-
-                        _sw.Restart();
-                        var datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>();
-                        _sw.Stop();
-                        _callData.Add((
-                                          "Using GetAllDataBlobsOfType<T>()\n {0,0} ticks to retreave {1,24} Entites",
-                                          _sw.Elapsed.Ticks,
-                                          datablobs.Count
-                                      ));
-
-                        _sw.Restart();
-                        datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>();
-                        _sw.Stop();
-                        _callData.Add((
-                                          "Using GetAllDataBlobsOfType<T>(int typeIndex)\n {0,0} ticks to retreave {1,24} Entites",
-                                          _sw.Elapsed.Ticks,
-                                          datablobs.Count
-                                      ));
-
-
-                        var db = datablobs[0];
-                        if(db.OwningEntity != null)
+                        foreach(var (key, value) in Profiler.Metrics)
                         {
-                            _sw.Restart();
-                            var ent = db.OwningEntity;
-                            _sw.Stop();
-                            _callData.Add((
-                                            "Using datablob.OwningEntity\n {0,0} ticks to retreave the entity",
-                                            _sw.Elapsed.Ticks,
-                                            1
-                                        ));
-
-                            _sw.Restart();
-                            ent.GetDataBlob<OrbitDB>();
-                            _sw.Stop();
-                            _callData.Add((
-                                            "Using entity.GetDataBlob<T>()\n {0,0} ticks to get db",
-                                            _sw.Elapsed.Ticks,
-                                            1
-                                            ));
-
-                            _sw.Restart();
-                            ent.GetDataBlob<OrbitDB>();
-                            _sw.Stop();
-                            _callData.Add((
-                                            "Using entity.GetDataBlob<T>(typeIndex)\n {0,0} ticks to get db",
-                                            _sw.Elapsed.Ticks,
-                                            1
-                                        ));
-
-
-                            _sw.Restart();
-                            ent.RemoveDataBlob<OrbitDB>();
-                            _sw.Stop();
-                            _callData.Add((
-                                            "Using entity.RemoveDataBlob<T>()\n {0,0} ticks to remove from entity",
-                                            _sw.Elapsed.Ticks,
-                                            1
-                                        ));
-
-                            _sw.Restart();
-                            ent.SetDataBlob(db);
-                            _sw.Stop();
-                            _callData.Add((
-                                            "Using entity.SetDataBlob(db)\n {0,0} ticks to add to entity",
-                                                _sw.Elapsed.Ticks,
-                                                1
-                                            ));
-
-                            _sw.Restart();
-                            // FIXME: ?
-                            //ent.RemoveDataBlob(typeIndex);
-                            _sw.Stop();
-                            _callData.Add((
-                                                "Using entity.RemoveDataBlob(typeIndex)\n {0,0} ticks to remove from entity",
-                                                _sw.Elapsed.Ticks,
-                                                1
-                                            ));
-
-                            _sw.Restart();
-                            // FIXME: ?
-                            //ent.SetDataBlob(db, typeIndex);
-                            _sw.Stop();
-                            _callData.Add((
-                                                "Using entity.SetDataBlob(db, typeIndex)\n {0,0} ticks to add to entity",
-                                                _sw.Elapsed.Ticks,
-                                                1
-                                            ));
+                            ImGui.Text(key);
+                            ImGui.SameLine();
+                            ImGui.Text(value.Last.TotalMilliseconds.ToString("0.00ms"));
                         }
                     }
 
-                    foreach (var dat in _callData)
-                    {
-                        string foo = string.Format(dat.txt, dat.time, dat.count);
-                        ImGui.Text(foo);
-                    }
-                }
+                    ImGui.EndGroup();
 
-                if (ImGui.Button("Record To File"))
-                {
-                    RecordToFile();
+                    var data = _systemState.StarSystem.ManagerSubpulses.Performance.GetLatestEntry();
+                    ImGui.Text($"StarSystemID: {_systemState.StarSystem.ID}");
+                    ImGui.Columns(4, "##performance", true);
+                    ImGui.SetColumnWidth(0, 160);
+                    ImGui.SetColumnWidth(1, 64);
+                    ImGui.SetColumnWidth(2, 128);
+                    ImGui.SetColumnWidth(3, 128);
+
+
+                    ImGui.Text("Name"); ImGui.NextColumn();
+                    ImGui.Text("Count"); ImGui.NextColumn();
+                    ImGui.Text("Run Time"); ImGui.NextColumn();
+                    ImGui.Text("Average"); ImGui.NextColumn();
+                    string str = "";
+                    foreach (var (key, values) in data.TimesById)
+                    {
+
+                        ImGui.Text(key);
+                        ImGui.NextColumn();
+                        ImGui.Text( values.times.Count.ToString());
+
+                        ImGui.NextColumn();
+                        str = $"{(values.sum):0.00}ms";
+                        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
+                        ImGui.Text(str);
+                        ImGui.NextColumn();
+                        str = $"{(values.sum / values.times.Count):0.00}ms";
+                        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
+                        ImGui.Text( str );
+                        ImGui.NextColumn();
+                    }
+                    ImGui.Columns(1);
+                    ImGui.Text($"    IsProcecssing: {_systemState.StarSystem.ManagerSubpulses.IsProcessing}");
+                    ImGui.Text($"    CurrentProcess: {_systemState.StarSystem.ManagerSubpulses.CurrentProcess}");
+                    ImGui.Text($"    Last Total ProcessTime: {data.FullIntervalTime}");
+
+                    var numDB = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>().Count;
+                    ImGui.Text($"ObitDB Count: {numDB}");
+                    numDB = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>().Count;
+                    ImGui.Text($"NewtonMoveDB Count: {numDB}");
+                    numDB = _systemState.StarSystem.GetAllDataBlobsOfType<SensorAbilityDB>().Count;
+                    ImGui.Text($"SensorAbilityDB Count: {numDB}");
+
+
+                    if(ImGui.CollapsingHeader("All Systems"))
+                    {
+                        foreach (var starsys in GameLifecycle.Instance!.Game!.Systems)
+                        {
+                            ImGui.Text(((StarSystem)starsys).ID.ToString());
+                            ImGui.Text($"    IsProcecssing: {starsys.ManagerSubpulses.IsProcessing}");
+                            ImGui.Text($"    CurrentProcess: {starsys.ManagerSubpulses.CurrentProcess}");
+                            ImGui.Text($"    Last Total ProcessTime: {starsys.ManagerSubpulses.Performance.GetLatestEntry().FullIntervalTime}");
+
+                        }
+                    }
+
+
+                    if (ImGui.CollapsingHeader("Call Times"))
+                    {
+
+
+
+                        if (ImGui.Button("Time"))
+                        {
+                            _callData = new List<(string txt, double time, double count)>();
+                            _sw.Restart();
+                            List<Entity> entites = _systemState.StarSystem.GetAllEntitiesWithDataBlob<OrbitDB>();
+                            _sw.Stop();
+                            _callData.Add((
+                                  "Using GetEntitysWithDatablob\n {0,0} ticks to retreave {1,24} Entites",
+                                  _sw.Elapsed.Ticks,
+                                  entites.Count
+                                  ));
+
+
+                            _sw.Restart();
+                            var datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>();
+                            _sw.Stop();
+                            _callData.Add((
+                                              "Using GetAllDataBlobsOfType<T>()\n {0,0} ticks to retreave {1,24} Entites",
+                                              _sw.Elapsed.Ticks,
+                                              datablobs.Count
+                                          ));
+
+                            _sw.Restart();
+                            datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>();
+                            _sw.Stop();
+                            _callData.Add((
+                                              "Using GetAllDataBlobsOfType<T>(int typeIndex)\n {0,0} ticks to retreave {1,24} Entites",
+                                              _sw.Elapsed.Ticks,
+                                              datablobs.Count
+                                          ));
+
+
+                            var db = datablobs[0];
+                            if(db.OwningEntity != null)
+                            {
+                                _sw.Restart();
+                                var ent = db.OwningEntity;
+                                _sw.Stop();
+                                _callData.Add((
+                                                "Using datablob.OwningEntity\n {0,0} ticks to retreave the entity",
+                                                _sw.Elapsed.Ticks,
+                                                1
+                                            ));
+
+                                _sw.Restart();
+                                ent.GetDataBlob<OrbitDB>();
+                                _sw.Stop();
+                                _callData.Add((
+                                                "Using entity.GetDataBlob<T>()\n {0,0} ticks to get db",
+                                                _sw.Elapsed.Ticks,
+                                                1
+                                                ));
+
+                                _sw.Restart();
+                                ent.GetDataBlob<OrbitDB>();
+                                _sw.Stop();
+                                _callData.Add((
+                                                "Using entity.GetDataBlob<T>(typeIndex)\n {0,0} ticks to get db",
+                                                _sw.Elapsed.Ticks,
+                                                1
+                                            ));
+
+
+                                _sw.Restart();
+                                ent.RemoveDataBlob<OrbitDB>();
+                                _sw.Stop();
+                                _callData.Add((
+                                                "Using entity.RemoveDataBlob<T>()\n {0,0} ticks to remove from entity",
+                                                _sw.Elapsed.Ticks,
+                                                1
+                                            ));
+
+                                _sw.Restart();
+                                ent.SetDataBlob(db);
+                                _sw.Stop();
+                                _callData.Add((
+                                                "Using entity.SetDataBlob(db)\n {0,0} ticks to add to entity",
+                                                    _sw.Elapsed.Ticks,
+                                                    1
+                                                ));
+
+                                _sw.Restart();
+                                // FIXME: ?
+                                //ent.RemoveDataBlob(typeIndex);
+                                _sw.Stop();
+                                _callData.Add((
+                                                    "Using entity.RemoveDataBlob(typeIndex)\n {0,0} ticks to remove from entity",
+                                                    _sw.Elapsed.Ticks,
+                                                    1
+                                                ));
+
+                                _sw.Restart();
+                                // FIXME: ?
+                                //ent.SetDataBlob(db, typeIndex);
+                                _sw.Stop();
+                                _callData.Add((
+                                                    "Using entity.SetDataBlob(db, typeIndex)\n {0,0} ticks to add to entity",
+                                                    _sw.Elapsed.Ticks,
+                                                    1
+                                                ));
+                            }
+                        }
+
+                        foreach (var dat in _callData)
+                        {
+                            string foo = string.Format(dat.txt, dat.time, dat.count);
+                            ImGui.Text(foo);
+                        }
+                    }
+
+                    if (ImGui.Button("Record To File"))
+                    {
+                        RecordToFile();
+                    }
+            
                 }
             }
-            Window.End();
         }
 
         void RecordToFile()

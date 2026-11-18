@@ -164,89 +164,93 @@ namespace Pulsar4X.Client
                 || _uiState.Faction == null)
                 return;
 
-            if (Window.Begin("Ordnance Design"))
+            using (var w = Window.Scope("Ordnance Design"))
             {
-                ImGui.Combo("Current Designs", ref _payloadSelectedIndex, _currentDesignNames, _currentDesignNames.Length);
-
-                ImGui.NewLine();
-                BorderGroup.Begin("Payload:");
-                if (ImGui.Combo("Payload type", ref _payloadSelectedIndex, _payload, _payload.Length))
+                if (w.Visible)
                 {
-                    //_selectedPayload = _payloadTypes[_payloadSelectedIndex].GetAttribute<OrdnancePayloadAtb>();
-                    _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
-                    RefreshMass();
+                    ImGui.Combo("Current Designs", ref _payloadSelectedIndex, _currentDesignNames, _currentDesignNames.Length);
+
+                    ImGui.NewLine();
+                    BorderGroup.Begin("Payload:");
+                    if (ImGui.Combo("Payload type", ref _payloadSelectedIndex, _payload, _payload.Length))
+                    {
+                        //_selectedPayload = _payloadTypes[_payloadSelectedIndex].GetAttribute<OrdnancePayloadAtb>();
+                        _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
+                        RefreshMass();
+                    }
+                    if(ImGui.SliderInt("Payload Count", ref _payloadCount, 1, 100))
+                    {
+                        _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
+                        RefreshMass();
+                    }
+                    var whmass = _payloadTypes[_payloadSelectedIndex].MassPerUnit * _payloadCount;
+                    ImGui.Text("Mass: " + Stringify.Mass(whmass));
+                    //ImGui.Text("Payload Trigger Type: " + _selectedPayload.Trigger);
+                    BorderGroup.End();
+                    ImGui.NewLine();
+
+                    BorderGroup.Begin("Electronics Suite:");
+                    if(ImGui.Combo("ElectronicsSuite", ref _electronicsSelectedIndex, _electronicsPackage, _electronicsPackage.Length))
+                    {
+                        _selectedComponentDesigns[_eleccPackTypes[_electronicsSelectedIndex]] = 1;
+                        RefreshMass();
+                    }
+                    var mass = _eleccPackTypes[_electronicsSelectedIndex].MassPerUnit;
+                    ImGui.Text("Mass: " + Stringify.Mass(mass));
+                    BorderGroup.End();
+
+                    ImGui.NewLine();
+
+                    BorderGroup.Begin("Engine:");
+
+                    if (ImGui.Combo("Engine Types", ref _engineDesignTypeIndex, _engineTypeNames, _engineTypeNames.Length))
+                    {
+                        _engineDesigner = new ComponentDesigner(_engineTemplates[_engineDesignTypeIndex], _uiState.Faction.GetDataBlob<FactionInfoDB>().Data, _factionTech);
+                        _engineDesigner.SetAttributes();
+                    }
+
+                    if(_engineDesigner != null)
+                    {
+                        //PartDesignUI.GuiDesignUI(_engineDesigner);
+                        _thrusterSizeKG = _engineDesigner.MassValue;
+                        RefreshMass();
+                    }
+
+                    if (ImGui.SliderFloat("Fuel", ref _fuelKG, 1, 1000))
+                    {
+                        RefreshMass();
+                    }
+
+                    BorderGroup.End();
+
+                    ImGui.NewLine();
+                    ImGui.Text("Total Mass: " + Stringify.Mass(_totalMass));
+
+                    double burnRate = 0;
+                    double exaustVel = 0;
+
+                    if (_engineDesigner != null)
+                    {
+                        var atb = _engineDesigner.GetAttribute<NewtonionThrustAtb>();
+                        burnRate = atb.FuelBurnRate;
+                        exaustVel = atb.ExhaustVelocity;
+                    }
+
+                    double thrustNewtons = burnRate * exaustVel;
+                    double burnTime = _fuelKG / burnRate;
+                    double dv = OrbitMath.TsiolkovskyRocketEquation(_totalMass, _totalMass - _fuelKG, exaustVel);
+                    ImGui.Text("Burn Time: " + burnTime + "s");
+                    ImGui.Text("Thrust: " + Stringify.Thrust(thrustNewtons));
+                    ImGui.Text("Acceleration (wet): " + Stringify.Velocity(thrustNewtons / _totalMass));
+                    ImGui.Text("Acceleration (dry): " + Stringify.Velocity(thrustNewtons / (_totalMass - _fuelKG)));
+                    ImGui.Text("DeltaV: " + Stringify.Velocity(dv));
+
+                    ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
+                    NewDesignButton();
+
+
+            
                 }
-                if(ImGui.SliderInt("Payload Count", ref _payloadCount, 1, 100))
-                {
-                    _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
-                    RefreshMass();
-                }
-                var whmass = _payloadTypes[_payloadSelectedIndex].MassPerUnit * _payloadCount;
-                ImGui.Text("Mass: " + Stringify.Mass(whmass));
-                //ImGui.Text("Payload Trigger Type: " + _selectedPayload.Trigger);
-                BorderGroup.End();
-                ImGui.NewLine();
-
-                BorderGroup.Begin("Electronics Suite:");
-                if(ImGui.Combo("ElectronicsSuite", ref _electronicsSelectedIndex, _electronicsPackage, _electronicsPackage.Length))
-                {
-                    _selectedComponentDesigns[_eleccPackTypes[_electronicsSelectedIndex]] = 1;
-                    RefreshMass();
-                }
-                var mass = _eleccPackTypes[_electronicsSelectedIndex].MassPerUnit;
-                ImGui.Text("Mass: " + Stringify.Mass(mass));
-                BorderGroup.End();
-
-                ImGui.NewLine();
-
-                BorderGroup.Begin("Engine:");
-
-                if (ImGui.Combo("Engine Types", ref _engineDesignTypeIndex, _engineTypeNames, _engineTypeNames.Length))
-                {
-                    _engineDesigner = new ComponentDesigner(_engineTemplates[_engineDesignTypeIndex], _uiState.Faction.GetDataBlob<FactionInfoDB>().Data, _factionTech);
-                    _engineDesigner.SetAttributes();
-                }
-
-                if(_engineDesigner != null)
-                {
-                    //PartDesignUI.GuiDesignUI(_engineDesigner);
-                    _thrusterSizeKG = _engineDesigner.MassValue;
-                    RefreshMass();
-                }
-
-                if (ImGui.SliderFloat("Fuel", ref _fuelKG, 1, 1000))
-                {
-                    RefreshMass();
-                }
-
-                BorderGroup.End();
-
-                ImGui.NewLine();
-                ImGui.Text("Total Mass: " + Stringify.Mass(_totalMass));
-
-                double burnRate = 0;
-                double exaustVel = 0;
-
-                if (_engineDesigner != null)
-                {
-                    var atb = _engineDesigner.GetAttribute<NewtonionThrustAtb>();
-                    burnRate = atb.FuelBurnRate;
-                    exaustVel = atb.ExhaustVelocity;
-                }
-
-                double thrustNewtons = burnRate * exaustVel;
-                double burnTime = _fuelKG / burnRate;
-                double dv = OrbitMath.TsiolkovskyRocketEquation(_totalMass, _totalMass - _fuelKG, exaustVel);
-                ImGui.Text("Burn Time: " + burnTime + "s");
-                ImGui.Text("Thrust: " + Stringify.Thrust(thrustNewtons));
-                ImGui.Text("Acceleration (wet): " + Stringify.Velocity(thrustNewtons / _totalMass));
-                ImGui.Text("Acceleration (dry): " + Stringify.Velocity(thrustNewtons / (_totalMass - _fuelKG)));
-                ImGui.Text("DeltaV: " + Stringify.Velocity(dv));
-
-                ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
-                NewDesignButton();
-
-                Window.End();
             }
         }
 

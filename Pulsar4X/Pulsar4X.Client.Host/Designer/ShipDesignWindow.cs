@@ -255,54 +255,57 @@ namespace Pulsar4X.Client
             ImGui.SetNextWindowSize(fit, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(new Vector2(Math.Min(640f, fit.X), Math.Min(400f, fit.Y)), viewport.WorkSize);
 
-            if (Window.Begin("Ship Design", ref IsActive, _flags))
+            using (var w = Window.Scope("Ship Design", ref IsActive, _flags))
             {
-                if(_existingShipDesignNames.Count != _factionInfoDB.ShipDesigns.Values.Count(d => !d.IsObsolete))
+                if (w.Visible)
                 {
-                    RefreshExistingClasses();
-                }
-                if (AllShipComponents.Count != _factionInfoDB.ComponentDesigns.Values.Count)
-                {
-                    RefreshComponentDesigns();
-                }
+                    if(_existingShipDesignNames.Count != _factionInfoDB.ShipDesigns.Values.Count(d => !d.IsObsolete))
+                    {
+                        RefreshExistingClasses();
+                    }
+                    if (AllShipComponents.Count != _factionInfoDB.ComponentDesigns.Values.Count)
+                    {
+                        RefreshComponentDesigns();
+                    }
 
-                DisplayExistingDesigns();
-                ImGui.SameLine();
-                ImGui.SetCursorPosY(27f);
+                    DisplayExistingDesigns();
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosY(27f);
 
-                if(ShowNoDesigns)
-                {
-                    ImGui.Text("Create a new design to begin editing.");
-                    return;
-                }
+                    if(ShowNoDesigns)
+                    {
+                        ImGui.Text("Create a new design to begin editing.");
+                        return;
+                    }
 
-                Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                // Statistics gets the largest share: its labels, values and wrapped warnings are the widest text.
-                var shares = DesignerColumnShares(windowContentSize.X);
-                var firstChildSize = new Vector2(windowContentSize.X * shares.X, windowContentSize.Y);
-                var secondChildSize = new Vector2(windowContentSize.X * shares.Y, windowContentSize.Y);
-                var thirdChildSize = new Vector2(windowContentSize.X * shares.Z - (windowContentSize.X * 0.01f), windowContentSize.Y);
-                if(ImGui.BeginChild("ShipDesign1", firstChildSize, ImGuiChildFlags.Borders))
-                {
-                    DisplayComponentSelection();
+                    Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                    // Statistics gets the largest share: its labels, values and wrapped warnings are the widest text.
+                    var shares = DesignerColumnShares(windowContentSize.X);
+                    var firstChildSize = new Vector2(windowContentSize.X * shares.X, windowContentSize.Y);
+                    var secondChildSize = new Vector2(windowContentSize.X * shares.Y, windowContentSize.Y);
+                    var thirdChildSize = new Vector2(windowContentSize.X * shares.Z - (windowContentSize.X * 0.01f), windowContentSize.Y);
+                    if(ImGui.BeginChild("ShipDesign1", firstChildSize, ImGuiChildFlags.Borders))
+                    {
+                        DisplayComponentSelection();
+                    }
+                    ImGui.EndChild();
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosY(27f);
+                    if(ImGui.BeginChild("ShipDesign2", secondChildSize, ImGuiChildFlags.Borders))
+                    {
+                        DisplayComponents();
+                    }
+                    ImGui.EndChild();
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosY(27f);
+                    if(ImGui.BeginChild("ShipDesign3", thirdChildSize, ImGuiChildFlags.Borders))
+                    {
+                        DisplayStats();
+                    }
+                    ImGui.EndChild();
+            
                 }
-                ImGui.EndChild();
-                ImGui.SameLine();
-                ImGui.SetCursorPosY(27f);
-                if(ImGui.BeginChild("ShipDesign2", secondChildSize, ImGuiChildFlags.Borders))
-                {
-                    DisplayComponents();
-                }
-                ImGui.EndChild();
-                ImGui.SameLine();
-                ImGui.SetCursorPosY(27f);
-                if(ImGui.BeginChild("ShipDesign3", thirdChildSize, ImGuiChildFlags.Borders))
-                {
-                    DisplayStats();
-                }
-                ImGui.EndChild();
             }
-            Window.End();
         }
 
         internal const float SelectorWidth = 256f;

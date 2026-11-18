@@ -80,55 +80,58 @@ namespace Pulsar4X.Client
 
             //selectedEntityData
             ImGui.SetNextWindowSizeConstraints(new System.Numerics.Vector2(32, 32), new System.Numerics.Vector2(720, 720));
-            if (Window.Begin("SM", ref IsActive, _flags))
+            using (var w = Window.Scope("SM", ref IsActive, _flags))
             {
-                ImGui.Columns(2, "##sm-window", true);
-                ImGui.SetColumnWidth(0, 200);
-                for (int i = 0; i < _systemEntities.Length; i++)
+                if (w.Visible)
                 {
-                    ImGui.PushID(_systemEntities[i].Id);
-                    bool isSelected = _selectedEntityIndex == i;
-                    if (ImGui.Selectable(_systemEntityNames[i], isSelected))
+                    ImGui.Columns(2, "##sm-window", true);
+                    ImGui.SetColumnWidth(0, 200);
+                    for (int i = 0; i < _systemEntities.Length; i++)
                     {
-                        if (i == _selectedEntityIndex)
+                        ImGui.PushID(_systemEntities[i].Id);
+                        bool isSelected = _selectedEntityIndex == i;
+                        if (ImGui.Selectable(_systemEntityNames[i], isSelected))
                         {
-                            _selectedEntityIndex = -1;
-                            _entityInspectorWindow = false;
+                            if (i == _selectedEntityIndex)
+                            {
+                                _selectedEntityIndex = -1;
+                                _entityInspectorWindow = false;
+                            }
+                            else
+                            {
+                                _selectedEntityIndex = i;
+                                _entityInspectorWindow = true;
+                            }
                         }
-                        else
+
+                        ImGui.NextColumn();
+                        ImGui.Text(_systemEntities[i].GetFactionName());
+                        ImGui.NextColumn();
+                        ImGui.PopID();
+                    }
+
+                    /*
+                    if (_selectedEntity != null && _selectedEntity.Entity != null)
+                    {
+                        Entity entity = _selectedEntity.Entity;
+                        var datablobs = entity.DataBlobs;
+                        ImGui.Text(_selectedEntity.Name);
+                        foreach (var datablob in datablobs)
                         {
-                            _selectedEntityIndex = i;
-                            _entityInspectorWindow = true;
+                            ImGui.Text(datablob.GetType().Name);
                         }
-                    }
+                        if (ImGui.Button("AddOrbit"))
+                        {
+                            var pannel = WarpOrderWindow.GetInstance(_selectedEntity, true);
+                            pannel.SetActive();
+                            _uiState.ActiveWindow = pannel;
+                        }
 
-                    ImGui.NextColumn();
-                    ImGui.Text(_systemEntities[i].GetFactionName());
-                    ImGui.NextColumn();
-                    ImGui.PopID();
+                    }
+                    */
+            
                 }
-
-                /*
-                if (_selectedEntity != null && _selectedEntity.Entity != null)
-                {
-                    Entity entity = _selectedEntity.Entity;
-                    var datablobs = entity.DataBlobs;
-                    ImGui.Text(_selectedEntity.Name);
-                    foreach (var datablob in datablobs)
-                    {
-                        ImGui.Text(datablob.GetType().Name);
-                    }
-                    if (ImGui.Button("AddOrbit"))
-                    {
-                        var pannel = WarpOrderWindow.GetInstance(_selectedEntity, true);
-                        pannel.SetActive();
-                        _uiState.ActiveWindow = pannel;
-                    }
-
-                }
-                */
             }
-            Window.End();
 
             if (_entityInspectorWindow && SelectedEntity != null)
             {

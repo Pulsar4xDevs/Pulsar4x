@@ -80,44 +80,48 @@ namespace Pulsar4X.Client
 
             ImGui.SetNextWindowSize(new Vector2(1200, 780), ImGuiCond.FirstUseEver);
 
-            if(Window.Begin("Component Designer", ref IsActive, _flags))
+            using (var w = Window.Scope("Component Designer", ref IsActive, _flags))
             {
-                var snapshot = _uiState.GameClient?.Galaxy?.ComponentDesigns;
-                if (snapshot != null && !ReferenceEquals(snapshot, designs))
-                    RefreshDerivedData(snapshot);
+                if (w.Visible)
+                {
+                    var snapshot = _uiState.GameClient?.Galaxy?.ComponentDesigns;
+                    if (snapshot != null && !ReferenceEquals(snapshot, designs))
+                        RefreshDerivedData(snapshot);
 
-                Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                var firstChildSize = new Vector2(windowContentSize.X * 0.15f, windowContentSize.Y);
-                var secondChildSize = new Vector2(windowContentSize.X * 0.15f, windowContentSize.Y);
-                var thirdChildSize = new Vector2(windowContentSize.X * 0.7f - (windowContentSize.X * 0.01f), windowContentSize.Y);
+                    Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                    var firstChildSize = new Vector2(windowContentSize.X * 0.15f, windowContentSize.Y);
+                    var secondChildSize = new Vector2(windowContentSize.X * 0.15f, windowContentSize.Y);
+                    var thirdChildSize = new Vector2(windowContentSize.X * 0.7f - (windowContentSize.X * 0.01f), windowContentSize.Y);
 
-                if(ImGui.BeginChild("ComponentDesignSelection", firstChildSize, ImGuiChildFlags.Borders))
-                {
-                    DisplayTemplateSelection();
-                }
-                ImGui.EndChild();
-                ImGui.SameLine();
-                if (ImGui.BeginChild("ComponentSelection", secondChildSize, ImGuiChildFlags.Borders))
-                {
-                    DisplayComponentList();
-                }
-                ImGui.EndChild();
-                ImGui.SameLine();
-                if (ImGui.BeginChild("ComponentDesign", thirdChildSize, ImGuiChildFlags.None))
-                {
-                    if(selectedTemplate != null)
+                    if(ImGui.BeginChild("ComponentDesignSelection", firstChildSize, ImGuiChildFlags.Borders))
                     {
-                        ComponentDesignDisplay.GetInstance().Display(_uiState);
+                        DisplayTemplateSelection();
                     }
+                    ImGui.EndChild();
+                    ImGui.SameLine();
+                    if (ImGui.BeginChild("ComponentSelection", secondChildSize, ImGuiChildFlags.Borders))
+                    {
+                        DisplayComponentList();
+                    }
+                    ImGui.EndChild();
+                    ImGui.SameLine();
+                    if (ImGui.BeginChild("ComponentDesign", thirdChildSize, ImGuiChildFlags.None))
+                    {
+                        if(selectedTemplate != null)
+                        {
+                            ComponentDesignDisplay.GetInstance().Display(_uiState);
+                        }
+                    }
+                    ImGui.EndChild();
+
+
+                    ImGui.SameLine();
+                    //ImGui.SetCursorPosY(27f); // FIXME: this should somehow be calculated
+
+
+
+            
                 }
-                ImGui.EndChild();
-
-
-                ImGui.SameLine();
-                //ImGui.SetCursorPosY(27f); // FIXME: this should somehow be calculated
-
-
-                Window.End();
             }
         }
 
