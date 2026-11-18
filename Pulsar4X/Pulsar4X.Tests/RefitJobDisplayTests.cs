@@ -84,17 +84,31 @@ public class RefitJobDisplayTests
         var empty = Info();
         Assert.That(RefitJobDisplay.PartsText(empty), Is.EqualTo("Removing: none\nMounting: none"));
 
-        // Mounting already includes awaited names; Waiting for is a separate line, not appended to Mounting.
-        var waiting = Info(
+        // Mounting already includes awaited names; do not append WaitingFor to Mounting.
+        // When WaitReason already names those parts, drop the separate Waiting for line.
+        var namedInReason = Info(
             removing: new[] { "Old Radio" },
             mounting: new[] { "Warehouse Radio", "Passenger Quarters" },
             waitingFor: new[] { "Passenger Quarters" },
             wait: "Waiting for Passenger Quarters");
-        string text = RefitJobDisplay.PartsText(waiting);
-        Assert.That(text, Is.EqualTo(
+        string named = RefitJobDisplay.PartsText(namedInReason);
+        Assert.That(named, Is.EqualTo(
+            "Removing: Old Radio\nMounting: Warehouse Radio, Passenger Quarters"));
+        Assert.That(named, Does.Not.Contain("Waiting for:"));
+        Assert.That(Occurrences(named, "Passenger Quarters"), Is.EqualTo(1),
+            "The awaited name appears in Mounting once, not again on a Waiting for line.");
+
+        // When WaitReason is empty, WaitingFor still has its own line.
+        var noReason = Info(
+            removing: new[] { "Old Radio" },
+            mounting: new[] { "Warehouse Radio", "Passenger Quarters" },
+            waitingFor: new[] { "Passenger Quarters" },
+            wait: "");
+        string listed = RefitJobDisplay.PartsText(noReason);
+        Assert.That(listed, Is.EqualTo(
             "Removing: Old Radio\nMounting: Warehouse Radio, Passenger Quarters\nWaiting for: Passenger Quarters"));
-        Assert.That(text.Split("Passenger Quarters").Length - 1, Is.EqualTo(2),
-            "The awaited name appears in Mounting once and in Waiting for once, not twice in Mounting.");
+        Assert.That(Occurrences(listed, "Passenger Quarters"), Is.EqualTo(2),
+            "With no WaitReason, the part is in Mounting once and in Waiting for once.");
     }
 
     [Test]
@@ -111,9 +125,42 @@ public class RefitJobDisplayTests
         Assert.That(tip, Does.StartWith("Waiting for Passenger Quarters"));
         Assert.That(tip, Does.Contain("Removing: Old Radio"));
         Assert.That(tip, Does.Contain("Mounting: Warehouse Radio, Passenger Quarters"));
-        Assert.That(tip, Does.Contain("Waiting for: Passenger Quarters"));
+        Assert.That(tip, Does.Not.Contain("Waiting for:"),
+            "WaitReason already names the awaited part, so PartsText must not list it again.");
+        Assert.That(Occurrences(tip, "Passenger Quarters"), Is.EqualTo(2),
+            "The waiting part appears once in WaitReason and once in Mounting, not a third time.");
         Assert.That(tip, Does.Contain("Industry points left: 40"));
         Assert.That(tip, Does.Contain("ETA About 2 days"));
+
+        // Occupied-hold and no-storage reasons stay intact; if they already name the part,
+        // there is still no separate Waiting for line.
+        var occupied = Job(pointsLeft: 0, status: "MissingResources", missing: true,
+            refit: Info(
+                removing: new[] { "Passenger Quarters" },
+                mounting: Array.Empty<string>(),
+                waitingFor: new[] { "Passenger Quarters" },
+                wait: "Waiting for passengers to disembark from Passenger Quarters; Waiting for cargo to be unloaded from Passenger Quarters",
+                perDay: 20));
+        string occupiedTip = RefitJobDisplay.Tooltip(occupied);
+        Assert.That(occupiedTip, Does.StartWith(
+            "Waiting for passengers to disembark from Passenger Quarters\n" +
+            "Waiting for cargo to be unloaded from Passenger Quarters"));
+        Assert.That(occupiedTip, Does.Contain("Mounting: none"));
+        Assert.That(occupiedTip, Does.Not.Contain("Waiting for:"));
+        Assert.That(occupiedTip, Does.Not.Contain("; "));
+
+        var noStorage = Job(pointsLeft: 0, status: "MissingResources", missing: true,
+            refit: Info(
+                removing: new[] { "Battery" },
+                mounting: Array.Empty<string>(),
+                waitingFor: new[] { "Battery" },
+                wait: "This yard has no storage for Battery.",
+                perDay: 20));
+        string storageTip = RefitJobDisplay.Tooltip(noStorage);
+        Assert.That(storageTip, Does.StartWith("This yard has no storage for Battery."));
+        Assert.That(storageTip, Does.Not.Contain("Waiting for:"));
+        Assert.That(Occurrences(storageTip, "Battery"), Is.EqualTo(2),
+            "The held part is named in WaitReason once and in Removing once, not again on a Waiting for line.");
     }
 
     [Test]
@@ -207,5 +254,17 @@ public class RefitJobDisplayTests
 
         var idle = new ProductionLineView("line", "Shipyard I", 0);
         Assert.That(RefitJobDisplay.ProgressPerDay(idle), Is.EqualTo(0));
+    }
+
+    static int Occurrences(string text, string part)
+    {
+        int count = 0;
+        int i = 0;
+        while ((i = text.IndexOf(part, i, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            i += part.Length;
+        }
+        return count;
     }
 }

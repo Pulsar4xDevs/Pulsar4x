@@ -39,6 +39,7 @@ namespace Pulsar4X.Client
             {
                 ("ProductionCompleted", "Production completed"),
                 ("ShipRefitCompleted", "Ship refit completed"),
+                ("ShipRefitUnloaded", "Refit unloaded cargo"),
                 ("FuelExhausted", "Fuel exhausted"),
                 ("PlantOutOfFuel", "Power plant out of fuel"),
                 ("PowerShortage", "Power shortage"),

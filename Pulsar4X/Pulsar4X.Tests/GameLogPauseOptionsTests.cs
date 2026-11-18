@@ -31,6 +31,13 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void ShipRefitUnloaded_IsAnEconomyPauseOption()
+        {
+            var options = GameLogWindow.PauseOptions().ToList();
+            Assert.That(options, Has.Some.EqualTo(("Economy", "ShipRefitUnloaded", "Refit unloaded cargo")));
+        }
+
+        [Test]
         public void EveryPauseOption_ParsesAsAnEngineEventType_LikeTheHaltCommand()
         {
             // SetEventHaltCommand is accepted only when its EventType string parses, case-sensitively, to a defined EventType.

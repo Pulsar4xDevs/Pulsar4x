@@ -102,10 +102,20 @@ public static class RefitJobDisplay
         lines.Add("Removing: " + JoinParts(info.Removing));
         // Mounting already includes awaited names from the engine; list it as-is and do not append WaitingFor again.
         lines.Add("Mounting: " + JoinParts(info.Mounting));
-        if (info.WaitingFor is { Count: > 0 } waiting && waiting.Any(p => !string.IsNullOrWhiteSpace(p)))
-            lines.Add("Waiting for: " + JoinParts(info.WaitingFor));
+        var waiting = (info.WaitingFor ?? Array.Empty<string>())
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .ToList();
+        // WaitReason already names those parts (e.g. "Waiting for Radio"); do not list them again.
+        // Still show WaitingFor when WaitReason is empty. Occupied-hold and no-storage
+        // reasons stay on the WaitReason lines in the tooltip.
+        if (waiting.Count > 0 && !WaitReasonNames(info.WaitReason, waiting))
+            lines.Add("Waiting for: " + JoinParts(waiting));
         return string.Join("\n", lines);
     }
+
+    static bool WaitReasonNames(string? waitReason, IReadOnlyList<string> parts)
+        => !string.IsNullOrWhiteSpace(waitReason)
+            && parts.All(part => waitReason.Contains(part, StringComparison.Ordinal));
 
     /// <summary>Status, wait reason, points left, ETA and the parts list, for a tooltip or detail view.</summary>
     public static string Tooltip(IndustryJobView job)
