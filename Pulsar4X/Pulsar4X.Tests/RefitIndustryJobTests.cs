@@ -203,27 +203,46 @@ public class RefitIndustryJobTests
         Assert.That(job.ProductionPointsLeft, Is.EqualTo(job.ProductionPointsCost), "nothing spent while it waits");
     }
 
-    [TestCase("passengers", "Waiting for passengers to disembark from ")]
-    [TestCase("cargo", "Waiting for cargo to be unloaded from ")]
-    public void RemovingAnOccupiedHold_AppliesTheRest_WaitsForThatHold_ThenCompletes(string what, string reasonStart)
+    sealed class HoldScene
+    {
+        public Game Game = null!;
+        public Entity Faction = null!, Yard = null!, Ship = null!;
+        public string LineId = "";
+        public IndustryAbilityDB.ProductionLine Line = null!;
+        public CargoStorageDB Colony = null!, Cargo = null!;
+        public FactionInfoDB Info = null!;
+        public ComponentInstance Hold = null!, Other = null!, Fresh = null!;
+        public string TypeId = "";
+        public ICargoable Load = null!;
+        public long Units;
+        public long OverflowUnits;
+        public double CapacityBefore;
+    }
+
+    /// <summary>A ship with an extra hold of <paramref name="what"/> filled to the brim, and a refit-ready swap of another part.</summary>
+    static HoldScene OccupiedHoldScene(string what)
     {
         var (game, faction) = Start(WarpTech);
         var (yard, lineId) = FindYard(game, faction);
         var info = faction.GetDataBlob<FactionInfoDB>();
         var line = yard.GetDataBlob<IndustryAbilityDB>().ProductionLines[lineId];
-        var storage = yard.GetDataBlob<CargoStorageDB>();
-        var holdDesign = what == "passengers"
-            ? PassengerQuarters(info)
-            : info.ComponentDesigns.Values.First(d => d.Name.StartsWith("Cargo Hold")
+        var colony = yard.GetDataBlob<CargoStorageDB>();
+        var holdDesign = what switch
+        {
+            "passengers" => PassengerQuarters(info),
+            "fuel" => info.ComponentDesigns.Values.First(d => d.TryGetAttribute<CargoStorageAtb>(out var atb)
+                && atb.StoreTypeID == "fuel-storage" && ShipRefitJob.IsShipPart(d)),
+            _ => info.ComponentDesigns.Values.First(d => d.Name.StartsWith("Cargo Hold")
                 && d.TryGetAttribute<CargoStorageAtb>(out var atb) && atb.StoreTypeID == "general-storage"
-                && ShipRefitJob.IsShipPart(d));
+                && ShipRefitJob.IsShipPart(d)),
+        };
         var ship = NewShip(yard, faction, info.ShipDesigns.Values.First(d => d.MassPerUnit <= line.MaxVolume));
         var hold = new ComponentInstance(holdDesign);
         ship.AddComponent(hold);
         var cargo = ship.GetDataBlob<CargoStorageDB>();
-        string typeId = holdDesign.GetAttribute<CargoStorageAtb>().StoreTypeID;
+        var atbData = holdDesign.GetAttribute<CargoStorageAtb>();
+        string typeId = atbData.StoreTypeID;
 
-        // Fill the ship's store of that type: the hold cannot come off while it holds this lot.
         ICargoable load;
         if (what == "passengers")
         {
@@ -232,45 +251,139 @@ public class RefitIndustryJobTests
         }
         else
             load = info.Data.CargoGoods.GetAll().Values.First(c => c.CargoTypeID == typeId && c.VolumePerUnit > 0);
-        double room = cargo.TypeStores[typeId].FreeVolume;
-        long units = (long)(room / load.VolumePerUnit);
+        long units = (long)(cargo.TypeStores[typeId].FreeVolume / load.VolumePerUnit);
         Assert.That(cargo.AddCargoByUnit(load, units), Is.GreaterThan(0), "the hold is loaded");
-        double capacityBefore = cargo.TypeStores[typeId].MaxVolume;
 
-        // The rest of the refit: swap another ordinary part for a fresh one from the warehouse.
         var other = ship.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.First(c =>
             c.ID != hold.ID && ShipRefitJob.IsShipPart(c.Design) && !c.Design.HasAttribute<CargoStorageAtb>()
             && !c.Design.HasAttribute<GameEngine.People.AdminSpaceAtb>());
         var fresh = new ComponentInstance(other.Design);
-        Assert.That(storage.AddCargoByUnit(fresh, 1), Is.EqualTo(1));
-        var queued = new CommandTranslator(game).Translate(faction, yard, new QueueShipRefitCommand(
-            yard.Id, lineId, ship.Id, new[] { hold.ID, other.ID }, new[] { fresh.ID }));
+        Assert.That(colony.AddCargoByUnit(fresh, 1), Is.EqualTo(1));
+        return new HoldScene
+        {
+            Game = game, Faction = faction, Yard = yard, Ship = ship, LineId = lineId, Line = line, Colony = colony,
+            Cargo = cargo, Info = info, Hold = hold, Other = other, Fresh = fresh, TypeId = typeId, Load = load,
+            Units = units, CapacityBefore = cargo.TypeStores[typeId].MaxVolume,
+            OverflowUnits = (long)Math.Ceiling(atbData.MaxVolume / load.VolumePerUnit),
+        };
+    }
+
+    /// <summary>Sets how many units of the load the yard colony can take: store room, or housing for people.</summary>
+    static void SetColonyRoom(HoldScene s, long units)
+    {
+        if (s.Load is SpeciesCargo people)
+        {
+            var colonyInfo = s.Yard.GetDataBlob<ColonyInfoDB>();
+            s.Game.Systems.First().TryGetGlobalEntityById(people.SpeciesId, out var species);
+            long capacity = Pulsar4X.Colonies.MigrationPlanner.Capacity(s.Yard, species);
+            Assert.That(capacity, Is.GreaterThan(units), "the colony can house this species");
+            colonyInfo.Population[people.SpeciesId] = capacity - units;
+            return;
+        }
+        var store = s.Colony.TypeStores[s.TypeId];
+        double volume = units * s.Load.VolumePerUnit;
+        if (store.MaxVolume < volume)
+            store.MaxVolume = volume;
+        store.FreeVolume = volume;
+    }
+
+    static long ColonyHolds(HoldScene s)
+        => s.Load is SpeciesCargo people
+            ? s.Yard.GetDataBlob<ColonyInfoDB>().Population.GetValueOrDefault(people.SpeciesId)
+            : s.Colony.GetUnitsStored(s.Load, false);
+
+    static void QueueSwap(HoldScene s)
+    {
+        var queued = new CommandTranslator(s.Game).Translate(s.Faction, s.Yard, new QueueShipRefitCommand(
+            s.Yard.Id, s.LineId, s.Ship.Id, new[] { s.Hold.ID, s.Other.ID }, new[] { s.Fresh.ID }));
         Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+    }
 
-        RunDays(yard, 60, () => ShipRefitJob.OnShip(ship, fresh.ID) == false);
+    [TestCase("passengers")]
+    [TestCase("cargo")]
+    [TestCase("fuel")]
+    public void RemovingAnOccupiedHold_UnloadsTheOverflowToTheColony_AndCompletes(string what)
+    {
+        var s = OccupiedHoldScene(what);
+        SetColonyRoom(s, s.OverflowUnits * 2);
+        long colonyBefore = ColonyHolds(s);
+        QueueSwap(s);
 
-        Assert.That(ShipRefitJob.OnShip(ship, fresh.ID), Is.True, "the mount was applied");
-        Assert.That(ShipRefitJob.OnShip(ship, other.ID), Is.False, "the other removal was applied");
-        Assert.That(ShipRefitJob.OnShip(ship, hold.ID), Is.True, "the occupied hold stays on");
-        var job = line.Jobs.Single();
-        Assert.That(job.WaitReason, Is.EqualTo(reasonStart + hold.Name));
+        RunDays(s.Yard, 60, () => ShipRefitJob.JobsOf(s.Yard).Any());
+
+        Assert.That(ShipRefitJob.JobsOf(s.Yard), Is.Empty, "the refit completed with no one emptying the hold");
+        Assert.That(ShipRefitJob.OnShip(s.Ship, s.Hold.ID), Is.False);
+        Assert.That(ShipRefitJob.OnShip(s.Ship, s.Fresh.ID), Is.True);
+        Assert.That(ShipRefitJob.OnShip(s.Ship, s.Other.ID), Is.False);
+        long moved = ColonyHolds(s) - colonyBefore;
+        Assert.That(moved, Is.GreaterThan(0), "the overflow went to the colony");
+        Assert.That(moved, Is.LessThanOrEqualTo(s.OverflowUnits + 1), "only the overflow moved");
+        Assert.That(s.Cargo.GetUnitsStored(s.Load, false), Is.EqualTo(s.Units - moved), "the rest stayed aboard");
+        Assert.That(s.Cargo.TypeStores[s.TypeId].MaxVolume, Is.LessThan(s.CapacityBefore));
+    }
+
+    [TestCase("passengers", "Waiting for passengers to disembark from ")]
+    [TestCase("cargo", "Waiting for cargo to be unloaded from ")]
+    [TestCase("fuel", "Waiting for fuel to be unloaded from ")]
+    public void RemovingAnOccupiedHold_ColonyFull_AppliesTheRest_WaitsForThatHold_ThenCompletes(string what, string reasonStart)
+    {
+        var s = OccupiedHoldScene(what);
+        SetColonyRoom(s, 0);
+        QueueSwap(s);
+
+        RunDays(s.Yard, 60, () => ShipRefitJob.OnShip(s.Ship, s.Fresh.ID) == false);
+
+        Assert.That(ShipRefitJob.OnShip(s.Ship, s.Fresh.ID), Is.True, "the mount was applied");
+        Assert.That(ShipRefitJob.OnShip(s.Ship, s.Other.ID), Is.False, "the other removal was applied");
+        Assert.That(ShipRefitJob.OnShip(s.Ship, s.Hold.ID), Is.True, "the occupied hold stays on");
+        var job = s.Line.Jobs.Single();
+        Assert.That(job.WaitReason, Is.EqualTo(reasonStart + s.Hold.Name));
         Assert.That(job.Status, Is.EqualTo(Pulsar4X.DataStructures.IndustryJobStatus.MissingResources));
-        Assert.That(job.Refit!.Remove.Select(p => p.ID), Is.EqualTo(new[] { hold.ID }));
+        Assert.That(job.Refit!.Remove.Select(p => p.ID), Is.EqualTo(new[] { s.Hold.ID }));
         Assert.That(job.Refit.Mount, Is.Empty);
-        RunDays(yard, 5, () => true);
-        Assert.That(ShipRefitJob.OnShip(ship, hold.ID), Is.True, "still waiting");
-        var view = new GameProjector(game).ProjectEntity(yard, faction.Id).GetView<IndustryView>()!
-            .ProductionLines.Single(l => l.Id == lineId).Jobs.Single();
-        Assert.That(view.Refit!.WaitReason, Is.EqualTo(reasonStart + hold.Name));
+        Assert.That(s.Cargo.GetUnitsStored(s.Load, false), Is.EqualTo(s.Units), "nothing fitted in the colony");
+        RunDays(s.Yard, 5, () => true);
+        Assert.That(ShipRefitJob.OnShip(s.Ship, s.Hold.ID), Is.True, "still waiting");
+        var view = new GameProjector(s.Game).ProjectEntity(s.Yard, s.Faction.Id).GetView<IndustryView>()!
+            .ProductionLines.Single(l => l.Id == s.LineId).Jobs.Single();
+        Assert.That(view.Refit!.WaitReason, Is.EqualTo(reasonStart + s.Hold.Name));
 
-        // Empty the hold: the job takes it off and completes.
-        cargo.RemoveCargoByUnit(load, units);
-        RunDays(yard, 5, () => ShipRefitJob.JobsOf(yard).Any());
+        // Empty the hold by hand: the job takes it off and completes.
+        s.Cargo.RemoveCargoByUnit(s.Load, s.Units);
+        RunDays(s.Yard, 5, () => ShipRefitJob.JobsOf(s.Yard).Any());
 
-        Assert.That(ShipRefitJob.JobsOf(yard), Is.Empty, "the job completed once the hold was empty");
-        Assert.That(ShipRefitJob.OnShip(ship, hold.ID), Is.False);
-        Assert.That(cargo.TypeStores[typeId].MaxVolume, Is.LessThan(capacityBefore), "the hold took its volume with it");
-        Assert.That(storage.GetUnitsStored(hold, false), Is.EqualTo(1), "the hold is in the warehouse");
+        Assert.That(ShipRefitJob.JobsOf(s.Yard), Is.Empty, "the job completed once the hold was empty");
+        Assert.That(ShipRefitJob.OnShip(s.Ship, s.Hold.ID), Is.False);
+        Assert.That(s.Cargo.TypeStores[s.TypeId].MaxVolume, Is.LessThan(s.CapacityBefore), "the hold took its volume with it");
+        Assert.That(s.Colony.GetUnitsStored(s.Hold, false), Is.EqualTo(1), "the hold is in the warehouse");
+    }
+
+    [TestCase("passengers")]
+    [TestCase("cargo")]
+    [TestCase("fuel")]
+    public void RemovingAnOccupiedHold_PartialRoom_UnloadsWhatFits_AndWaitsForTheRest(string what)
+    {
+        var s = OccupiedHoldScene(what);
+        long fits = s.OverflowUnits / 2;
+        Assert.That(fits, Is.GreaterThan(0));
+        SetColonyRoom(s, fits);
+        long colonyBefore = ColonyHolds(s);
+        QueueSwap(s);
+
+        RunDays(s.Yard, 60, () => ShipRefitJob.OnShip(s.Ship, s.Fresh.ID) == false);
+
+        Assert.That(ShipRefitJob.OnShip(s.Ship, s.Hold.ID), Is.True, "the rest does not fit, so the hold waits");
+        Assert.That(ColonyHolds(s) - colonyBefore, Is.EqualTo(fits), "the colony took what it had room for");
+        Assert.That(s.Cargo.GetUnitsStored(s.Load, false), Is.EqualTo(s.Units - fits));
+        var job = s.Line.Jobs.Single();
+        Assert.That(job.WaitReason, Does.StartWith("Waiting for "));
+        Assert.That(job.Refit!.Remove.Select(p => p.ID), Is.EqualTo(new[] { s.Hold.ID }));
+
+        // The colony makes room: the next pass unloads the rest and finishes.
+        SetColonyRoom(s, s.OverflowUnits * 2);
+        RunDays(s.Yard, 5, () => ShipRefitJob.JobsOf(s.Yard).Any());
+        Assert.That(ShipRefitJob.JobsOf(s.Yard), Is.Empty);
+        Assert.That(ShipRefitJob.OnShip(s.Ship, s.Hold.ID), Is.False);
     }
 
     [Test]

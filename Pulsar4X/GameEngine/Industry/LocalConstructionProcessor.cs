@@ -186,7 +186,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
         if (!yard.Manager!.TryGetEntityById(job.ShipEntityId, out var ship))
             return false;
 
-        var held = HeldRemovals(ship, job.Remove, out var heldReasons);
+        var held = HeldRemovals(yard, storage, ship, job.Remove, out var heldReasons);
         var removable = job.Remove.Where(part => !held.Contains(part)).ToList();
         if (removable.Count == 0 && job.Mount.Count == 0)
         {
@@ -251,9 +251,12 @@ public class LocalConstructionProcessor : IHotloopProcessor
 
     /// <summary>
     /// The parts to take off whose hold still has more aboard than the ship's remaining holds of that type
-    /// could carry once the part is gone (passengers, cargo, fuel). Each comes with why it waits.
+    /// could carry once the part is gone (passengers, cargo, fuel, ordnance, minerals, anything). The overflow
+    /// is first unloaded to the yard colony as far as it has room (<see cref="UnloadOverflow"/>); a part is
+    /// held only for what fits nowhere. Each held part comes with why it waits.
     /// </summary>
-    static HashSet<ComponentInstance> HeldRemovals(Entity ship, IEnumerable<ComponentInstance> remove, out List<string> reasons)
+    static HashSet<ComponentInstance> HeldRemovals(
+        Entity yard, CargoStorageDB colonyStore, Entity ship, IEnumerable<ComponentInstance> remove, out List<string> reasons)
     {
         var held = new HashSet<ComponentInstance>();
         reasons = new List<string>();
@@ -266,9 +269,14 @@ public class LocalConstructionProcessor : IHotloopProcessor
                 || !cargo.TypeStores.TryGetValue(hold.StoreTypeID, out var store))
                 continue;
             leaving.TryGetValue(hold.StoreTypeID, out var already);
-            double used = store.MaxVolume - store.FreeVolume;
             double capacityAfter = store.MaxVolume - already - hold.MaxVolume;
-            if (used > capacityAfter + 1e-6)
+            double overflow = store.MaxVolume - store.FreeVolume - capacityAfter;
+            if (overflow > 1e-6)
+            {
+                UnloadOverflow(yard, colonyStore, ship, hold.StoreTypeID, overflow);
+                overflow = store.MaxVolume - store.FreeVolume - capacityAfter;
+            }
+            if (overflow > 1e-6)
             {
                 held.Add(part);
                 reasons.Add(ShipRefitJob.EmptyHoldReason(hold.StoreTypeID, part.Name));
@@ -277,6 +285,54 @@ public class LocalConstructionProcessor : IHotloopProcessor
                 leaving[hold.StoreTypeID] = already + hold.MaxVolume;
         }
         return held;
+    }
+
+    /// <summary>
+    /// Moves up to <paramref name="volume"/> m3 of a ship's store of one type to the yard colony: cargo, fuel,
+    /// ordnance, minerals and the rest into the colony's store of the same type as far as it has room; people
+    /// into the colony's housing the way landing does (<see cref="PassengerAdapter.Land"/>). Partial moves are
+    /// fine: what does not fit stays aboard. Logs one entry per item moved.
+    /// </summary>
+    static void UnloadOverflow(Entity yard, CargoStorageDB colonyStore, Entity ship, string storeType, double volume)
+    {
+        if (!ship.TryGetDataBlob<CargoStorageDB>(out var cargo)
+            || !cargo.TypeStores.TryGetValue(storeType, out var store))
+            return;
+        foreach (var (id, item) in store.Cargoables.ToList())
+        {
+            if (volume <= 1e-6)
+                return;
+            if (!store.CurrentStoreInUnits.TryGetValue(id, out var aboard) || aboard <= 0 || item.VolumePerUnit <= 0)
+                continue;
+            long want = Math.Min(aboard, (long)Math.Ceiling(volume / item.VolumePerUnit - 1e-9));
+            long moved;
+            if (item is SpeciesCargo people)
+                moved = PassengerAdapter.Land(yard, ship, people, want);
+            else
+            {
+                moved = colonyStore.AddCargoByUnit(item, want);
+                if (moved > 0)
+                    cargo.RemoveCargoByUnit(item, moved);
+            }
+            if (moved <= 0)
+                continue;
+            volume -= moved * item.VolumePerUnit;
+            PublishUnloaded(yard, ship, item, moved);
+        }
+    }
+
+    static void PublishUnloaded(Entity yard, Entity ship, ICargoable item, long units)
+    {
+        string where = yard.GetName(yard.FactionOwnerID);
+        string shipName = ship.GetName(yard.FactionOwnerID);
+        EventManager.Instance.Publish(
+            Event.Create(
+                EventType.ShipRefitUnloaded,
+                yard.StarSysDateTime,
+                $"Refit of {shipName}: unloaded {units} {item.Name} to {where}",
+                yard.FactionOwnerID,
+                yard.Manager.ManagerID,
+                ship.Id));
     }
 
     /// <summary>A hold taken off a ship takes its volume with it (the hold was emptied first).</summary>

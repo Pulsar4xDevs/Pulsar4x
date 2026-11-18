@@ -114,5 +114,10 @@ namespace Pulsar4X.Events
         /// <summary>A runtime NPC company folded back into its sponsor (multi-faction phase 9).</summary>
         NpcCompanyFolded,
         #endregion
+
+        #region Refit (appended so saved ordinals stay put)
+        /// <summary>A refit unloaded the overflow of a hold it is removing to the yard colony.</summary>
+        ShipRefitUnloaded,
+        #endregion
     }
 }
