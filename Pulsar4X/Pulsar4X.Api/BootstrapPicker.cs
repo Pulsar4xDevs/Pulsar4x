@@ -16,6 +16,8 @@ public static class BootstrapPicker
     /// <summary>Whether the ship can take this order at all. Null when it can.</summary>
     public static string? CheckShip(ShipSnapshot ship)
     {
+        if (ship.Automated)
+            return CrewText.AutomatedNoOrders; // no bridge: never "no captain"
         if (ship.CommanderId == null)
             return NoCaptain;
         if (!ship.HasConstructionBay)

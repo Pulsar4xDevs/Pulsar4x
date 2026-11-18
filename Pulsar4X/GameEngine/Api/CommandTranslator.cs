@@ -1332,7 +1332,7 @@ namespace Pulsar4X.Engine.Api
         }
 
         /// <summary>Reason an automated ship (no bridge) takes no order of its own; it may ride in a fleet and follow the flagship.</summary>
-        public const string AutomatedShipNoOrders = "This ship has no bridge: it is automated and takes no orders of its own. Put it in a fleet to have it follow the flagship.";
+        public const string AutomatedShipNoOrders = CrewText.AutomatedNoOrders;
 
         private static CommandResult? RejectAutomated(Entity commanded)
             => ShipCrew.Automated(commanded) ? CommandResult.Reject(AutomatedShipNoOrders) : null;

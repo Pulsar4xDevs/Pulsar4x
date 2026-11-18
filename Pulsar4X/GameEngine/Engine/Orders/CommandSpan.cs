@@ -159,6 +159,9 @@ public static class CommandSpan
     /// </summary>
     public static string Describe(Entity unit)
     {
+        // No bridge: nothing to describe (no bridge, chair or captain reach); it follows its fleet.
+        if (ShipCrew.Automated(unit))
+            return Pulsar4X.Api.CrewText.AutomatedSpan;
         var hardware = unit == null ? CommandSpanKind.Body : Of(unit);
         var effective = unit == null ? CommandSpanKind.Body : Effective(unit);
         string line = Word(effective) + ". " + BridgeClause(hardware) + " " + OfficerClause(unit, effective);
@@ -205,6 +208,8 @@ public static class CommandSpan
             return SpanLimiter.None;
         if (!unit.HasDataBlob<ShipInfoDB>() && !unit.HasDataBlob<FleetDB>())
             return SpanLimiter.None;
+        if (ShipCrew.Automated(unit))
+            return SpanLimiter.None; // no bridge or chair to blame
         if (Order(ParentCeiling(unit)) < Order(OwnEffective(unit)))
             return SpanLimiter.Parent;
         bool seated = CommanderSkills.TryGetCommander(unit, out _, out var commander);
@@ -265,6 +270,9 @@ public static class CommandSpan
     {
         if (unit == null)
             return null;
+        // An automated ship has no bridge to fit or chair to seat: say what it is, once, for any wider reach.
+        if (ShipCrew.Automated(unit))
+            return Order(wanted) > 0 ? Pulsar4X.Api.CrewText.AutomatedSpan : null;
         bool seated = CommanderSkills.TryGetCommander(unit, out _, out var commander);
         var fix = Fix(Of(unit), seated, seated ? commander.Rank : 0, wanted, rank => TitleFor(unit, rank));
         if (fix == null && Order(ParentCeiling(unit)) < Order(wanted))

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Api;
 using Pulsar4X.Client;
 using Pulsar4X.Client.Host;
@@ -311,5 +312,38 @@ public class CrewRulesPhase1Tests
         Assert.That(ShipCrew.BoardAtLaunch(sat, _earth, _earth.StarSysDateTime), Is.Zero);
         Assert.That(ShipCrew.Aboard(sat), Is.Zero);
         Assert.That(Pool.Total, Is.EqualTo(pool));
+    }
+
+    // ---- span and reach text for automated ships ----
+
+    [Test]
+    public void AutomatedShip_SpanText_SaysAutomated_NotBridgeChairOrCaptain()
+    {
+        // The scenario's own Sensor Sat, so it shows in the player's fleet hierarchy.
+        var sat = _game.Systems.SelectMany(x => x.GetAllEntitiesWithDataBlob<ShipInfoDB>())
+            .First(x => x.FactionOwnerID == _player.Id && x.GetDataBlob<ShipInfoDB>().Design.Name == "Sensor Sat");
+        Assert.That(CommandSpan.Describe(sat), Is.EqualTo(CrewText.AutomatedSpan));
+        Assert.That(CommandSpan.LimiterOf(sat), Is.EqualTo(CommandSpan.SpanLimiter.None));
+        Assert.That(CommandSpan.Fix(sat, CommandSpanKind.Well), Is.EqualTo(CrewText.AutomatedSpan));
+        Assert.That(CommandSpan.Fix(sat, CommandSpanKind.System), Is.EqualTo(CrewText.AutomatedSpan));
+        Assert.That(CommandSpan.Fix(sat, CommandSpanKind.Body), Is.Null, "nothing wider is wanted");
+        Assert.That(CrewText.AutomatedSpan, Does.Contain("Automated").And.Contain("no bridge").And.Contain("follows its fleet"));
+
+        // The projected ship carries the same lines; none mention a bridge to fit, a chair or a captain.
+        var projector = new GameProjector(_game);
+        var (fleets, loose) = projector.ProjectFleetHierarchy(_player.Id);
+        var snap = loose.Concat(fleets.SelectMany(f => f.Ships)).Single(x => x.Id == sat.Id);
+        Assert.That(snap.Automated, Is.True);
+        foreach (var line in new[] { snap.SpanLine, snap.ReachFixWell, snap.ReachFixSystem })
+        {
+            Assert.That(line, Is.EqualTo(CrewText.AutomatedSpan));
+            Assert.That(line, Does.Not.Contain("chair").And.Not.Contain("Fit a").And.Not.Contain("captain").And.Not.Contain("officer"));
+        }
+        Assert.That(BootstrapPicker.CheckShip(snap), Is.EqualTo(CrewText.AutomatedNoOrders), "never 'no captain'");
+
+        // A bridged ship keeps the bridge / chair wording.
+        var starship = Spawn("default-ship-design-starship", "Rules Span Starship");
+        Assert.That(CommandSpan.Describe(starship), Does.Contain("bridge").And.Not.Contain("Automated"));
+        Assert.That(CommandSpan.Fix(starship, CommandSpanKind.System), Does.Not.Contain("Automated"));
     }
 }
