@@ -4,8 +4,7 @@ using Pulsar4X.Datablobs;
 namespace Pulsar4X.Ships
 {
     /// <summary>
-    /// People aboard a ship (crew plan phase 3). Never more than min(required, berths) of the parts
-    /// mounted. Crew aboard is one number: it is not tracked by species yet
+    /// People aboard a ship (crew plan phase 3). Never more than the part crew the berths can house, plus the captain who may put the ship one over its berths. Crew aboard is one number: it is not tracked by species yet
     /// (TODO(crew): per-species crew aboard, so scrapping returns the same species).
     /// </summary>
     public class ShipCrewDB : BaseDataBlob

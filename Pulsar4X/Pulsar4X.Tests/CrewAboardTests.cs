@@ -14,6 +14,8 @@ using Pulsar4X.Events;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
+using Pulsar4X.GeoSurveys;
+using Pulsar4X.Sensors;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.People;
@@ -404,6 +406,62 @@ public class CrewAboardTests
         Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(split.Capacity));
         Assert.That(Pool.Total, Is.EqualTo(100 + excess));
         Assert.That(ShipCrew.AfterRefit(ship, _earth), Is.EqualTo(0));
+    }
+
+    [Test]
+    public void Refit_ToADesignWhoseBerthsCoverItsCrew_IsNotUnderCrewed()
+    {
+        // Jon's playtest: Starship GeoS has 8 part crew and 8 berths (quarters 6 + bridge 2) plus a captain.
+        // Capacity must let the captain board over the berths so aboard can reach needed and the ship is not flagged.
+        var starship = Design("default-ship-design-starship");
+        var ship = Spawn(starship, "Refit Geo Crew");
+        ship.GetDataBlob<ShipInfoDB>().CommanderID = 4242;
+        ShipCrew.SyncCaptain(ship);
+        Assert.That(ShipCrew.HasCaptain(ship), Is.True);
+
+        var geo = Info.InternalComponentDesigns.Values.First(d => d.HasAttribute<GeoSurveyAtb>() && d.CrewReq > 0);
+        var quarters6 = Info.ComponentDesigns.Values.FirstOrDefault(d => ShipCrew.BerthsPer(d) == 6 && d.CrewReq == 0);
+        var bunk = Info.ComponentDesigns["default-design-crew-quarters-1"];
+        // Drop the original bunks and other crewed work/cargo so the new layout's berths equal its part crew, like GeoS.
+        var instances = ship.GetDataBlob<ComponentInstancesDB>();
+        foreach (var inst in instances.AllComponents.Values.Where(i => ShipCrew.BerthsPer(i.Design) > 0 && !ShipCrew.IsBridge(i.Design)).ToList())
+            ship.RemoveComponent(inst);
+        // Cargo holds and similar work/cargo crew: drop them so the added surveyor plus the kept sensor and bridge set the need.
+        foreach (var inst in instances.AllComponents.Values
+            .Where(i => i.Design.CrewReq > 0 && !ShipCrew.IsBridge(i.Design) && !ShipCrew.IsEngine(i.Design) && !i.Design.HasAttribute<SensorReceiverAtb>())
+            .ToList())
+            ship.RemoveComponent(inst);
+        ship.AddComponent(new ComponentInstance(geo));
+        if (quarters6 != null)
+            ship.AddComponent(new ComponentInstance(quarters6));
+        else
+        {
+            int need = ShipCrew.Split(ShipCrew.Mounted(ship)).Required;
+            // Bridge already gives some berths; add 1-berth bunks until berths equal the part crew.
+            while (ShipCrew.Split(ShipCrew.Mounted(ship)).Berths < need)
+                ship.AddComponent(new ComponentInstance(bunk));
+        }
+
+        var parts = ShipCrew.Split(ShipCrew.Mounted(ship));
+        Assert.That(parts.Berths, Is.EqualTo(parts.Required), "berths cover the part crew");
+        Assert.That(parts.Required, Is.GreaterThan(0));
+
+        SetPool(50);
+        ShipCrew.AfterRefit(ship, _earth);
+        ShipCrew.TopUp(ship, _earth);
+
+        var split = ShipCrew.SplitOf(ship);
+        var view = new GameProjector(_game).ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
+        Assert.That(split.Captain, Is.EqualTo(1));
+        Assert.That(split.Required, Is.EqualTo(parts.Required + 1));
+        Assert.That(split.Berths, Is.EqualTo(parts.Berths));
+        Assert.That(split.Capacity, Is.EqualTo(split.Required), "captain boards even when berths equal the part crew");
+        Assert.That(view.CrewRequired, Is.EqualTo(split.Required));
+        Assert.That(view.CrewBerths, Is.EqualTo(split.Berths));
+        Assert.That(view.CrewAboard, Is.EqualTo(split.Required));
+        Assert.That(view.UnderCrewed, Is.False, "berths cover the part crew; the captain does not leave the ship short");
+        Assert.That(view.CrewByComponent.Sum(r => r.Crew), Is.EqualTo(view.CrewRequired));
+        Assert.That(view.BerthsByComponent.Sum(r => r.Berths), Is.EqualTo(view.CrewBerths));
     }
 
     [Test]
