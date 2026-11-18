@@ -66,5 +66,18 @@ namespace Pulsar4X.Tests
         {
             Assert.That(LedgerWindow.CategoryLabel("CrewTransfer"), Is.EqualTo("Crew transfer"));
         }
+
+        [Test]
+        public void FactionTip_OnlyWhenItDiffersFromTheSeller()
+        {
+            var same = new CrewOfferView(20, "Euro Consortium", 2, "Euro Consortium",
+                1, "Human", 150, DefaultFee, "");
+            Assert.That(ColonyCrewMarketDisplay.FactionTip(same), Is.Null);
+
+            var different = Offer();
+            Assert.That(different.SellerColonyName, Is.EqualTo("ECN Earth"));
+            Assert.That(ColonyCrewMarketDisplay.FactionTip(different),
+                Is.EqualTo("European Continental Network"));
+        }
     }
 }

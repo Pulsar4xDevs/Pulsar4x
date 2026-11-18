@@ -41,6 +41,15 @@ namespace Pulsar4X.Client
             => Credits(Math.Round(fee * share, 2));
 
         /// <summary>
+        /// Faction to show on the seller tooltip. Null when the faction name is the same as the seller
+        /// (typical for a bloc colony), so the Faction column can stay hidden.
+        /// </summary>
+        public static string? FactionTip(CrewOfferView offer)
+            => string.Equals(offer.SellerColonyName, offer.SellerFactionName, StringComparison.Ordinal)
+                ? null
+                : offer.SellerFactionName;
+
+        /// <summary>
         /// Why Buy is disabled: the offer's engine Reason, a bad count, or not enough funds.
         /// Null when the buy can be submitted.
         /// </summary>
@@ -66,12 +75,37 @@ namespace Pulsar4X.Client
                 _drafts[colonyId] = draft;
             }
 
-            ImGui.TextWrapped("The fee is 1.5× tuition (three months of crew wage), and no ask can go below it. The seller receives "
-                + ShareText(view.SellerShare) + ". Blocs list crew above a reserve of 50.");
+            var avail = ImGui.GetContentRegionAvail();
+            var windowBg = ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg];
+            windowBg.W = 1f;
+            var rowBg = windowBg;
+            var rowBgAlt = new System.Numerics.Vector4(
+                Math.Min(1f, windowBg.X + 0.05f),
+                Math.Min(1f, windowBg.Y + 0.05f),
+                Math.Min(1f, windowBg.Z + 0.06f),
+                1f);
+            var headerBg = ImGui.GetStyle().Colors[(int)ImGuiCol.TableHeaderBg];
+            headerBg.W = 1f;
 
-            DrawListing(view, draft, colonyId, uiState);
-            ImGui.Spacing();
-            DrawOffers(view, draft, colonyId, uiState);
+            ImGui.PushStyleColor(ImGuiCol.ChildBg, windowBg);
+            ImGui.PushStyleColor(ImGuiCol.TableRowBg, rowBg);
+            ImGui.PushStyleColor(ImGuiCol.TableRowBgAlt, rowBgAlt);
+            ImGui.PushStyleColor(ImGuiCol.TableHeaderBg, headerBg);
+
+            // Clip to the content region and paint an opaque background so the system tree cannot show through.
+            if (ImGui.BeginChild("##crew-market-panel", new System.Numerics.Vector2(avail.X, avail.Y)))
+            {
+                ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + ImGui.GetContentRegionAvail().X);
+                ImGui.TextUnformatted("The fee is 1.5× tuition (three months of crew wage), and no ask can go below it. The seller receives "
+                    + ShareText(view.SellerShare) + ". Blocs list crew above a reserve of 50.");
+                ImGui.PopTextWrapPos();
+
+                DrawListing(view, draft, colonyId, uiState);
+                ImGui.Spacing();
+                DrawOffers(view, draft, colonyId, uiState);
+            }
+            ImGui.EndChild();
+            ImGui.PopStyleColor(4);
         }
 
         static void DrawListing(CrewMarketView view, Draft draft, int colonyId, GlobalUIState uiState)
@@ -163,35 +197,18 @@ namespace Pulsar4X.Client
                 funds = faction.Funds - faction.AccruedThisMonth;
 
             float tableHeight = Math.Max(90f, ImGui.GetContentRegionAvail().Y - (view.Offers.Count == 0 ? 24f : 0f));
-            if (ImGui.BeginTable("##crew-market-offers", 8, Styles.TableFlags | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.ScrollY,
-                    new System.Numerics.Vector2(0, tableHeight)))
+            float tableWidth = ImGui.GetContentRegionAvail().X;
+            if (ImGui.BeginTable("##crew-market-offers", 7,
+                    Styles.TableFlags | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Borders,
+                    new System.Numerics.Vector2(tableWidth, tableHeight)))
             {
-                float pad = ImGui.GetStyle().ItemSpacing.X;
-                float sellerW = ImGui.CalcTextSize("Seller").X;
-                float factionW = ImGui.CalcTextSize("Faction").X;
-                float speciesW = ImGui.CalcTextSize("Species").X;
-                foreach (var offer in view.Offers)
-                {
-                    sellerW = Math.Max(sellerW, ImGui.CalcTextSize(offer.SellerColonyName).X);
-                    factionW = Math.Max(factionW, ImGui.CalcTextSize(offer.SellerFactionName).X);
-                    speciesW = Math.Max(speciesW, ImGui.CalcTextSize(offer.SpeciesName).X);
-                }
-                float fixedW = 80 + 90 + 90 + 60;
-                float namesRoom = Math.Max(180f, ImGui.GetContentRegionAvail().X - fixedW - pad * 8);
-                float natural = sellerW + factionW + speciesW + 80f;
-                if (natural > namesRoom && natural > 0)
-                {
-                    float scale = namesRoom / natural;
-                    sellerW *= scale; factionW *= scale; speciesW *= scale;
-                }
-                ImGui.TableSetupColumn("Seller", ImGuiTableColumnFlags.WidthFixed, sellerW + pad);
-                ImGui.TableSetupColumn("Faction", ImGuiTableColumnFlags.WidthFixed, factionW + pad);
-                ImGui.TableSetupColumn("Species", ImGuiTableColumnFlags.WidthFixed, speciesW + pad);
+                ImGui.TableSetupColumn("Seller", ImGuiTableColumnFlags.WidthStretch, 1.6f);
+                ImGui.TableSetupColumn("Species", ImGuiTableColumnFlags.WidthStretch, 0.8f);
                 ImGui.TableSetupColumn("Available", ImGuiTableColumnFlags.WidthFixed, 80);
                 ImGui.TableSetupColumn("Fee", ImGuiTableColumnFlags.WidthFixed, 90);
                 ImGui.TableSetupColumn("Count", ImGuiTableColumnFlags.WidthFixed, 90);
                 ImGui.TableSetupColumn("Buy", ImGuiTableColumnFlags.WidthFixed, 60);
-                ImGui.TableSetupColumn("Reason", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn("Reason", ImGuiTableColumnFlags.WidthStretch, 1.2f);
                 ImGui.TableHeadersRow();
 
                 foreach (var offer in view.Offers)
@@ -204,9 +221,7 @@ namespace Pulsar4X.Client
 
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
-                    NameCell(offer.SellerColonyName);
-                    ImGui.TableNextColumn();
-                    NameCell(offer.SellerFactionName);
+                    SellerCell(offer);
                     ImGui.TableNextColumn();
                     NameCell(offer.SpeciesName);
                     ImGui.TableNextColumn();
@@ -286,11 +301,28 @@ namespace Pulsar4X.Client
             ImGui.EndTooltip();
         }
 
+        static void SellerCell(CrewOfferView offer)
+        {
+            string name = offer.SellerColonyName;
+            string shown = ResearchWindow.FitText(name, ImGui.GetContentRegionAvail().X, t => ImGui.CalcTextSize(t).X);
+            ImGui.TextUnformatted(shown);
+            string? faction = FactionTip(offer);
+            if (!ImGui.IsItemHovered())
+                return;
+            if (shown == name && faction == null)
+                return;
+            ImGui.BeginTooltip();
+            ImGui.TextUnformatted(name);
+            if (faction != null)
+                ImGui.TextUnformatted(faction);
+            ImGui.EndTooltip();
+        }
+
         static void NameCell(string name)
         {
             string shown = ResearchWindow.FitText(name, ImGui.GetContentRegionAvail().X, t => ImGui.CalcTextSize(t).X);
             ImGui.TextUnformatted(shown);
-            if (ImGui.IsItemHovered())
+            if (ImGui.IsItemHovered() && shown != name)
             {
                 ImGui.BeginTooltip();
                 ImGui.TextUnformatted(name);
