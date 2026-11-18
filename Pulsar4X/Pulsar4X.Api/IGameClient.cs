@@ -29,6 +29,9 @@ public interface IGameClient
 
     /// <summary>Plan a move for the clicked target. A null <paramref name="options"/> is today's defaults.</summary>
     TripPreview PreviewMove(int shipId, int bodyId, MoveOrderOptions? options = null);
+
+    /// <summary>Estimate what a good costs to make, from its recipe at current market prices on this colony's body.</summary>
+    GoodAppraisal AppraiseGood(int colonyId, string cargoId, long quantity = 1);
     Task SetTimeControlAsync(TimeControlRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>Tell the server which system the player is watching (engine processing priority).</summary>

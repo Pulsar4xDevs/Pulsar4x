@@ -86,6 +86,10 @@ namespace Pulsar4X.Engine
         [JsonProperty]
         public GameSettings Settings { get; internal set; }
 
+        /// <summary>Multi-faction phase 9: clocks, caps and live charters for runtime NPC companies.</summary>
+        [JsonProperty]
+        public NpcCompanyBook NpcCompanies { get; internal set; } = new();
+
         [JsonProperty]
         public ModDataStore StartingGameData { get; private set; }
 

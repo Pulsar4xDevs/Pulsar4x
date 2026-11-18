@@ -666,6 +666,12 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.BootstrapDefaults:
                     ApplyModGeneric<BootstrapDefaultsBlueprint>(baseData.BootstrapDefaults, mod, modNamespace);
                     break;
+                case ModInstruction.DataType.NpcCompanyKit:
+                    ApplyModGeneric<NpcCompanyKitBlueprint>(baseData.NpcCompanyKits, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.NpcCompanySettings:
+                    ApplyModGeneric<NpcCompanySettingsBlueprint>(baseData.NpcCompanySettings, mod, modNamespace);
+                    break;
             }
         }
 

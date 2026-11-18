@@ -126,6 +126,14 @@ namespace Pulsar4X.Factions
         [JsonProperty]
         public bool NpcEconomy { get; internal set; }
 
+        /// <summary>Multi-faction phase 9: the sponsor bloc of a runtime NPC company; 0 if this faction was not chartered at runtime.</summary>
+        [JsonProperty]
+        public int SponsorFactionId { get; internal set; }
+
+        /// <summary>Multi-faction phase 9: the good a runtime NPC company was chartered to supply.</summary>
+        [JsonProperty]
+        public string? SpawnedGood { get; internal set; }
+
         /// <summary>Multi-faction phase 6: staff wages owed for <see cref="AccrualMonth"/> (own staff and commuters), cr.</summary>
         [JsonProperty]
         public decimal AccruedStaffWages { get; internal set; }
@@ -222,6 +230,8 @@ namespace Pulsar4X.Factions
             AccruedResearch = factionDB.AccruedResearch;
             AccruedLabDays = factionDB.AccruedLabDays;
             NpcEconomy = factionDB.NpcEconomy;
+            SponsorFactionId = factionDB.SponsorFactionId;
+            SpawnedGood = factionDB.SpawnedGood;
             AccruedStaffWages = factionDB.AccruedStaffWages;
             AccruedStaffDays = factionDB.AccruedStaffDays;
             AccruedCommuterWages = new Dictionary<int, decimal>(factionDB.AccruedCommuterWages ?? new Dictionary<int, decimal>());

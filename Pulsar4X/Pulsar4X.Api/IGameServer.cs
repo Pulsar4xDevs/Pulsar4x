@@ -4,7 +4,7 @@ namespace Pulsar4X.Api;
 /// The server-authoritative surface the engine exposes, scoped to a <see cref="PlayerSession"/>
 /// (a faction). It is deliberately <b>push-only</b>: clients connect, subscribe, and issue writes —
 /// all state arrives through the event stream (initial snapshot on <see cref="Subscribe"/>, then
-/// self-contained deltas). <see cref="PreviewMove"/> is the one read: a move plan is too heavy
+/// self-contained deltas). <see cref="PreviewMove"/> and <see cref="AppraiseGood"/> are the reads: a move plan or a recipe cost is too heavy
 /// to put on every snapshot, and the window asks for the one target the player clicked.
 ///
 /// Implemented in the engine by <c>EngineGameServer</c>.
@@ -22,6 +22,10 @@ public interface IGameServer
     /// <summary>Plan a move from this ship to this body. Does not start anything.
     /// A null <paramref name="options"/> is today's defaults.</summary>
     TripPreview PreviewMove(PlayerSession session, int shipId, int bodyId, MoveOrderOptions? options = null);
+
+    /// <summary>Estimate what a good costs to make, from its recipe at current market prices on this colony's body.
+    /// Does not change any state. Quantity defaults to 1.</summary>
+    GoodAppraisal AppraiseGood(PlayerSession session, int colonyId, string cargoId, long quantity = 1);
 
     /// <summary>Tell the server which system this session is watching, so the engine can
     /// prioritise its processing (foreground-observer scheduling). Null clears the focus.</summary>

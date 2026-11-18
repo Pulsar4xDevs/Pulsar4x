@@ -34,6 +34,8 @@ namespace Pulsar4X.Modding
         public Dictionary<string, ComponentDesignBlueprint> ComponentDesigns { get; set; } = new ();
         public Dictionary<string, ShipDesignBlueprint> ShipDesigns { get; set; } = new ();
         public Dictionary<string, BootstrapDefaultsBlueprint> BootstrapDefaults { get; set; } = new ();
+        public Dictionary<string, NpcCompanyKitBlueprint> NpcCompanyKits { get; set; } = new ();
+        public Dictionary<string, NpcCompanySettingsBlueprint> NpcCompanySettings { get; set; } = new ();
 
         /// <summary>Namespace of the scenario applied on top of the mods, if any. Null on
         /// stores that loaded no scenario and on saves from before this field existed.</summary>

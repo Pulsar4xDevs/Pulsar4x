@@ -81,6 +81,13 @@ public sealed class InProcessAdapter : IGameClient
         return _server.PreviewMove(Session, shipId, bodyId, options);
     }
 
+    public GoodAppraisal AppraiseGood(int colonyId, string cargoId, long quantity = 1)
+    {
+        if (!IsConnected)
+            return GoodAppraisal.None(cargoId ?? "", cargoId ?? "", quantity, "not connected");
+        return _server.AppraiseGood(Session, colonyId, cargoId, quantity);
+    }
+
     public Task SetSystemFocusAsync(string? systemId, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

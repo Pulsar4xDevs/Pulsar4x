@@ -20,6 +20,8 @@ public enum TransactionCategory
     Tax,
     /// <summary>Multi-faction phase 8: the transfer fee for trained crew bought on (or sold on) a crew market.</summary>
     CrewTransfer,
+    /// <summary>Multi-faction phase 9: seed funds paid by a sponsor to charter a runtime NPC company, or returned on fold.</summary>
+    Charter,
 }
 
 public class Transaction
