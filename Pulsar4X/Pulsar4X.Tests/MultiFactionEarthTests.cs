@@ -93,7 +93,13 @@ public class MultiFactionEarthTests
 
             // StartingItems, not UnlockAll: whatever the company has not researched is locked for the bloc too.
             Assert.That(info.Data.LockedTechs.Keys, Is.Not.Empty, name);
-            Assert.That(info.Data.LockedTechs.Keys, Is.SupersetOf(playerInfo.Data.LockedTechs.Keys), name);
+            // A bloc may know techs the company lacks in its specialisation (AMC agriculture/raw, SPC manufacturing,
+            // ECN high tech), but nothing in the company's niche (warp, engines, jump points).
+            var extras = playerInfo.Data.LockedTechs.Keys.Except(info.Data.LockedTechs.Keys).ToList();
+            Assert.That(extras, Has.None.Contain("alcubierre"), name);
+            Assert.That(extras, Has.None.Contain("engine"), name);
+            Assert.That(extras, Has.None.Contain("jumpoint"), name);
+            Assert.That(info.Data.LockedTechs.Keys, Is.SupersetOf(playerInfo.Data.LockedTechs.Keys.Except(extras)), name);
         }
         if (scenario == EarlyTech)
             Assert.That(Colonies(game), Has.Count.EqualTo(4), "no modern blocs or outposts left in Early Tech");

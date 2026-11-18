@@ -60,6 +60,9 @@ public class ColonyBlueprint : Blueprint
         public double UsePerDayPerMillion { get; set; }
         /// <summary>Phase 7a: an absolute daily gap (kg/day) held for HoldDays on top of the per-million use; not consumed by the bloc sink.</summary>
         public double GapPerDay { get; set; }
+        /// <summary>Phase 8: what the bloc's abstract industry adds to stock per day per million people (a Sell row);
+        /// keeps a manufacturing bloc supplying the others. Held at Max (or 90 days of output).</summary>
+        public double OutputPerDayPerMillion { get; set; }
         /// <summary>Phase 7a: the stock farms grow food up to (food rows); 0 = the default cap.</summary>
         public long Max { get; set; }
     }
