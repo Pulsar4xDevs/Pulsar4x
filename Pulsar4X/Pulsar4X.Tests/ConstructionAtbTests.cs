@@ -132,7 +132,7 @@ public class ConstructionAtbTests
         Assert.That(refit.ConstructionPoints.Keys, Is.EquivalentTo(new[] { "ship-refit" }));
         Assert.That(refit.ConstructionPoints["ship-refit"], Is.EqualTo(10));
         var industry = yard.GetAttribute<IndustryAtb>();
-        Assert.That(industry.IndustryPoints.Keys, Is.EquivalentTo(new[] { "component-construction", "ship-assembly" }));
+        Assert.That(industry.IndustryPoints.Keys, Is.EquivalentTo(new[] { "ship-assembly" }));
 
         var colonyShip = info.ShipDesigns["default-ship-design-colony-ship"];
         Assert.That(colonyShip.Components.Select(part => part.design.UniqueID), Does.Contain("default-design-ship-construction"));
