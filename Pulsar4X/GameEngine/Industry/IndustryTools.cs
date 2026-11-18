@@ -317,9 +317,9 @@ namespace Pulsar4X.Industry
             if (job.ProductionPointsLeft > 0)
                 return;
 
-            if (!LocalConstructionProcessor.TryApplyRefit(yard, storage, refit))
+            if (!LocalConstructionProcessor.TryApplyRefit(yard, storage, refit, out var heldReason))
             {
-                job.WaitReason = ShipRefitJob.WaitingFor + "parts";
+                job.WaitReason = heldReason ?? ShipRefitJob.WaitingFor + "parts";
                 job.Status = IndustryJobStatus.MissingResources;
                 return;
             }

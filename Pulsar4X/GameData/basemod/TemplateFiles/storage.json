@@ -256,7 +256,7 @@
       },
       "ComponentType":"Cargo Hold",
       "MountType": "ShipComponent, ShipCargo",
-      "CargoTypeID": "passenger-storage",
+      "CargoTypeID": "general-storage",
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {

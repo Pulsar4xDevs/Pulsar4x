@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pulsar4X.Colonies;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
@@ -82,7 +83,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
 
     /// <summary>
     /// Null when a refit can run: the ship is in range, its parts to remove are aboard and every part to
-    /// mount is in the warehouse. Otherwise why not. Storage type and room never block a refit. A part that is
+    /// mount is in the warehouse. Otherwise why not. Room never blocks a refit (a part coming off is kept over capacity); a yard with no store of a part's type waits with a reason. A part that is
     /// not in storage yet is "Waiting for X": the job claims a stored part of that design as soon as one
     /// appears (a factory job finished, a crate delivered) and then runs. Claiming is done here.
     /// </summary>
@@ -97,6 +98,10 @@ public class LocalConstructionProcessor : IHotloopProcessor
         {
             if (!ShipRefitJob.OnShip(ship, part.ID))
                 return ShipRefitJob.NotOnShip;
+            // Room never blocks (the part is kept even over capacity), but a yard with no store of the
+            // part's cargo type at all has nowhere to put it: say so, and wait.
+            if (!storage.TypeStores.ContainsKey(part.CargoTypeID))
+                return ShipRefitJob.NoStorageFor + part.Name + ".";
         }
 
         ClaimStoredParts(yard, storage, job);
@@ -169,10 +174,25 @@ public class LocalConstructionProcessor : IHotloopProcessor
         return fresh;
     }
 
-    internal static bool TryApplyRefit(Entity yard, CargoStorageDB storage, ShipRefitJob job)
+    /// <summary>
+    /// Applies the refit: mounts the claimed parts and takes the removals off. A hold that still has
+    /// passengers or cargo in it is not taken off yet: the rest of the refit is applied, the job keeps just
+    /// that removal (and says <paramref name="waitReason"/>), and it completes on a later pass once the hold
+    /// is empty. Returns true when the job is finished. False with no waitReason means nothing could be done.
+    /// </summary>
+    internal static bool TryApplyRefit(Entity yard, CargoStorageDB storage, ShipRefitJob job, out string? waitReason)
     {
+        waitReason = null;
         if (!yard.Manager!.TryGetEntityById(job.ShipEntityId, out var ship))
             return false;
+
+        var held = HeldRemovals(ship, job.Remove, out var heldReasons);
+        var removable = job.Remove.Where(part => !held.Contains(part)).ToList();
+        if (removable.Count == 0 && job.Mount.Count == 0)
+        {
+            waitReason = string.Join("; ", heldReasons);
+            return false;
+        }
 
         var taken = new List<ComponentInstance>();
         foreach (var part in job.Mount)
@@ -186,7 +206,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
         }
 
         var removed = new List<ComponentInstance>();
-        foreach (var part in job.Remove)
+        foreach (var part in removable)
         {
             if (!ShipRefitJob.OnShip(ship, part.ID))
             {
@@ -195,6 +215,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
                 return false;
             }
             ship.RemoveComponent(part);
+            ShrinkShipStore(ship, part);
             removed.Add(part);
         }
 
@@ -214,10 +235,60 @@ public class LocalConstructionProcessor : IHotloopProcessor
 
         foreach (var part in taken)
             ship.AddComponent(part);
+        // What is done is done: the job now only holds the removals still waiting on their hold.
+        job.Mount = new List<ComponentInstance>();
+        job.Remove = job.Remove.Where(part => held.Contains(part)).ToList();
+        if (held.Count > 0)
+        {
+            waitReason = string.Join("; ", heldReasons);
+            return false;
+        }
         AdoptDesign(yard, ship, job);
         // Crew plan phase 3: crew the refitted ship cannot berth (or no longer needs) go to the yard's pool.
         Pulsar4X.Ships.ShipCrew.AfterRefit(ship, yard);
         return true;
+    }
+
+    /// <summary>
+    /// The parts to take off whose hold still has more aboard than the ship's remaining holds of that type
+    /// could carry once the part is gone (passengers, cargo, fuel). Each comes with why it waits.
+    /// </summary>
+    static HashSet<ComponentInstance> HeldRemovals(Entity ship, IEnumerable<ComponentInstance> remove, out List<string> reasons)
+    {
+        var held = new HashSet<ComponentInstance>();
+        reasons = new List<string>();
+        if (!ship.TryGetDataBlob<CargoStorageDB>(out var cargo))
+            return held;
+        var leaving = new Dictionary<string, double>();
+        foreach (var part in remove)
+        {
+            if (!part.Design.TryGetAttribute<CargoStorageAtb>(out var hold)
+                || !cargo.TypeStores.TryGetValue(hold.StoreTypeID, out var store))
+                continue;
+            leaving.TryGetValue(hold.StoreTypeID, out var already);
+            double used = store.MaxVolume - store.FreeVolume;
+            double capacityAfter = store.MaxVolume - already - hold.MaxVolume;
+            if (used > capacityAfter + 1e-6)
+            {
+                held.Add(part);
+                reasons.Add(ShipRefitJob.EmptyHoldReason(hold.StoreTypeID, part.Name));
+            }
+            else
+                leaving[hold.StoreTypeID] = already + hold.MaxVolume;
+        }
+        return held;
+    }
+
+    /// <summary>A hold taken off a ship takes its volume with it (the hold was emptied first).</summary>
+    static void ShrinkShipStore(Entity ship, ComponentInstance part)
+    {
+        if (!part.Design.TryGetAttribute<CargoStorageAtb>(out var hold)
+            || !ship.TryGetDataBlob<CargoStorageDB>(out var cargo)
+            || !cargo.TypeStores.TryGetValue(hold.StoreTypeID, out var store))
+            return;
+        double cut = Math.Min(hold.MaxVolume, store.MaxVolume);
+        store.MaxVolume -= cut;
+        store.FreeVolume = Math.Max(0, store.FreeVolume - cut);
     }
 
     static void AdoptDesign(Entity yard, Entity ship, ShipRefitJob job)

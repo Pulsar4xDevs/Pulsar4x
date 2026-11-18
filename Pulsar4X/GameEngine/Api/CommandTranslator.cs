@@ -2544,7 +2544,7 @@ namespace Pulsar4X.Engine.Api
 
             var instance = instances[0];
             if (!commanded.TryGetDataBlob<Pulsar4X.Storage.CargoStorageDB>(out var storage)
-                || !storage.TypeStores.ContainsKey(storage.StoreKey(instance)))
+                || !storage.TypeStores.ContainsKey(instance.CargoTypeID))
                 return CommandResult.Reject("The entity has no cargo storage that can hold the component.");
 
             if (!_game.OrderHandler.HandleOrder(UninstallComponentInstanceOrder.Create(commanded, instance)))

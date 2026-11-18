@@ -142,7 +142,7 @@ public class RefitIndustryJobTests
     }
 
     [Test]
-    public void Warp_RefitMountingThenRemovingPassengerQuarters_Completes_WithNoPassengerStorage()
+    public void Warp_RefitMountingThenRemovingPassengerQuarters_Completes_OnCorrectData()
     {
         var (game, faction) = Start(WarpTech);
         var (yard, lineId) = FindYard(game, faction);
@@ -150,13 +150,14 @@ public class RefitIndustryJobTests
         var line = yard.GetDataBlob<IndustryAbilityDB>().ProductionLines[lineId];
         var storage = yard.GetDataBlob<CargoStorageDB>();
         var quarters = PassengerQuarters(info);
-        Assert.That(storage.TypeStores.ContainsKey(quarters.CargoTypeID), Is.False, "the warehouse has no store of the part's own cargo type");
+        Assert.That(quarters.CargoTypeID, Is.EqualTo("general-storage"), "a Passenger Quarters part is stored as general cargo");
+        Assert.That(storage.TypeStores.ContainsKey(quarters.CargoTypeID), Is.True, "so the warehouse can hold it");
         var ship = NewShip(yard, faction, info.ShipDesigns.Values.First(d => d.MassPerUnit <= line.MaxVolume));
         var translator = new CommandTranslator(game);
 
         // Mount: a Passenger Quarters in the warehouse goes onto the ship.
         var crate = new ComponentInstance(quarters);
-        Assert.That(storage.AddCargoByUnit(crate, 1), Is.EqualTo(1), "a part is storable without its own cargo type");
+        Assert.That(storage.AddCargoByUnit(crate, 1), Is.EqualTo(1));
         var mounted = translator.Translate(faction, yard, new QueueShipRefitCommand(
             yard.Id, lineId, ship.Id, Array.Empty<int>(), new[] { crate.ID }));
         Assert.That(mounted.Accepted, Is.True, mounted.RejectionReason);
@@ -175,7 +176,141 @@ public class RefitIndustryJobTests
         Assert.That(ShipRefitJob.JobsOf(yard), Is.Empty, "the removal completed");
         Assert.That(ShipRefitJob.OnShip(ship, crate.ID), Is.False);
         Assert.That(storage.GetUnitsStored(crate, false), Is.EqualTo(1), "the removed part is in the warehouse");
-        Assert.That(storage.TypeStores.ContainsKey(quarters.CargoTypeID), Is.False, "no passenger store was needed");
+    }
+
+    [Test]
+    public void RemovingAYardWithNoStoreForThePart_WaitsWithAReason_AndChangesNothing()
+    {
+        var (game, faction) = Start(WarpTech);
+        var (yard, lineId) = FindYard(game, faction);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        var line = yard.GetDataBlob<IndustryAbilityDB>().ProductionLines[lineId];
+        var storage = yard.GetDataBlob<CargoStorageDB>();
+        var quarters = PassengerQuarters(info);
+        var ship = NewShip(yard, faction, info.ShipDesigns.Values.First(d => d.MassPerUnit <= line.MaxVolume));
+        var part = new ComponentInstance(quarters);
+        ship.AddComponent(part);
+        var queued = new CommandTranslator(game).Translate(faction, yard, new QueueShipRefitCommand(
+            yard.Id, lineId, ship.Id, new[] { part.ID }, Array.Empty<int>()));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+        storage.TypeStores.Remove(quarters.CargoTypeID);
+
+        RunDays(yard, 5, () => true);
+
+        var job = line.Jobs.Single();
+        Assert.That(job.WaitReason, Is.EqualTo("This yard has no storage for " + part.Name + "."));
+        Assert.That(ShipRefitJob.OnShip(ship, part.ID), Is.True);
+        Assert.That(job.ProductionPointsLeft, Is.EqualTo(job.ProductionPointsCost), "nothing spent while it waits");
+    }
+
+    [TestCase("passengers", "Waiting for passengers to disembark from ")]
+    [TestCase("cargo", "Waiting for cargo to be unloaded from ")]
+    public void RemovingAnOccupiedHold_AppliesTheRest_WaitsForThatHold_ThenCompletes(string what, string reasonStart)
+    {
+        var (game, faction) = Start(WarpTech);
+        var (yard, lineId) = FindYard(game, faction);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        var line = yard.GetDataBlob<IndustryAbilityDB>().ProductionLines[lineId];
+        var storage = yard.GetDataBlob<CargoStorageDB>();
+        var holdDesign = what == "passengers"
+            ? PassengerQuarters(info)
+            : info.ComponentDesigns.Values.First(d => d.Name.StartsWith("Cargo Hold")
+                && d.TryGetAttribute<CargoStorageAtb>(out var atb) && atb.StoreTypeID == "general-storage"
+                && ShipRefitJob.IsShipPart(d));
+        var ship = NewShip(yard, faction, info.ShipDesigns.Values.First(d => d.MassPerUnit <= line.MaxVolume));
+        var hold = new ComponentInstance(holdDesign);
+        ship.AddComponent(hold);
+        var cargo = ship.GetDataBlob<CargoStorageDB>();
+        string typeId = holdDesign.GetAttribute<CargoStorageAtb>().StoreTypeID;
+
+        // Fill the ship's store of that type: the hold cannot come off while it holds this lot.
+        ICargoable load;
+        if (what == "passengers")
+        {
+            SpeciesCargo.RegisterOwned(faction);
+            load = new SpeciesCargo(info.Species.First());
+        }
+        else
+            load = info.Data.CargoGoods.GetAll().Values.First(c => c.CargoTypeID == typeId && c.VolumePerUnit > 0);
+        double room = cargo.TypeStores[typeId].FreeVolume;
+        long units = (long)(room / load.VolumePerUnit);
+        Assert.That(cargo.AddCargoByUnit(load, units), Is.GreaterThan(0), "the hold is loaded");
+        double capacityBefore = cargo.TypeStores[typeId].MaxVolume;
+
+        // The rest of the refit: swap another ordinary part for a fresh one from the warehouse.
+        var other = ship.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.First(c =>
+            c.ID != hold.ID && ShipRefitJob.IsShipPart(c.Design) && !c.Design.HasAttribute<CargoStorageAtb>()
+            && !c.Design.HasAttribute<GameEngine.People.AdminSpaceAtb>());
+        var fresh = new ComponentInstance(other.Design);
+        Assert.That(storage.AddCargoByUnit(fresh, 1), Is.EqualTo(1));
+        var queued = new CommandTranslator(game).Translate(faction, yard, new QueueShipRefitCommand(
+            yard.Id, lineId, ship.Id, new[] { hold.ID, other.ID }, new[] { fresh.ID }));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+
+        RunDays(yard, 60, () => ShipRefitJob.OnShip(ship, fresh.ID) == false);
+
+        Assert.That(ShipRefitJob.OnShip(ship, fresh.ID), Is.True, "the mount was applied");
+        Assert.That(ShipRefitJob.OnShip(ship, other.ID), Is.False, "the other removal was applied");
+        Assert.That(ShipRefitJob.OnShip(ship, hold.ID), Is.True, "the occupied hold stays on");
+        var job = line.Jobs.Single();
+        Assert.That(job.WaitReason, Is.EqualTo(reasonStart + hold.Name));
+        Assert.That(job.Status, Is.EqualTo(Pulsar4X.DataStructures.IndustryJobStatus.MissingResources));
+        Assert.That(job.Refit!.Remove.Select(p => p.ID), Is.EqualTo(new[] { hold.ID }));
+        Assert.That(job.Refit.Mount, Is.Empty);
+        RunDays(yard, 5, () => true);
+        Assert.That(ShipRefitJob.OnShip(ship, hold.ID), Is.True, "still waiting");
+        var view = new GameProjector(game).ProjectEntity(yard, faction.Id).GetView<IndustryView>()!
+            .ProductionLines.Single(l => l.Id == lineId).Jobs.Single();
+        Assert.That(view.Refit!.WaitReason, Is.EqualTo(reasonStart + hold.Name));
+
+        // Empty the hold: the job takes it off and completes.
+        cargo.RemoveCargoByUnit(load, units);
+        RunDays(yard, 5, () => ShipRefitJob.JobsOf(yard).Any());
+
+        Assert.That(ShipRefitJob.JobsOf(yard), Is.Empty, "the job completed once the hold was empty");
+        Assert.That(ShipRefitJob.OnShip(ship, hold.ID), Is.False);
+        Assert.That(cargo.TypeStores[typeId].MaxVolume, Is.LessThan(capacityBefore), "the hold took its volume with it");
+        Assert.That(storage.GetUnitsStored(hold, false), Is.EqualTo(1), "the hold is in the warehouse");
+    }
+
+    [Test]
+    public void Basemod_NoComponentIsStoredAsTheTypeItHolds_ExceptGeneralStorage()
+    {
+        // A part's CargoTypeID is what the part itself is stored as while it is cargo; the type its storage
+        // attribute holds is what it carries once mounted. They are the same only for general storage (a
+        // warehouse or cargo hold is stored as general cargo and holds general cargo). A specialised hold
+        // (passengers, fuel) stored as the type it holds could not sit in an ordinary warehouse.
+        ModsState.RefreshModsList("Data");
+        var mods = ModsState.AvailableMods;
+        var paths = new[] { mods.Single(m => m.Mod.ModName == "Pulsar4x").Path }.ToList();
+        var offenders = new List<string>();
+        int holds = 0;
+        foreach (var file in System.IO.Directory.GetFiles(
+                     System.IO.Path.Combine(System.IO.Path.GetDirectoryName(paths[0])!, "TemplateFiles"), "*.json", System.IO.SearchOption.AllDirectories))
+        {
+            var entries = Newtonsoft.Json.Linq.JArray.Parse(System.IO.File.ReadAllText(file));
+            foreach (var entry in entries)
+            {
+                if ((string?)entry["Type"] != "ComponentTemplate" || entry["Payload"] is not { } payload)
+                    continue;
+                string? cargoType = (string?)payload["CargoTypeID"];
+                foreach (var property in payload["Properties"] ?? new Newtonsoft.Json.Linq.JArray())
+                {
+                    string attribute = (string?)property["AttributeType"] ?? "";
+                    if (!attribute.EndsWith("StorageAtb"))
+                        continue;
+                    holds++;
+                    string formula = (string?)property["PropertyFormula"] ?? "";
+                    foreach (var type in new[] { "passenger-storage", "fuel-storage", "ordnance-storage" })
+                    {
+                        if (formula.Contains("'" + type + "'") && cargoType == type)
+                            offenders.Add((string?)payload["UniqueID"] + " is stored as " + type);
+                    }
+                }
+            }
+        }
+        Assert.That(holds, Is.GreaterThan(5), "the audit found the storage components");
+        Assert.That(offenders, Is.Empty, string.Join("; ", offenders));
     }
 
     [TestCase(WarpTech)]

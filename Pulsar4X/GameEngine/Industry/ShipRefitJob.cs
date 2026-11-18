@@ -29,6 +29,10 @@ public class ShipRefitJob
     public const string AlreadyListed = "That part is already in a refit.";
     public const string UnknownPart = "That part design is not available.";
     public const string WaitingFor = "Waiting for ";
+    public const string PassengersLeft = "Waiting for passengers to disembark from ";
+    public const string CargoLeft = "Waiting for cargo to be unloaded from ";
+    public const string FuelLeft = "Waiting for fuel to be unloaded from ";
+    public const string NoStorageFor = "This yard has no storage for ";
     public const string UnknownDesign = "That design is not available.";
 
     public int ShipEntityId { get; set; }
@@ -71,6 +75,12 @@ public class ShipRefitJob
         }
         PointCost = Math.Max(1, cost);
     }
+
+    /// <summary>Why a hold that still has contents cannot come off yet.</summary>
+    public static string EmptyHoldReason(string storeTypeId, string partName)
+        => storeTypeId == Pulsar4X.Colonies.SpeciesCargo.CargoType ? PassengersLeft + partName
+            : storeTypeId == "fuel-storage" ? FuelLeft + partName
+            : CargoLeft + partName;
 
     public static long CostOf(IEnumerable<ComponentInstance> parts)
     {
