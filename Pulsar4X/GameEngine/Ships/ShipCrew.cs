@@ -7,6 +7,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Events;
+using Pulsar4X.Fleets;
 using Pulsar4X.Extensions;
 using Pulsar4X.GeoSurveys;
 using Pulsar4X.Industry;
@@ -18,59 +19,100 @@ using Pulsar4X.Storage;
 namespace Pulsar4X.Ships
 {
     /// <summary>
-    /// Crew capacity, crew aboard and what a short crew does (crew plan phases 1-3).
-    /// <para>Berths come from parts with a CrewQuartersAtb: crew quarters, and a few on every bridge.</para>
+    /// Crew capacity, crew aboard and what a short crew does (crew plan phases 1-3, crew rules phase 1).
     /// <para>
-    /// Crew aboard (ShipCrewDB) fill the engines first, then the bridge, then the work parts. The warp
-    /// drives below their own crew run at aboard / engine crew (reaction engines need no crew and are not counted). The work parts
+    /// Two groups aboard. Crew staff the parts (<see cref="ComponentDesign.CrewReq"/>) and sleep in crew bunks
+    /// (parts with a CrewQuartersAtb: crew quarters only). Officers (the captain for now) are housed in the
+    /// bridge's officer slots (OfficerSlotsAtb) and are not part crew. A bridge's own operators are crew and
+    /// need bunks. A design with no bridge (AdminSpaceAtb) is automated: no crew, no captain, no life support,
+    /// no orders of its own (it may ride in a fleet and follow the flagship).
+    /// </para>
+    /// <para>
+    /// Crew aboard fill the engines first, then the bridge, then the work parts. The warp drives below their own
+    /// crew run at crew / engine crew (reaction engines need no crew and are not counted). The work parts
     /// (geo and grav surveyors, asteroid miners, shuttlebays, construction bays) share what is left:
-    /// F = clamp((aboard - engine crew - bridge crew) / work crew, 0, 1), and they run at F².
+    /// F = clamp((crew - engine crew - bridge crew) / work crew, 0, 1), and they run at F².
     /// Nothing else degrades: lasers, fire control, sensors, reactors and the bridge run at full.
     /// </para>
     /// <para>
-    /// A ship with a captain (ShipInfoDB.CommanderID) counts the captain as one more crew: one more required,
-    /// life support and wages. The captain is counted in ShipCrewDB.Aboard (so pay and life support follow)
-    /// but is never drawn from or returned to a colony pool, and does not crew the engines. The captain always
-    /// boards even when that puts the ship one over its berths, so a ship whose berths cover its part crew can
-    /// still be fully staffed.
+    /// ShipCrewDB.Aboard is everyone aboard (crew + the captain), so life support and wages follow it. The captain
+    /// (ShipInfoDB.CommanderID) boards only into an officer slot, is never drawn from or returned to a colony pool,
+    /// and does not crew the engines. Under-crewed compares crew aboard with part crew only.
     /// TODO(crew): weapon crew waits for the damage rework.
     /// </para>
     /// </summary>
     public static class ShipCrew
     {
-        /// <summary>Crew of a part list split by what the crew does. Capacity is the most that can be aboard.</summary>
-        /// <para>Captain is 1 when a captain sits the ship: counted in Required and Bridge, never drawn from a pool.
-        /// The captain always boards, even when that puts the ship one over its berths, so Capacity is the part
-        /// crew the berths can house plus the captain.</para>
-        public readonly record struct CrewSplit(int Required, int Berths, int Engine, int Bridge, int Work, int Captain = 0)
+        /// <summary>
+        /// Crew and officers of a part list. <see cref="Required"/> is part crew (0 when automated), <see cref="Berths"/> the
+        /// crew bunks, <see cref="OfficerSlots"/> the bridge cabins. <see cref="Captain"/> is 1 when a seated captain
+        /// can board (a bridge with a slot); the captain is never part crew.
+        /// </summary>
+        public readonly record struct CrewSplit(int Required, int Berths, int Engine, int Bridge, int Work,
+            int OfficerSlots = 0, bool NeedsCaptain = false, int Captain = 0)
         {
-            /// <summary>Part crew the berths can house, plus the captain when one sits the ship.</summary>
-            public int Capacity => Math.Min(Math.Max(0, Required - Captain), Berths) + Captain;
+            /// <summary>Crew the bunks can house: min(part crew, bunks). 0 when automated.</summary>
+            public int Capacity => Math.Min(Required, Berths);
+
+            /// <summary>True with no bridge: no crew, no captain, no life support, no orders of its own.</summary>
+            public bool Automated => !NeedsCaptain;
+
+            /// <summary>Officers the ship wants: 1 (the captain) when it has a bridge, else 0.</summary>
+            public int OfficersRequired => NeedsCaptain ? 1 : 0;
         }
 
-        // ---- phase 1: berths ----
+        // ---- phase 1: bunks and officer slots ----
 
-        /// <summary>Berths one copy of the part gives; 0 for parts without quarters.</summary>
+        /// <summary>Crew bunks one copy of the part gives; 0 for parts without quarters. A bridge gives none (its berths are officer slots).</summary>
         public static int BerthsPer(ComponentDesign design)
-            => design != null && design.TryGetAttribute<CrewQuartersAtb>(out var q) ? q.Berths : 0;
+            => design != null && !IsBridge(design) && design.TryGetAttribute<CrewQuartersAtb>(out var q) ? q.Berths : 0;
 
-        /// <summary>Berths the parts give: crew quarters plus bridge berths.</summary>
+        /// <summary>Officer slots one copy of the part gives: a bridge's OfficerSlotsAtb, or the CrewQuartersAtb an old saved bridge carries.</summary>
+        public static int SlotsPer(ComponentDesign design)
+        {
+            if (design == null || !IsBridge(design))
+                return 0;
+            if (design.TryGetAttribute<OfficerSlotsAtb>(out var o))
+                return o.Slots;
+            return design.TryGetAttribute<CrewQuartersAtb>(out var legacy) ? legacy.Berths : 0;
+        }
+
+        /// <summary>Crew bunks the parts give (crew quarters only; ShipDesign.CrewBerths).</summary>
         public static int Berths(IEnumerable<(ComponentDesign design, int count)> components)
             => components?.Sum(c => BerthsPer(c.design) * c.count) ?? 0;
 
-        /// <summary>Crew the parts need: Σ part crew × count, as ShipDesign.CrewReq.</summary>
-        public static int CrewRequired(IEnumerable<(ComponentDesign design, int count)> components)
+        /// <summary>Officer slots the parts give (bridges).</summary>
+        public static int OfficerSlots(IEnumerable<(ComponentDesign design, int count)> components)
+            => components?.Sum(c => SlotsPer(c.design) * c.count) ?? 0;
+
+        /// <summary>True when a part list has a bridge: it needs a captain. No bridge means automated.</summary>
+        public static bool NeedsCaptain(IEnumerable<(ComponentDesign design, int count)> components)
+            => components?.Any(c => c.design != null && c.count > 0 && IsBridge(c.design)) ?? false;
+
+        /// <summary>Σ part crew × count, whatever the design: what the parts would need if a crew ran them.</summary>
+        public static int PartCrew(IEnumerable<(ComponentDesign design, int count)> components)
             => components?.Sum(c => (c.design?.CrewReq ?? 0) * c.count) ?? 0;
 
-        /// <summary>Designer warnings about crew: fewer berths than the parts need.</summary>
+        /// <summary>Crew the design needs (ShipDesign.CrewReq): the part crew, or 0 for an automated design with no bridge. Excludes the captain.</summary>
+        public static int CrewRequired(IEnumerable<(ComponentDesign design, int count)> components)
+        {
+            var list = components as IList<(ComponentDesign design, int count)> ?? components?.ToList();
+            return NeedsCaptain(list) ? PartCrew(list) : 0;
+        }
+
+        /// <summary>Designer warnings about crew: fewer crew bunks than the parts need, or a bridge with no officer slot. None for an automated design.</summary>
         public static List<string> DesignCrewWarnings(IEnumerable<(ComponentDesign design, int count)> components)
         {
             var warnings = new List<string>();
             if (components == null) return warnings;
             var list = components.ToList();
-            int crew = CrewRequired(list), berths = Berths(list);
-            if (berths < crew)
-                warnings.Add($"Crew {crew} but only {berths} berths: add crew quarters for {crew - berths} more.");
+            if (!NeedsCaptain(list))
+                return warnings;
+            int crew = PartCrew(list), bunks = Berths(list);
+            if (bunks < crew)
+                warnings.Add($"Crew {crew} but only {bunks} crew bunks: add crew quarters for {crew - bunks} more.");
+            if (OfficerSlots(list) < 1)
+                warnings.Add("The bridge has no officer slot for a captain.");
             return warnings;
         }
 
@@ -88,22 +130,22 @@ namespace Pulsar4X.Ships
 
         public static CrewSplit Split(IEnumerable<(ComponentDesign design, int count)> components)
         {
-            int required = 0, berths = 0, engine = 0, bridge = 0, work = 0;
-            foreach (var (design, count) in components ?? Enumerable.Empty<(ComponentDesign, int)>())
-            {
-                if (design == null || count <= 0)
-                    continue;
-                int crew = design.CrewReq * count;
-                required += crew;
-                berths += BerthsPer(design) * count;
-                if (IsEngine(design))
-                    engine += crew;
-                else if (IsBridge(design))
-                    bridge += crew;
-                else if (IsWorkPart(design))
-                    work += crew;
-            }
-            return new CrewSplit(required, berths, engine, bridge, work);
+            var list = (components ?? Enumerable.Empty<(ComponentDesign, int)>()).Where(c => c.design != null && c.count > 0).ToList();
+            bool needsCaptain = NeedsCaptain(list);
+            int required = 0, engine = 0, bridge = 0, work = 0;
+            if (needsCaptain) // an automated design runs without crew
+                foreach (var (design, count) in list)
+                {
+                    int crew = design.CrewReq * count;
+                    required += crew;
+                    if (IsEngine(design))
+                        engine += crew;
+                    else if (IsBridge(design))
+                        bridge += crew;
+                    else if (IsWorkPart(design))
+                        work += crew;
+                }
+            return new CrewSplit(required, Berths(list), engine, bridge, work, OfficerSlots(list), needsCaptain);
         }
 
         /// <summary>The parts mounted on a ship now, by design. A refit can leave these off the design.</summary>
@@ -118,54 +160,93 @@ namespace Pulsar4X.Ships
                 .ToList();
         }
 
-        /// <summary>The mounted parts' split, plus the captain when one sits the ship.</summary>
+        /// <summary>The mounted parts' split; <see cref="CrewSplit.Captain"/> is 1 when a seated captain can board (a bridge with a slot).</summary>
         public static CrewSplit SplitOf(Entity ship)
         {
             int parts = ship.TryGetDataBlob<ComponentInstancesDB>(out var instances) ? instances.AllComponents.Count : 0;
-            int captain = HasCaptain(ship) ? 1 : 0;
+            bool seated = HasCaptain(ship);
             if (ship.TryGetDataBlob<ShipCrewDB>(out var db))
             {
-                if (db.CachedParts != parts || db.CachedSplit.Captain != captain)
+                if (db.CachedParts != parts || db.CachedSeated != seated)
                 {
-                    db.CachedSplit = WithCaptain(Split(Mounted(ship)), captain);
+                    db.CachedSplit = WithCaptain(Split(Mounted(ship)), seated);
                     db.CachedParts = parts;
+                    db.CachedSeated = seated;
                 }
                 return db.CachedSplit;
             }
-            return WithCaptain(Split(Mounted(ship)), captain);
+            return WithCaptain(Split(Mounted(ship)), seated);
         }
 
-        static CrewSplit WithCaptain(CrewSplit split, int captain)
-            => captain <= 0 ? split : split with { Required = split.Required + captain, Bridge = split.Bridge + captain, Captain = captain };
+        static CrewSplit WithCaptain(CrewSplit split, bool seated)
+            => seated && split.NeedsCaptain && split.OfficerSlots >= 1 ? split with { Captain = 1 } : split;
 
         /// <summary>True when an officer captains the ship.</summary>
         public static bool HasCaptain(Entity ship)
             => ship != null && ship.TryGetDataBlob<ShipInfoDB>(out var info) && info.CommanderID >= 0;
 
-        /// <summary>1 when the captain is counted in the ship's crew aboard, else 0.</summary>
+        /// <summary>1 when the captain is counted in the people aboard, else 0.</summary>
         static int CaptainAboard(ShipCrewDB db) => db.CaptainAboard ? 1 : 0;
 
         /// <summary>
-        /// Boards or lands the captain in the crew count when a captain is seated or leaves (ShipInfoDB.CommanderID).
-        /// The captain always boards, even when that puts the ship one over its berths; no crew are drawn or returned.
+        /// Boards or lands the captain when one is seated or leaves (ShipInfoDB.CommanderID) or the bridge changes.
+        /// The captain boards only a ship with a bridge and an officer slot, and counts in the people aboard
+        /// (life support, wages) but is not crew: no crew are drawn or returned.
         /// </summary>
         public static void SyncCaptain(Entity ship)
         {
             if (ship == null || ship.Manager == null || !ship.TryGetDataBlob<ShipCrewDB>(out var db))
                 return;
-            bool has = HasCaptain(ship);
+            bool has = SplitOf(ship).Captain > 0;
             if (has == db.CaptainAboard)
                 return;
             db.CaptainAboard = has;
-            db.CachedParts = -1;
             db.Aboard = has ? db.Aboard + 1 : Math.Max(0, db.Aboard - 1);
         }
+
+        /// <summary>
+        /// After a load: boards each seated captain once (saves from before captains counted), and clears the crew of a
+        /// ship with no bridge (it is automated now). Designs and crew bunks are not rewritten.
+        /// </summary>
+        public static void AfterLoad(Entity ship)
+        {
+            SyncCaptain(ship);
+            if (ship.TryGetDataBlob<ShipCrewDB>(out var db) && Automated(ship))
+            {
+                db.CaptainAboard = false;
+                if (db.Aboard != 0)
+                    db.Aboard = 0;
+            }
+        }
+
+        /// <summary>True when the ship has parts but no bridge: automated, no crew, no captain, no orders of its own.</summary>
+        public static bool Automated(Entity ship)
+            => ship != null && ship.HasDataBlob<ShipInfoDB>() && !ship.HasDataBlob<FleetDB>()
+               && ship.HasDataBlob<ComponentInstancesDB>() && SplitOf(ship).Automated
+               && ship.GetDataBlob<ComponentInstancesDB>().AllComponents.Count > 0;
 
         /// <summary>True when the ship carries crew (every ship made by ShipFactory).</summary>
         public static bool Tracked(Entity ship) => ship.HasDataBlob<ShipCrewDB>();
 
+        /// <summary>Everyone aboard: crew plus the captain (life support and wages follow this).</summary>
         public static int Aboard(Entity ship)
-            => ship.TryGetDataBlob<ShipCrewDB>(out var db) ? db.Aboard : SplitOf(ship).Capacity;
+            => ship.TryGetDataBlob<ShipCrewDB>(out var db) ? db.Aboard : SplitOf(ship).Capacity + SplitOf(ship).Captain;
+
+        /// <summary>Crew aboard, not counting the captain: what the part crew requirement is compared with.</summary>
+        public static int CrewAboard(Entity ship)
+            => ship.TryGetDataBlob<ShipCrewDB>(out var db) ? Math.Max(0, db.Aboard - CaptainAboard(db)) : SplitOf(ship).Capacity;
+
+        /// <summary>Officers aboard: 1 when the captain is aboard, else 0.</summary>
+        public static int OfficersAboard(Entity ship)
+            => ship.TryGetDataBlob<ShipCrewDB>(out var db) ? CaptainAboard(db) : SplitOf(ship).Captain;
+
+        /// <summary>True when a tracked ship has fewer crew aboard than its part crew. Never true for an automated ship, and a missing captain is not under-crewed.</summary>
+        public static bool IsUnderCrewed(Entity ship)
+            => Tracked(ship) && CrewAboard(ship) < SplitOf(ship).Required;
+
+        /// <summary>True when a tracked ship has a bridge but no captain aboard ("No captain", not under-crewed).</summary>
+        public static bool NoCaptain(Entity ship)
+            => Tracked(ship) && SplitOf(ship) is { NeedsCaptain: true } split && split.Captain == 0;
 
         /// <summary>Share of the engines' own crew filled, 0..1 (crew fill the engines first). 1 without crew tracking.</summary>
         public static double EngineFactor(Entity ship)
@@ -173,22 +254,22 @@ namespace Pulsar4X.Ships
             if (ship == null || !ship.TryGetDataBlob<ShipCrewDB>(out var db))
                 return 1;
             var split = SplitOf(ship);
-            return EngineFactor(split, db.Aboard);
+            return EngineFactor(split, CrewAboard(ship));
         }
 
-        /// <summary>The captain does not crew the engines, so a seated captain is taken off <paramref name="aboard"/>.</summary>
-        public static double EngineFactor(CrewSplit split, int aboard)
-            => split.Engine <= 0 ? 1 : Math.Clamp((aboard - split.Captain) / (double)split.Engine, 0, 1);
+        /// <summary><paramref name="crewAboard"/> is crew only: the captain is not counted.</summary>
+        public static double EngineFactor(CrewSplit split, int crewAboard)
+            => split.Engine <= 0 ? 1 : Math.Clamp(crewAboard / (double)split.Engine, 0, 1);
 
         /// <summary>F for the work parts: the crew left after the engines and then the bridge, over the work parts' crew, 0..1.</summary>
-        public static double WorkFactor(CrewSplit split, int aboard)
-            => split.Work <= 0 ? 1 : Math.Clamp((aboard - split.Engine - split.Bridge) / (double)split.Work, 0, 1);
+        public static double WorkFactor(CrewSplit split, int crewAboard)
+            => split.Work <= 0 ? 1 : Math.Clamp((crewAboard - split.Engine - split.Bridge) / (double)split.Work, 0, 1);
 
         public static double WorkFactor(Entity ship)
         {
             if (ship == null || !ship.TryGetDataBlob<ShipCrewDB>(out var db))
                 return 1;
-            return WorkFactor(SplitOf(ship), db.Aboard);
+            return WorkFactor(SplitOf(ship), CrewAboard(ship));
         }
 
         /// <summary>Rate multiplier for the work parts, F². 1 for colonies and ships without crew tracking.</summary>
@@ -220,18 +301,19 @@ namespace Pulsar4X.Ships
             if (!ship.TryGetDataBlob<ShipCrewDB>(out var db))
                 return "";
             var split = SplitOf(ship);
-            if (db.Aboard >= split.Required)
+            int crew = CrewAboard(ship);
+            if (crew >= split.Required)
                 return "";
             var parts = new List<string>();
-            double engine = EngineFactor(split, db.Aboard);
+            double engine = EngineFactor(split, crew);
             if (split.Engine > 0 && engine < 1)
                 parts.Add($"engines {engine * 100:0} %");
-            double work = WorkFactor(split, db.Aboard);
+            double work = WorkFactor(split, crew);
             if (split.Work > 0 && work < 1)
                 parts.Add($"work parts {work * work * 100:0} %");
-            string head = $"{db.Aboard}/{split.Required} crew";
+            string head = $"{crew}/{split.Required} crew";
             if (split.Berths < split.Required)
-                head += $" ({split.Berths} berths)";
+                head += $" ({split.Berths} bunks)";
             return parts.Count == 0 ? head : head + ": " + string.Join(", ", parts);
         }
 
@@ -311,6 +393,7 @@ namespace Pulsar4X.Ships
         {
             var db = new ShipCrewDB(Split(Mounted(ship)).Capacity);
             ship.SetDataBlob(db);
+            db.CachedParts = -1;
             SyncCaptain(ship);
             RefreshLifeSupport(ship);
         }
@@ -391,7 +474,7 @@ namespace Pulsar4X.Ships
         }
 
         /// <summary>
-        /// A launch: the new ship takes min(required, berths) from the colony, largest species pool first.
+        /// A launch: the new ship takes min(part crew, crew bunks) from the colony (none when automated), largest species pool first.
         /// When the colony is short it launches under-crewed and an event says so. Returns crew boarded
         /// (a seated captain is aboard too but is not drawn from the colony).
         /// </summary>
@@ -405,14 +488,14 @@ namespace Pulsar4X.Ships
             SyncCaptain(ship);
             var split = SplitOf(ship);
             int captain = CaptainAboard(db);
-            int boarded = Draw(colony, Math.Max(0, split.Capacity - captain));
+            int boarded = Draw(colony, split.Capacity);
             db.Aboard = boarded + captain;
-            if (db.Aboard < split.Required && colony.Manager != null)
+            if (boarded < split.Required && colony.Manager != null)
             {
                 EventManager.Instance.Publish(Event.Create(
                     EventType.ShipUnderCrewed,
                     at,
-                    LaunchShortText(ship.GetName(ship.FactionOwnerID), db.Aboard, split.Required),
+                    LaunchShortText(ship.GetName(ship.FactionOwnerID), boarded, split.Required),
                     ship.FactionOwnerID,
                     ship.Manager?.ManagerID ?? colony.Manager.ManagerID,
                     ship.Id));
@@ -436,12 +519,12 @@ namespace Pulsar4X.Ships
             return null;
         }
 
-        /// <summary>Tops up crew from the colony up to <see cref="CrewSplit.Capacity"/> (part crew the berths can
-        /// house, plus the captain), or by <paramref name="count"/> when ≥ 0. Returns how many boarded.</summary>
+        /// <summary>Tops up crew from the colony up to <see cref="CrewSplit.Capacity"/> (part crew the bunks can
+        /// house; the captain is not crew and boards only an officer slot), or by <paramref name="count"/> when ≥ 0. Returns how many boarded.</summary>
         public static int TopUp(Entity ship, Entity colony, int count = -1)
         {
             var db = ship.GetDataBlob<ShipCrewDB>();
-            int room = Math.Max(0, SplitOf(ship).Capacity - db.Aboard);
+            int room = Math.Max(0, SplitOf(ship).Capacity - CrewAboard(ship));
             int want = count < 0 ? room : Math.Min(room, count);
             int got = Draw(colony, want);
             db.Aboard += got;
@@ -459,14 +542,15 @@ namespace Pulsar4X.Ships
             return leave;
         }
 
-        /// <summary>After a refit: crew above the new capacity (part crew the berths can house, plus the captain) go to the yard colony's pool.</summary>
+        /// <summary>After a refit: crew above the new capacity (part crew the bunks can house; none when automated) go to the yard colony's pool.</summary>
         public static int AfterRefit(Entity ship, Entity yard)
         {
             if (!ship.TryGetDataBlob<ShipCrewDB>(out var db))
                 return 0;
             db.CachedParts = -1; // a refit can swap parts one for one; recount
+            SyncCaptain(ship);   // the new bridge may have no slot, or no bridge at all
             int cap = SplitOf(ship).Capacity;
-            int excess = Math.Max(0, Math.Min(db.Aboard - cap, db.Aboard - CaptainAboard(db)));
+            int excess = Math.Max(0, CrewAboard(ship) - cap);
             if (excess > 0)
             {
                 db.Aboard -= excess;

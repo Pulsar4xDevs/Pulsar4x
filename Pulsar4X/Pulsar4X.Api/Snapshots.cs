@@ -775,11 +775,36 @@ public sealed record ShipView(
     /// </summary>
     public IReadOnlyList<ShipCrewRow> CrewByComponent { get; init; } = Array.Empty<ShipCrewRow>();
 
-    /// <summary>Owner only. Crew the ship can house: quarters plus bridge berths, people.</summary>
+    /// <summary>Owner only. Crew bunks (crew quarters only; a bridge's cabins are <see cref="OfficerSlots"/>), people. 0 when <see cref="Automated"/>.</summary>
     public int CrewBerths { get; init; }
 
-    /// <summary>Owner only. Where <see cref="CrewBerths"/> come from, one row per design that gives berths. Empty until phase 1.</summary>
+    /// <summary>Owner only. Where <see cref="CrewBerths"/> come from, one row per design that gives crew bunks.</summary>
     public IReadOnlyList<ShipBerthRow> BerthsByComponent { get; init; } = Array.Empty<ShipBerthRow>();
+
+    /// <summary>Owner only. Officers (the captain for now) are housed in the bridge's officer slots, not in crew bunks.</summary>
+    public int OfficerSlots { get; init; }
+
+    /// <summary>Owner only. Where <see cref="OfficerSlots"/> come from, one row per bridge design (slots per copy x copies).</summary>
+    public IReadOnlyList<ShipBerthRow> OfficerSlotsByComponent { get; init; } = Array.Empty<ShipBerthRow>();
+
+    /// <summary>Owner only. Officers aboard: 1 when the captain is aboard, else 0. They are not part of <see cref="CrewAboard"/>.</summary>
+    public int OfficersAboard { get; init; }
+
+    /// <summary>Owner only. Officers the ship wants: 1 (the captain) with a bridge, 0 when <see cref="Automated"/>.</summary>
+    public int OfficersRequired { get; init; }
+
+    /// <summary>Owner only. Everyone aboard: <see cref="CrewAboard"/> + <see cref="OfficersAboard"/>. Life support and wages follow this.</summary>
+    public int PeopleAboard { get; init; }
+
+    /// <summary>
+    /// Owner only. True when the ship has no bridge: fully automated. It needs no crew, captain or life support,
+    /// takes no orders of its own (the engine rejects them with <c>CommandTranslator.AutomatedShipNoOrders</c>), and may ride in a fleet
+    /// and follow the flagship. Show "Uncrewed" instead of crew and officer demand; never show Under-crewed or No captain.
+    /// </summary>
+    public bool Automated { get; init; }
+
+    /// <summary>Owner only. True when the ship has a bridge but no captain aboard ("No captain", not under-crewed).</summary>
+    public bool NoCaptain { get; init; }
 
     /// <summary>
     /// Owner only. True when the engine tracks the people aboard this ship (every ship it makes). While false,
@@ -788,7 +813,7 @@ public sealed record ShipView(
     /// </summary>
     public bool CrewTracked { get; init; }
 
-    /// <summary>Owner only. People aboard, at most min(required, berths).</summary>
+    /// <summary>Owner only. Crew aboard (not counting the captain), at most min(required, crew bunks). Compare with <see cref="CrewRequired"/>.</summary>
     public int CrewAboard { get; init; }
 
     /// <summary>
@@ -805,14 +830,14 @@ public sealed record ShipView(
     /// </summary>
     public double EngineCrewFactor { get; init; } = 1;
 
-    /// <summary>Owner only. True when aboard is below required.</summary>
+    /// <summary>Owner only. True when crew aboard is below the part crew (<see cref="CrewRequired"/>). Never true for an automated ship; a missing captain is <see cref="NoCaptain"/>.</summary>
     public bool UnderCrewed { get; init; }
 
     /// <summary>Owner only. One line on what the crew shortfall limits, e.g. "12/28 crew: engines 60 %, work parts 18 %" (work parts as F²). Empty when fully crewed.</summary>
     public string CrewNote { get; init; } = "";
 }
 
-/// <summary>Berths from one component design on a ship: berths per copy x copies.</summary>
+/// <summary>Bunks (or officer slots) from one component design on a ship: per copy x copies.</summary>
 public sealed record ShipBerthRow(string DesignId, string Name, int Count, int BerthsPerCopy)
 {
     public int Berths => BerthsPerCopy * Count;
@@ -1483,8 +1508,14 @@ public sealed record ConstructibleItemView(
     /// <summary>Crew one unit needs, people (a ship design's sum, or a component's own crew).</summary>
     public int CrewRequired { get; init; }
 
-    /// <summary>Ship designs: crew the design can house, people. 0 for components.</summary>
+    /// <summary>Ship designs: crew bunks the design has (crew quarters only), people. 0 for components.</summary>
     public int CrewBerths { get; init; }
+
+    /// <summary>Ship designs: officer slots on the design's bridges. 0 for components.</summary>
+    public int OfficerSlots { get; init; }
+
+    /// <summary>Ship designs: true when the design has no bridge, so it is automated (CrewRequired is 0, no captain, no orders of its own).</summary>
+    public bool Automated { get; init; }
 
     /// <summary>Ship designs: the designer's crew warning, e.g. "10 berths for 28 crew". Empty when none.</summary>
     public string CrewWarning { get; init; } = "";
@@ -1728,8 +1759,14 @@ public sealed record ComponentDesignSummary(string Id, string Name, string Templ
     public IReadOnlyList<DesignerInput> PropertyValues { get; init; } = Array.Empty<DesignerInput>();
     /// <summary>Crew one copy needs, people.</summary>
     public int CrewRequired { get; init; }
-    /// <summary>Berths one copy gives (crew quarters, bridge console space), people.</summary>
+    /// <summary>Crew bunks one copy gives (crew quarters only), people.</summary>
     public int Berths { get; init; }
+
+    /// <summary>Officer slots one copy gives (a bridge), people.</summary>
+    public int OfficerSlots { get; init; }
+
+    /// <summary>True for a bridge (AdminSpaceAtb): a design with one needs a captain, a design with none is automated.</summary>
+    public bool IsBridge { get; init; }
 
     public long MassPerUnit { get; init; }
     public double VolumePerUnit { get; init; }
@@ -1866,16 +1903,28 @@ public sealed record ShipSnapshot(
     /// <summary>Crew the design needs, people.</summary>
     public int CrewRequired { get; init; }
 
-    /// <summary>Crew the design can house, people.</summary>
+    /// <summary>Crew bunks the design has (crew quarters only), people.</summary>
     public int CrewBerths { get; init; }
 
-    /// <summary>People aboard (see <see cref="CrewTracked"/>).</summary>
+    /// <summary>Officer slots on the ship's bridges.</summary>
+    public int OfficerSlots { get; init; }
+
+    /// <summary>Crew aboard, not counting the captain (see <see cref="CrewTracked"/>).</summary>
     public int CrewAboard { get; init; }
+
+    /// <summary>Officers aboard: 1 when the captain is aboard.</summary>
+    public int OfficersAboard { get; init; }
+
+    /// <summary>True when the ship has no bridge: automated, no crew or captain, no orders of its own.</summary>
+    public bool Automated { get; init; }
+
+    /// <summary>True when the ship has a bridge but no captain aboard.</summary>
+    public bool NoCaptain { get; init; }
 
     /// <summary>True when the engine tracks crew aboard. While false, ignore CrewAboard and UnderCrewed.</summary>
     public bool CrewTracked { get; init; }
 
-    /// <summary>For the fleet tree badge: aboard below required.</summary>
+    /// <summary>For the fleet tree badge: crew aboard below part crew. Never true for an automated ship.</summary>
     public bool UnderCrewed { get; init; }
 }
 

@@ -160,6 +160,10 @@ namespace Pulsar4X.Engine.Api
             if (!_translators.TryGetValue(command.GetType(), out var translate))
                 return CommandResult.Reject($"Unsupported command: {command.GetType().Name}");
 
+            // No bridge, no orders: an automated ship takes no plotted action of its own.
+            if (ShipActionCommands.Contains(command.GetType()) && RejectAutomated(commanded) is { } automated)
+                return automated;
+
             return translate(faction, commanded, command);
         }
 
@@ -1231,6 +1235,9 @@ namespace Pulsar4X.Engine.Api
             if (ship.FactionOwnerID != faction.Id)
                 return CommandResult.Reject("The flagship must be one of your own ships.");
 
+            if (ShipCrew.Automated(ship))
+                return CommandResult.Reject("An automated ship (no bridge) cannot be a flagship. It may follow one.");
+
             return Dispatch(FleetOrder.SetFlagShip(faction.Id, commanded, ship));
         }
 
@@ -1317,10 +1324,26 @@ namespace Pulsar4X.Engine.Api
         {
             if (commanded.HasDataBlob<FleetDB>())
                 return null;
+            if (RejectAutomated(commanded) is { } automated)
+                return automated;
             if (!commanded.TryGetDataBlob<ShipInfoDB>(out var info) || info.CommanderID >= 0)
                 return null;
             return CommandResult.Reject("This ship has no captain. Plot an action instead.");
         }
+
+        /// <summary>Reason an automated ship (no bridge) takes no order of its own; it may ride in a fleet and follow the flagship.</summary>
+        public const string AutomatedShipNoOrders = "This ship has no bridge: it is automated and takes no orders of its own. Put it in a fleet to have it follow the flagship.";
+
+        private static CommandResult? RejectAutomated(Entity commanded)
+            => ShipCrew.Automated(commanded) ? CommandResult.Reject(AutomatedShipNoOrders) : null;
+
+        /// <summary>Plotted-action commands on one ship: an automated ship takes none of its own.</summary>
+        private static readonly HashSet<Type> ShipActionCommands = new()
+        {
+            typeof(Pulsar4X.Api.NewtonThrustCommand), typeof(Pulsar4X.Api.WarpMoveCommand), typeof(GoToBodyCommand),
+            typeof(WarpToBodyCommand), typeof(CirculariseCommand), typeof(ChangeAltitudeCommand), typeof(MatchOrbitCommand),
+            typeof(TransferFromWindowCommand),
+        };
 
         private CommandResult TranslateMoveToBody(Entity faction, Entity commanded, GameCommand command)
         {
@@ -1918,6 +1941,11 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Ok(Guid.NewGuid().ToString("N"));
             }
 
+            if (ShipCrew.Automated(commanded))
+                return CommandResult.Reject("This ship has no bridge: it is automated and has no captain.");
+            if (commanded.TryGetDataBlob<ComponentInstancesDB>(out _) && ShipCrew.SplitOf(commanded).OfficerSlots < 1)
+                return CommandResult.Reject("This ship's bridge has no officer slot for a captain.");
+
             if (!TryResolve(assign.CommanderId, out var officer)
                 || officer.FactionOwnerID != faction.Id
                 || !officer.TryGetDataBlob<CommanderDB>(out var commanderDB))
@@ -2157,9 +2185,11 @@ namespace Pulsar4X.Engine.Api
             var topUp = (TopUpCrewCommand)command;
             if (CrewTransferCheck(faction, commanded, topUp.ColonyId, out var colony) is { } rejected)
                 return rejected;
+            if (ShipCrew.Automated(commanded))
+                return CommandResult.Reject("This ship has no bridge: it is automated and carries no crew.");
             if (topUp.Count == 0 || topUp.Count < -1)
                 return CommandResult.Reject("Top up at least one crew, or -1 to fill.");
-            int room = ShipCrew.SplitOf(commanded).Capacity - ShipCrew.Aboard(commanded);
+            int room = ShipCrew.SplitOf(commanded).Capacity - ShipCrew.CrewAboard(commanded);
             if (room <= 0)
                 return CommandResult.Reject("The ship has a full crew.");
             if (ShipCrew.Available(colony, 1) <= 0)
@@ -2176,7 +2206,7 @@ namespace Pulsar4X.Engine.Api
                 return rejected;
             if (down.Count == 0 || down.Count < -1)
                 return CommandResult.Reject("Send down at least one crew, or -1 for everyone.");
-            if (ShipCrew.Aboard(commanded) <= 0)
+            if (ShipCrew.CrewAboard(commanded) <= 0)
                 return CommandResult.Reject("Nobody is aboard.");
             ShipCrew.ToPool(commanded, colony, down.Count);
             PublishEntityChanged(commanded);

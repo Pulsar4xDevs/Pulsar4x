@@ -1071,8 +1071,9 @@ namespace Pulsar4X.Engine.Api
                 .Select(g => new ShipCrewRow(g.Key, g.First().design.Name, g.Sum(c => c.count), g.First().design.CrewReq))
                 .OrderByDescending(r => r.Crew).ThenBy(r => r.Name)
                 .ToList();
-            if (ShipCrew.Tracked(ship) && ShipCrew.HasCaptain(ship))
-                crewRows.Add(new ShipCrewRow("captain", "Captain", 1, 1));
+            var splitNow = ShipCrew.Tracked(ship) ? ShipCrew.SplitOf(ship) : default;
+            if (crewRows.Count > 0 && ShipCrew.Tracked(ship) && splitNow.Automated)
+                crewRows.Clear(); // an automated ship runs with no crew
             var berthRows = parts
                 .Where(c => c.design != null && c.count > 0)
                 .GroupBy(c => c.design.UniqueID)
@@ -1091,13 +1092,26 @@ namespace Pulsar4X.Engine.Api
                 armorThickness)
             {
                 CrewByComponent = crewRows,
-                CrewBerths = ShipCrew.Berths(parts),
+                CrewBerths = splitNow.Automated && ShipCrew.Tracked(ship) ? 0 : ShipCrew.Berths(parts),
                 BerthsByComponent = berthRows,
+                OfficerSlots = ShipCrew.OfficerSlots(parts),
+                OfficerSlotsByComponent = parts
+                    .Where(c => c.design != null && c.count > 0)
+                    .GroupBy(c => c.design.UniqueID)
+                    .Select(g => new ShipBerthRow(g.Key, g.First().design.Name, g.Sum(c => c.count), ShipCrew.SlotsPer(g.First().design)))
+                    .Where(r => r.BerthsPerCopy > 0)
+                    .OrderByDescending(r => r.Berths).ThenBy(r => r.Name)
+                    .ToList(),
+                OfficersAboard = ShipCrew.OfficersAboard(ship),
+                OfficersRequired = ShipCrew.Tracked(ship) ? splitNow.OfficersRequired : 0,
+                PeopleAboard = ShipCrew.Aboard(ship),
+                Automated = ShipCrew.Tracked(ship) && splitNow.Automated,
+                NoCaptain = ShipCrew.NoCaptain(ship),
                 CrewTracked = ShipCrew.Tracked(ship),
-                CrewAboard = ShipCrew.Aboard(ship),
+                CrewAboard = ShipCrew.CrewAboard(ship),
                 CrewFactor = ShipCrew.WorkFactor(ship),
                 EngineCrewFactor = ShipCrew.EngineFactor(ship),
-                UnderCrewed = ShipCrew.Tracked(ship) && ShipCrew.Aboard(ship) < ShipCrew.SplitOf(ship).Required,
+                UnderCrewed = ShipCrew.IsUnderCrewed(ship),
                 CrewNote = ShipCrew.Note(ship),
             };
         }
@@ -1974,6 +1988,8 @@ namespace Pulsar4X.Engine.Api
                             _ => 0,
                         },
                         CrewBerths = design is ShipDesign withBerths ? withBerths.CrewBerths : 0,
+                        OfficerSlots = design is ShipDesign withSlots ? withSlots.OfficerSlots : 0,
+                        Automated = design is ShipDesign auto && !auto.NeedsCaptain,
                         CrewWarning = design is ShipDesign warned ? string.Join("; ", ShipCrew.DesignCrewWarnings(warned.Components)) : "",
                         MountFlags = mountFlags,
                         ComponentType = componentType,
@@ -2630,6 +2646,8 @@ namespace Pulsar4X.Engine.Api
                     Infrastructure = InfrastructureSuitability.WindowOf(design),
                     CrewRequired = design.CrewReq,
                     Berths = ShipCrew.Berths(new[] { (design, 1) }),
+                    OfficerSlots = ShipCrew.SlotsPer(design),
+                    IsBridge = ShipCrew.IsBridge(design),
                     MassPerUnit = design.MassPerUnit,
                     VolumePerUnit = design.VolumePerUnit,
                     CreditCost = design.CreditCost,
@@ -2890,9 +2908,13 @@ namespace Pulsar4X.Engine.Api
                 LogisticsSystemIds = LogisticsSpan.SystemIds(ship),
                 CrewRequired = ShipCrew.Tracked(ship) ? ShipCrew.SplitOf(ship).Required : shipInfo?.Design?.CrewReq ?? 0,
                 CrewBerths = ShipCrew.Tracked(ship) ? ShipCrew.SplitOf(ship).Berths : shipInfo?.Design?.CrewBerths ?? 0,
-                CrewAboard = ShipCrew.Aboard(ship),
+                OfficerSlots = ShipCrew.Tracked(ship) ? ShipCrew.SplitOf(ship).OfficerSlots : shipInfo?.Design?.OfficerSlots ?? 0,
+                CrewAboard = ShipCrew.CrewAboard(ship),
+                OfficersAboard = ShipCrew.OfficersAboard(ship),
                 CrewTracked = ShipCrew.Tracked(ship),
-                UnderCrewed = ShipCrew.Tracked(ship) && ShipCrew.Aboard(ship) < ShipCrew.SplitOf(ship).Required,
+                Automated = ShipCrew.Tracked(ship) ? ShipCrew.SplitOf(ship).Automated : shipInfo?.Design is { NeedsCaptain: false },
+                NoCaptain = ShipCrew.NoCaptain(ship),
+                UnderCrewed = ShipCrew.IsUnderCrewed(ship),
             };
         }
 
