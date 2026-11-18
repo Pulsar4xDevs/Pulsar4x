@@ -200,6 +200,7 @@ namespace Pulsar4X.Client
 
             ui.SelectedId = selectedId;
             ImGui.PopID();
+            MarketAppraisalDisplay.DrawWindow();
         }
 
         static void DrawToolbar(EntitySnapshot entity, MarketView market, OfficeUi ui, GlobalUIState uiState, List<MarketGoodView> listed)
@@ -459,6 +460,12 @@ namespace Pulsar4X.Client
             var range = CurrentRange(ui, now, earliest);
             string title = Title(ui, listed, selectedGood, selectedChoice);
             DrawTitle(ui, history, selectedId, title, range);
+            if (!ui.Compare && selectedId.Length > 0)
+            {
+                string goodName = selectedGood?.Name ?? selectedChoice?.Name ?? selectedId;
+                decimal? ask = selectedGood?.Ask;
+                MarketAppraisalDisplay.DrawButton(entity.Id, selectedId, goodName, ask, uiState.GameClient);
+            }
 
             var facts = BuildFacts(ui, history, listed, selectedGood, selectedId);
             DrawFacts(facts);

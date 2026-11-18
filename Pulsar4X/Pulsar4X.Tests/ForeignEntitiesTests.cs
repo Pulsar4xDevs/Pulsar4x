@@ -24,12 +24,12 @@ namespace Pulsar4X.Tests
         };
 
         [Test]
-        public void FactionName_UsesTheStanceRow_OrUnknownFaction()
+        public void FactionName_UsesTheStanceRow_OrFoldedCompany()
         {
             Assert.AreEqual("Ceres Depot Authority", ForeignEntities.FactionName(Stances, 7));
             Assert.AreEqual("Luna Concord", ForeignEntities.FactionName(Stances, 8));
-            Assert.AreEqual("Unknown faction", ForeignEntities.FactionName(Stances, 12345));
-            Assert.AreEqual("Unknown faction", ForeignEntities.FactionName(Array.Empty<FactionStanceRow>(), 7));
+            Assert.AreEqual("Folded company", ForeignEntities.FactionName(Stances, 12345));
+            Assert.AreEqual("Folded company", ForeignEntities.FactionName(Array.Empty<FactionStanceRow>(), 7));
         }
 
         [Test]

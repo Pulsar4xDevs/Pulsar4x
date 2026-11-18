@@ -11,7 +11,8 @@ namespace Pulsar4X.Client
     public static class ForeignEntities
     {
         /// <summary>
-        /// Owner of a non-owned entity, for display. Falls back to "Unknown faction" when the stance list has no row.
+        /// Owner of a non-owned entity, for display. Falls back to "Folded company" when the stance list has no row
+        /// (the faction was removed mid-game, or is not yet known).
         /// </summary>
         public static string FactionName(IReadOnlyList<FactionStanceRow> stances, int factionId)
         {
@@ -23,7 +24,7 @@ namespace Pulsar4X.Client
                         return row.Name;
                 }
             }
-            return "Unknown faction";
+            return "Folded company";
         }
 
         /// <summary>Colonies in one system, in snapshot order.</summary>

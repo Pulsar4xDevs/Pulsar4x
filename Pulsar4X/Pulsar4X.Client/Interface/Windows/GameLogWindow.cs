@@ -44,6 +44,8 @@ namespace Pulsar4X.Client
                 ("PowerShortage", "Power shortage"),
                 ("BudgetDay", "Budget day"),
                 ("CrewTransferred", "Crew transferred"),
+                ("NpcCompanySpawned", "Company founded"),
+                ("NpcCompanyFolded", "Company folded"),
             }),
             ("Combat", new[]
             {
