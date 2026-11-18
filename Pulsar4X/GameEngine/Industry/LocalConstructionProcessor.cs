@@ -81,8 +81,10 @@ public class LocalConstructionProcessor : IHotloopProcessor
     }
 
     /// <summary>
-    /// Null when a refit can run: the ship is in range, its parts are aboard, the mounts are in the
-    /// warehouse and the warehouse has room for what comes off. Otherwise what is missing.
+    /// Null when a refit can run: the ship is in range, its parts to remove are aboard and every part to
+    /// mount is in the warehouse. Otherwise why not. Storage type and room never block a refit. A part that is
+    /// not in storage yet is "Waiting for X": the job claims a stored part of that design as soon as one
+    /// appears (a factory job finished, a crate delivered) and then runs. Claiming is done here.
     /// </summary>
     internal static string? RefitBlocker(Entity yard, CargoStorageDB storage, ShipRefitJob job)
     {
@@ -96,38 +98,75 @@ public class LocalConstructionProcessor : IHotloopProcessor
             if (!ShipRefitJob.OnShip(ship, part.ID))
                 return ShipRefitJob.NotOnShip;
         }
+
+        ClaimStoredParts(yard, storage, job);
+        var waiting = new List<string>();
         foreach (var part in job.Mount)
         {
             if (storage.GetUnitsStored(part, false) < 1)
-                return ShipRefitJob.NotInWarehouse;
+                waiting.Add(part.Name);
         }
-        return CargoFits(storage, job) ? null : ShipRefitJob.NoRoom;
+        waiting.AddRange(WaitingDesignNames(yard, job));
+        return waiting.Count == 0 ? null : ShipRefitJob.WaitingFor + string.Join(", ", waiting);
     }
 
-    static bool CargoFits(CargoStorageDB storage, ShipRefitJob job)
+    /// <summary>Names of the designs the job still needs a stored part for.</summary>
+    internal static List<string> WaitingDesignNames(Entity yard, ShipRefitJob job)
     {
-        var need = new Dictionary<string, double>();
-        foreach (var part in job.Remove)
-            AddVolume(need, part.CargoTypeID, part.VolumePerUnit);
-        foreach (var part in job.Mount)
-            AddVolume(need, part.CargoTypeID, -part.VolumePerUnit);
+        var names = new List<string>();
+        FactionInfoDB? info = FactionInfo(yard);
+        foreach (var id in job.MountDesignIds)
+            names.Add(info != null && info.ComponentDesigns.TryGetValue(id, out var design) ? design.Name : id);
+        return names;
+    }
 
-        foreach (var (cargoType, volume) in need)
+    static FactionInfoDB? FactionInfo(Entity yard)
+        => yard.Manager?.Game is { } game
+            && game.Factions.TryGetValue(yard.FactionOwnerID, out var faction)
+            && faction.TryGetDataBlob<FactionInfoDB>(out var info) ? info : null;
+
+    /// <summary>
+    /// Moves a stored part of each still-wanted design into the job's mount list, which reserves it.
+    /// A part stored as a stack of the design becomes one instance first.
+    /// </summary>
+    static void ClaimStoredParts(Entity yard, CargoStorageDB storage, ShipRefitJob job)
+    {
+        if (job.MountDesignIds.Count == 0)
+            return;
+        var info = FactionInfo(yard);
+        if (info == null)
+            return;
+        foreach (var id in job.MountDesignIds.ToArray())
         {
-            if (volume <= 0)
+            if (!info.ComponentDesigns.TryGetValue(id, out var design))
                 continue;
-            if (!storage.TypeStores.TryGetValue(cargoType, out var store))
-                return false;
-            if (store.FreeVolume + 1e-9 < volume)
-                return false;
+            var found = FindStoredPart(yard, storage, design);
+            if (found == null)
+                continue;
+            job.Mount.Add(found);
+            job.MountDesignIds.Remove(id);
         }
-        return true;
     }
 
-    static void AddVolume(Dictionary<string, double> need, string cargoType, double volume)
+    static ComponentInstance? FindStoredPart(Entity yard, CargoStorageDB storage, ComponentDesign design)
     {
-        need.TryGetValue(cargoType, out var current);
-        need[cargoType] = current + volume;
+        foreach (var (instance, _) in CargoMath.InstancesOf(storage, design))
+        {
+            if (!ShipRefitJob.Reserved(yard, instance.ID))
+                return instance;
+        }
+
+        if (storage.GetUnitsStored(design, false) < 1)
+            return null;
+        var fresh = new ComponentInstance(design);
+        if (storage.RemoveCargoByUnit(design, 1) < 1)
+            return null;
+        if (storage.AddCargoByUnitUnbounded(fresh) < 1)
+        {
+            storage.AddCargoByUnitUnbounded(design);
+            return null;
+        }
+        return fresh;
     }
 
     internal static bool TryApplyRefit(Entity yard, CargoStorageDB storage, ShipRefitJob job)
@@ -162,7 +201,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
         var stored = new List<ComponentInstance>();
         foreach (var part in removed)
         {
-            if (storage.AddCargoByUnit(part, 1) < 1)
+            if (storage.AddCargoByUnitUnbounded(part) < 1)
             {
                 foreach (var back in stored)
                     storage.RemoveCargoByUnit(back, 1);
@@ -248,7 +287,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
         foreach (var part in taken)
         {
             if (storage.GetUnitsStored(part, false) < 1)
-                storage.AddCargoByUnit(part, 1);
+                storage.AddCargoByUnitUnbounded(part);
         }
     }
 

@@ -186,7 +186,7 @@ public class CargoTransferDataDB : BaseDataBlob
         }
 
         if (sourceStore == null
-            || !sourceStore.TypeStores.TryGetValue(cargoItem.CargoTypeID, out var store)
+            || !sourceStore.TypeStores.TryGetValue(sourceStore.StoreKey(cargoItem), out var store)
             || !store.CurrentStoreInUnits.TryGetValue(cargoItem.ID, out var amountInStore))
         {
             held.Add((cargoItem, 0, 0));
@@ -196,7 +196,7 @@ public class CargoTransferDataDB : BaseDataBlob
         long room = long.MaxValue;
         if (!(cargoItem is SpeciesCargo && OnColonyBooks(destEntity)))
         {
-            if (destStore != null && destStore.TypeStores.ContainsKey(cargoItem.CargoTypeID))
+            if (destStore != null && destStore.TypeStores.ContainsKey(destStore.StoreKey(cargoItem)))
                 room = Math.Max(0, CargoMath.GetFreeUnitSpace(destStore, cargoItem));
             else
                 room = 0;
@@ -295,7 +295,7 @@ public class CargoTransferDataDB : BaseDataBlob
         {
             if (item == null || count <= 0)
                 continue;
-            if (!store.TypeStores.TryGetValue(item.CargoTypeID, out var type))
+            if (!store.TypeStores.TryGetValue(store.StoreKey(item), out var type))
                 continue;
             if (type.CurrentStoreInUnits.ContainsKey(item.ID))
                 type.CurrentStoreInUnits[item.ID] += count;

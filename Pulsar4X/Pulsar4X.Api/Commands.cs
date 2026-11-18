@@ -634,7 +634,11 @@ public sealed record QueueShipRefitCommand(
     IReadOnlyList<int> RemoveInstanceIds,
     IReadOnlyList<int> MountInstanceIds,
     /// <summary>When set, a finished refit whose parts match this design adopts it. Null keeps the old design.</summary>
-    string? TargetDesignId = null) : GameCommand(TargetEntityId);
+    string? TargetDesignId = null,
+    /// <summary>Parts the refit needs that are not in the warehouse yet: component design ids, one per part
+    /// (<see cref="RefitDesignDiffResult.Missing"/> gives them). The job waits ("Waiting for X"), spends no
+    /// points, and claims a stored part of each design when one appears. Storage type never blocks it.</summary>
+    IReadOnlyList<string>? MountDesignIds = null) : GameCommand(TargetEntityId);
 
 /// <summary>Replace the facility behind a production line with another design of the same template.
 /// The colony queues the new design as a normal mount (a stored crate) or assemble (site-only). When it finishes

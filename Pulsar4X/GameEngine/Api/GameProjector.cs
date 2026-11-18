@@ -2255,7 +2255,8 @@ namespace Pulsar4X.Engine.Api
             return new ShipRefitView(yard.GetName(factionId), cost, done, cost <= 0 ? 0 : (double)done / cost)
             {
                 Removing = refit.Remove.Select(part => part.Name).ToList(),
-                Mounting = refit.Mount.Select(part => part.Name).ToList(),
+                Mounting = refit.Mount.Select(part => part.Name)
+                    .Concat(LocalConstructionProcessor.WaitingDesignNames(yard, refit)).ToList(),
             };
         }
 
@@ -2276,7 +2277,9 @@ namespace Pulsar4X.Engine.Api
             return new RefitJobInfo(refit.ShipEntityId, shipName, fromDesign, toDesign)
             {
                 Removing = refit.Remove.Select(part => part.Name).ToList(),
-                Mounting = refit.Mount.Select(part => part.Name).ToList(),
+                Mounting = refit.Mount.Select(part => part.Name)
+                    .Concat(LocalConstructionProcessor.WaitingDesignNames(yard, refit)).ToList(),
+                WaitingFor = LocalConstructionProcessor.WaitingDesignNames(yard, refit),
                 WaitReason = job.WaitReason,
                 PointsPerDay = perDay,
             };

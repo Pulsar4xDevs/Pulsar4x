@@ -319,7 +319,7 @@ namespace Pulsar4X.Industry
 
             if (!LocalConstructionProcessor.TryApplyRefit(yard, storage, refit))
             {
-                job.WaitReason = ShipRefitJob.NoRoom;
+                job.WaitReason = ShipRefitJob.WaitingFor + "parts";
                 job.Status = IndustryJobStatus.MissingResources;
                 return;
             }

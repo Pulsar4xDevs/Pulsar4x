@@ -2544,7 +2544,7 @@ namespace Pulsar4X.Engine.Api
 
             var instance = instances[0];
             if (!commanded.TryGetDataBlob<Pulsar4X.Storage.CargoStorageDB>(out var storage)
-                || !storage.TypeStores.ContainsKey(instance.CargoTypeID))
+                || !storage.TypeStores.ContainsKey(storage.StoreKey(instance)))
                 return CommandResult.Reject("The entity has no cargo storage that can hold the component.");
 
             if (!_game.OrderHandler.HandleOrder(UninstallComponentInstanceOrder.Create(commanded, instance)))
@@ -2692,7 +2692,17 @@ namespace Pulsar4X.Engine.Api
                 mount.Add(instance);
             }
 
-            var reason = ShipRefitJob.Rejection(commanded, refit.ProductionLineId, ship, remove, mount);
+            // Parts not in the warehouse yet: the job waits for each ("Waiting for <part>") and then runs.
+            var wanted = new List<ComponentDesign>();
+            foreach (var designId in refit.MountDesignIds ?? Array.Empty<string>())
+            {
+                if (!faction.TryGetDataBlob<FactionInfoDB>(out var partInfo)
+                    || !partInfo.ComponentDesigns.TryGetValue(designId, out var partDesign))
+                    return CommandResult.Reject(ShipRefitJob.UnknownPart);
+                wanted.Add(partDesign);
+            }
+
+            var reason = ShipRefitJob.Rejection(commanded, refit.ProductionLineId, ship, remove, mount, wanted);
             if (reason != null)
                 return CommandResult.Reject(reason);
             string? targetDesignId = string.IsNullOrEmpty(refit.TargetDesignId) ? null : refit.TargetDesignId;
@@ -2701,7 +2711,7 @@ namespace Pulsar4X.Engine.Api
                     || !info.ShipDesigns.ContainsKey(targetDesignId)))
                 return CommandResult.Reject(ShipRefitJob.UnknownDesign);
             return Dispatch(QueueShipRefitOrder.Create(
-                commanded, refit.ProductionLineId, ship, remove, mount, targetDesignId));
+                commanded, refit.ProductionLineId, ship, remove, mount, targetDesignId, wanted));
         }
 
         static bool TryResolveShip(Entity yard, int shipId, out Entity ship)

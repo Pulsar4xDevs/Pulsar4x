@@ -1496,10 +1496,13 @@ public sealed record RefitJobInfo(int ShipEntityId, string ShipName, string From
     /// <summary>Names of the parts coming off the ship.</summary>
     public IReadOnlyList<string> Removing { get; init; } = Array.Empty<string>();
 
-    /// <summary>Names of the parts going on from the warehouse.</summary>
+    /// <summary>Names of the parts going on: those claimed in the warehouse and those still awaited.</summary>
     public IReadOnlyList<string> Mounting { get; init; } = Array.Empty<string>();
 
-    /// <summary>Why the refit is stalled (ship out of range, part missing, no warehouse room). Empty when it can run.</summary>
+    /// <summary>Names of the parts not in the warehouse yet (also in <see cref="Mounting"/>). Empty when none are awaited.</summary>
+    public IReadOnlyList<string> WaitingFor { get; init; } = Array.Empty<string>();
+
+    /// <summary>Why the refit is stalled: "That ship is not in transfer range.", "That part is not on the ship." or "Waiting for <part>[, <part>]". Storage type and room never stall it. Empty when it can run.</summary>
     public string WaitReason { get; init; } = "";
 
     /// <summary>The yard's ship-refit points per day, shared by every refit job on the colony. Days left is about ProductionPointsLeft / PointsPerDay.</summary>

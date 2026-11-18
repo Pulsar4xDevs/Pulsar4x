@@ -27,7 +27,8 @@ public class ShipRefitJob
     public const string NothingToRefit = "Nothing to refit.";
     public const string NotAShipyard = "That line is not a shipyard.";
     public const string AlreadyListed = "That part is already in a refit.";
-    public const string NoRoom = "The warehouse has no room for the parts that come off.";
+    public const string UnknownPart = "That part design is not available.";
+    public const string WaitingFor = "Waiting for ";
     public const string UnknownDesign = "That design is not available.";
 
     public int ShipEntityId { get; set; }
@@ -35,6 +36,12 @@ public class ShipRefitJob
     public List<ComponentInstance> Remove { get; set; } = new();
 
     public List<ComponentInstance> Mount { get; set; } = new();
+
+    /// <summary>
+    /// Parts to mount that are not in the warehouse yet, by component design id (one entry per part).
+    /// The job claims a stored part of each design when one appears, then moves it into <see cref="Mount"/>.
+    /// </summary>
+    public List<string> MountDesignIds { get; set; } = new();
 
     /// <summary>Copied at queue time. A later edit to a part's mass does not change it. The industry job spends it.</summary>
     public long PointCost { get; set; }
@@ -46,12 +53,23 @@ public class ShipRefitJob
     {
     }
 
-    public ShipRefitJob(int shipEntityId, List<ComponentInstance> remove, List<ComponentInstance> mount)
+    public ShipRefitJob(
+        int shipEntityId, List<ComponentInstance> remove, List<ComponentInstance> mount,
+        IReadOnlyList<ComponentDesign>? wanted = null)
     {
         ShipEntityId = shipEntityId;
         Remove = remove;
         Mount = mount;
-        PointCost = Math.Max(1, CostOf(remove) + CostOf(mount));
+        long cost = CostOf(remove) + CostOf(mount);
+        if (wanted != null)
+        {
+            foreach (var design in wanted)
+            {
+                MountDesignIds.Add(design.UniqueID);
+                cost += LocalConstructionJob.MountCost(design.MassPerUnit);
+            }
+        }
+        PointCost = Math.Max(1, cost);
     }
 
     public static long CostOf(IEnumerable<ComponentInstance> parts)
@@ -74,7 +92,8 @@ public class ShipRefitJob
     /// <summary>Null when the refit can be queued.</summary>
     public static string? Rejection(
         Entity yard, string lineId, Entity ship,
-        IReadOnlyList<ComponentInstance> remove, IReadOnlyList<ComponentInstance> mount)
+        IReadOnlyList<ComponentInstance> remove, IReadOnlyList<ComponentInstance> mount,
+        IReadOnlyList<ComponentDesign>? wanted = null)
     {
         if (!yard.TryGetDataBlob<LocalConstructionDB>(out var construction) || construction.RefitPointsPerDay <= 0)
             return NoRefitRate;
@@ -91,8 +110,13 @@ public class ShipRefitJob
             return OverSlip;
         if (TryFind(ship, out _, out _))
             return InRefit;
-        if (remove.Count == 0 && mount.Count == 0)
+        if (remove.Count == 0 && mount.Count == 0 && (wanted == null || wanted.Count == 0))
             return NothingToRefit;
+        foreach (var design in wanted ?? Array.Empty<ComponentDesign>())
+        {
+            if (!IsShipPart(design))
+                return IsColonyInstallation(design) ? ColonyInstallation : NotShipPart;
+        }
 
         var seen = new HashSet<int>();
         foreach (var part in remove)
@@ -173,7 +197,7 @@ public class ShipRefitJob
         return false;
     }
 
-    static bool Reserved(Entity yard, int componentId)
+    internal static bool Reserved(Entity yard, int componentId)
     {
         if (yard.Manager == null)
             return false;

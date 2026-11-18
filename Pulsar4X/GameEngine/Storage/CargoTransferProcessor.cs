@@ -128,7 +128,7 @@ namespace Pulsar4X.Storage
                 // Escrow only took the units. Release the reserved volume once, and take the mass
                 // off the source once, for the units that actually left. A colony's books are not
                 // a store: boarding must not change its warehouse mass or volume.
-                if (!fromBooks && moved > 0 && moveFrom.TypeStores.TryGetValue(cargoItem.CargoTypeID, out var store))
+                if (!fromBooks && moved > 0 && moveFrom.TypeStores.TryGetValue(moveFrom.StoreKey(cargoItem), out var store))
                 {
                     store.FreeVolume += moved * cargoItem.VolumePerUnit;
                     moveFrom.TotalStoredMass -= moved * cargoItem.MassPerUnit;
@@ -163,7 +163,7 @@ namespace Pulsar4X.Storage
         {
             if (count <= 0 || store == null || item == null)
                 return;
-            if (!store.TypeStores.TryGetValue(item.CargoTypeID, out var type))
+            if (!store.TypeStores.TryGetValue(store.StoreKey(item), out var type))
                 return;
             if (type.CurrentStoreInUnits.ContainsKey(item.ID))
                 type.CurrentStoreInUnits[item.ID] += count;

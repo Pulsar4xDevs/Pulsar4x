@@ -28,12 +28,14 @@ public class QueueShipRefitOrder : EntityAction
     private List<ComponentInstance> _remove;
     private List<ComponentInstance> _mount;
     private string? _targetDesignId;
+    private IReadOnlyList<ComponentDesign>? _wanted;
 
     private QueueShipRefitOrder(
         Entity yard, string lineId, Entity ship,
         List<ComponentInstance> remove, List<ComponentInstance> mount,
-        string? targetDesignId)
+        string? targetDesignId, IReadOnlyList<ComponentDesign>? wanted)
     {
+        _wanted = wanted;
         _yard = yard;
         _ship = ship;
         _lineId = lineId;
@@ -49,8 +51,8 @@ public class QueueShipRefitOrder : EntityAction
     public static QueueShipRefitOrder Create(
         Entity yard, string lineId, Entity ship,
         List<ComponentInstance> remove, List<ComponentInstance> mount,
-        string? targetDesignId = null)
-        => new QueueShipRefitOrder(yard, lineId, ship, remove, mount, targetDesignId);
+        string? targetDesignId = null, IReadOnlyList<ComponentDesign>? wanted = null)
+        => new QueueShipRefitOrder(yard, lineId, ship, remove, mount, targetDesignId, wanted);
 
     public override EntityAction Clone()
     {
@@ -63,13 +65,22 @@ public class QueueShipRefitOrder : EntityAction
             || !industry.ProductionLines.ContainsKey(_lineId))
             return;
 
-        var refit = new ShipRefitJob(_ship.Id, _remove, _mount);
+        var refit = new ShipRefitJob(_ship.Id, _remove, _mount, _wanted);
         refit.TargetDesignId = _targetDesignId;
         string shipName = _ship.TryGetDataBlob<NameDB>(out var name)
             ? name.GetName(_yard.FactionOwnerID)
             : _ship.Id.ToString();
         // A normal industry job on the yard's line: it shares the line and its points like any other job.
-        IndustryTools.AddJob(_yard, _lineId, IndustryJob.ForRefit(refit, JobName(shipName)));
+        var industryJob = IndustryJob.ForRefit(refit, JobName(shipName));
+        // Claim any wanted part already in storage now, and say what the job waits for.
+        if (_yard.TryGetDataBlob<Pulsar4X.Storage.CargoStorageDB>(out var storage))
+        {
+            string? blocker = LocalConstructionProcessor.RefitBlocker(_yard, storage, refit);
+            industryJob.WaitReason = blocker ?? "";
+            if (blocker != null)
+                industryJob.Status = Pulsar4X.DataStructures.IndustryJobStatus.MissingResources;
+        }
+        IndustryTools.AddJob(_yard, _lineId, industryJob);
         EventManager.Instance.Publish(
             Event.Create(
                 EventType.ShipRefitBegan,
@@ -101,6 +112,6 @@ public class QueueShipRefitOrder : EntityAction
     {
         if (_yard == null || _ship == null)
             return false;
-        return ShipRefitJob.Rejection(_yard, _lineId, _ship, _remove, _mount) == null;
+        return ShipRefitJob.Rejection(_yard, _lineId, _ship, _remove, _mount, _wanted) == null;
     }
 }

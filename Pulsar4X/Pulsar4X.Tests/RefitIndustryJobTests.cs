@@ -141,6 +141,97 @@ public class RefitIndustryJobTests
         Assert.That(ShipRefitJob.TryFind(ship, out _, out _), Is.False);
     }
 
+    [Test]
+    public void Warp_RefitMountingThenRemovingPassengerQuarters_Completes_WithNoPassengerStorage()
+    {
+        var (game, faction) = Start(WarpTech);
+        var (yard, lineId) = FindYard(game, faction);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        var line = yard.GetDataBlob<IndustryAbilityDB>().ProductionLines[lineId];
+        var storage = yard.GetDataBlob<CargoStorageDB>();
+        var quarters = PassengerQuarters(info);
+        Assert.That(storage.TypeStores.ContainsKey(quarters.CargoTypeID), Is.False, "the warehouse has no store of the part's own cargo type");
+        var ship = NewShip(yard, faction, info.ShipDesigns.Values.First(d => d.MassPerUnit <= line.MaxVolume));
+        var translator = new CommandTranslator(game);
+
+        // Mount: a Passenger Quarters in the warehouse goes onto the ship.
+        var crate = new ComponentInstance(quarters);
+        Assert.That(storage.AddCargoByUnit(crate, 1), Is.EqualTo(1), "a part is storable without its own cargo type");
+        var mounted = translator.Translate(faction, yard, new QueueShipRefitCommand(
+            yard.Id, lineId, ship.Id, Array.Empty<int>(), new[] { crate.ID }));
+        Assert.That(mounted.Accepted, Is.True, mounted.RejectionReason);
+        RunDays(yard, 60, () => ShipRefitJob.JobsOf(yard).Any());
+        Assert.That(ShipRefitJob.JobsOf(yard), Is.Empty, "the mount completed");
+        Assert.That(ShipRefitJob.OnShip(ship, crate.ID), Is.True);
+        Assert.That(storage.GetUnitsStored(crate, false), Is.EqualTo(0));
+
+        // Remove it again with the warehouse's general store full: the part still comes off and is kept.
+        foreach (var store in storage.TypeStores.Values)
+            store.FreeVolume = 0;
+        var removed = translator.Translate(faction, yard, new QueueShipRefitCommand(
+            yard.Id, lineId, ship.Id, new[] { crate.ID }, Array.Empty<int>()));
+        Assert.That(removed.Accepted, Is.True, removed.RejectionReason);
+        RunDays(yard, 60, () => ShipRefitJob.JobsOf(yard).Any());
+        Assert.That(ShipRefitJob.JobsOf(yard), Is.Empty, "the removal completed");
+        Assert.That(ShipRefitJob.OnShip(ship, crate.ID), Is.False);
+        Assert.That(storage.GetUnitsStored(crate, false), Is.EqualTo(1), "the removed part is in the warehouse");
+        Assert.That(storage.TypeStores.ContainsKey(quarters.CargoTypeID), Is.False, "no passenger store was needed");
+    }
+
+    [TestCase(WarpTech)]
+    [TestCase(EarlyTech)]
+    public void MissingPart_WaitsForIt_SpendsNothing_ThenCompletesWhenItIsStored(string scenario)
+    {
+        var (game, faction) = Start(scenario);
+        var (yard, lineId) = FindYard(game, faction);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        var line = yard.GetDataBlob<IndustryAbilityDB>().ProductionLines[lineId];
+        var storage = yard.GetDataBlob<CargoStorageDB>();
+        var quarters = AnyShipPart(info);
+        var ship = NewShip(yard, faction, info.ShipDesigns.Values.First(d => d.MassPerUnit <= line.MaxVolume));
+
+        var queued = new CommandTranslator(game).Translate(faction, yard, new QueueShipRefitCommand(
+            yard.Id, lineId, ship.Id, Array.Empty<int>(), Array.Empty<int>(), null, new[] { quarters.UniqueID }));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+        var job = line.Jobs.Single();
+        long cost = job.ProductionPointsCost;
+        Assert.That(job.WaitReason, Is.EqualTo("Waiting for " + quarters.Name));
+
+        RunDays(yard, 5, () => true);
+
+        Assert.That(job.ProductionPointsLeft, Is.EqualTo(cost), "no points spent while a part is missing");
+        Assert.That(job.Status, Is.EqualTo(Pulsar4X.DataStructures.IndustryJobStatus.MissingResources));
+        Assert.That(job.WaitReason, Is.EqualTo("Waiting for " + quarters.Name));
+        var view = new GameProjector(game).ProjectEntity(yard, faction.Id).GetView<IndustryView>()!
+            .ProductionLines.Single(l => l.Id == lineId).Jobs.Single();
+        Assert.That(view.Refit!.WaitReason, Is.EqualTo("Waiting for " + quarters.Name));
+        Assert.That(view.Refit.WaitingFor, Is.EqualTo(new[] { quarters.Name }));
+
+        var arrived = new ComponentInstance(quarters);
+        Assert.That(storage.AddCargoByUnit(arrived, 1), Is.EqualTo(1));
+        RunDays(yard, 60, () => ShipRefitJob.JobsOf(yard).Any());
+
+        Assert.That(ShipRefitJob.JobsOf(yard), Is.Empty, "it completed once the part was stored");
+        Assert.That(ship.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.Any(c => c.Design.UniqueID == quarters.UniqueID), Is.True);
+        Assert.That(storage.GetUnitsStored(arrived, false), Is.EqualTo(0));
+    }
+
+        static ComponentDesign AnyShipPart(FactionInfoDB info)
+        => info.ComponentDesigns.Values.FirstOrDefault(d => d.Name.StartsWith("Passenger Quarters")
+                && d.ComponentMountType.HasFlag(Pulsar4X.DataStructures.ComponentMountType.ShipComponent))
+            ?? info.ComponentDesigns.Values.First(d => d.IsValid && ShipRefitJob.IsShipPart(d)
+                && !LocalConstructionJob.IsSiteOnly(d));
+
+static ComponentDesign PassengerQuarters(FactionInfoDB info)
+        => info.ComponentDesigns.Values.First(d => d.Name.StartsWith("Passenger Quarters")
+            && d.ComponentMountType.HasFlag(Pulsar4X.DataStructures.ComponentMountType.ShipComponent));
+
+    static void RunDays(Entity yard, int max, Func<bool> keepGoing)
+    {
+        for (int day = 0; day < max && keepGoing(); day++)
+            new IndustryProcessor().ProcessEntity(yard, 0);
+    }
+
     [TestCase(WarpTech)]
     [TestCase(EarlyTech)]
     public void RemovingABridge_DropsItsSeat_AndDoesNotThrow(string scenario)
@@ -193,10 +284,9 @@ public class RefitIndustryJobTests
         throw new InvalidOperationException();
     }
 
-    /// <summary>Two ship designs that fit the slip and differ by parts the yard's warehouse can hold.</summary>
+    /// <summary>Two ship designs that fit the slip and differ by ship parts. Storage type does not matter to a refit.</summary>
     static (ShipDesign from, ShipDesign to) PickPair(Entity yard, FactionInfoDB info, IndustryAbilityDB.ProductionLine line)
     {
-        var stores = yard.GetDataBlob<CargoStorageDB>().TypeStores.Keys.ToHashSet();
         var designs = info.ShipDesigns.Values.Where(d => d.MassPerUnit <= line.MaxVolume).ToList();
         foreach (var from in designs)
         {
@@ -211,11 +301,11 @@ public class RefitIndustryJobTests
                 var moved = from.Components.Concat(to.Components)
                     .Where(c => a.GetValueOrDefault(c.Item1.UniqueID) != b.GetValueOrDefault(c.Item1.UniqueID))
                     .Select(c => c.Item1);
-                if (moved.All(p => ShipRefitJob.IsShipPart(p) && stores.Contains(p.CargoTypeID)))
+                if (moved.All(ShipRefitJob.IsShipPart))
                     return (from, to);
             }
         }
-        Assert.Fail("no two designs the yard's warehouse can refit between");
+        Assert.Fail("no two ship designs that differ by parts");
         throw new InvalidOperationException();
     }
 
