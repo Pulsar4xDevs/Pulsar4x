@@ -69,11 +69,20 @@ public class MultiFactionEarthTests
             .SelectMany(list => list).Sum(i => (long)i.Design.CrewReq);
         TestContext.Out.WriteLine($"{scenario} company Earth CrewReq = {crewReq}");
         Assert.That(crewReq, Is.EqualTo(6210));
-        // The 2,000-crew stock yard keeps its 200 component / 400 assembly points (x10 per crew).
+        // The 2,000-crew stock yard keeps its 400 assembly points; yards build only ships (no component points).
         var yard = company.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign["default-design-shipyard"].Single().Design;
         Assert.That(yard.CrewReq, Is.EqualTo(2000));
         var points = yard.GetAttribute<Pulsar4X.Industry.IndustryAtb>().IndustryPoints;
-        Assert.That(points["component-construction"], Is.EqualTo(200));
+        Assert.That(points.ContainsKey("component-construction"), Is.False);
+        // Components still come from factories on the company's Earth colony.
+        long componentPoints = company.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign.Values
+            .SelectMany(list => list)
+            .Where(i => i.Design.HasAttribute<Pulsar4X.Industry.IndustryAtb>())
+            .Select(i => i.Design.GetAttribute<Pulsar4X.Industry.IndustryAtb>())
+            .Where(a => a.IndustryPoints.ContainsKey("component-construction"))
+            .Sum(a => (long)a.IndustryPoints["component-construction"]);
+        TestContext.Out.WriteLine($"{scenario} company component-construction points = {componentPoints}");
+        Assert.That(componentPoints, Is.GreaterThan(0), "the company can still build components somewhere");
         Assert.That(points["ship-assembly"], Is.EqualTo(400));
 
         var playerInfo = player.GetDataBlob<FactionInfoDB>();
