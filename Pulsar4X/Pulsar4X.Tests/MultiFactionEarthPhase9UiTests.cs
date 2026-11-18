@@ -35,6 +35,27 @@ namespace Pulsar4X.Tests
                 Is.EqualTo("0.18 cr  (0.07 cr below the ask of 0.25 cr)"));
             Assert.That(MarketAppraisalDisplay.UnitCostVsAsk(0.3m, 0.25m),
                 Is.EqualTo("0.3 cr  (0.05 cr above the ask of 0.25 cr)"));
+            Assert.That(MarketAppraisalDisplay.Money(0m), Is.EqualTo("0 cr"));
+            Assert.That(MarketAppraisalDisplay.Money(0.000625m), Is.EqualTo("0.000625 cr"));
+            Assert.That(MarketAppraisalDisplay.Money(0.01m), Is.EqualTo("0.01 cr"));
+            Assert.That(MarketAppraisalDisplay.UnitCostVsAsk(0.000625m, 0.25m),
+                Is.EqualTo("0.000625 cr  (0.249375 cr below the ask of 0.25 cr)"));
+        }
+
+        [Test]
+        public void Quantity_ShowsFractions_WholeNumbers_AndZero()
+        {
+            Assert.That(MarketAppraisalDisplay.Quantity(0), Is.EqualTo("0"));
+            Assert.That(MarketAppraisalDisplay.Quantity(0d), Is.EqualTo("0"));
+            Assert.That(MarketAppraisalDisplay.Quantity(1), Is.EqualTo("1"));
+            Assert.That(MarketAppraisalDisplay.Quantity(2), Is.EqualTo("2"));
+            Assert.That(MarketAppraisalDisplay.Quantity(0.5), Is.EqualTo("0.5"));
+            Assert.That(MarketAppraisalDisplay.Quantity(0.5d), Is.EqualTo("0.5"));
+            Assert.That(MarketAppraisalDisplay.Quantity((double)0.5m), Is.EqualTo("0.5"));
+            Assert.That(MarketAppraisalDisplay.Quantity(1.25), Is.EqualTo("1.25"));
+            Assert.That(MarketAppraisalDisplay.Quantity(0.000625), Is.EqualTo("0.000625"));
+            // A current integer line quantity still reads as a whole number.
+            Assert.That(MarketAppraisalDisplay.Quantity(1L), Is.EqualTo("1"));
         }
 
         [Test]

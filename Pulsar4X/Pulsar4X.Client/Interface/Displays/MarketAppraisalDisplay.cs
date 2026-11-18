@@ -18,9 +18,26 @@ namespace Pulsar4X.Client
         static bool _open;
 
         public static string Money(decimal? amount)
-            => amount is decimal value
-                ? value.ToString("0.##", CultureInfo.InvariantCulture) + " cr"
-                : "—";
+        {
+            if (amount is not decimal value)
+                return "—";
+            if (value == 0)
+                return "0 cr";
+            // "0.##" hid labour like 0.000625 cr by rounding it to 0.00. Keep ordinary
+            // values short, but give small non-zero amounts enough significant figures.
+            return value.ToString("0.########", CultureInfo.InvariantCulture) + " cr";
+        }
+
+        /// <summary>
+        /// One line's quantity. Takes a <see cref="double"/> so it works with the current
+        /// integer field and a later fractional (double or decimal) field via a cast.
+        /// </summary>
+        public static string Quantity(double quantity)
+        {
+            if (quantity == 0)
+                return "0";
+            return quantity.ToString("0.########", CultureInfo.InvariantCulture);
+        }
 
         /// <summary>Unit cost against the current ask. "Unpriced" when the cost fields are null.</summary>
         public static string UnitCostVsAsk(decimal? unitCost, decimal? ask)
@@ -46,7 +63,7 @@ namespace Pulsar4X.Client
 
         public static string LineText(AppraisalLine line)
         {
-            string qty = line.Quantity.ToString("N0", CultureInfo.InvariantCulture);
+            string qty = Quantity((double)line.Quantity);
             return line.Name + "  " + qty + " × " + Money(line.UnitPrice) + " = " + Money(line.LineCost)
                 + "  (" + LineMarker(line) + ")";
         }
@@ -167,7 +184,7 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     ImGui.TextUnformatted(line.Name ?? line.CargoId);
                     ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(line.Quantity.ToString("N0", CultureInfo.InvariantCulture));
+                    ImGui.TextUnformatted(Quantity((double)line.Quantity));
                     ImGui.TableNextColumn();
                     ImGui.TextUnformatted(Money(line.UnitPrice));
                     ImGui.TableNextColumn();
