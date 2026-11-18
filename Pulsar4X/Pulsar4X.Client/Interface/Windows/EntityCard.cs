@@ -238,22 +238,25 @@ namespace Pulsar4X.Client
             // Track if window is closed via the X button
             bool windowOpen = true;
             string kindLabel = _commander != null ? _commander.Kind.ToString() : _bodyType.ToDescription();
-            if (Window.Begin(Title + " (" + kindLabel + ")" + "###" + EntityId, ref windowOpen, _flags))
+            using (var w = Window.Scope(Title + " (" + kindLabel + ")" + "###" + EntityId, ref windowOpen, _flags))
             {
-                _accentColor = accentColor;
-                DrawWindowAccents(accentColor);
-                DisplayHeader(accentColor);
-                DisplayContent();
-                // Measure content, not GetWindowSize: a card pinned to the bottom cannot grow down,
-                // so a too-short first frame would otherwise freeze the height and clip the links.
-                float actual = ImGui.GetCursorPos().Y + ImGui.GetStyle().WindowPadding.Y;
-                actual = ClampLaidOutHeight(actual, 48f, workHeight);
-                float pinnedY = workBottom - actual - BottomMargin;
-                ImGui.SetWindowPos(new Vector2(currentX, pinnedY));
-                _laidOutHeight = actual;
-                ScreenTop = pinnedY;
+                if (w.Visible)
+                {
+                    _accentColor = accentColor;
+                    DrawWindowAccents(accentColor);
+                    DisplayHeader(accentColor);
+                    DisplayContent();
+                    // Measure content, not GetWindowSize: a card pinned to the bottom cannot grow down,
+                    // so a too-short first frame would otherwise freeze the height and clip the links.
+                    float actual = ImGui.GetCursorPos().Y + ImGui.GetStyle().WindowPadding.Y;
+                    actual = ClampLaidOutHeight(actual, 48f, workHeight);
+                    float pinnedY = workBottom - actual - BottomMargin;
+                    ImGui.SetWindowPos(new Vector2(currentX, pinnedY));
+                    _laidOutHeight = actual;
+                    ScreenTop = pinnedY;
+            
+                }
             }
-            Window.End();
 
             ImGui.PopStyleColor(3);
             ImGui.PopStyleVar();

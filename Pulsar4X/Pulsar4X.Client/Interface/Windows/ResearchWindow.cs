@@ -83,52 +83,55 @@ namespace Pulsar4X.Client
             var research = galaxy?.Research;
 
             ImGui.SetNextWindowSize(new Vector2(1050, 675), ImGuiCond.FirstUseEver);
-            if (Window.Begin("Research and Development", ref IsActive, _flags))
+            using (var w = Window.Scope("Research and Development", ref IsActive, _flags))
             {
-                if(galaxy != null && research != null)
+                if (w.Visible)
                 {
-                    if (!ReferenceEquals(research, _research))
-                        RefreshDerivedData(research);
-
-                    // Labs are the faction's researcher entities in the viewed system (the server only
-                    // projects ResearcherView for the owning faction).
-                    var system = galaxy.GetSystem(_uiState.SelectedStarSystemId);
-                    var labs = system == null
-                        ? new List<EntitySnapshot>()
-                        : system.Entities.Where(e => e.HasView<ResearcherView>()).ToList();
-
-                    // Keep the selection valid, defaulting to the first lab so the
-                    // window is immediately usable without an extra click.
-                    EntitySnapshot? selectedLab = null;
-                    if(labs.Count > 0)
+                    if(galaxy != null && research != null)
                     {
-                        selectedLab = labs.FirstOrDefault(l => l.Id == _selectedLabId) ?? labs[0];
-                    }
-                    _selectedLabId = selectedLab?.Id;
+                        if (!ReferenceEquals(research, _research))
+                            RefreshDerivedData(research);
 
-                    Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                    var labListSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
-                    var detailSize = new Vector2(windowContentSize.X - Styles.LeftColumnWidthLg - 8, windowContentSize.Y);
+                        // Labs are the faction's researcher entities in the viewed system (the server only
+                        // projects ResearcherView for the owning faction).
+                        var system = galaxy.GetSystem(_uiState.SelectedStarSystemId);
+                        var labs = system == null
+                            ? new List<EntitySnapshot>()
+                            : system.Entities.Where(e => e.HasView<ResearcherView>()).ToList();
 
-                    if(ImGui.BeginChild("LabList", labListSize, ImGuiChildFlags.Borders))
-                    {
-                        DisplayHelpers.Header("Research Labs", "Select a lab to manage its research queue");
-                        DisplayLabList(labs);
-                    }
-                    ImGui.EndChild();
+                        // Keep the selection valid, defaulting to the first lab so the
+                        // window is immediately usable without an extra click.
+                        EntitySnapshot? selectedLab = null;
+                        if(labs.Count > 0)
+                        {
+                            selectedLab = labs.FirstOrDefault(l => l.Id == _selectedLabId) ?? labs[0];
+                        }
+                        _selectedLabId = selectedLab?.Id;
 
-                    ImGui.SameLine();
-                    if(ImGui.BeginChild("LabDetail", detailSize, ImGuiChildFlags.Borders))
-                    {
-                        if(selectedLab != null)
-                            DisplayLabDetail(selectedLab, research);
-                        else
-                            ImGui.TextColored(Styles.DescriptiveColor, "No research labs in this system.");
+                        Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                        var labListSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
+                        var detailSize = new Vector2(windowContentSize.X - Styles.LeftColumnWidthLg - 8, windowContentSize.Y);
+
+                        if(ImGui.BeginChild("LabList", labListSize, ImGuiChildFlags.Borders))
+                        {
+                            DisplayHelpers.Header("Research Labs", "Select a lab to manage its research queue");
+                            DisplayLabList(labs);
+                        }
+                        ImGui.EndChild();
+
+                        ImGui.SameLine();
+                        if(ImGui.BeginChild("LabDetail", detailSize, ImGuiChildFlags.Borders))
+                        {
+                            if(selectedLab != null)
+                                DisplayLabDetail(selectedLab, research);
+                            else
+                                ImGui.TextColored(Styles.DescriptiveColor, "No research labs in this system.");
+                        }
+                        ImGui.EndChild();
                     }
-                    ImGui.EndChild();
+            
                 }
             }
-            Window.End();
         }
 
         private void DisplayLabList(List<EntitySnapshot> labs)

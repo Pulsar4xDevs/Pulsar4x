@@ -343,146 +343,148 @@ namespace Pulsar4X.Client
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);
 
-            if (Window.Begin(_displayText, ref IsActive, _flags))
+            using (var w = Window.Scope(_displayText, ref IsActive, _flags))
             {
-                //put calcs that needs refreshing each frame in here. (ie calculations from mouse cursor position)
-                if (_endpointTargetOrbitWidget != null)
+                if (w.Visible)
                 {
-                    switch (CurrentState)
+                    //put calcs that needs refreshing each frame in here. (ie calculations from mouse cursor position)
+                    if (_endpointTargetOrbitWidget != null)
                     {
-                        case States.NeedsEntity:
+                        switch (CurrentState)
+                        {
+                            case States.NeedsEntity:
 
-                            break;
-                        case States.NeedsTarget:
-                            {
-
-                            }
-
-                            break;
-                        case States.NeedsInsertionPoint:
-                            {
-
-                                if (_strictNewtonMode)
+                                break;
+                            case States.NeedsTarget:
                                 {
-                                    if (_newtonUI != null)
+
+                                }
+
+                                break;
+                            case States.NeedsInsertionPoint:
+                                {
+
+                                    if (_strictNewtonMode)
+                                    {
+                                        if (_newtonUI != null)
+                                        {
+                                            if (NewtonUIDisplay())
+                                                InsertionCalcs();
+                                        }
+                                        CurrentState = States.NeedsActioning;
+                                    }
+                                    else
+                                    {
+                                        var system = System;
+                                        var orbitTarget = OrbitTarget;
+                                        if (system != null && orbitTarget != null)
+                                        {
+                                            var mouseWorldPos = _uiState.Camera.MouseWorldCoordinate_m();
+                                            var targetAbsPos = orbitTarget.AbsolutePositionM(system, _uiState.PrimarySystemDateTime);
+                                            _endpointInsertionPoint_m = mouseWorldPos - targetAbsPos; //relative to the target body
+
+                                            _moveWidget?.SetArrivalPosition(_endpointInsertionPoint_m);
+                                            _endpointTargetOrbit = OrbitalMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _endpointInsertionPoint_m, _endpointInitalVelocity_m, _departureDateTime);
+                                            _endpointTargetOrbitWidget.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
+                                        }
+                                    }
+
+                                    break;
+                                }
+
+                            case States.NeedsActioning:
+                                {
+                                    if (_strictNewtonMode && _newtonUI != null)
                                     {
                                         if (NewtonUIDisplay())
                                             InsertionCalcs();
                                     }
-                                    CurrentState = States.NeedsActioning;
-                                }
-                                else
-                                {
-                                    var system = System;
-                                    var orbitTarget = OrbitTarget;
-                                    if (system != null && orbitTarget != null)
+                                    else
                                     {
-                                        var mouseWorldPos = _uiState.Camera.MouseWorldCoordinate_m();
-                                        var targetAbsPos = orbitTarget.AbsolutePositionM(system, _uiState.PrimarySystemDateTime);
-                                        _endpointInsertionPoint_m = mouseWorldPos - targetAbsPos; //relative to the target body
-
-                                        _moveWidget?.SetArrivalPosition(_endpointInsertionPoint_m);
-                                        _endpointTargetOrbit = OrbitalMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _endpointInsertionPoint_m, _endpointInitalVelocity_m, _departureDateTime);
+                                        _endpointTargetOrbit = OrbitalMath.KeplerCircularFromPosition(_stdGravParamCurrentBody, _endpointInsertionPoint_m, _departureDateTime);
                                         _endpointTargetOrbitWidget.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
                                     }
-                                }
 
+                                    break;
+                                }
+                            default:
                                 break;
-                            }
-
-                        case States.NeedsActioning:
-                            {
-                                if (_strictNewtonMode && _newtonUI != null)
-                                {
-                                    if (NewtonUIDisplay())
-                                        InsertionCalcs();
-                                }
-                                else
-                                {
-                                    _endpointTargetOrbit = OrbitalMath.KeplerCircularFromPosition(_stdGravParamCurrentBody, _endpointInsertionPoint_m, _departureDateTime);
-                                    _endpointTargetOrbitWidget.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
-                                }
-
-                                break;
-                            }
-                        default:
-                            break;
+                        }
                     }
+
+
+                    ImGui.SetTooltip(_tooltipText);
+                    ImGui.Text("Target: ");
+                    if (TargetEntity != null)
+                    {
+                        ImGui.SameLine();
+                        ImGui.Text(TargetEntity.GetView<NameView>()?.Name ?? "Unknown");
+                    }
+
+                    if (ImGui.CollapsingHeader("Orbit Data"))
+                    {
+
+                        ImGui.Text("InsertionSpeed: ");
+                        ImGui.Text("Initial: "+Stringify.Distance(_endpointInitalSpeed_m) + "/s");
+                        ImGui.Text("Target: " + Stringify.Distance(_endpointTargetSpeed_m) + "/s");
+
+                        ImGui.Text("Eccentricity: ");
+                        ImGui.Text("Initial: "+Stringify.Quantity(_endpointInitialOrbit.Eccentricity));
+                        ImGui.Text("Target: "+Stringify.Quantity(_endpointTargetOrbit.Eccentricity));
+
+
+                        ImGui.Text("Apoapsis: ");
+                        ImGui.SameLine();
+                        ImGui.Text(Stringify.Distance(_endpointTargetOrbit.Apoapsis) + " (Alt: " + Stringify.Distance(_apAlt) + ")");
+
+                        ImGui.Text("Periapsis: ");
+                        ImGui.SameLine();
+                        ImGui.Text(Stringify.Distance(_endpointTargetOrbit.Periapsis) + " (Alt: " + Stringify.Distance(_peAlt) + ")");
+
+                        ImGui.Text("DepartureSpeed: ");
+                        ImGui.Text( Stringify.Distance( _departureOrbitalSpeed_m) + "/s");
+
+                        ImGui.Text("Departure Vector: ");
+                        ImGui.Text("X: " + Stringify.Distance(_departureState.vel.X)+ "/s");
+                        ImGui.Text("Y: " + Stringify.Distance(_departureState.vel.Y)+ "/s");
+
+                        ImGui.Text("Departure Angle: ");
+                        ImGui.SameLine();
+                        ImGui.Text(_departureProgradeAngle.ToString("g3") + " radians or " + Angle.ToDegrees(_departureProgradeAngle).ToString("F") + " deg ");
+
+                        ImGui.Text("Insertion Vector: ");
+                        ImGui.Text("X: " + Stringify.Distance(_endpointInitalVelocity_m.X)+ "/s");
+                        ImGui.Text("Y: " + Stringify.Distance(_endpointInitalVelocity_m.Y)+ "/s");
+                        ImGui.Text("Z: " + Stringify.Distance(_endpointInitalVelocity_m.Z)+ "/s");
+
+                        ImGui.Text("Insertion RelativePosition: ");
+                        ImGui.Text("X: " + Stringify.Distance(_endpointInsertionPoint_m.X));
+                        ImGui.Text("Y: " + Stringify.Distance(_endpointInsertionPoint_m.Y));
+                        ImGui.Text("Z: " + Stringify.Distance(_endpointInsertionPoint_m.Z));
+
+                        ImGui.Text("LoAN: ");
+                        ImGui.SameLine();
+                        ImGui.Text(_endpointTargetOrbit.LoAN.ToString("g3"));
+
+                        ImGui.Text("AoP: ");
+                        ImGui.SameLine();
+                        ImGui.Text(_endpointTargetOrbit.AoP.ToString("g3"));
+
+                        ImGui.Text("LoP Angle: ");
+                        ImGui.SameLine();
+                        ImGui.Text((_endpointTargetOrbit.LoAN + _endpointTargetOrbit.AoP).ToString("g3") + " radians or " + Angle.ToDegrees(_endpointTargetOrbit.LoAN + _endpointTargetOrbit.AoP).ToString("F") + " deg ");
+
+                        if (_endpointTargetOrbitWidget != null)
+                            ImGui.Text("Is Retrograde " + _endpointTargetOrbitWidget.IsRetrogradeOrbit.ToString());
+
+                    }
+
+                    if (ImGui.Button("Action Order") && CurrentState == States.NeedsActioning) //only do suff if clicked if it's usable.
+                    {
+                        fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
+                    }
+
                 }
-
-
-                ImGui.SetTooltip(_tooltipText);
-                ImGui.Text("Target: ");
-                if (TargetEntity != null)
-                {
-                    ImGui.SameLine();
-                    ImGui.Text(TargetEntity.GetView<NameView>()?.Name ?? "Unknown");
-                }
-
-                if (ImGui.CollapsingHeader("Orbit Data"))
-                {
-
-                    ImGui.Text("InsertionSpeed: ");
-                    ImGui.Text("Initial: "+Stringify.Distance(_endpointInitalSpeed_m) + "/s");
-                    ImGui.Text("Target: " + Stringify.Distance(_endpointTargetSpeed_m) + "/s");
-
-                    ImGui.Text("Eccentricity: ");
-                    ImGui.Text("Initial: "+Stringify.Quantity(_endpointInitialOrbit.Eccentricity));
-                    ImGui.Text("Target: "+Stringify.Quantity(_endpointTargetOrbit.Eccentricity));
-
-
-                    ImGui.Text("Apoapsis: ");
-                    ImGui.SameLine();
-                    ImGui.Text(Stringify.Distance(_endpointTargetOrbit.Apoapsis) + " (Alt: " + Stringify.Distance(_apAlt) + ")");
-
-                    ImGui.Text("Periapsis: ");
-                    ImGui.SameLine();
-                    ImGui.Text(Stringify.Distance(_endpointTargetOrbit.Periapsis) + " (Alt: " + Stringify.Distance(_peAlt) + ")");
-
-                    ImGui.Text("DepartureSpeed: ");
-                    ImGui.Text( Stringify.Distance( _departureOrbitalSpeed_m) + "/s");
-
-                    ImGui.Text("Departure Vector: ");
-                    ImGui.Text("X: " + Stringify.Distance(_departureState.vel.X)+ "/s");
-                    ImGui.Text("Y: " + Stringify.Distance(_departureState.vel.Y)+ "/s");
-
-                    ImGui.Text("Departure Angle: ");
-                    ImGui.SameLine();
-                    ImGui.Text(_departureProgradeAngle.ToString("g3") + " radians or " + Angle.ToDegrees(_departureProgradeAngle).ToString("F") + " deg ");
-
-                    ImGui.Text("Insertion Vector: ");
-                    ImGui.Text("X: " + Stringify.Distance(_endpointInitalVelocity_m.X)+ "/s");
-                    ImGui.Text("Y: " + Stringify.Distance(_endpointInitalVelocity_m.Y)+ "/s");
-                    ImGui.Text("Z: " + Stringify.Distance(_endpointInitalVelocity_m.Z)+ "/s");
-
-                    ImGui.Text("Insertion RelativePosition: ");
-                    ImGui.Text("X: " + Stringify.Distance(_endpointInsertionPoint_m.X));
-                    ImGui.Text("Y: " + Stringify.Distance(_endpointInsertionPoint_m.Y));
-                    ImGui.Text("Z: " + Stringify.Distance(_endpointInsertionPoint_m.Z));
-
-                    ImGui.Text("LoAN: ");
-                    ImGui.SameLine();
-                    ImGui.Text(_endpointTargetOrbit.LoAN.ToString("g3"));
-
-                    ImGui.Text("AoP: ");
-                    ImGui.SameLine();
-                    ImGui.Text(_endpointTargetOrbit.AoP.ToString("g3"));
-
-                    ImGui.Text("LoP Angle: ");
-                    ImGui.SameLine();
-                    ImGui.Text((_endpointTargetOrbit.LoAN + _endpointTargetOrbit.AoP).ToString("g3") + " radians or " + Angle.ToDegrees(_endpointTargetOrbit.LoAN + _endpointTargetOrbit.AoP).ToString("F") + " deg ");
-
-                    if (_endpointTargetOrbitWidget != null)
-                        ImGui.Text("Is Retrograde " + _endpointTargetOrbitWidget.IsRetrogradeOrbit.ToString());
-
-                }
-
-                if (ImGui.Button("Action Order") && CurrentState == States.NeedsActioning) //only do suff if clicked if it's usable.
-                {
-                    fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
-                }
-
-                Window.End();
             }
 
         }

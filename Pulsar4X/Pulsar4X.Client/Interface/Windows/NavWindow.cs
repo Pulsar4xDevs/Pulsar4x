@@ -219,108 +219,111 @@ namespace Pulsar4X.Client
 
             string entityName = entity.GetView<NameView>()?.Name ?? "Unknown";
             ImGui.SetNextWindowSize(new Vector2(860f, 560f), ImGuiCond.FirstUseEver);
-            if (Window.Begin("Nav Control: " + entityName, ref IsActive, _flags))
+            using (var w = Window.Scope("Nav Control: " + entityName, ref IsActive, _flags))
             {
-                ImGui.Columns(2, "##nav-window", true);
-                ManuverTree(_manuverLines.RootSequence);
-                ImGui.NextColumn();
-                if (_navMode == NavMode.None)
+                if (w.Visible)
                 {
-                    if (ImGui.Button("Manual Thrust"))
+                    ImGui.Columns(2, "##nav-window", true);
+                    ManuverTree(_manuverLines.RootSequence);
+                    ImGui.NextColumn();
+                    if (_navMode == NavMode.None)
                     {
-                        _manuverLines.AddNewEditNode(_uiState, _systemId, _entityId, _atDatetime);
-                        _navMode = NavMode.Thrust;
+                        if (ImGui.Button("Manual Thrust"))
+                        {
+                            _manuverLines.AddNewEditNode(_uiState, _systemId, _entityId, _atDatetime);
+                            _navMode = NavMode.Thrust;
+                        }
+
+                        if (ImGui.Button("Hohmann Transfer"))
+                        {
+                            _manuverLines.EditingNodes = new ManuverNode[2];
+                            _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
+                            var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
+                            _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
+                            _navMode = NavMode.HohmannTransfer;
+                        }
+
+                        ImGui.SameLine();
+                        if (ImGui.Button("Transfer Windows"))
+                        {
+                            _manuverLines.EditingNodes = new ManuverNode[2];
+                            _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
+                            _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
+                            if (_porkCeiling <= 0)
+                                _porkCeiling = (float)thrust.DeltaVMps;
+                            _navMode = NavMode.Porkchop;
+                        }
+
+                        if (ImGui.Button("Interplanetary Transfer"))
+                        {
+                            _pork.Reset();
+                            _porkAxesForId = int.MinValue;
+                            _plotTask = null;
+                            _plotError = "";
+                            if (_porkCeiling <= 0)
+                                _porkCeiling = (float)thrust.DeltaVMps;
+                            _navMode = NavMode.InterplanetaryTransfer;
+                        }
+
+                        if (ImGui.Button("Phase Change"))
+                        {
+                            _manuverLines.EditingNodes = new ManuverNode[2];
+                            _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
+                            var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
+                            _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
+                            _navMode = NavMode.PhaseChange;
+                        }
+
+                        if (ImGui.Button("Escape SOI"))
+                        {
+                            _manuverLines.EditingNodes = new ManuverNode[1];
+                            _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
+                            _navMode = NavMode.EscapeSOI;
+                        }
                     }
 
-                    if (ImGui.Button("Hohmann Transfer"))
+                    switch (_navMode)
                     {
-                        _manuverLines.EditingNodes = new ManuverNode[2];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
-                        var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
-                        _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
-                        _navMode = NavMode.HohmannTransfer;
+                        case NavMode.Edit:
+                            DisplayEditMode(thrust);
+                            break;
+                        case NavMode.Thrust:
+                            DisplayThrustMode(thrust);
+                            break;
+                        case NavMode.PhaseChange:
+                            DisplayPhaseChangeMode(system, entity, thrust, massVolume, currentKE);
+                            break;
+                        case NavMode.HohmannTransfer:
+                            DisplayHohmannMode(system, entity, soiParent, thrust, massVolume, currentKE);
+                            break;
+                        case NavMode.Porkchop:
+                            DisplayPorkchopMode(system, soiParent, thrust, currentKE);
+                            break;
+                        case NavMode.InterplanetaryTransfer:
+                            DisplayInterplanetaryMode(system, soiParent, thrust, massVolume, currentKE);
+                            break;
+                        case NavMode.EscapeSOI:
+                            DisplayEscapeSOI(system, entity, soiParent, thrust, massVolume, currentKE, orbit);
+                            break;
+                        case NavMode.None:
+                            break;
+                        default:
+                            break;
                     }
-
-                    ImGui.SameLine();
-                    if (ImGui.Button("Transfer Windows"))
-                    {
-                        _manuverLines.EditingNodes = new ManuverNode[2];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
-                        _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
-                        if (_porkCeiling <= 0)
-                            _porkCeiling = (float)thrust.DeltaVMps;
-                        _navMode = NavMode.Porkchop;
-                    }
-
-                    if (ImGui.Button("Interplanetary Transfer"))
-                    {
-                        _pork.Reset();
-                        _porkAxesForId = int.MinValue;
-                        _plotTask = null;
-                        _plotError = "";
-                        if (_porkCeiling <= 0)
-                            _porkCeiling = (float)thrust.DeltaVMps;
-                        _navMode = NavMode.InterplanetaryTransfer;
-                    }
-
-                    if (ImGui.Button("Phase Change"))
-                    {
-                        _manuverLines.EditingNodes = new ManuverNode[2];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
-                        var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
-                        _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
-                        _navMode = NavMode.PhaseChange;
-                    }
-
-                    if (ImGui.Button("Escape SOI"))
-                    {
-                        _manuverLines.EditingNodes = new ManuverNode[1];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
-                        _navMode = NavMode.EscapeSOI;
-                    }
+                    ImGui.Columns(1);
+                    ImGui.NewLine();
+                    double fuelMass = thrust.TotalFuelKg;
+                    double cargoMass = entity.GetView<CargoStorageView>()?.TotalStoredMassKg ?? 0;
+                    ImGui.Text("Availible Δv: " + Stringify.Velocity(thrust.DeltaVMps));
+                    ImGui.Text("Dry Mass:" + Stringify.Mass(massVolume.DryMassKg, "0.######"));
+                    ImGui.Text("Total Mass: " + Stringify.Mass(massVolume.MassKg));
+                    ImGui.Text("Non Fuel Cargo: " + Stringify.Mass(cargoMass - fuelMass));
+                    var fuelName = string.IsNullOrEmpty(thrust.FuelName) ? "Unknown" : thrust.FuelName;
+                    ImGui.Text(fuelName + " Fuel: " + Stringify.Mass(fuelMass));
+                    ImGui.Text("Total Thrust: " + Stringify.Thrust(thrust.ThrustNewtons));
+            
                 }
-
-                switch (_navMode)
-                {
-                    case NavMode.Edit:
-                        DisplayEditMode(thrust);
-                        break;
-                    case NavMode.Thrust:
-                        DisplayThrustMode(thrust);
-                        break;
-                    case NavMode.PhaseChange:
-                        DisplayPhaseChangeMode(system, entity, thrust, massVolume, currentKE);
-                        break;
-                    case NavMode.HohmannTransfer:
-                        DisplayHohmannMode(system, entity, soiParent, thrust, massVolume, currentKE);
-                        break;
-                    case NavMode.Porkchop:
-                        DisplayPorkchopMode(system, soiParent, thrust, currentKE);
-                        break;
-                    case NavMode.InterplanetaryTransfer:
-                        DisplayInterplanetaryMode(system, soiParent, thrust, massVolume, currentKE);
-                        break;
-                    case NavMode.EscapeSOI:
-                        DisplayEscapeSOI(system, entity, soiParent, thrust, massVolume, currentKE, orbit);
-                        break;
-                    case NavMode.None:
-                        break;
-                    default:
-                        break;
-                }
-                ImGui.Columns(1);
-                ImGui.NewLine();
-                double fuelMass = thrust.TotalFuelKg;
-                double cargoMass = entity.GetView<CargoStorageView>()?.TotalStoredMassKg ?? 0;
-                ImGui.Text("Availible Δv: " + Stringify.Velocity(thrust.DeltaVMps));
-                ImGui.Text("Dry Mass:" + Stringify.Mass(massVolume.DryMassKg, "0.######"));
-                ImGui.Text("Total Mass: " + Stringify.Mass(massVolume.MassKg));
-                ImGui.Text("Non Fuel Cargo: " + Stringify.Mass(cargoMass - fuelMass));
-                var fuelName = string.IsNullOrEmpty(thrust.FuelName) ? "Unknown" : thrust.FuelName;
-                ImGui.Text(fuelName + " Fuel: " + Stringify.Mass(fuelMass));
-                ImGui.Text("Total Thrust: " + Stringify.Thrust(thrust.ThrustNewtons));
             }
-            Window.End();
         }
 
         /// <summary>Submits one queued burn; the node time centres the burn like the engine does.</summary>

@@ -46,46 +46,49 @@ public class EntityFilterBar : UniquePulsarGuiWindow<EntityFilterBar>
         ImGui.SetNextWindowPos(new Vector2(xPos, 4));
         ImGui.SetNextWindowBgAlpha(0);
 
-        if (Window.Begin("###entity-filter-bar", _flags))
+        using (var w = Window.Scope("###entity-filter-bar", _flags))
         {
-            foreach (UserOrbitSettings.OrbitBodyType type in Enum.GetValues(typeof(UserOrbitSettings.OrbitBodyType)))
+            if (w.Visible)
             {
-                bool isVisible = prefs.ShouldDisplay(ViewKey, type);
-
-                var idx = (int)type;
-                if (idx > 0) ImGui.SameLine(0, 2);
-
-                // Style: bright when active, dim when filtered out
-                if (isVisible)
+                foreach (UserOrbitSettings.OrbitBodyType type in Enum.GetValues(typeof(UserOrbitSettings.OrbitBodyType)))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.3f, 0.5f, 0.8f, 0.9f));
-                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.4f, 0.6f, 0.9f, 1.0f));
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 1f, 1f, 1f));
-                }
-                else
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.2f, 0.2f, 0.6f));
-                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.3f, 0.3f, 0.3f, 0.8f));
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 0.8f));
-                }
+                    bool isVisible = prefs.ShouldDisplay(ViewKey, type);
 
-                var label = UserOrbitSettings.OrbitBodyTypeShortNames[idx];
+                    var idx = (int)type;
+                    if (idx > 0) ImGui.SameLine(0, 2);
 
-                if (ImGui.SmallButton($"{label}##filter-{type}"))
-                {
-                    prefs.ToggleFilter(ViewKey, type);
+                    // Style: bright when active, dim when filtered out
+                    if (isVisible)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.3f, 0.5f, 0.8f, 0.9f));
+                        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.4f, 0.6f, 0.9f, 1.0f));
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 1f, 1f, 1f));
+                    }
+                    else
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.2f, 0.2f, 0.6f));
+                        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.3f, 0.3f, 0.3f, 0.8f));
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 0.8f));
+                    }
+
+                    var label = UserOrbitSettings.OrbitBodyTypeShortNames[idx];
+
+                    if (ImGui.SmallButton($"{label}##filter-{type}"))
+                    {
+                        prefs.ToggleFilter(ViewKey, type);
+                    }
+
+                    ImGui.PopStyleColor(3);
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        var tip = UserOrbitSettings.OrbitBodyTypeTooltips[idx];
+                        ImGui.SetTooltip(isVisible ? $"Hide {tip}" : $"Show {tip}");
+                    }
                 }
-
-                ImGui.PopStyleColor(3);
-
-                if (ImGui.IsItemHovered())
-                {
-                    var tip = UserOrbitSettings.OrbitBodyTypeTooltips[idx];
-                    ImGui.SetTooltip(isVisible ? $"Hide {tip}" : $"Show {tip}");
-                }
+        
             }
         }
-        Window.End();
     }
 
     private float EstimateWidth()

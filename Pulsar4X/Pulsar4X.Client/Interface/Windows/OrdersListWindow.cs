@@ -114,97 +114,100 @@ namespace Pulsar4X.Client
             bool colony = entity.Kind == BodyKind.Colony;
 
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(550, 325), ImGuiCond.Once);
-            if (Window.Begin("Orders: " + entityName + "###" + UniqueName, ref IsActiveRef, _flags))
+            using (var w = Window.Scope("Orders: " + entityName + "###" + UniqueName, ref IsActiveRef, _flags))
             {
-                if (!colony && CanCancelGoal(ordersView?.goal))
+                if (w.Visible)
                 {
-                    if (ImGui.Button("Cancel now"))
-                        _uiState.GameClient?.SubmitCommandAsync(new CancelGoalCommand(entity.Id, CancelTiming.Now));
-                    ImGui.SameLine();
-                    if (ImGui.Button("Cancel when convenient"))
-                        _uiState.GameClient?.SubmitCommandAsync(new CancelGoalCommand(entity.Id, CancelTiming.WhenConvenient));
-                }
-
-                var tableFlags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingFixedFit;
-                if (ImGui.BeginTable("OrdersTable", 7, tableFlags))
-                {
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthFixed, 124);
-                    ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.WidthStretch);
-                    ImGui.TableSetupColumn("Mov", ImGuiTableColumnFlags.WidthFixed, 32);
-                    ImGui.TableSetupColumn("IE", ImGuiTableColumnFlags.WidthFixed, 32);
-                    ImGui.TableSetupColumn("IS", ImGuiTableColumnFlags.WidthFixed, 32);
-                    ImGui.TableSetupColumn("Pause", ImGuiTableColumnFlags.WidthFixed, 44);
-                    ImGui.TableSetupColumn("Cancel", ImGuiTableColumnFlags.WidthFixed, 64);
-                    ImGui.TableHeadersRow();
-
-                    if (orders.Any())
+                    if (!colony && CanCancelGoal(ordersView?.goal))
                     {
-                        foreach (var order in orders)
+                        if (ImGui.Button("Cancel now"))
+                            _uiState.GameClient?.SubmitCommandAsync(new CancelGoalCommand(entity.Id, CancelTiming.Now));
+                        ImGui.SameLine();
+                        if (ImGui.Button("Cancel when convenient"))
+                            _uiState.GameClient?.SubmitCommandAsync(new CancelGoalCommand(entity.Id, CancelTiming.WhenConvenient));
+                    }
+
+                    var tableFlags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingFixedFit;
+                    if (ImGui.BeginTable("OrdersTable", 7, tableFlags))
+                    {
+                        ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthFixed, 124);
+                        ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.WidthStretch);
+                        ImGui.TableSetupColumn("Mov", ImGuiTableColumnFlags.WidthFixed, 32);
+                        ImGui.TableSetupColumn("IE", ImGuiTableColumnFlags.WidthFixed, 32);
+                        ImGui.TableSetupColumn("IS", ImGuiTableColumnFlags.WidthFixed, 32);
+                        ImGui.TableSetupColumn("Pause", ImGuiTableColumnFlags.WidthFixed, 44);
+                        ImGui.TableSetupColumn("Cancel", ImGuiTableColumnFlags.WidthFixed, 64);
+                        ImGui.TableHeadersRow();
+
+                        if (orders.Any())
+                        {
+                            foreach (var order in orders)
+                            {
+                                ImGui.TableNextRow();
+                                ImGui.TableNextColumn();
+                                if (ImGui.Selectable(order.Name + "###" + order.OrderId, false, ImGuiSelectableFlags.SpanAllColumns))
+                                {
+                                }
+
+                                ImGui.TableNextColumn();
+                                ImGui.Text(order.Details);
+
+                                ImGui.TableNextColumn();
+                                if (order.UsesMovementLane)
+                                {
+                                    ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), order.IsBlocking ? "--" : "|");
+                                }
+
+                                ImGui.TableNextColumn();
+                                if (order.UsesExternalLane)
+                                {
+                                    ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), order.IsBlocking ? "--" : "|");
+                                }
+
+                                ImGui.TableNextColumn();
+                                if (order.UsesSelfLane)
+                                {
+                                    ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), order.IsBlocking ? "--" : "|");
+                                }
+
+                                ImGui.TableNextColumn();
+                                bool pause = order.PauseOnAction;
+                                if (ImGui.Checkbox("##" + order.OrderId, ref pause))
+                                {
+                                    _uiState.GameClient?.SubmitCommandAsync(
+                                        new SetOrderPauseCommand(entity.Id, order.OrderId, pause));
+                                }
+
+                                ImGui.TableNextColumn();
+                                if (!colony && order.OrderId.Length > 0 && ImGui.SmallButton("Cancel##" + order.OrderId))
+                                {
+                                    _uiState.GameClient?.SubmitCommandAsync(
+                                        new CancelOrderCommand(entity.Id, order.OrderId));
+                                }
+                            }
+                        }
+                        else
                         {
                             ImGui.TableNextRow();
                             ImGui.TableNextColumn();
-                            if (ImGui.Selectable(order.Name + "###" + order.OrderId, false, ImGuiSelectableFlags.SpanAllColumns))
-                            {
-                            }
-
-                            ImGui.TableNextColumn();
-                            ImGui.Text(order.Details);
-
-                            ImGui.TableNextColumn();
-                            if (order.UsesMovementLane)
-                            {
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), order.IsBlocking ? "--" : "|");
-                            }
-
-                            ImGui.TableNextColumn();
-                            if (order.UsesExternalLane)
-                            {
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), order.IsBlocking ? "--" : "|");
-                            }
-
-                            ImGui.TableNextColumn();
-                            if (order.UsesSelfLane)
-                            {
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), order.IsBlocking ? "--" : "|");
-                            }
-
-                            ImGui.TableNextColumn();
-                            bool pause = order.PauseOnAction;
-                            if (ImGui.Checkbox("##" + order.OrderId, ref pause))
-                            {
-                                _uiState.GameClient?.SubmitCommandAsync(
-                                    new SetOrderPauseCommand(entity.Id, order.OrderId, pause));
-                            }
-
-                            ImGui.TableNextColumn();
-                            if (!colony && order.OrderId.Length > 0 && ImGui.SmallButton("Cancel##" + order.OrderId))
-                            {
-                                _uiState.GameClient?.SubmitCommandAsync(
-                                    new CancelOrderCommand(entity.Id, order.OrderId));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        ImGui.TableNextRow();
-                        ImGui.TableNextColumn();
-                        ImGui.Text("No Orders");
-
-                        ImGui.TableNextColumn();
-                        if (entity.Kind == BodyKind.Ship && ImGui.Selectable("Give orders"))
-                        {
-                            FleetWindow.GetInstance().OrderShip(entity.Id);
-                        }
-                        else if (entity.Kind != BodyKind.Ship)
-                        {
                             ImGui.Text("No Orders");
-                        }
-                    }
 
-                    ImGui.EndTable();
+                            ImGui.TableNextColumn();
+                            if (entity.Kind == BodyKind.Ship && ImGui.Selectable("Give orders"))
+                            {
+                                FleetWindow.GetInstance().OrderShip(entity.Id);
+                            }
+                            else if (entity.Kind != BodyKind.Ship)
+                            {
+                                ImGui.Text("No Orders");
+                            }
+                        }
+
+                        ImGui.EndTable();
+                    }
+            
                 }
             }
-            Window.End();
         }
 
         static bool CanCancelGoal(GoalSnapshot? goal)

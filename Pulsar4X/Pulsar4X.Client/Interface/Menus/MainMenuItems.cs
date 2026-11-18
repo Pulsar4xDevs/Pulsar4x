@@ -39,124 +39,126 @@ namespace Pulsar4X.Client
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(10, 10));
-            if (Window.Begin("Pulsar4X Main Menu", ref IsActive, _flags))
+            using (var w = Window.Scope("Pulsar4X Main Menu", ref IsActive, _flags))
             {
-                ImGui.Image(_uiState.Img_MainMenuLogo().ToTextureRef(), new System.Numerics.Vector2(400, 200));
+                if (w.Visible)
+                {
+                    ImGui.Image(_uiState.Img_MainMenuLogo().ToTextureRef(), new System.Numerics.Vector2(400, 200));
 
-                if (ImGui.Button("New Game...", _buttonSize) || _uiState.debugnewgame)
-                {
-                    _quickstartError = "";
-                    //_uiState.NewGameOptions.IsActive = true;
-                    var newgameoptions = NewGameMenu.GetInstance();
-                    newgameoptions.SetActive(true);
-                    this.IsActive = false;
-                }
-                if (ImGui.Button("Quickstart", _buttonSize))
-                {
-                    _quickstartError = "";
-                    var error = NewGameMenu.QuickstartGame();
-                    if (error == null)
+                    if (ImGui.Button("New Game...", _buttonSize) || _uiState.debugnewgame)
+                    {
+                        _quickstartError = "";
+                        //_uiState.NewGameOptions.IsActive = true;
+                        var newgameoptions = NewGameMenu.GetInstance();
+                        newgameoptions.SetActive(true);
                         this.IsActive = false;
-                    else
-                        _quickstartError = error;
-                }
-                if (_uiState.IsGameLoaded)
-                {
-                    if (ImGui.Button("Save Game...", _buttonSize))
-                    {
-                        _saveGame = !_saveGame;
-
-                        // Set the save name equal to the corporation name by default (player can change it in the dialog)
-                        string corpName = _uiState.GameClient?.Galaxy.Faction?.Name ?? "Unknown";
-                        string dateTime = _uiState.SelectedSystemTime.ToString("yyyy-MM-dd_HH-mm-ss");
-                        string unsanitizedName = $"{corpName} - {dateTime}";
-
-                        // Remove any invalid filename characters
-                        char[] invalidChars = Path.GetInvalidFileNameChars();
-                        string saveName = string.Join("_", unsanitizedName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
-
-                        SaveGame.GetInstance().UpdateSaveName(saveName);
-                        SaveGame.GetInstance().ToggleActive();
-                        SetActive(false);
                     }
-
-                    if (ImGui.Button("Settings", _buttonSize))
+                    if (ImGui.Button("Quickstart", _buttonSize))
                     {
-                        SettingsWindow.GetInstance().ToggleActive();
-                        this.SetActive(false);
-                    }
-                    
-                    if(ImGui.Button("Preferences", _buttonSize))
-                    {
-                        SystemViewPreferences.GetInstance().ToggleActive();
-                        this.SetActive(false);
-                    }
-
-                    // Host-registered dev tools that asked for a main-menu button (e.g. SM Mode).
-                    foreach (var tool in _uiState.DevTools)
-                    {
-                        if (tool.Placement != DevToolPlacement.MainMenu)
-                            continue;
-                        if (ImGui.Button(tool.Label, _buttonSize))
-                        {
-                            tool.Toggle();
+                        _quickstartError = "";
+                        var error = NewGameMenu.QuickstartGame();
+                        if (error == null)
                             this.IsActive = false;
+                        else
+                            _quickstartError = error;
+                    }
+                    if (_uiState.IsGameLoaded)
+                    {
+                        if (ImGui.Button("Save Game...", _buttonSize))
+                        {
+                            _saveGame = !_saveGame;
+
+                            // Set the save name equal to the corporation name by default (player can change it in the dialog)
+                            string corpName = _uiState.GameClient?.Galaxy.Faction?.Name ?? "Unknown";
+                            string dateTime = _uiState.SelectedSystemTime.ToString("yyyy-MM-dd_HH-mm-ss");
+                            string unsanitizedName = $"{corpName} - {dateTime}";
+
+                            // Remove any invalid filename characters
+                            char[] invalidChars = Path.GetInvalidFileNameChars();
+                            string saveName = string.Join("_", unsanitizedName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
+
+                            SaveGame.GetInstance().UpdateSaveName(saveName);
+                            SaveGame.GetInstance().ToggleActive();
+                            SetActive(false);
+                        }
+
+                        if (ImGui.Button("Settings", _buttonSize))
+                        {
+                            SettingsWindow.GetInstance().ToggleActive();
+                            this.SetActive(false);
+                        }
+                    
+                        if(ImGui.Button("Preferences", _buttonSize))
+                        {
+                            SystemViewPreferences.GetInstance().ToggleActive();
+                            this.SetActive(false);
+                        }
+
+                        // Host-registered dev tools that asked for a main-menu button (e.g. SM Mode).
+                        foreach (var tool in _uiState.DevTools)
+                        {
+                            if (tool.Placement != DevToolPlacement.MainMenu)
+                                continue;
+                            if (ImGui.Button(tool.Label, _buttonSize))
+                            {
+                                tool.Toggle();
+                                this.IsActive = false;
+                            }
                         }
                     }
-                }
 
-                var disabled = !DoAnySavesExist();
-                if(disabled)
-                    ImGui.BeginDisabled();
-                if (ImGui.Button("Resume Last Save", _buttonSize))
-                {
-                    var load = LoadGame.GetInstance();
-                    if (load.LoadLatest())
+                    var disabled = !DoAnySavesExist();
+                    if(disabled)
+                        ImGui.BeginDisabled();
+                    if (ImGui.Button("Resume Last Save", _buttonSize))
+                    {
+                        var load = LoadGame.GetInstance();
+                        if (load.LoadLatest())
+                            SetActive(false);
+                        else
+                            load.SetActive(true);
+                    }
+                    if(disabled)
+                        ImGui.EndDisabled();
+                    if (ImGui.Button("Load Game...", _buttonSize))
+                    {
+                        LoadGame.GetInstance().ToggleActive();
                         SetActive(false);
-                    else
-                        load.SetActive(true);
-                }
-                if(disabled)
-                    ImGui.EndDisabled();
-                if (ImGui.Button("Load Game...", _buttonSize))
-                {
-                    LoadGame.GetInstance().ToggleActive();
-                    SetActive(false);
-                }
+                    }
                 
 
-                if(ImageButton.Begin(_uiState.Img_Discord(), "Discord", new Vector2(16, 12), _buttonSize))
-                {
-                    try
+                    if(ImageButton.Begin(_uiState.Img_Discord(), "Discord", new Vector2(16, 12), _buttonSize))
                     {
-                        ProcessStartInfo psi = new ProcessStartInfo
+                        try
                         {
-                            FileName = "https://discord.gg/3uwCQSn",
-                            UseShellExecute = true
-                        };
-                        Process.Start(psi);
+                            ProcessStartInfo psi = new ProcessStartInfo
+                            {
+                                FileName = "https://discord.gg/3uwCQSn",
+                                UseShellExecute = true
+                            };
+                            Process.Start(psi);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Handle any errors
+                            Console.WriteLine($"Error opening URL: {ex.Message}");
+                        }
                     }
-                    catch (Exception ex)
+
+                    if(ImGui.Button("Exit to Desktop", _buttonSize))
                     {
-                        // Handle any errors
-                        Console.WriteLine($"Error opening URL: {ex.Message}");
+                        _uiState.ViewPort.IsAlive = false;
                     }
-                }
 
-                if(ImGui.Button("Exit to Desktop", _buttonSize))
-                {
-                    _uiState.ViewPort.IsAlive = false;
-                }
-
-                if (!string.IsNullOrEmpty(_quickstartError))
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0.35f, 0.35f, 1f));
-                    ImGui.TextWrapped(_quickstartError);
-                    ImGui.PopStyleColor();
+                    if (!string.IsNullOrEmpty(_quickstartError))
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0.35f, 0.35f, 1f));
+                        ImGui.TextWrapped(_quickstartError);
+                        ImGui.PopStyleColor();
+                    }
+            
                 }
             }
-
-            Window.End();
             ImGui.PopStyleVar();
         }
 

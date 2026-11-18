@@ -51,5 +51,79 @@ namespace Pulsar4X.Tests
             var ex = Assert.Throws<InvalidOperationException>(Window.DebugLeaveEnd);
             Assert.That(ex.Message, Does.Contain("without a matching Begin"));
         }
+
+        [Test]
+        public void Scope_EndsWhenBeginReturnsFalse()
+        {
+            Window.DebugSuppressImGui = true;
+            Window.DebugBeginVisible = false;
+            bool open = true;
+
+            using (var w = Window.DebugScope("GameLog", ref open))
+            {
+                Assert.That(w.Visible, Is.False);
+                Assert.That(Window.DebugBeginCount, Is.EqualTo(1));
+            }
+
+            Assert.That(Window.DebugBeginCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Scope_EndsWhenBodyReturnsEarly()
+        {
+            Window.DebugSuppressImGui = true;
+            Window.DebugBeginVisible = true;
+            bool open = true;
+
+            DrawLikeGameLog();
+            Assert.That(Window.DebugBeginCount, Is.EqualTo(0));
+
+            void DrawLikeGameLog()
+            {
+                using var w = Window.DebugScope("GameLog", ref open);
+                if (!w.Visible)
+                    return;
+                // Empty log used to return here without End; the scope still Ends.
+                return;
+            }
+        }
+
+        [Test]
+        public void Scope_EndsWhenBodyThrows()
+        {
+            Window.DebugSuppressImGui = true;
+            Window.DebugBeginVisible = true;
+            bool open = true;
+
+            var ex = Assert.Throws<InvalidOperationException>(() =>
+            {
+                using var w = Window.DebugScope("GameLog", ref open);
+                throw new InvalidOperationException("body failed");
+            });
+            Assert.That(ex.Message, Is.EqualTo("body failed"));
+            Assert.That(Window.DebugBeginCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Scope_AllowsTheNextWindowAfterACollapsedBegin()
+        {
+            Window.DebugSuppressImGui = true;
+            Window.DebugBeginVisible = false;
+            bool open = true;
+
+            using (var w = Window.DebugScope("GameLog", ref open))
+            {
+                Assert.That(w.Visible, Is.False);
+            }
+
+            Window.DebugBeginVisible = true;
+            using (var w = Window.DebugScope("Unknown (Unknown)###1055", ref open))
+            {
+                Assert.That(w.Visible, Is.True);
+                Assert.That(Window.DebugBeginCount, Is.EqualTo(1));
+            }
+
+            Assert.That(Window.DebugBeginCount, Is.EqualTo(0));
+        }
     }
 }

@@ -132,16 +132,21 @@ namespace Pulsar4X.Client
                     ImGui.SetNextWindowPos(new System.Numerics.Vector2(screenPos.X + 20, screenPos.Y - textHeight * 0.5f), ImGuiCond.Always);
 
                     bool isActive = true;
-                    Window.Begin("galLabel##" + systemId, ref isActive,
+                    using (var w = Window.Scope("galLabel##" + systemId, ref isActive,
                         ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize |
                         ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus |
-                        ImGuiWindowFlags.NoScrollWithMouse);
+                        ImGuiWindowFlags.NoScrollWithMouse))
+                    {
+                        if (w.Visible)
+                        {
 
-                    ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(1f, 1f, 1f, 1f));
-                    ImGui.TextUnformatted(label);
-                    ImGui.PopStyleColor();
+                        ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(1f, 1f, 1f, 1f));
+                        ImGui.TextUnformatted(label);
+                        ImGui.PopStyleColor();
 
-                    Window.End();
+                    
+                        }
+                    }
                     ImGui.PopStyleColor();
                     ImGui.PopStyleVar(2);
                 }

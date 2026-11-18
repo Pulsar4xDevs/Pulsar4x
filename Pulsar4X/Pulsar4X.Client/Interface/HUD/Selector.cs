@@ -81,23 +81,26 @@ namespace Pulsar4X.Client
             ImGui.SetNextWindowSizeConstraints(new Vector2(256, 0), new Vector2(256, maxHeight));
             ImGui.SetNextWindowPos(new Vector2(work.WorkPos.X + work.WorkSize.X - 256, work.WorkPos.Y));
             ImGui.SetNextWindowBgAlpha(0);
-            if(Window.Begin("###selector", _flags))
+            using (var w = Window.Scope("###selector", _flags))
             {
-                // TODO: re-implement this somewhere
-                // SystemViewPreferences.GetInstance().DisplayCombo("map", selectedIndex =>
-                // {
-                //     _uiState.SelectedMapView = SystemViewPreferences.GetInstance().GetViewByIndex(selectedIndex);
-                // });
-                if(_editing)
+                if (w.Visible)
                 {
-                    DisplayEditor();
-                }
-                else
-                {
-                    DisplaySections();
+                    // TODO: re-implement this somewhere
+                    // SystemViewPreferences.GetInstance().DisplayCombo("map", selectedIndex =>
+                    // {
+                    //     _uiState.SelectedMapView = SystemViewPreferences.GetInstance().GetViewByIndex(selectedIndex);
+                    // });
+                    if(_editing)
+                    {
+                        DisplayEditor();
+                    }
+                    else
+                    {
+                        DisplaySections();
+                    }
+            
                 }
             }
-            Window.End();
         }
 
         private void DisplaySections()

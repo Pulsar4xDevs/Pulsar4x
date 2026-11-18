@@ -30,24 +30,27 @@ namespace Pulsar4X.Client
         {
             if (!IsActive) return;
             ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
-            if (Window.Begin("Galaxy Browser", ref IsActive, _flags))
+            using (var w = Window.Scope("Galaxy Browser", ref IsActive, _flags))
             {
-                // The faction's known systems, kept current by the adapter's event stream.
-                var galaxy = _uiState.GameClient?.Galaxy;
-                if (galaxy != null)
+                if (w.Visible)
                 {
-                    foreach (var system in galaxy.KnownSystems.OrderBy(s => s.Name))
+                    // The faction's known systems, kept current by the adapter's event stream.
+                    var galaxy = _uiState.GameClient?.Galaxy;
+                    if (galaxy != null)
                     {
-                        ImGui.PushID(system.SystemId);
-                        if (ImGui.SmallButton(system.Name))
+                        foreach (var system in galaxy.KnownSystems.OrderBy(s => s.Name))
                         {
-                            _uiState.SetActiveSystem(system.SystemId);
+                            ImGui.PushID(system.SystemId);
+                            if (ImGui.SmallButton(system.Name))
+                            {
+                                _uiState.SetActiveSystem(system.SystemId);
+                            }
+                            ImGui.PopID();
                         }
-                        ImGui.PopID();
                     }
+            
                 }
             }
-            Window.End();
         }
     }
 }

@@ -53,32 +53,35 @@ namespace Pulsar4X.Client
             var fireControl = entity?.GetView<FireControlView>();
 
             ImGui.SetNextWindowSize(new Vector2(600f, 400f), ImGuiCond.FirstUseEver);
-            if (Window.Begin("Fire Control", ref IsActive, _flags))
+            using (var w = Window.Scope("Fire Control", ref IsActive, _flags))
             {
-                if (system != null && entity != null && fireControl != null)
+                if (w.Visible)
                 {
-                    var weaponsById = fireControl.Weapons.ToDictionary(w => w.Id);
+                    if (system != null && entity != null && fireControl != null)
+                    {
+                        var weaponsById = fireControl.Weapons.ToDictionary(w => w.Id);
 
-                    ImGui.Columns(2, "##fire-control", true);
-                    ImGui.SetColumnWidth(0, 400);
-                    DisplayFC(entity, fireControl, weaponsById);
+                        ImGui.Columns(2, "##fire-control", true);
+                        ImGui.SetColumnWidth(0, 400);
+                        DisplayFC(entity, fireControl, weaponsById);
 
-                    UnAssignedWeapons(entity, fireControl, weaponsById);
+                        UnAssignedWeapons(entity, fireControl, weaponsById);
 
-                    ImGui.NewLine();
+                        ImGui.NewLine();
 
-                    DisplayOrdnance(fireControl);
+                        DisplayOrdnance(fireControl);
 
-                    ImGui.NextColumn();
+                        ImGui.NextColumn();
 
-                    DisplayTargetColumn(system, entity);
-                }
-                else
-                {
-                    ImGui.TextColored(Styles.DescriptiveColor, "No fire controls on the selected entity.");
+                        DisplayTargetColumn(system, entity);
+                    }
+                    else
+                    {
+                        ImGui.TextColored(Styles.DescriptiveColor, "No fire controls on the selected entity.");
+                    }
+            
                 }
             }
-            Window.End();
         }
 
         void DisplayFC(EntitySnapshot entity, FireControlView fireControl, Dictionary<string, WeaponSnapshot> weaponsById)

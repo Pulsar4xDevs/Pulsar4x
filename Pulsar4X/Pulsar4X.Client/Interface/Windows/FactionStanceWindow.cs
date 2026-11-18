@@ -41,70 +41,73 @@ namespace Pulsar4X.Client
             if (!IsActive) return;
 
             var galaxy = _uiState.GameClient?.Galaxy;
-            if (Window.Begin("Factions", ref IsActive, _flags))
+            using (var w = Window.Scope("Factions", ref IsActive, _flags))
             {
-                if (galaxy == null || galaxy.Stances.Count == 0)
+                if (w.Visible)
                 {
-                    ImGui.TextColored(Styles.DescriptiveColor, "No other factions.");
-                }
-                else if (ImGui.BeginTable("FactionStances", 5,
-                    ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingFixedFit))
-                {
-                    // Stretch columns collapse under AlwaysAutoResize, which clipped the combo to "Frien".
-                    // Fixed widths follow the text, so the window grows to the table.
-                    var style = ImGui.GetStyle();
-                    float nameWidth = ImGui.CalcTextSize("Faction").X;
-                    foreach (var row in galaxy.Stances)
-                        nameWidth = Math.Max(nameWidth, ImGui.CalcTextSize(row.Name).X);
-                    nameWidth += style.CellPadding.X * 2f;
-
-                    float comboWidth = Math.Max(ImGui.CalcTextSize("Status").X, ImGui.CalcTextSize("Their status").X);
-                    foreach (var label in StanceLabels)
-                        comboWidth = Math.Max(comboWidth, ImGui.CalcTextSize(label).X);
-                    comboWidth += style.FramePadding.X * 2f + ImGui.GetFrameHeight() + style.CellPadding.X * 2f;
-
-                    float grantsWidth = Math.Max(ImGui.CalcTextSize("Their grants").X, ImGui.CalcTextSize("Grants").X);
-                    grantsWidth += style.CellPadding.X * 2f;
-                    foreach (var grant in GrantLabels)
-                        grantsWidth += ImGui.GetFrameHeight() + style.FramePadding.X * 2f + ImGui.CalcTextSize(grant.Label).X + style.ItemSpacing.X;
-
-                    ImGui.TableSetupColumn("Faction", ImGuiTableColumnFlags.WidthFixed, nameWidth);
-                    ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.WidthFixed, comboWidth);
-                    ImGui.TableSetupColumn("Grants", ImGuiTableColumnFlags.WidthFixed, grantsWidth);
-                    ImGui.TableSetupColumn("Their status", ImGuiTableColumnFlags.WidthFixed, comboWidth);
-                    ImGui.TableSetupColumn("Their grants", ImGuiTableColumnFlags.WidthFixed, grantsWidth);
-                    ImGui.TableHeadersRow();
-
-                    foreach (var row in galaxy.Stances)
+                    if (galaxy == null || galaxy.Stances.Count == 0)
                     {
-                        ImGui.TableNextColumn();
-                        ImGui.Text(row.Name);
+                        ImGui.TextColored(Styles.DescriptiveColor, "No other factions.");
+                    }
+                    else if (ImGui.BeginTable("FactionStances", 5,
+                        ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingFixedFit))
+                    {
+                        // Stretch columns collapse under AlwaysAutoResize, which clipped the combo to "Frien".
+                        // Fixed widths follow the text, so the window grows to the table.
+                        var style = ImGui.GetStyle();
+                        float nameWidth = ImGui.CalcTextSize("Faction").X;
+                        foreach (var row in galaxy.Stances)
+                            nameWidth = Math.Max(nameWidth, ImGui.CalcTextSize(row.Name).X);
+                        nameWidth += style.CellPadding.X * 2f;
 
-                        ImGui.TableNextColumn();
-                        int current = (int)row.Stance;
-                        ImGui.SetNextItemWidth(-1);
-                        if (ImGui.Combo($"##stance-{row.FactionId}", ref current, StanceLabels, StanceLabels.Length)
-                            && current != (int)row.Stance
-                            && Enum.IsDefined(typeof(FactionStance), current))
+                        float comboWidth = Math.Max(ImGui.CalcTextSize("Status").X, ImGui.CalcTextSize("Their status").X);
+                        foreach (var label in StanceLabels)
+                            comboWidth = Math.Max(comboWidth, ImGui.CalcTextSize(label).X);
+                        comboWidth += style.FramePadding.X * 2f + ImGui.GetFrameHeight() + style.CellPadding.X * 2f;
+
+                        float grantsWidth = Math.Max(ImGui.CalcTextSize("Their grants").X, ImGui.CalcTextSize("Grants").X);
+                        grantsWidth += style.CellPadding.X * 2f;
+                        foreach (var grant in GrantLabels)
+                            grantsWidth += ImGui.GetFrameHeight() + style.FramePadding.X * 2f + ImGui.CalcTextSize(grant.Label).X + style.ItemSpacing.X;
+
+                        ImGui.TableSetupColumn("Faction", ImGuiTableColumnFlags.WidthFixed, nameWidth);
+                        ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.WidthFixed, comboWidth);
+                        ImGui.TableSetupColumn("Grants", ImGuiTableColumnFlags.WidthFixed, grantsWidth);
+                        ImGui.TableSetupColumn("Their status", ImGuiTableColumnFlags.WidthFixed, comboWidth);
+                        ImGui.TableSetupColumn("Their grants", ImGuiTableColumnFlags.WidthFixed, grantsWidth);
+                        ImGui.TableHeadersRow();
+
+                        foreach (var row in galaxy.Stances)
                         {
-                            _uiState.GameClient?.SubmitCommandAsync(
-                                new SetFactionStanceCommand(_uiState.FactionId, row.FactionId, (FactionStance)current));
+                            ImGui.TableNextColumn();
+                            ImGui.Text(row.Name);
+
+                            ImGui.TableNextColumn();
+                            int current = (int)row.Stance;
+                            ImGui.SetNextItemWidth(-1);
+                            if (ImGui.Combo($"##stance-{row.FactionId}", ref current, StanceLabels, StanceLabels.Length)
+                                && current != (int)row.Stance
+                                && Enum.IsDefined(typeof(FactionStance), current))
+                            {
+                                _uiState.GameClient?.SubmitCommandAsync(
+                                    new SetFactionStanceCommand(_uiState.FactionId, row.FactionId, (FactionStance)current));
+                            }
+
+                            ImGui.TableNextColumn();
+                            DrawGrants(row.FactionId, row.GrantedByViewer, editable: true, "mine");
+
+                            ImGui.TableNextColumn();
+                            ImGui.Text(row.TheirStance.ToString());
+
+                            ImGui.TableNextColumn();
+                            DrawGrants(row.FactionId, row.GrantedToViewer, editable: false, "theirs");
                         }
 
-                        ImGui.TableNextColumn();
-                        DrawGrants(row.FactionId, row.GrantedByViewer, editable: true, "mine");
-
-                        ImGui.TableNextColumn();
-                        ImGui.Text(row.TheirStance.ToString());
-
-                        ImGui.TableNextColumn();
-                        DrawGrants(row.FactionId, row.GrantedToViewer, editable: false, "theirs");
+                        ImGui.EndTable();
                     }
-
-                    ImGui.EndTable();
+            
                 }
             }
-            Window.End();
         }
 
         void DrawGrants(int factionId, FactionGrants grants, bool editable, string prefix)

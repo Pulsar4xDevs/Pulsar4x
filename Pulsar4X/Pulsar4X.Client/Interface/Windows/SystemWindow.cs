@@ -26,70 +26,73 @@ public class SystemWindow : UniquePulsarGuiWindow<SystemWindow>
         if(!IsActive) return;
 
         ImGui.SetNextWindowSize(new Vector2(1350, 750), ImGuiCond.FirstUseEver);
-        if (Window.Begin("System Viewer", ref IsActive, _flags))
+        using (var w = Window.Scope("System Viewer", ref IsActive, _flags))
         {
-            var system = _uiState.GameClient?.Galaxy.GetSystem(_uiState.SelectedStarSystemId);
-            if (system != null)
+            if (w.Visible)
             {
-                ImGui.Text("View Options: ");
-                ImGui.SameLine();
-                SystemViewPreferences.GetInstance().DisplayCombo(SystemViewPreferencesKey, selectedIndex => {});
-
-                // The celestial bodies, their orbital hierarchy, and the faction's colonies keyed by
-                // the body they sit on — rebuilt each frame from the (faction-filtered) snapshot.
-                var bodies = system.Entities
-                    .Where(e => e.HasView<StarView>() || e.HasView<BodyView>())
-                    .ToDictionary(e => e.Id);
-
-                var children = new Dictionary<int, List<EntitySnapshot>>();
-                foreach (var body in bodies.Values)
+                var system = _uiState.GameClient?.Galaxy.GetSystem(_uiState.SelectedStarSystemId);
+                if (system != null)
                 {
-                    if (ParentIdOf(body) is { } parentId && parentId != body.Id && bodies.ContainsKey(parentId))
+                    ImGui.Text("View Options: ");
+                    ImGui.SameLine();
+                    SystemViewPreferences.GetInstance().DisplayCombo(SystemViewPreferencesKey, selectedIndex => {});
+
+                    // The celestial bodies, their orbital hierarchy, and the faction's colonies keyed by
+                    // the body they sit on — rebuilt each frame from the (faction-filtered) snapshot.
+                    var bodies = system.Entities
+                        .Where(e => e.HasView<StarView>() || e.HasView<BodyView>())
+                        .ToDictionary(e => e.Id);
+
+                    var children = new Dictionary<int, List<EntitySnapshot>>();
+                    foreach (var body in bodies.Values)
                     {
-                        if (!children.TryGetValue(parentId, out var list))
+                        if (ParentIdOf(body) is { } parentId && parentId != body.Id && bodies.ContainsKey(parentId))
                         {
-                            list = new List<EntitySnapshot>();
-                            children[parentId] = list;
+                            if (!children.TryGetValue(parentId, out var list))
+                            {
+                                list = new List<EntitySnapshot>();
+                                children[parentId] = list;
+                            }
+                            list.Add(body);
                         }
-                        list.Add(body);
                     }
-                }
 
-                var coloniesByBody = system.Entities
-                    .Where(e => e.Kind == BodyKind.Colony)
-                    .Select(e => (Colony: e, PlanetId: e.GetView<ColonyView>()?.PlanetEntityId))
-                    .Where(c => c.PlanetId != null)
-                    .GroupBy(c => c.PlanetId!.Value)
-                    .ToDictionary(g => g.Key, g => g.Select(c => c.Colony).ToList());
+                    var coloniesByBody = system.Entities
+                        .Where(e => e.Kind == BodyKind.Colony)
+                        .Select(e => (Colony: e, PlanetId: e.GetView<ColonyView>()?.PlanetEntityId))
+                        .Where(c => c.PlanetId != null)
+                        .GroupBy(c => c.PlanetId!.Value)
+                        .ToDictionary(g => g.Key, g => g.Select(c => c.Colony).ToList());
 
-                var stars = bodies.Values
-                    .Where(e => e.HasView<StarView>())
-                    .OrderBy(DistanceFromRoot)
-                    .ToList();
+                    var stars = bodies.Values
+                        .Where(e => e.HasView<StarView>())
+                        .OrderBy(DistanceFromRoot)
+                        .ToList();
 
-                if(ImGui.BeginTable("DesignStatsTables", 9, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
-                {
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.15f);
-                    ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 0.15f);
-                    ImGui.TableSetupColumn("Colony", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("GeoSurvey", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("Gravity", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("Temperature", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("Atm Pressure", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("Oxygen", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("Minerals", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableHeadersRow();
-
-                    foreach (var star in stars)
+                    if(ImGui.BeginTable("DesignStatsTables", 9, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
                     {
-                        TreeGen(star, children, coloniesByBody);
-                    }
+                        ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.15f);
+                        ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 0.15f);
+                        ImGui.TableSetupColumn("Colony", ImGuiTableColumnFlags.None, 0.1f);
+                        ImGui.TableSetupColumn("GeoSurvey", ImGuiTableColumnFlags.None, 0.1f);
+                        ImGui.TableSetupColumn("Gravity", ImGuiTableColumnFlags.None, 0.1f);
+                        ImGui.TableSetupColumn("Temperature", ImGuiTableColumnFlags.None, 0.1f);
+                        ImGui.TableSetupColumn("Atm Pressure", ImGuiTableColumnFlags.None, 0.1f);
+                        ImGui.TableSetupColumn("Oxygen", ImGuiTableColumnFlags.None, 0.1f);
+                        ImGui.TableSetupColumn("Minerals", ImGuiTableColumnFlags.None, 0.1f);
+                        ImGui.TableHeadersRow();
 
-                    ImGui.EndTable();
+                        foreach (var star in stars)
+                        {
+                            TreeGen(star, children, coloniesByBody);
+                        }
+
+                        ImGui.EndTable();
+                    }
                 }
+        
             }
         }
-        Window.End();
     }
 
     private static int? ParentIdOf(EntitySnapshot body)

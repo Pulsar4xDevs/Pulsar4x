@@ -41,46 +41,49 @@ namespace Pulsar4X.Client
             var galaxy = _uiState.GameClient?.Galaxy;
 
             ImGui.SetNextWindowSize(new Vector2(960, 500), ImGuiCond.FirstUseEver);
-            if(Window.Begin("Commanders", ref IsActive, _flags))
+            using (var w = Window.Scope("Commanders", ref IsActive, _flags))
             {
-                if(galaxy != null)
+                if (w.Visible)
                 {
-                    var people = galaxy.Commanders;
-
-                    DisplayRecruitButton(galaxy);
-
-                    // Keep the selection valid, defaulting to the first person so the window is
-                    // immediately usable without an extra click.
-                    CommanderSnapshot? selected = null;
-                    if(people.Count > 0)
+                    if(galaxy != null)
                     {
-                        selected = people.FirstOrDefault(p => p.Id == _selectedId) ?? people[0];
-                    }
-                    _selectedId = selected?.Id;
+                        var people = galaxy.Commanders;
 
-                    Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                    var listSize = new Vector2(windowContentSize.X - Styles.LeftColumnWidthLg - 8, windowContentSize.Y);
-                    var detailSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
+                        DisplayRecruitButton(galaxy);
 
-                    if(ImGui.BeginChild("PeopleList", listSize, ImGuiChildFlags.Borders))
-                    {
-                        DisplayHelpers.Header("Personnel", "Everyone in the corporation's service");
-                        DisplayPeopleList(people, galaxy.Time.GameDateTime);
-                    }
-                    ImGui.EndChild();
+                        // Keep the selection valid, defaulting to the first person so the window is
+                        // immediately usable without an extra click.
+                        CommanderSnapshot? selected = null;
+                        if(people.Count > 0)
+                        {
+                            selected = people.FirstOrDefault(p => p.Id == _selectedId) ?? people[0];
+                        }
+                        _selectedId = selected?.Id;
 
-                    ImGui.SameLine();
-                    if(ImGui.BeginChild("PersonDetail", detailSize, ImGuiChildFlags.Borders))
-                    {
-                        if(selected != null)
-                            DisplayPersonDetail(selected, galaxy.Time.GameDateTime);
-                        else
-                            ImGui.TextColored(Styles.DescriptiveColor, "No personnel in service.");
+                        Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                        var listSize = new Vector2(windowContentSize.X - Styles.LeftColumnWidthLg - 8, windowContentSize.Y);
+                        var detailSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
+
+                        if(ImGui.BeginChild("PeopleList", listSize, ImGuiChildFlags.Borders))
+                        {
+                            DisplayHelpers.Header("Personnel", "Everyone in the corporation's service");
+                            DisplayPeopleList(people, galaxy.Time.GameDateTime);
+                        }
+                        ImGui.EndChild();
+
+                        ImGui.SameLine();
+                        if(ImGui.BeginChild("PersonDetail", detailSize, ImGuiChildFlags.Borders))
+                        {
+                            if(selected != null)
+                                DisplayPersonDetail(selected, galaxy.Time.GameDateTime);
+                            else
+                                ImGui.TextColored(Styles.DescriptiveColor, "No personnel in service.");
+                        }
+                        ImGui.EndChild();
                     }
-                    ImGui.EndChild();
+            
                 }
             }
-            Window.End();
         }
 
         // Hiring lives on each colony's Recruitment tab (Manage Colonies). This button only opens

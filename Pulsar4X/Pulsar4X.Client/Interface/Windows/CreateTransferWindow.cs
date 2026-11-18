@@ -44,67 +44,70 @@ public class CreateTransferWindow : UniquePulsarGuiWindow<CreateTransferWindow>
     {
         if(!IsActive) return;
 
-        if(Window.Begin("Create Transfer Order", ref IsActive))
+        using (var w = Window.Scope("Create Transfer Order", ref IsActive))
         {
-            var system = _systemId != null ? _uiState.GameClient?.Galaxy.GetSystem(_systemId) : null;
-            var left = _leftId is int leftId ? system?.GetEntity(leftId) : null;
-            var right = _rightId is int rightId ? system?.GetEntity(rightId) : null;
-
-            Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            var firstChildSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
-            var secondChildSize = new Vector2(windowContentSize.X - (Styles.LeftColumnWidthLg * 2) - (windowContentSize.X * 0.01f), windowContentSize.Y);
-            var thirdChildSize = new Vector2(Styles.LeftColumnWidthLg - (windowContentSize.X * 0.01f), windowContentSize.Y);
-            if(ImGui.BeginChild(GetTitle(left) + "###left", firstChildSize, ImGuiChildFlags.Borders))
+            if (w.Visible)
             {
-                DisplayTransferTarget(system, left, right, isLeft: true);
-            }
-            ImGui.EndChild();
-            ImGui.SameLine();
+                var system = _systemId != null ? _uiState.GameClient?.Galaxy.GetSystem(_systemId) : null;
+                var left = _leftId is int leftId ? system?.GetEntity(leftId) : null;
+                var right = _rightId is int rightId ? system?.GetEntity(rightId) : null;
 
-            if(ImGui.BeginChild("Transfer Details", secondChildSize, ImGuiChildFlags.Borders))
-            {
-
-                ImGui.Columns(2, "##create-transfer", true);
-
-                ImGui.Text("Items to Transfer");
-                ImGui.NextColumn();
-                ImGui.Text("Items to Transfer");
-                ImGui.Separator();
-                ImGui.NextColumn();
-
-                if(left != null)
-                    DisplayTradeList(_leftSelected, left);
-
-                ImGui.NextColumn();
-
-                if(right != null)
-                    DisplayTradeList(_rightSelected, right);
-
-                ImGui.Columns(1);
-
-                if(_leftSelected.Count > 0 || _rightSelected.Count > 0)
+                Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                var firstChildSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
+                var secondChildSize = new Vector2(windowContentSize.X - (Styles.LeftColumnWidthLg * 2) - (windowContentSize.X * 0.01f), windowContentSize.Y);
+                var thirdChildSize = new Vector2(Styles.LeftColumnWidthLg - (windowContentSize.X * 0.01f), windowContentSize.Y);
+                if(ImGui.BeginChild(GetTitle(left) + "###left", firstChildSize, ImGuiChildFlags.Borders))
                 {
+                    DisplayTransferTarget(system, left, right, isLeft: true);
+                }
+                ImGui.EndChild();
+                ImGui.SameLine();
+
+                if(ImGui.BeginChild("Transfer Details", secondChildSize, ImGuiChildFlags.Borders))
+                {
+
+                    ImGui.Columns(2, "##create-transfer", true);
+
+                    ImGui.Text("Items to Transfer");
+                    ImGui.NextColumn();
+                    ImGui.Text("Items to Transfer");
                     ImGui.Separator();
-                    if(ImGui.Button("Create") && left != null && right != null)
+                    ImGui.NextColumn();
+
+                    if(left != null)
+                        DisplayTradeList(_leftSelected, left);
+
+                    ImGui.NextColumn();
+
+                    if(right != null)
+                        DisplayTradeList(_rightSelected, right);
+
+                    ImGui.Columns(1);
+
+                    if(_leftSelected.Count > 0 || _rightSelected.Count > 0)
                     {
-                        SubmitTransfer(left.Id, right.Id, _leftSelected);
-                        SubmitTransfer(right.Id, left.Id, _rightSelected);
-                        _leftSelected.Clear();
-                        _rightSelected.Clear();
+                        ImGui.Separator();
+                        if(ImGui.Button("Create") && left != null && right != null)
+                        {
+                            SubmitTransfer(left.Id, right.Id, _leftSelected);
+                            SubmitTransfer(right.Id, left.Id, _rightSelected);
+                            _leftSelected.Clear();
+                            _rightSelected.Clear();
+                        }
                     }
                 }
-            }
-            ImGui.EndChild();
-            ImGui.SameLine();
+                ImGui.EndChild();
+                ImGui.SameLine();
 
-            if(ImGui.BeginChild(GetTitle(right) + "###right", thirdChildSize, ImGuiChildFlags.Borders))
-            {
-                DisplayTransferTarget(system, right, left, isLeft: false);
-            }
-            ImGui.EndChild();
+                if(ImGui.BeginChild(GetTitle(right) + "###right", thirdChildSize, ImGuiChildFlags.Borders))
+                {
+                    DisplayTransferTarget(system, right, left, isLeft: false);
+                }
+                ImGui.EndChild();
 
+        
+            }
         }
-        Window.End();
     }
 
     private void SubmitTransfer(int fromId, int toId, Dictionary<int, long> selected)
