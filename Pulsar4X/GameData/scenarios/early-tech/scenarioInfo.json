@@ -13,7 +13,8 @@
   ],
   "DataFiles": [
     "colonies.json",
-    "ships.json"
+    "ships.json",
+    "npc-company-kits.json"
   ],
   "DefaultStart": {
     "Species": "species-human",

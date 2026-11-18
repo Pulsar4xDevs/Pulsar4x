@@ -107,5 +107,12 @@ namespace Pulsar4X.Events
         /// <summary>Trained crew bought on a crew market arrived (multi-faction phase 8).</summary>
         CrewTransferred,
         #endregion
+
+        #region Runtime NPC companies (appended so saved ordinals stay put)
+        /// <summary>A bloc chartered a runtime NPC company (multi-faction phase 9).</summary>
+        NpcCompanySpawned,
+        /// <summary>A runtime NPC company folded back into its sponsor (multi-faction phase 9).</summary>
+        NpcCompanyFolded,
+        #endregion
     }
 }

@@ -144,6 +144,10 @@ namespace Pulsar4X.Engine
         public const decimal DefaultBlocTaxPerPersonPerMonth = 2m;
         public decimal BlocTaxPerPersonPerMonth { get; set; } = DefaultBlocTaxPerPersonPerMonth;
 
+        /// <summary>Multi-faction phase 9: maximum runtime NPC companies chartered in one game. Hard cap is also MaxFactions − 4.</summary>
+        public const int DefaultMaxSpawnedFactions = 6;
+        public int MaxSpawnedFactions { get; set; } = DefaultMaxSpawnedFactions;
+
         #endregion
 
         #region Network Settings

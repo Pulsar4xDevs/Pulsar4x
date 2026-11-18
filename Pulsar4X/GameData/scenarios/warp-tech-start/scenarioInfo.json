@@ -18,6 +18,7 @@
     "species.json",
     "colonies.json",
     "factions.json",
+    "npc-company-kits.json",
     "designs/componentDesigns.json",
     "designs/shipDesigns.json"
   ],

@@ -33,6 +33,8 @@ namespace Pulsar4X.Modding
             ComponentDesign,
             ShipDesign,
             BootstrapDefaults,
+            NpcCompanyKit,
+            NpcCompanySettings,
         }
         public enum OperationType { Default, Remove }
         public enum CollectionOperationType { Add, Remove, Overwrite }
@@ -136,6 +138,12 @@ namespace Pulsar4X.Modding
                     break;
                 case ModInstruction.DataType.BootstrapDefaults:
                     instruction.Data = jObject["Payload"].ToObject<BootstrapDefaultsBlueprint>();
+                    break;
+                case ModInstruction.DataType.NpcCompanyKit:
+                    instruction.Data = jObject["Payload"].ToObject<NpcCompanyKitBlueprint>();
+                    break;
+                case ModInstruction.DataType.NpcCompanySettings:
+                    instruction.Data = jObject["Payload"].ToObject<NpcCompanySettingsBlueprint>();
                     break;
                 default:
                     // Left null for the loader to report with the mod and file it is reading.

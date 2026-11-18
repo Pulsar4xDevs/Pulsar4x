@@ -164,6 +164,10 @@ namespace Pulsar4X.Colonies
                 }
             }
 
+            // Multi-faction phase 9: monthly unmet-demand check and fold-back, once per system.
+            if (manager is StarSystem system && manager.Game != null)
+                Pulsar4X.Factions.FactionSpawner.TickSystem(manager.Game, system, manager.StarSysDateTime);
+
             return colonies.Count;
         }
 
