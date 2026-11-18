@@ -175,14 +175,14 @@ namespace Pulsar4X.Client
             Log = 256,
             Power = 512,
             Workforce = 1024,
-            Crew = 2048,
+            Staffing = 2048,
         }
 
         /// <summary>
-        /// Owned: Summary|Production|Construction|Market|Shipping|Log|Crew, plus Mining when ColonyMiningView is present,
+        /// Owned: Summary|Production|Construction|Market|Shipping|Log|Staffing, plus Mining when ColonyMiningView is present,
         /// Power when ColonyPowerView is present, Workforce when WorkforceView is present.
-        /// Crew is always present for an owned colony, even with no naval academy or recruitment view.
-        /// NavalAcademy and Recruitment remain in the enum but are no longer set; those sections live on the Crew tab.
+        /// Staffing is always present for an owned colony, even with no naval academy or recruitment view.
+        /// NavalAcademy and Recruitment remain in the enum but are no longer set; those sections live on the Staffing tab.
         /// Not owned: Summary|Market|Shipping only.
         /// </summary>
         public static ColonyTabs ColonyTabsFor(EntitySnapshot colony)
@@ -191,7 +191,7 @@ namespace Pulsar4X.Client
                 return ColonyTabs.Summary | ColonyTabs.Market | ColonyTabs.Shipping;
 
             var tabs = ColonyTabs.Summary | ColonyTabs.Production | ColonyTabs.Construction
-                | ColonyTabs.Market | ColonyTabs.Shipping | ColonyTabs.Log | ColonyTabs.Crew;
+                | ColonyTabs.Market | ColonyTabs.Shipping | ColonyTabs.Log | ColonyTabs.Staffing;
             if (colony.HasView<ColonyMiningView>())
                 tabs |= ColonyTabs.Mining;
             if (colony.HasView<ColonyPowerView>())

@@ -93,7 +93,7 @@ namespace Pulsar4X.Client
             ImGui.PushStyleColor(ImGuiCol.TableHeaderBg, headerBg);
 
             // Clip to the content region and paint an opaque background so the system tree cannot show through.
-            // A floor keeps the listing usable when this panel sits under other Crew tab sections.
+            // A floor keeps the listing usable when this panel sits under other Staffing tab sections.
             float height = Math.Max(280f, avail.Y);
             if (ImGui.BeginChild("##crew-market-panel", new System.Numerics.Vector2(avail.X, height)))
             {

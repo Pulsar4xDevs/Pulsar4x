@@ -120,8 +120,8 @@ namespace Pulsar4X.Client
                 ImGui.SetTooltip(!enabled
                     ? "No owned colony offers recruitment."
                     : hasCandidates
-                        ? "Open the colony Crew tab to hire."
-                        : "Open the colony Crew tab. No candidates right now.");
+                        ? "Open the colony Staffing tab to hire."
+                        : "Open the colony Staffing tab. No candidates right now.");
         }
 
         private void DisplayPeopleList(IReadOnlyList<CommanderSnapshot> people, DateTime now)

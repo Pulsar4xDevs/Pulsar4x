@@ -44,8 +44,8 @@ namespace Pulsar4X.Client
             _selectedSystemId = systemId;
         }
 
-        // Set by OpenRecruitment so the Crew tab is brought forward once.
-        private bool _focusCrewTab;
+        // Set by OpenRecruitment so the Staffing tab is brought forward once.
+        private bool _focusStaffingTab;
 
         // ImGui.NET only exposes the flags overload together with p_open, which adds a close
         // button; call the native entry with a null p_open instead.
@@ -56,11 +56,11 @@ namespace Pulsar4X.Client
                 return ImGuiNative.igBeginTabItem(text, null, flags) != 0;
         }
 
-        /// <summary>Open this window on a colony with its Crew tab selected.</summary>
+        /// <summary>Open this window on a colony with its Staffing tab selected.</summary>
         public void OpenRecruitment(int colonyId, string systemId)
         {
             SelectColony(colonyId, systemId);
-            _focusCrewTab = true;
+            _focusStaffingTab = true;
             SetActive(true);
         }
 
@@ -266,11 +266,11 @@ namespace Pulsar4X.Client
                     mining.Display();
                     ImGui.EndTabItem();
                 }
-                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Crew)
-                    && BeginTabItem("Crew", _focusCrewTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Staffing)
+                    && BeginTabItem("Staffing", _focusStaffingTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
                 {
-                    _focusCrewTab = false;
-                    DisplayCrewTab(selectedColony);
+                    _focusStaffingTab = false;
+                    DisplayStaffingTab(selectedColony);
                     ImGui.EndTabItem();
                 }
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Power)
@@ -892,9 +892,9 @@ namespace Pulsar4X.Client
                 ? candidate.WagePerMonth.ToString("N0", System.Globalization.CultureInfo.CurrentCulture) + " a month"
                 : candidate.Wage.ToString("N0", System.Globalization.CultureInfo.CurrentCulture) + " a day";
 
-        private void DisplayCrewTab(EntitySnapshot colony)
+        private void DisplayStaffingTab(EntitySnapshot colony)
         {
-            if (ImGui.BeginChild("ColonyCrewTab"))
+            if (ImGui.BeginChild("ColonyStaffingTab"))
             {
                 var colonyView = colony.GetView<ColonyView>();
                 if (colonyView != null)
