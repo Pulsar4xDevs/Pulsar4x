@@ -12,6 +12,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
 using Pulsar4X.Names;
+using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Tests;
@@ -136,6 +137,17 @@ public class MultiFactionEarthPhase9Tests
         var record = _game.NpcCompanies.Spawned.Single(s => s.FactionId == companyId);
         record.BrokeSince = Now.AddDays(-FactionSpawner.FoldDays);
 
+        var designs = _player.GetDataBlob<FactionInfoDB>().ShipDesigns;
+        var design = designs.ContainsKey("default-ship-design-freighter")
+            ? designs["default-ship-design-freighter"]
+            : designs.Values.First();
+        var ship = ShipFactory.CreateShip(design, company, colony.GetDataBlob<ColonyInfoDB>().PlanetEntity, "Folded Packet");
+        Assert.That(ship.FactionOwnerID, Is.EqualTo(companyId));
+
+        var workforce = _amc.GetDataBlob<ColonyWorkforceDB>();
+        workforce.Commuters.TryGetValue(_amc.FactionOwnerID, out var commutersBefore);
+        workforce.Commuters[companyId] = 250;
+
         var seen = new List<Event>();
         void OnEvent(Event e) => seen.Add(e);
         EventManager.Instance.Subscribe(EventType.NpcCompanyFolded, OnEvent);
@@ -145,6 +157,10 @@ public class MultiFactionEarthPhase9Tests
             Assert.That(_game.Factions.ContainsKey(companyId), Is.False);
             Assert.That(colony.FactionOwnerID, Is.EqualTo(_amc.FactionOwnerID));
             Assert.That(Info(_amc).Colonies, Does.Contain(colony));
+            Assert.That(ship.FactionOwnerID, Is.EqualTo(_amc.FactionOwnerID), "folded company's ship is rehomed");
+            Assert.That(workforce.Commuters.ContainsKey(companyId), Is.False, "no commuter entry for the folded faction");
+            workforce.Commuters.TryGetValue(_amc.FactionOwnerID, out var commutersAfter);
+            Assert.That(commutersAfter, Is.EqualTo(commutersBefore + 250));
             Assert.That(seen, Has.Count.EqualTo(1));
             Assert.That(seen[0].Message, Does.Contain("folded back into Americas Compact"));
         }
@@ -152,6 +168,21 @@ public class MultiFactionEarthPhase9Tests
         {
             EventManager.Instance.Unsubscribe(EventType.NpcCompanyFolded, OnEvent);
         }
+    }
+
+    [Test]
+    public void MaskExhaustion_DoesNotSpawnOrTakePeopleOrFunds()
+    {
+        long people = Pop(_amc);
+        decimal funds = Funds(_amc);
+        int factions = _game.Factions.Count;
+        // Mask indexes are never recycled; once the next index hits the headroom gate, spawning must stop.
+        _game.NextFactionMaskIndex = Game.MaxFactions - FactionSpawner.FactionHeadroom;
+        var colony = FactionSpawner.TrySpawn(_game, _sol, Iron, _amc, Now);
+        Assert.That(colony, Is.Null, "no spawn when mask slots are exhausted");
+        Assert.That(_game.Factions.Count, Is.EqualTo(factions));
+        Assert.That(Pop(_amc), Is.EqualTo(people), "people were not taken");
+        Assert.That(Funds(_amc), Is.EqualTo(funds), "funds were not taken");
     }
 
     [Test]

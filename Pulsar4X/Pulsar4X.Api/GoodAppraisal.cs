@@ -28,7 +28,7 @@ public sealed record GoodAppraisal(
 public sealed record AppraisalLine(
     string CargoId,
     string Name,
-    long Quantity,
+    double Quantity,
     decimal? UnitPrice,
     decimal? LineCost,
     bool FromMarket,

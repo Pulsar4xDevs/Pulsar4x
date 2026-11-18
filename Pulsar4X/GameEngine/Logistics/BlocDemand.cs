@@ -41,7 +41,7 @@ public static class BlocDemand
         var info = InfoOf(colony);
         if (info == null)
             return;
-        bool anyDemand = policy.Rows.Values.Any(r => r.IsDemand() || r.OutputPerDay > 0);
+        bool anyDemand = policy.Rows.Values.Any(r => r.IsDemand() || r.OutputPerDay > 0 || r.OutputPerDayPerMillion > 0);
         if (!anyDemand)
             return;
 
@@ -50,7 +50,7 @@ public static class BlocDemand
         colony.TryGetDataBlob<CargoStorageDB>(out var storage);
         var game = colony.Manager?.Game;
 
-        Produce(policy, info, storage, days);
+        Produce(policy, info, storage, days, colony);
 
         foreach (var row in policy.Rows.Values.Where(r => r.IsDemand()).OrderBy(r => r.CargoId, StringComparer.Ordinal))
         {
@@ -78,23 +78,43 @@ public static class BlocDemand
     }
 
     /// <summary>
-    /// Phase 8: a Sell row with <see cref="MarketPolicyRow.OutputPerDay"/> is the bloc's abstract industry: it adds
-    /// that many units a day to stock, held at the row's Max (90 days of output when Max is 0). Output the stock has no
-    /// room for is not carried.
+    /// Phase 8: a Sell row with output is the bloc's abstract industry: it adds that many units a day to stock,
+    /// held at the row's Max (90 days of output when Max is 0). Output the stock has no room for is not carried.
+    /// Production scales with live population when <see cref="MarketPolicyRow.OutputPerDayPerMillion"/> is set.
     /// </summary>
-    static void Produce(ColonyMarketPolicyDB policy, FactionInfoDB info, Pulsar4X.Storage.CargoStorageDB? storage, double days)
+    /// <summary>Units per day at the colony's live population. A row with only <see cref="MarketPolicyRow.OutputPerDay"/>
+    /// (tests and rows that are not population-scaled) keeps that rate.</summary>
+    public static double LiveOutputPerDay(MarketPolicyRow row, Entity colony)
+    {
+        if (row.OutputPerDayPerMillion > 0)
+        {
+            long pop = 0;
+            if (colony.TryGetDataBlob<Pulsar4X.Colonies.ColonyInfoDB>(out var info))
+            {
+                foreach (var n in info.Population.Values)
+                    pop += n;
+            }
+            return row.OutputPerDayPerMillion * (pop / 1_000_000.0);
+        }
+        return row.OutputPerDay;
+    }
+
+    static void Produce(ColonyMarketPolicyDB policy, FactionInfoDB info, Pulsar4X.Storage.CargoStorageDB? storage, double days, Entity colony)
     {
         if (storage == null || days <= 0)
             return;
-        foreach (var row in policy.Rows.Values.Where(r => r.OutputPerDay > 0).OrderBy(r => r.CargoId, StringComparer.Ordinal))
+        foreach (var row in policy.Rows.Values.OrderBy(r => r.CargoId, StringComparer.Ordinal))
         {
+            double rate = LiveOutputPerDay(row, colony);
+            if (rate <= 0)
+                continue;
             if (!info.Data.CargoGoods.Contains(row.CargoId))
                 continue;
             var cargo = info.Data.CargoGoods.GetAny(row.CargoId);
-            row.OutputOwed += row.OutputPerDay * days;
+            row.OutputOwed += rate * days;
             long whole = (long)Math.Floor(row.OutputOwed);
             row.OutputOwed -= whole;
-            long cap = row.Max > 0 ? row.Max : (long)Math.Ceiling(PremiumDays * row.OutputPerDay);
+            long cap = row.Max > 0 ? row.Max : (long)Math.Ceiling(PremiumDays * rate);
             long room = cap - storage.GetUnitsStored(cargo, false);
             long add = Math.Min(whole, room);
             if (add > 0)
