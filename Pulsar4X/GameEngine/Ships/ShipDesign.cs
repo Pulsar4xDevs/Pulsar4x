@@ -86,10 +86,17 @@ namespace Pulsar4X.Ships
         public Dictionary<string, long> MaterialCosts = new Dictionary<string, long>();
         public Dictionary<string, long> ComponentCosts = new Dictionary<string, long>();
         public Dictionary<string, long> ShipInstanceCost = new Dictionary<string, long>();
+        /// <summary>Crew the design needs: part crew, without the captain; 0 for an automated design (no bridge). See <see cref="ShipCrew.CrewRequired"/>.</summary>
         public int CrewReq;
 
-        /// <summary>Crew the design can house (quarters plus bridge berths, <see cref="ShipCrew.Berths"/>). 0 until crew plan phase 1.</summary>
+        /// <summary>Crew bunks the design has (crew quarters only; a bridge's cabins are <see cref="OfficerSlots"/>). <see cref="ShipCrew.Berths"/>.</summary>
         public int CrewBerths;
+
+        /// <summary>Officer slots the design's bridges give (the captain for now).</summary>
+        public int OfficerSlots;
+
+        /// <summary>True when the design has a bridge and so wants a captain; false means automated (no crew, no orders of its own).</summary>
+        public bool NeedsCaptain;
         public long IndustryPointCosts { get; private set; }
 
         /// <summary>
@@ -189,11 +196,13 @@ namespace Pulsar4X.Ships
             ShipInstanceCost.Clear();
 
             CrewBerths = ShipCrew.Berths(Components);
+            OfficerSlots = ShipCrew.OfficerSlots(Components);
+            NeedsCaptain = ShipCrew.NeedsCaptain(Components);
+            CrewReq = ShipCrew.CrewRequired(Components);
 
             foreach (var component in Components)
             {
                 MassPerUnit += component.design.MassPerUnit * component.count;
-                CrewReq += component.design.CrewReq * component.count;
                 CreditCost += component.design.CreditCost * component.count;
                 VolumePerUnit += component.design.VolumePerUnit * component.count;
                 if (ComponentCosts.ContainsKey(component.design.UniqueID))

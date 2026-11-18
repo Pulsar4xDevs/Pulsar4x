@@ -189,7 +189,7 @@
       "UniqueID": "crew-quarters",
       "Name": "Crew Quarters",
       "Formulas": {
-        "Description": "Bunks, lockers and a share of galley and washroom for the ship's own crew. A ship needs a berth for every crew member; its bridge sleeps a few. Bigger quarters share more, so each berth weighs less.",
+        "Description": "Bunks, lockers and a share of galley and washroom for the ship's own crew. A ship needs a bunk for every crew member the parts need. The bridge has its own cabins for officers. Bigger quarters share more, so each berth weighs less.",
         "Mass": "250 * Pow(PropertyValue('Berths'), 0.85)",
         "Volume": "[Mass] * 0.1",
         "HTK": "0.5",
@@ -494,23 +494,23 @@
           "AttributeType": "GameEngine.People.AdminSpaceAtb"
         },
         {
-          "Name": "Berths",
-          "DescriptionFormula": "'Bunks on the bridge for its own crew: half the console space, at least 2'",
+          "Name": "Officer Slots",
+          "DescriptionFormula": "'Cabins on the bridge for officers (the captain for now): half the console space, at least 2. The bridge operators are crew and sleep in crew quarters.'",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "Max(2, Floor(PropertyValue('Console Space') / 2))"
         },
         {
-          "Name": "Life Support at Full Berths",
+          "Name": "Life Support at Full Officer Slots",
           "Units": "kW",
-          "DescriptionFormula": "'Life support with every bridge berth filled: 1 kW per crew x the Closed-Loop Life Support factor at design time. Display only.'",
+          "DescriptionFormula": "'Life support with every officer slot filled: 1 kW per person x the Closed-Loop Life Support factor at design time. Display only.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Berths') * TechData('tech-life-support-efficiency')"
+          "PropertyFormula": "PropertyValue('Officer Slots') * TechData('tech-life-support-efficiency')"
         },
         {
-          "Name": "DBargsBerths",
+          "Name": "DBargsOfficerSlots",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(PropertyValue('Berths'))",
-          "AttributeType": "Pulsar4X.Ships.CrewQuartersAtb"
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Officer Slots'))",
+          "AttributeType": "Pulsar4X.Ships.OfficerSlotsAtb"
         }
       ]
     }

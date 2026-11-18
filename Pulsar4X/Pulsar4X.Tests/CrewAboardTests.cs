@@ -92,13 +92,18 @@ public class CrewAboardTests
         {
             var design = ship.GetDataBlob<ShipInfoDB>().Design;
             Assert.That(ShipCrew.Tracked(ship), Is.True, design.Name);
-            // Every scenario ship comes with a captain except the Sensor Sat, which flies uncaptained (no spare berth).
+            // Every bridged scenario ship comes with a captain; the Sensor Sat has no bridge, so it is automated (crew rules).
             bool captained = design.Name != "Sensor Sat";
+            Assert.That(ShipCrew.Automated(ship), Is.EqualTo(!captained), design.Name);
             Assert.That(ShipCrew.HasCaptain(ship), Is.EqualTo(captained), design.Name + ": scenario captain");
             int captain = captained ? 1 : 0;
             Assert.That(ShipCrew.Aboard(ship), Is.EqualTo(design.CrewReq + captain), design.Name + ": crew plus any captain");
-            Assert.That(ShipCrew.SplitOf(ship).Required, Is.EqualTo(design.CrewReq + captain), design.Name);
-            Assert.That(ShipCrew.Aboard(ship), Is.LessThanOrEqualTo(design.CrewBerths), design.Name + ": everyone aboard, captain included, has a berth");
+            Assert.That(ShipCrew.CrewAboard(ship), Is.EqualTo(design.CrewReq), design.Name);
+            Assert.That(ShipCrew.SplitOf(ship).Required, Is.EqualTo(design.CrewReq), design.Name + ": the captain is not part crew");
+            Assert.That(ShipCrew.CrewAboard(ship), Is.LessThanOrEqualTo(design.CrewBerths), design.Name + ": every crew member has a bunk");
+            Assert.That(ShipCrew.OfficersAboard(ship), Is.LessThanOrEqualTo(design.OfficerSlots), design.Name + ": the captain has an officer slot");
+            Assert.That(ShipCrew.IsUnderCrewed(ship), Is.False, design.Name);
+            Assert.That(ShipCrew.NoCaptain(ship), Is.False, design.Name);
             Assert.That(ShipCrew.WorkFactor(ship), Is.EqualTo(1), design.Name);
             Assert.That(ShipCrew.EngineFactor(ship), Is.EqualTo(1), design.Name);
             Assert.That(ShipCrew.Note(ship), Is.Empty, design.Name);
@@ -383,9 +388,10 @@ public class CrewAboardTests
         Assert.That(ShipCrew.IsEngine(newton), Is.False, "reaction engines need no crew and are not scaled");
 
         // A reaction engine given crew counts as a plain crewed part, not engine crew.
-        var split = ShipCrew.Split(new[] { (warp, 1), (newton, 2) });
+        var bridge = Info.InternalComponentDesigns.Values.First(d => ShipCrew.IsBridge(d));
+        var split = ShipCrew.Split(new[] { (warp, 1), (newton, 2), (bridge, 1) });
         Assert.That(split.Engine, Is.EqualTo(warp.CrewReq));
-        Assert.That(split.Required, Is.EqualTo(warp.CrewReq + 2 * newton.CrewReq));
+        Assert.That(split.Required, Is.EqualTo(warp.CrewReq + 2 * newton.CrewReq + bridge.CrewReq));
     }
 
     [Test]
@@ -453,13 +459,16 @@ public class CrewAboardTests
         var split = ShipCrew.SplitOf(ship);
         var view = new GameProjector(_game).ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
         Assert.That(split.Captain, Is.EqualTo(1));
-        Assert.That(split.Required, Is.EqualTo(parts.Required + 1));
+        Assert.That(split.Required, Is.EqualTo(parts.Required), "the captain is not part crew");
         Assert.That(split.Berths, Is.EqualTo(parts.Berths));
-        Assert.That(split.Capacity, Is.EqualTo(split.Required), "captain boards even when berths equal the part crew");
+        Assert.That(split.Capacity, Is.EqualTo(split.Required), "crew bunks cover the part crew");
         Assert.That(view.CrewRequired, Is.EqualTo(split.Required));
         Assert.That(view.CrewBerths, Is.EqualTo(split.Berths));
         Assert.That(view.CrewAboard, Is.EqualTo(split.Required));
-        Assert.That(view.UnderCrewed, Is.False, "berths cover the part crew; the captain does not leave the ship short");
+        Assert.That(view.OfficersAboard, Is.EqualTo(1), "the captain boards an officer slot");
+        Assert.That(view.PeopleAboard, Is.EqualTo(split.Required + 1));
+        Assert.That(view.NoCaptain, Is.False);
+        Assert.That(view.UnderCrewed, Is.False, "bunks cover the part crew; the captain does not leave the ship short");
         Assert.That(view.CrewByComponent.Sum(r => r.Crew), Is.EqualTo(view.CrewRequired));
         Assert.That(view.BerthsByComponent.Sum(r => r.Berths), Is.EqualTo(view.CrewBerths));
     }

@@ -5,8 +5,8 @@ using Pulsar4X.Interfaces;
 namespace Pulsar4X.Ships
 {
     /// <summary>
-    /// Berths for a ship's own crew (crew plan phase 1). Crew quarters carry it, and so does every bridge,
-    /// which sleeps a few. Berths are read from the design (ShipCrew.Berths), so installing or removing a
+    /// Bunks for a ship's own crew (crew plan phase 1). Crew quarters carry it; bridges carry OfficerSlotsAtb instead,
+    /// which houses officers. Bunks are read from the design (ShipCrew.Berths), so installing or removing a
     /// part needs no datablob work here; phase 3 caps crew aboard at the ship's berths.
     /// </summary>
     public class CrewQuartersAtb : IComponentDesignAttribute

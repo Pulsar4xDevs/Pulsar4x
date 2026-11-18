@@ -143,7 +143,8 @@ public class CrewFormulaTests
         var four = new ShipDesign(Info, "four", new List<(ComponentDesign, int)> { (drive, 4), (hold, 1) }, armor, "credit-four-" + Guid.NewGuid().ToString("N"));
         Assert.That(one.CreditCost, Is.EqualTo(drive.CreditCost + hold.CreditCost));
         Assert.That(four.CreditCost, Is.EqualTo(4 * drive.CreditCost + hold.CreditCost), "four drives cost four times one");
-        Assert.That(four.CrewReq, Is.EqualTo(4 * drive.CrewReq + hold.CrewReq));
+        Assert.That(ShipCrew.PartCrew(four.Components), Is.EqualTo(4 * drive.CrewReq + hold.CrewReq));
+        Assert.That(four.CrewReq, Is.EqualTo(0), "no bridge: automated, so the design needs no crew");
     }
 
     [Test]
@@ -178,11 +179,16 @@ public class CrewFormulaTests
             if (!seen.Add(design.UniqueID))
                 continue;
             crew[design.Name] = design.CrewReq;
+            int partCrew = ShipCrew.PartCrew(design.Components);
             TestContext.Out.WriteLine($"{design.Name} ({faction.GetDataBlob<NameDB>().DefaultName}): crew {design.CrewReq}, credits {design.CreditCost} = "
                 + string.Join(" + ", design.Components.Where(c => c.design.CrewReq > 0).Select(c => $"{c.design.Name} {c.design.CrewReq}x{c.count}")));
-            Assert.That(design.CrewReq, Is.EqualTo(design.Components.Sum(c => c.design.CrewReq * c.count)), design.Name);
+            Assert.That(design.CrewReq, Is.EqualTo(design.NeedsCaptain ? partCrew : 0), design.Name);
+            Assert.That(partCrew, Is.EqualTo(design.Components.Sum(c => c.design.CrewReq * c.count)), design.Name);
             Assert.That(design.CreditCost, Is.EqualTo(design.Components.Sum(c => c.design.CreditCost * c.count)), design.Name);
-            Assert.That(design.CrewReq, Is.InRange(1, 60), design.Name + ": a stock design needs a handful to a few dozen crew");
+            if (design.NeedsCaptain)
+                Assert.That(design.CrewReq, Is.InRange(1, 60), design.Name + ": a stock design needs a handful to a few dozen crew");
+            else
+                Assert.That(design.CrewReq, Is.Zero, design.Name + ": automated");
             foreach (var (part, _) in design.Components)
                 Assert.That(part.CrewReq, Is.InRange(0, 20), design.Name + ": " + part.Name);
         }
