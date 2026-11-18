@@ -45,7 +45,7 @@ namespace Pulsar4X.Client
             public readonly HashSet<string> Checked = new();
             public bool Candles = true;
             public bool Index = true;
-            public readonly MarketRangeState Range = new();
+            public MarketRangeState Range => SharedRange;
             public readonly Dictionary<string, RowEdit> Rows = new();
             public readonly RowEdit Add = new();
             public string AddFor = "";
@@ -68,6 +68,49 @@ namespace Pulsar4X.Client
         }
 
         static readonly Dictionary<int, OfficeUi> Ui = new();
+
+        /// <summary>One chart range for every office, so 3M (or a custom span) stays selected when you switch markets.</summary>
+        static readonly MarketRangeState SharedRange = new();
+
+        static readonly HashSet<int> FlashPrimedOffices = new();
+        static readonly HashSet<(int OfficeId, string CargoId)> SeenGoods = new();
+        static readonly Dictionary<(int OfficeId, string CargoId), double> FlashStarted = new();
+        const double FlashSeconds = 1.5;
+
+        /// <summary>1 at the instant a listing appears, 0 after <paramref name="duration"/> seconds.</summary>
+        public static float FlashAmount(double now, double started, double duration = FlashSeconds)
+        {
+            if (duration <= 0)
+                return 0f;
+            double t = (now - started) / duration;
+            if (t < 0 || t >= 1)
+                return 0f;
+            return (float)(1.0 - t);
+        }
+
+        static uint FlashRowBg(float amount)
+        {
+            float a = 0.45f * amount;
+            return ImGui.ColorConvertFloat4ToU32(new Vector4(0.45f, 0.85f, 0.35f, a));
+        }
+
+        static void NoteListedGoods(int officeId, List<MarketGoodView> listed)
+        {
+            double now = ImGui.GetTime();
+            if (!FlashPrimedOffices.Contains(officeId))
+            {
+                foreach (var good in listed)
+                    SeenGoods.Add((officeId, good.CargoId));
+                FlashPrimedOffices.Add(officeId);
+                return;
+            }
+            foreach (var good in listed)
+            {
+                var key = (officeId, good.CargoId);
+                if (SeenGoods.Add(key))
+                    FlashStarted[key] = now;
+            }
+        }
 
         /// <summary>Space between segment buttons. A click there hits nothing.</summary>
         const float SegmentGap = 4f;
@@ -129,7 +172,7 @@ namespace Pulsar4X.Client
                 if (listH > 220f)
                     listH = 220f;
                 ImGui.BeginChild("##market-goods", new Vector2(0f, listH), ImGuiChildFlags.Borders);
-                DrawGoods(ui, listed, addable, ref selectedId);
+                DrawGoods(entity.Id, ui, listed, addable, ref selectedId);
                 ImGui.EndChild();
                 DrawDetail(entity, market, history, now, uiState, ui, listed, addable, selectedId, true);
                 IntelDisplay.Display(entity, book, officeSystemId, uiState);
@@ -146,7 +189,7 @@ namespace Pulsar4X.Client
                 if (bodyH < 160f)
                     bodyH = 160f;
                 ImGui.BeginChild("##market-goods", new Vector2(listW, bodyH), ImGuiChildFlags.Borders);
-                DrawGoods(ui, listed, addable, ref selectedId);
+                DrawGoods(entity.Id, ui, listed, addable, ref selectedId);
                 ImGui.EndChild();
                 ImGui.SameLine();
                 ImGui.BeginChild("##market-detail", new Vector2(0f, bodyH));
@@ -225,8 +268,9 @@ namespace Pulsar4X.Client
             }
         }
 
-        static void DrawGoods(OfficeUi ui, List<MarketGoodView> listed, List<MarketGoodChoice> addable, ref string selectedId)
+        static void DrawGoods(int officeId, OfficeUi ui, List<MarketGoodView> listed, List<MarketGoodChoice> addable, ref string selectedId)
         {
+            NoteListedGoods(officeId, listed);
             ImGui.SetNextItemWidth(-1f);
             string filter = ui.Filter;
             ImGui.InputTextWithHint("##good-search", "Search goods...", ref filter, 64);
@@ -257,7 +301,7 @@ namespace Pulsar4X.Client
             }
 
             if (shownListed > 0)
-                DrawListedTable(ui, listed, filter, ref selectedId);
+                DrawListedTable(officeId, ui, listed, filter, ref selectedId);
             if (shownAddable > 0)
             {
                 ImGui.Spacing();
@@ -266,7 +310,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        static void DrawListedTable(OfficeUi ui, List<MarketGoodView> listed, string filter, ref string selectedId)
+        static void DrawListedTable(int officeId, OfficeUi ui, List<MarketGoodView> listed, string filter, ref string selectedId)
         {
             int columns = ui.Compare ? 4 : 3;
             string tableId = ui.Compare ? "##market-goods-compare" : "##market-goods-rows";
@@ -291,6 +335,12 @@ namespace Pulsar4X.Client
                 ImGui.TableNextRow();
                 if (selected)
                     ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, selectedBg, -1);
+                else if (FlashStarted.TryGetValue((officeId, good.CargoId), out double started))
+                {
+                    float flash = FlashAmount(ImGui.GetTime(), started);
+                    if (flash > 0)
+                        ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, FlashRowBg(flash), -1);
+                }
                 ImGui.PushID(good.CargoId);
 
                 if (ui.Compare)
@@ -305,13 +355,15 @@ namespace Pulsar4X.Client
                 }
 
                 ImGui.TableNextColumn();
-                if (ImGui.Selectable(good.Name + "###row", selected))
+                string shown = FitName(good.Name);
+                if (ImGui.Selectable(shown + "###row", selected))
                 {
                     // In Compare the whole row toggles the good, so a click that lands beside the small box still counts.
                     if (ui.Compare)
                         MarketChartData.ToggleCompare(ui.Checked, good.CargoId);
                     selectedId = good.CargoId;
                 }
+                NameTooltip(good.Name, shown);
                 ImGui.TableNextColumn();
                 RightText(Money(good.Bid));
                 if (ImGui.IsItemClicked())
@@ -345,8 +397,10 @@ namespace Pulsar4X.Client
                     ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, selectedBg, -1);
                 ImGui.PushID(choice.CargoId);
                 ImGui.TableNextColumn();
-                if (ImGui.Selectable(choice.Name + "###add", selected))
+                string shown = FitName(choice.Name);
+                if (ImGui.Selectable(shown + "###add", selected))
                     selectedId = choice.CargoId;
+                NameTooltip(choice.Name, shown);
                 ImGui.TableNextColumn();
                 RightText("—");
                 if (ImGui.IsItemClicked())
@@ -994,6 +1048,23 @@ namespace Pulsar4X.Client
         static float ButtonWidth(string label)
         {
             return ImGui.CalcTextSize(label).X + ImGui.GetStyle().FramePadding.X * 2f;
+        }
+
+        static string FitName(string name)
+        {
+            float width = ImGui.GetContentRegionAvail().X;
+            if (width < 8f)
+                width = 8f;
+            return ResearchWindow.FitText(name, width, static t => ImGui.CalcTextSize(t).X);
+        }
+
+        static void NameTooltip(string fullName, string shown)
+        {
+            if (shown == fullName || !ImGui.IsItemHovered())
+                return;
+            ImGui.BeginTooltip();
+            ImGui.TextUnformatted(fullName);
+            ImGui.EndTooltip();
         }
 
         static OfficeUi Office(int entityId)

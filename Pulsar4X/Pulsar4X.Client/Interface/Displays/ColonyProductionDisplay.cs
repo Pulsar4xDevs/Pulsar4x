@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -32,7 +33,30 @@ namespace Pulsar4X.Client
 
         internal ColonyProductionDisplay() { }
 
-        public void Display(int entityId, IndustryView? industry, GlobalUIState uiState)
+        /// <summary>"Have 5, need 12" for a missing-resource tooltip.</summary>
+        public static string HaveNeedText(long have, long need)
+            => "Have " + have.ToString("N0") + ", need " + need.ToString("N0");
+
+        /// <summary>Units on hand matching <paramref name="name"/>, or 0 when there is no store.</summary>
+        public static long StockOnHand(CargoStorageView? storage, string name)
+        {
+            if (storage == null || string.IsNullOrEmpty(name))
+                return 0;
+            long units = 0;
+            foreach (var store in storage.Stores)
+            {
+                if (store.Items == null)
+                    continue;
+                foreach (var item in store.Items)
+                {
+                    if (item.Name == name)
+                        units += item.Units;
+                }
+            }
+            return units;
+        }
+
+        public void Display(int entityId, IndustryView? industry, GlobalUIState uiState, CargoStorageView? cargo = null)
         {
             if (industry == null)
             {
@@ -48,7 +72,7 @@ namespace Pulsar4X.Client
             }
 
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            ProductionLineDisplay(entityId, industry, uiState);
+            ProductionLineDisplay(entityId, industry, uiState, cargo);
             ImGui.SameLine();
 
             var selectedLine = industry.ProductionLines.FirstOrDefault(l => l.Id == _selectedProdLine);
@@ -76,7 +100,7 @@ namespace Pulsar4X.Client
             ImGui.EndChild();
         }
 
-        private void ProductionLineDisplay(int entityId, IndustryView industry, GlobalUIState uiState)
+        private void ProductionLineDisplay(int entityId, IndustryView industry, GlobalUIState uiState, CargoStorageView? cargo)
         {
             if (industry.ProductionLines.Count == 0)
             {
@@ -152,7 +176,7 @@ namespace Pulsar4X.Client
                             if (ImGui.IsItemHovered())
                                 ImGui.SetTooltip("Assuming all resources needed are available.");
 
-                            JobsTable(entityId, line, uiState);
+                            JobsTable(entityId, line, uiState, cargo);
                         }
 
                         if (line.IsShipyard)
@@ -222,7 +246,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void JobsTable(int entityId, ProductionLineView line, GlobalUIState uiState)
+        private void JobsTable(int entityId, ProductionLineView line, GlobalUIState uiState, CargoStorageView? cargo)
         {
             if (ImGui.BeginTable(line.Name, 4, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
@@ -278,19 +302,19 @@ namespace Pulsar4X.Client
                         if (ImGui.BeginTable(job.JobId, 2, ImGuiTableFlags.Borders))
                         {
                             ImGui.TableSetupColumn("Resource Required");
-                            ImGui.TableSetupColumn("Quantity Needed");
+                            ImGui.TableSetupColumn("Have / Need");
                             ImGui.TableHeadersRow();
                             ImGui.TableNextColumn();
-                            ImGui.Text("Industry Points");
+                            ImGui.TextUnformatted("Industry Points");
                             ImGui.TableNextColumn();
-                            ImGui.Text(job.ProductionPointsLeft.ToString());
+                            ImGui.TextUnformatted(job.ProductionPointsLeft.ToString());
 
                             foreach (var requirement in job.RemainingRequirements)
                             {
                                 ImGui.TableNextColumn();
-                                ImGui.Text(requirement.Name);
+                                ImGui.TextUnformatted(requirement.Name);
                                 ImGui.TableNextColumn();
-                                ImGui.Text(requirement.Amount.ToString());
+                                ImGui.TextUnformatted(HaveNeedText(StockOnHand(cargo, requirement.Name), requirement.Amount));
                             }
                             if (job.CrewRequired > 0)
                             {
@@ -838,9 +862,9 @@ namespace Pulsar4X.Client
                         if (ImGui.IsItemHovered())
                         {
                             if (cost.CanProduce)
-                                ImGui.SetTooltip("Not enough " + cost.Name + " available on this colony.\nImport or produce some!");
+                                ImGui.SetTooltip(HaveNeedText(cost.Available, totalCost) + ". Import or produce some!");
                             else
-                                ImGui.SetTooltip("Not enough " + cost.Name + " available on this colony.\nAnd we can't build this item!");
+                                ImGui.SetTooltip(HaveNeedText(cost.Available, totalCost) + ". This colony cannot produce it.");
                         }
 
                         ImGui.PopStyleColor();

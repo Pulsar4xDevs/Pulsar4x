@@ -67,7 +67,46 @@ namespace Pulsar4X.Client
 
         public static string RelocateButtonLabel() => "Relocate (" + RelocateFee.ToString("0", CultureInfo.InvariantCulture) + " cr each)";
 
-        public static void Display(int colonyId, WorkforceView view, GlobalUIState uiState)
+        /// <summary>One consumption good, so later goods (consumer, medical, luxuries) can append to the same table.</summary>
+        public readonly record struct NeedGoodRow(string Name, double PerDay, long Stock, double? DaysOfStock, bool Short);
+
+        public static NeedGoodRow[] Goods(ColonyNeedsView needs) => new[]
+        {
+            new NeedGoodRow("Food", needs.FoodPerDay, needs.FoodStock, needs.FoodDaysOfStock, needs.FoodShort),
+            new NeedGoodRow("Water", needs.WaterPerDay, needs.WaterStock, needs.WaterDaysOfStock, needs.WaterShort),
+        };
+
+        public static string FormatPerDay(double amount)
+            => amount.ToString("0.##", CultureInfo.InvariantCulture) + " a day";
+
+        public static string FormatStock(long amount)
+            => amount.ToString("N0", CultureInfo.InvariantCulture);
+
+        /// <summary>"—" when the colony draws nothing from stock (a habitable world); otherwise days at today's use.</summary>
+        public static string FormatDaysOfStock(double? days)
+            => days is double d ? d.ToString("0.#", CultureInfo.InvariantCulture) + " days" : "—";
+
+        /// <summary>The first short day, or null when supplied. <paramref name="now"/> is the current game date.</summary>
+        public static DateTime? ShortageStartedOn(DateTime now, int? shortageDay)
+            => shortageDay is int d ? now.Date.AddDays(-d) : null;
+
+        public static string ShortageText(ColonyNeedsView needs, DateTime? now)
+        {
+            if (needs.ShortageDay is not int day)
+                return string.IsNullOrEmpty(needs.ShortageState) ? "Supplied" : needs.ShortageState;
+            if (now is DateTime date && ShortageStartedOn(date, day) is DateTime started)
+                return needs.ShortageState + " since " + DateDisplay.FormatDate(started);
+            return needs.ShortageState + " (day " + day.ToString(CultureInfo.InvariantCulture) + ")";
+        }
+
+        public static string SatisfactionText(ColonyNeedsView needs)
+            => needs.Satisfaction.ToString("0.#", CultureInfo.InvariantCulture) + " / "
+                + needs.SatisfactionTarget.ToString("0.#", CultureInfo.InvariantCulture);
+
+        public static string FactorText(double factor)
+            => factor.ToString("0.##", CultureInfo.InvariantCulture) + "×";
+
+        public static void Display(int colonyId, WorkforceView view, GlobalUIState uiState, ColonyNeedsView? needs = null, DateTime? now = null)
         {
             if (!_drafts.TryGetValue(colonyId, out var draft) || draft.ColonyId != colonyId)
             {
@@ -114,6 +153,9 @@ namespace Pulsar4X.Client
                 ImGui.TextUnformatted("Staff wages " + view.StaffWagesPerMonth.ToString("C2", CultureInfo.CurrentCulture)
                     + " a month (" + view.StaffWagePerDay.ToString("C2", CultureInfo.CurrentCulture) + " a day each).");
             }
+
+            if (needs != null)
+                DrawConsumption(needs, now);
 
             ImGui.Spacing();
             ImGui.TextUnformatted("Tiers");
@@ -225,6 +267,60 @@ namespace Pulsar4X.Client
                 ImGui.EndTable();
                 if (view.Contracts.Count == 0)
                     ImGui.TextDisabled("No other factions on this body.");
+            }
+        }
+
+        static void DrawConsumption(ColonyNeedsView needs, DateTime? now)
+        {
+            ImGui.Spacing();
+            ImGui.TextUnformatted("Consumption");
+            if (ImGui.BeginTable("##workforce-needs", 5, Styles.TableFlags | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+            {
+                ImGui.TableSetupColumn("Good");
+                ImGui.TableSetupColumn("Use");
+                ImGui.TableSetupColumn("Stock");
+                ImGui.TableSetupColumn("Days of stock");
+                ImGui.TableSetupColumn("Status");
+                ImGui.TableHeadersRow();
+                foreach (var good in Goods(needs))
+                {
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(good.Name);
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(FormatPerDay(good.PerDay));
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(FormatStock(good.Stock));
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(FormatDaysOfStock(good.DaysOfStock));
+                    ImGui.TableNextColumn();
+                    if (good.Short)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                    ImGui.TextUnformatted(good.Short ? "Short" : "Supplied");
+                    if (good.Short)
+                        ImGui.PopStyleColor();
+                }
+                ImGui.EndTable();
+            }
+
+            if (ImGui.BeginTable("##workforce-needs-summary", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg))
+            {
+                bool shorting = needs.ShortageState != "Supplied" && needs.ShortageDay != null;
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.TextColored(Styles.DescriptiveColor, "Shortage");
+                ImGui.TableNextColumn();
+                if (shorting)
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                ImGui.TextUnformatted(ShortageText(needs, now));
+                if (shorting)
+                    ImGui.PopStyleColor();
+                SummaryRow("Deaths", needs.DeathsTotal.ToString("N0"), "Deaths from shortage since the clock started.");
+                SummaryRow("Leavers", needs.LeftTotal.ToString("N0"), "People who left because of the shortage.");
+                SummaryRow("Satisfaction", SatisfactionText(needs), "Current satisfaction and the target it moves toward (20% every 30 days).");
+                SummaryRow("Growth", FactorText(needs.GrowthFactor), "Population growth multiplier. 0 while short.");
+                SummaryRow("Output", FactorText(needs.OutputFactor), "Industry, mining and research multiplier.");
+                ImGui.EndTable();
             }
         }
 

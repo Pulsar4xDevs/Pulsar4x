@@ -210,13 +210,15 @@ namespace Pulsar4X.Client
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Workforce)
                     && selectedColony.GetView<WorkforceView>() is { } workforce && ImGui.BeginTabItem("Workforce"))
                 {
-                    ColonyWorkforceDisplay.Display(selectedColony.Id, workforce, _uiState);
+                    ColonyWorkforceDisplay.Display(selectedColony.Id, workforce, _uiState,
+                        selectedColony.GetView<ColonyNeedsView>(), selectedSystem.DateTime);
                     ImGui.EndTabItem();
                 }
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Production) && ImGui.BeginTabItem("Production"))
                 {
                     _productionDisplay ??= new ColonyProductionDisplay();
-                    _productionDisplay.Display(selectedColony.Id, selectedColony.GetView<IndustryView>(), _uiState);
+                    _productionDisplay.Display(selectedColony.Id, selectedColony.GetView<IndustryView>(), _uiState,
+                        selectedColony.GetView<CargoStorageView>());
                     ImGui.EndTabItem();
                 }
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Construction) && ImGui.BeginTabItem("Construction"))

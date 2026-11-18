@@ -210,13 +210,15 @@ namespace Pulsar4X.Client
             float width = 480f;
             float height = _laidOutHeight;
             var work = ImGui.GetMainViewport();
+            float workHeight = work.WorkSize.Y > 0 ? work.WorkSize.Y : work.Size.Y;
+            float maxHeight = MaxLaidOutHeight(48f, workHeight);
             float workRight = work.WorkPos.X + work.WorkSize.X;
             float workBottom = work.WorkPos.Y + work.WorkSize.Y;
             float finalX = workRight - width - RightMargin;
             float currentX = workRight + (finalX - workRight) * _animationProgress;
             float y = workBottom - height - BottomMargin;
             _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
-            ImGui.SetNextWindowSizeConstraints(new Vector2(width, 48f), new Vector2(width, work.WorkSize.Y - 8f));
+            ImGui.SetNextWindowSizeConstraints(new Vector2(width, 48f), new Vector2(width, maxHeight));
             ImGui.SetNextWindowPos(new Vector2(currentX, y), ImGuiCond.Always);
             ImGui.SetNextWindowBgAlpha(0.85f);
 
@@ -245,7 +247,7 @@ namespace Pulsar4X.Client
                 // Measure content, not GetWindowSize: a card pinned to the bottom cannot grow down,
                 // so a too-short first frame would otherwise freeze the height and clip the links.
                 float actual = ImGui.GetCursorPos().Y + ImGui.GetStyle().WindowPadding.Y;
-                actual = Math.Clamp(actual, 48f, work.WorkSize.Y - 8f);
+                actual = ClampLaidOutHeight(actual, 48f, workHeight);
                 float pinnedY = workBottom - actual - BottomMargin;
                 ImGui.SetWindowPos(new Vector2(currentX, pinnedY));
                 _laidOutHeight = actual;
@@ -261,6 +263,25 @@ namespace Pulsar4X.Client
             {
                 SetActive(false);
             }
+        }
+
+        /// <summary>
+        /// Upper bound for the card height: at least <paramref name="minHeight"/>, even when the
+        /// work area is missing or shorter than that (WorkSize.Y can be 0, which used to make
+        /// Math.Clamp throw because max &lt; min).
+        /// </summary>
+        public static float MaxLaidOutHeight(float minHeight, float workHeight, float margin = 8f)
+            => Math.Max(minHeight, Math.Max(0f, workHeight) - margin);
+
+        /// <summary>Clamp the measured card height so it never throws when max &lt; min.</summary>
+        public static float ClampLaidOutHeight(float actual, float minHeight, float workHeight, float margin = 8f)
+        {
+            float maxHeight = MaxLaidOutHeight(minHeight, workHeight, margin);
+            if (actual < minHeight)
+                return minHeight;
+            if (actual > maxHeight)
+                return maxHeight;
+            return actual;
         }
 
         private void DrawWindowAccents(Vector4 accentColor)
