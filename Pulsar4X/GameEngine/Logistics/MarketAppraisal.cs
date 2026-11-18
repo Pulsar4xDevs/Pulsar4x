@@ -53,6 +53,19 @@ namespace Pulsar4X.Logistics
             decimal? Scale(decimal? v) => v is decimal d ? d * quantity : null;
             var total = (input ?? 0m) + (energy ?? 0m) + (labour ?? 0m);
             bool any = input != null || energy != null || labour != null;
+            // CostOf records lines for one unit; scale them so they sum to InputCost for the requested quantity.
+            if (quantity != 1)
+            {
+                for (int i = 0; i < inputs.Count; i++)
+                {
+                    var line = inputs[i];
+                    inputs[i] = line with
+                    {
+                        Quantity = line.Quantity * quantity,
+                        LineCost = line.LineCost is decimal c ? c * quantity : null,
+                    };
+                }
+            }
             return new GoodAppraisal(
                 cargoId, name, quantity,
                 any ? total : unit,
@@ -94,10 +107,11 @@ namespace Pulsar4X.Logistics
                         decimal? price = hasRecipe ? childUnit : market ?? childUnit;
                         if (!hasRecipe)
                             fromMarket = market != null && fromMarket;
-                        var lineQty = (long)Math.Ceiling(perOut * needed);
+                        // Fractional quantity so line costs sum to InputCost (e.g. OutputAmount 2, quantity 1 → 0.5).
+                        double lineQty = perOut * needed;
                         string inName = data.GetName(inId);
                         if (string.IsNullOrEmpty(inName)) inName = inId;
-                        inputs.Add(new AppraisalLine(inId, inName, lineQty, price, price is decimal p ? p * lineQty : null, fromMarket, hasRecipe));
+                        inputs.Add(new AppraisalLine(inId, inName, lineQty, price, price is decimal p ? p * (decimal)lineQty : null, fromMarket, hasRecipe));
                         if (price is decimal pay)
                         {
                             input += pay * (decimal)perOut;

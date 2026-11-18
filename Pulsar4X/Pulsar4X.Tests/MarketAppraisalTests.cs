@@ -59,7 +59,7 @@ public class MarketAppraisalTests
         Assert.That(view.CargoId, Is.EqualTo("plastic"));
         Assert.That(view.Quantity, Is.EqualTo(2));
         Assert.That(view.Cycles, Is.Empty);
-        Assert.That(view.Inputs, Has.Some.Matches<AppraisalLine>(l => l.CargoId == "hydrocarbons" && l.FromMarket && l.UnitPrice == hydroAsk));
+        Assert.That(view.Inputs, Has.Some.Matches<AppraisalLine>(l => l.CargoId == "hydrocarbons" && l.FromMarket && l.UnitPrice == hydroAsk && l.Quantity == 1 && l.LineCost == hydroAsk * 1));
 
         // One batch makes 2 kg, so 2 kg is one batch: 1 kg hydrocarbons at the market ask, plus energy 12 kWh × CreditsPerKWh, plus labour.
         decimal energy = EnergyPricing.Round(EnergyPricing.CreditsPerKWh(_game) * 12);
@@ -69,6 +69,23 @@ public class MarketAppraisalTests
         Assert.That(view.LabourCost, Is.EqualTo(labour));
         Assert.That(view.TotalCost, Is.EqualTo(hydroAsk * 1 + energy + labour));
         Assert.That(view.UnitCost, Is.EqualTo(view.TotalCost / 2));
+    }
+
+    [Test]
+    public void AppraiseGood_QuantityOne_WithOutputAmountTwo_LinesUseFractionalQuantitiesThatSumToInputCost()
+    {
+        // Plastic is 1 kg hydrocarbons → 2 kg plastic. One kilogram should show 0.5 kg hydrocarbons, not a ceiled 1.
+        const decimal hydroAsk = 1.5m;
+        MarketBook.SetListing(_company, new MarketListing { CargoId = "hydrocarbons", SellQuantity = 1_000, Ask = hydroAsk });
+
+        var view = _server.AppraiseGood(_session, _company.Id, "plastic", 1);
+        Assert.That(view.Reason, Is.Empty.Or.Null);
+        Assert.That(view.InputCost, Is.EqualTo(0.75m));
+        var hydro = view.Inputs.Single(l => l.CargoId == "hydrocarbons");
+        Assert.That(hydro.Quantity, Is.EqualTo(0.5).Within(1e-9));
+        Assert.That(hydro.UnitPrice, Is.EqualTo(hydroAsk));
+        Assert.That(hydro.LineCost, Is.EqualTo(0.75m));
+        Assert.That(view.Inputs.Where(l => l.LineCost != null).Sum(l => l.LineCost!.Value), Is.EqualTo(view.InputCost));
     }
 
     [Test]
