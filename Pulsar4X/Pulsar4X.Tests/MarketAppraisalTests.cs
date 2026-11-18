@@ -5,6 +5,7 @@ using Pulsar4X.Api;
 using Pulsar4X.Client;
 using Pulsar4X.Client.Host;
 using Pulsar4X.Colonies;
+using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Api;
 using Pulsar4X.Energy;
@@ -113,5 +114,59 @@ public class MarketAppraisalTests
         var missing = MarketAppraisal.Appraise(_game, _company, "this-good-does-not-exist", 1);
         Assert.That(missing.Reason, Is.Not.Empty);
         Assert.That(missing.TotalCost, Is.Null);
+    }
+
+    [Test]
+    public void AppraiseGood_ComponentDesign_SumsResourceCostsAtMarketPrices_AndAddsEnergyAndLabour()
+    {
+        var info = _player.GetDataBlob<FactionInfoDB>();
+        bool IsLeaf(string id)
+        {
+            if (info.ComponentDesigns.ContainsKey(id))
+                return false;
+            if (!info.Data.CargoGoods.IsMaterial(id) && !info.Data.LockedCargoGoods.IsMaterial(id))
+                return true;
+            var material = info.Data.CargoGoods.IsMaterial(id)
+                ? info.Data.CargoGoods.GetMaterial(id)
+                : info.Data.LockedCargoGoods.GetMaterial(id);
+            return material.ResourceCosts == null || material.ResourceCosts.Count == 0;
+        }
+        var design = info.ComponentDesigns.Values.First(d =>
+            d.ResourceCosts != null && d.ResourceCosts.Count > 0 && d.ResourceCosts.Keys.All(IsLeaf));
+        const decimal ask = 0.05m;
+        foreach (var cargoId in design.ResourceCosts.Keys)
+            MarketBook.SetListing(_company, new MarketListing { CargoId = cargoId, SellQuantity = 1_000_000, Ask = ask });
+
+        var view = _server.AppraiseGood(_session, _company.Id, design.UniqueID, 2);
+        Assert.That(view.Reason, Is.Empty.Or.Null, view.Reason);
+        Assert.That(view.CargoId, Is.EqualTo(design.UniqueID));
+        Assert.That(view.Name, Is.EqualTo(design.Name));
+        Assert.That(view.Quantity, Is.EqualTo(2));
+        Assert.That(view.Cycles, Is.Empty);
+
+        decimal input = 0;
+        foreach (var (cargoId, qty) in design.ResourceCosts)
+        {
+            if (qty <= 0) continue;
+            var line = view.Inputs.Single(l => l.CargoId == cargoId);
+            Assert.That(line.Quantity, Is.EqualTo(qty * 2).Within(1e-9));
+            Assert.That(line.FromMarket, Is.True);
+            Assert.That(line.UnitPrice, Is.EqualTo(ask));
+            Assert.That(line.LineCost, Is.EqualTo(ask * (decimal)(qty * 2)));
+            input += line.LineCost!.Value;
+        }
+        Assert.That(view.InputCost, Is.EqualTo(input));
+
+        long output = Math.Max(1, (long)design.OutputAmount);
+        decimal? energyPer = design.EnergyCost > 0
+            ? EnergyPricing.Round(EnergyPricing.CreditsPerKWh(_game) * design.EnergyCost / output)
+            : null;
+        decimal? labourPer = design.IndustryPointCosts > 0
+            ? Math.Round(2m * design.IndustryPointCosts / MarketAppraisal.ReferenceIndustryPointsPerDay / output, 4, MidpointRounding.AwayFromZero)
+            : null;
+        Assert.That(view.EnergyCost, Is.EqualTo(energyPer is decimal e ? e * 2 : (decimal?)null));
+        Assert.That(view.LabourCost, Is.EqualTo(labourPer is decimal l ? l * 2 : (decimal?)null));
+        Assert.That(view.TotalCost, Is.EqualTo(view.InputCost + (view.EnergyCost ?? 0) + (view.LabourCost ?? 0)));
+        Assert.That(view.UnitCost, Is.EqualTo(view.TotalCost / 2));
     }
 }
