@@ -571,14 +571,21 @@ namespace Pulsar4X.Industry
             /// <summary>Units still needed: required minus stock. Always above 0 for a returned shortfall.</summary>
             public long Short => Required - InStock;
 
-            /// <summary>Units still to queue: the shortfall less what queued jobs will make. 0 when they cover it.</summary>
+            /// <summary>Units still to make: the shortfall less what queued jobs will make (<see cref="Queued"/>, in units). 0 when they cover it.</summary>
             public long ToQueue => Math.Max(0, Short - Queued);
+
+            /// <summary>Units one job item (one batch) makes: the recipe's <c>OutputAmount</c>, or 1 when it is 0 or the input cannot be built.</summary>
+            public long OutputPerJob => OutputPerItem(Builder);
 
             /// <summary>The design that builds this input, or null for a raw resource that cannot be built.</summary>
             public IConstructableDesign? Builder => Item as IConstructableDesign;
 
-            /// <summary>The quantity a one-shot feeder job for the shortfall queues, capped at what a job can hold (65535).</summary>
-            public ushort QueueQuantity => (ushort)Math.Min(ToQueue, ushort.MaxValue);
+            /// <summary>
+            /// The quantity (batches, <c>NumberOrdered</c>) of a one-shot feeder job for what is still to make:
+            /// <c>ceil(ToQueue / OutputPerJob)</c>, capped at what a job can hold (65535). 40 units short of a recipe
+            /// that makes 2 per batch queues 20; 41 queues 21.
+            /// </summary>
+            public ushort QueueQuantity => (ushort)Math.Min((ToQueue + OutputPerJob - 1) / OutputPerJob, ushort.MaxValue);
         }
 
         /// <summary>
@@ -587,6 +594,10 @@ namespace Pulsar4X.Industry
         /// the colony's queued jobs will still make of it (<see cref="QueuedOutput"/>), so feeding the same input twice
         /// only queues what is still short. <paramref name="parent"/> is the job asking: it never counts as its own supply.
         /// </summary>
+        /// <summary>Units one batch of the design makes: its <c>OutputAmount</c>, with 0 (or no design) counted as 1.</summary>
+        internal static long OutputPerItem(IConstructableDesign? design)
+            => design == null ? 1 : Math.Max(1, (long)design.OutputAmount);
+
         internal static List<InputShortfall> InputShortfalls(Entity colony, IReadOnlyDictionary<string, long> required, CargoStorageDB? stockpile, IndustryJob? parent = null)
         {
             var found = new List<InputShortfall>();
@@ -610,10 +621,9 @@ namespace Pulsar4X.Industry
         }
 
         /// <summary>
-        /// What the jobs already queued on the colony's lines will still make of <paramref name="design"/>, counted the way
-        /// chaining sizes a feeder job (<c>NumberOrdered</c> is the shortfall in units): per job, the items left in its
-        /// current batch (ordered less completed). A recipe's output per item is not applied, as chaining does not apply it. A repeat job
-        /// counts only its current batch. A stock order that is idle (its batch not started) counts nothing, because it
+        /// Units of <paramref name="design"/>'s item the jobs already queued on the colony's lines will still make, in
+        /// the same item units as the shortfall: per job, the batches left in its current batch (ordered less completed)
+        /// times the recipe's <c>OutputAmount</c> (0 counts as 1). A repeat job counts only its current batch. A stock order that is idle (its batch not started) counts nothing, because it
         /// makes nothing until stock drops. <paramref name="except"/> (the parent job) and refit jobs are skipped.
         /// </summary>
         internal static long QueuedOutput(Entity colony, IConstructableDesign design, IndustryJob? except = null)
@@ -621,6 +631,7 @@ namespace Pulsar4X.Industry
             if (!colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
                 return 0;
             long units = 0;
+            long perBatch = OutputPerItem(design);
             foreach (var line in industry.ProductionLines.Values)
             {
                 foreach (var queued in line.Jobs)
@@ -629,7 +640,7 @@ namespace Pulsar4X.Industry
                         continue;
                     if (queued.StockThreshold != null && !queued.StockBatchStarted)
                         continue;
-                    units += Math.Max(0, queued.NumberOrdered - queued.NumberCompleted);
+                    units += Math.Max(0, queued.NumberOrdered - queued.NumberCompleted) * perBatch;
                 }
             }
             return units;

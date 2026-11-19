@@ -166,7 +166,7 @@ public class IndustryChainingTests
         Assert.That(Jobs(colony, FactoryId).Select(j => j.ItemGuid), Is.EqualTo(new[] { world.Part.UniqueID }));
         var plastic = Jobs(colony, RefineryId).Single();
         Assert.That(plastic.ItemGuid, Is.EqualTo("plastic"));
-        Assert.That(plastic.NumberOrdered, Is.EqualTo(40));
+        Assert.That(plastic.NumberOrdered, Is.EqualTo(20), "40 plastic short, 2 made per batch");
         Assert.That(plastic.Auto, Is.False, "a feeder job is one-shot");
     }
 
@@ -201,7 +201,7 @@ public class IndustryChainingTests
         Assert.That(part.NumberOrdered, Is.EqualTo(1));
         var plastic = Jobs(colony, RefineryId).Single();
         Assert.That(plastic.ItemGuid, Is.EqualTo("plastic"));
-        Assert.That(plastic.NumberOrdered, Is.EqualTo(40));
+        Assert.That(plastic.NumberOrdered, Is.EqualTo(20), "40 plastic short, 2 made per batch");
     }
 
     // ----- the gate -----
@@ -329,7 +329,7 @@ public class IndustryChainingTests
         Assert.That(IndustryLog(colony), Is.EqualTo(new[]
         {
             "Industry (Lee) queued 1 Gizmo for Hull Section.",
-            "Industry (Lee) queued 40 Plastic for Gizmo.",
+            "Industry (Lee) queued 20 Plastic for Gizmo.",
         }));
     }
 
@@ -346,8 +346,8 @@ public class IndustryChainingTests
 
         Assert.That(IndustryLog(colony), Is.EqualTo(new[]
         {
-            "Industry (Lee) queued 40 Plastic for Gizmo.",
-            "Industry (Moss) queued 40 Plastic for Gizmo.",
+            "Industry (Lee) queued 20 Plastic for Gizmo.",
+            "Industry (Moss) queued 20 Plastic for Gizmo.",
         }));
     }
 
@@ -427,7 +427,7 @@ public class IndustryChainingTests
         Assert.That(missing.LineId, Is.EqualTo(RefineryId));
         Assert.That(missing.LineName, Is.EqualTo("Refinery"));
         Assert.That(missing.LineKind, Is.EqualTo(IndustryLineKinds.Refinery));
-        Assert.That(missing.QueueQuantity, Is.EqualTo(40));
+        Assert.That(missing.QueueQuantity, Is.EqualTo(20), "40 units short, 2 per batch");
     }
 
     [Test]
@@ -489,7 +489,7 @@ public class IndustryChainingTests
         var missing = Missing(colony, FactoryId).Single();
 
         Assert.That((missing.Required, missing.InStock, missing.Short), Is.EqualTo((40L, 15L, 25L)));
-        Assert.That(missing.QueueQuantity, Is.EqualTo(25));
+        Assert.That(missing.QueueQuantity, Is.EqualTo(13), "25 units short, 2 per batch: rounded up");
     }
 
     [Test]
@@ -529,12 +529,12 @@ public class IndustryChainingTests
     {
         var world = NewWorld();
         var colony = Colony(world);
-        world.Part.ResourceCosts["plastic"] = 100_000;
+        world.Part.ResourceCosts["plastic"] = 200_000;
         Queue(world, colony, FactoryId, world.Part.UniqueID);
 
         var missing = Missing(colony, FactoryId).Single();
 
-        Assert.That(missing.Short, Is.EqualTo(100_000));
+        Assert.That(missing.Short, Is.EqualTo(200_000));
         Assert.That(missing.QueueQuantity, Is.EqualTo(ushort.MaxValue));
     }
 
@@ -565,7 +565,7 @@ public class IndustryChainingTests
         var colony = Colony(world);
         Queue(world, colony, FactoryId, world.Part.UniqueID);
         var before = Missing(colony, FactoryId).Single();
-        Assert.That((before.Short, before.Queued, before.QueueQuantity), Is.EqualTo((40L, 0L, 40)));
+        Assert.That((before.Short, before.Queued, before.QueueQuantity), Is.EqualTo((40L, 0L, 20)));
 
         var result = new CommandTranslator(Game).Translate(world.Faction, colony,
             new QueueIndustryJobCommand(colony.Id, before.LineId, before.DesignId, before.QueueQuantity, false, false));
@@ -587,14 +587,134 @@ public class IndustryChainingTests
         Queue(world, colony, RefineryId, "plastic", 10);
         Queue(world, colony, FactoryId, world.Part.UniqueID); // no head: only itself
         var missing = Missing(colony, FactoryId).Single();
-        Assert.That((missing.Short, missing.Queued, missing.QueueQuantity), Is.EqualTo((40L, 10L, 30)));
+        Assert.That((missing.Short, missing.Queued, missing.QueueQuantity), Is.EqualTo((40L, 20L, 10)), "10 queued jobs make 20 units");
 
         SeatHead(world, colony);
         Queue(world, colony, FactoryId, world.Part.UniqueID);
 
-        Assert.That(Jobs(colony, RefineryId).Select(j => j.NumberOrdered), Is.EqualTo(new[] { 10, 30 }.Select(n => (ushort)n)),
-            "the 10 already queued are kept, and 30 more are chained");
-        Assert.That(Jobs(colony, RefineryId)[1].NumberOrdered, Is.EqualTo(missing.QueueQuantity), "the view said 30");
+        Assert.That(Jobs(colony, RefineryId).Select(j => j.NumberOrdered), Is.EqualTo(new[] { 10, 10 }.Select(n => (ushort)n)),
+            "the 10 already queued (20 units) are kept, and 10 more (20 units) are chained");
+        Assert.That(Jobs(colony, RefineryId)[1].NumberOrdered, Is.EqualTo(missing.QueueQuantity), "the view said 10");
+    }
+
+    // ----- the recipe's output per batch (chaining orders batches, not units) -----
+
+    [Test]
+    public void ARecipeThatMakesTwo_QueuesHalfTheUnitsShort_RoundedUp()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        var plastic = (IConstructableDesign)world.Info.Data.CargoGoods.GetAny("plastic")!;
+        Assert.That(plastic.OutputAmount, Is.EqualTo(2), "this test is about a two-per-batch recipe");
+        SeatHead(world, colony);
+
+        Queue(world, colony, FactoryId, world.Part.UniqueID); // 40 plastic short
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(20), "20 batches make the 40");
+        Assert.That(Missing(colony, FactoryId).Single().Short, Is.EqualTo(40), "Short stays in item units");
+
+        Jobs(colony, RefineryId).Clear();
+        world.Part.ResourceCosts["plastic"] = 41;
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(21), "41 units need 21 batches");
+    }
+
+    [Test]
+    public void TheView_AndChaining_AgreeOnBatches_ForAnOddShortfall()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        world.Part.ResourceCosts["plastic"] = 41;
+        Queue(world, colony, FactoryId, world.Part.UniqueID); // no head: only itself
+        var missing = Missing(colony, FactoryId).Single();
+        Assert.That((missing.Short, missing.Queued, missing.QueueQuantity), Is.EqualTo((41L, 0L, 21)));
+
+        SeatHead(world, colony);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(missing.QueueQuantity));
+    }
+
+    [Test]
+    public void QueuedJobs_CoverUnits_NotJobs()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Queue(world, colony, RefineryId, "plastic", 10); // 10 batches make 20 units
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+
+        var half = Missing(colony, FactoryId).Single();
+        Assert.That((half.Short, half.Queued, half.QueueQuantity), Is.EqualTo((40L, 20L, 10)), "20 units still short: 10 batches");
+
+        Queue(world, colony, RefineryId, "plastic", 10); // 20 batches in all: 40 units
+        var covered = Missing(colony, FactoryId).Single();
+        Assert.That((covered.Short, covered.Queued, covered.QueueQuantity), Is.EqualTo((40L, 40L, 0)));
+        Assert.That(covered.CanBuild, Is.True);
+    }
+
+    [Test]
+    public void ARepeatJobsQueuedUnits_AreItsRemainingBatchesTimesTheOutput()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Assert.That(new CommandTranslator(Game).Translate(world.Faction, colony,
+            new QueueIndustryJobCommand(colony.Id, RefineryId, "plastic", 10, true, false)).Accepted, Is.True);
+        var job = Jobs(colony, RefineryId).Single();
+        job.NumberCompleted = 4;
+        var plastic = (IConstructableDesign)world.Info.Data.CargoGoods.GetAny("plastic")!;
+
+        Assert.That(IndustryTools.QueuedOutput(colony, plastic), Is.EqualTo(12), "6 batches left x 2 units");
+    }
+
+    // A refining recipe of our own with a chosen output per batch, wired in as 7 of the hull's inputs.
+    static ProcessedMaterial Widget(World world, ushort outputAmount)
+    {
+        var widget = new ProcessedMaterial
+        {
+            UniqueID = "chain-widget-" + Guid.NewGuid().ToString("N"),
+            Name = "Widget",
+            IndustryTypeID = "refining",
+            OutputAmount = outputAmount,
+            CargoTypeID = "general-storage",
+            MassPerUnit = 1,
+            VolumePerUnit = 0.001,
+            IndustryPointCosts = 10,
+            ResourceCosts = new Dictionary<string, long> { ["hydrocarbons"] = 1 },
+        };
+        world.Info.IndustryDesigns[widget.UniqueID] = widget;
+        world.Hull.ResourceCosts.Clear();
+        world.Hull.ResourceCosts[widget.UniqueID] = 7;
+        return widget;
+    }
+
+    [Test]
+    public void AFeederThatMakesThree_NeedsCeilBatches()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Widget(world, 3);
+        SeatHead(world, colony);
+
+        Queue(world, colony, YardId, world.Hull.UniqueID);
+
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(3), "7 units at 3 per batch is 3 batches");
+        var missing = Missing(colony, YardId).Single();
+        Assert.That((missing.Short, missing.Queued, missing.QueueQuantity), Is.EqualTo((7L, 9L, 0)), "3 batches make 9 units, which covers 7");
+    }
+
+    [Test]
+    public void AnOutputAmountOfZero_CountsAsOne()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        var widget = Widget(world, 0);
+        SeatHead(world, colony);
+
+        Assert.That(IndustryTools.OutputPerItem(widget), Is.EqualTo(1));
+        Assert.That(IndustryTools.OutputPerItem(null), Is.EqualTo(1));
+        Queue(world, colony, YardId, world.Hull.UniqueID);
+
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(7));
+        Assert.That(Missing(colony, YardId).Single().Queued, Is.EqualTo(7));
     }
 
     [Test]
@@ -608,9 +728,9 @@ public class IndustryChainingTests
         Queue(world, colony, FactoryId, world.Part.UniqueID);
 
         Assert.That(Jobs(colony, FactoryId), Has.Count.EqualTo(2));
-        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(40),
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(20),
             "the second Gizmo reuses the plastic already queued, as the first one's shortfall is the same stock");
-        Assert.That(IndustryLog(colony), Is.EqualTo(new[] { "Industry (Lee) queued 40 Plastic for Gizmo." }));
+        Assert.That(IndustryLog(colony), Is.EqualTo(new[] { "Industry (Lee) queued 20 Plastic for Gizmo." }));
     }
 
     [Test]
@@ -624,7 +744,7 @@ public class IndustryChainingTests
         Queue(world, colony, YardId, world.Hull.UniqueID);
 
         Assert.That(Jobs(colony, FactoryId).Single().NumberOrdered, Is.EqualTo(1));
-        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(40));
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(20));
     }
 
     [Test]
@@ -675,7 +795,7 @@ public class IndustryChainingTests
         Assert.That(result.Accepted, Is.True, result.RejectionReason);
         var queued = Jobs(colony, RefineryId).Single();
         Assert.That(queued.ItemGuid, Is.EqualTo("plastic"));
-        Assert.That(queued.NumberOrdered, Is.EqualTo(40));
+        Assert.That(queued.NumberOrdered, Is.EqualTo(20));
         Assert.That(queued.Auto, Is.False);
     }
 
