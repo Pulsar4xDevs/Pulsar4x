@@ -240,4 +240,95 @@ public class LedgerSankeyLayoutTests
         Assert.That(LedgerSankeyLayout.PercentLabel(0.125m), Is.EqualTo("12.5%"));
         Assert.That(LedgerSankeyLayout.PercentLabel(0.03m), Is.EqualTo("3%"));
     }
+
+    [Test]
+    public void Nodes_AreNarrowBars_WithGapsAndReservedLabelMargins()
+    {
+        var d = Diagram(
+            new[] { ("Trade", 100m), ("Charter", 50m) },
+            new[] { (FactionSnapshot.WagesCategory, -90m), (FactionSnapshot.StaffWagesCategory, -60m) });
+
+        var trade = Node(d, "Trade");
+        var charter = Node(d, "Charter");
+        var wages = Node(d, "Wages (monthly)");
+        var staff = Node(d, "Staff wages (monthly)");
+        var treasury = Node(d, LedgerSankeyLayout.TreasuryLabel);
+
+        foreach (var node in d.Nodes)
+        {
+            Assert.That(node.Width, Is.InRange(LedgerSankeyLayout.NodeWidthMin, LedgerSankeyLayout.NodeWidthMax), node.Label);
+            Assert.That(node.Width, Is.EqualTo(LedgerSankeyLayout.NodeWidth).Within(1e-3f), node.Label);
+        }
+
+        Assert.That(charter.Y, Is.EqualTo(trade.Y + trade.Height + LedgerSankeyLayout.NodeGap).Within(1e-3f));
+        Assert.That(staff.Y, Is.EqualTo(wages.Y + wages.Height + LedgerSankeyLayout.NodeGap).Within(1e-3f));
+
+        var tradeBand = Band(d, "Trade");
+        Assert.That(tradeBand.LeftY0, Is.EqualTo(trade.Y).Within(1e-3f));
+        Assert.That(tradeBand.LeftY1, Is.EqualTo(trade.Y + trade.Height).Within(1e-3f));
+        Assert.That(tradeBand.LeftY1, Is.LessThanOrEqualTo(charter.Y + 1e-3f));
+        var charterBand = Band(d, "Charter");
+        Assert.That(charterBand.LeftY0, Is.EqualTo(charter.Y).Within(1e-3f));
+        Assert.That(charterBand.RightY0, Is.EqualTo(tradeBand.RightY1).Within(1e-3f),
+            "treasury-side bands pack tightly, still as thick as their node");
+        Assert.That(charterBand.RightY1 - charterBand.RightY0, Is.EqualTo(charter.Height).Within(1e-3f));
+
+        Assert.That(trade.LabelSide, Is.EqualTo(LedgerSankeyLabelSide.Left));
+        Assert.That(trade.LabelAlignRight, Is.True);
+        Assert.That(trade.LabelX + trade.LabelMaxWidth, Is.LessThanOrEqualTo(trade.X - LedgerSankeyLayout.LabelGap + 1e-3f));
+        Assert.That(trade.LabelX, Is.GreaterThanOrEqualTo(X + LedgerSankeyLayout.Padding - 1e-3f));
+        Assert.That(trade.FittedLabel, Is.EqualTo("Trade"));
+
+        Assert.That(staff.LabelSide, Is.EqualTo(LedgerSankeyLabelSide.Right));
+        Assert.That(staff.LabelAlignRight, Is.False);
+        Assert.That(staff.LabelX, Is.GreaterThanOrEqualTo(staff.X + staff.Width + LedgerSankeyLayout.LabelGap - 1e-3f));
+        Assert.That(staff.LabelX + staff.LabelMaxWidth, Is.LessThanOrEqualTo(X + W - LedgerSankeyLayout.Padding + 1e-3f));
+        Assert.That(staff.FittedLabel, Is.EqualTo("Staff wages (monthly)"));
+        Assert.That(staff.LabelMaxWidth, Is.GreaterThanOrEqualTo(LedgerSankeyLayout.EstimateTextSize("Staff wages (monthly)").X - 1e-3f));
+
+        Assert.That(treasury.LabelSide, Is.EqualTo(LedgerSankeyLabelSide.Above));
+        Assert.That(treasury.LabelY + treasury.LabelLineHeight * 2f, Is.LessThanOrEqualTo(treasury.Y - LedgerSankeyLayout.LabelGap + 1e-3f));
+        Assert.That(treasury.FittedLabel, Is.EqualTo(LedgerSankeyLayout.TreasuryLabel));
+    }
+
+    [Test]
+    public void NetAndShortfall_KeepTheGapBetweenStackedNodes()
+    {
+        var net = Diagram(
+            new[] { ("Trade", 100m) },
+            new[] { (FactionSnapshot.WagesCategory, -40m) });
+        var wages = Node(net, "Wages (monthly)");
+        var saved = Node(net, LedgerSankeyLayout.NetSavedLabel);
+        Assert.That(saved.Y, Is.EqualTo(wages.Y + wages.Height + LedgerSankeyLayout.NodeGap).Within(1e-3f));
+        var netBand = Band(net, LedgerSankeyLayout.NetSavedLabel);
+        Assert.That(netBand.RightY0, Is.EqualTo(saved.Y).Within(1e-3f));
+        Assert.That(netBand.RightY1, Is.EqualTo(saved.Y + saved.Height).Within(1e-3f));
+
+        var deficit = Diagram(
+            new[] { ("Trade", 40m) },
+            new[] { (FactionSnapshot.WagesCategory, -100m) });
+        var trade = Node(deficit, "Trade");
+        var shortfall = Node(deficit, LedgerSankeyLayout.ShortfallLabel);
+        Assert.That(shortfall.Y, Is.EqualTo(trade.Y + trade.Height + LedgerSankeyLayout.NodeGap).Within(1e-3f));
+    }
+
+    [Test]
+    public void FitText_EllipsizesOnlyWhenTheWindowIsTooNarrow()
+    {
+        Assert.That(LedgerSankeyLayout.FitText("Staff wages (monthly)", 1000f), Is.EqualTo("Staff wages (monthly)"));
+        string fitted = LedgerSankeyLayout.FitText("Staff wages (monthly)", 10 * LedgerSankeyLayout.EstimatedCharWidth);
+        Assert.That(fitted, Is.Not.EqualTo("Staff wages (monthly)"));
+        Assert.That(fitted, Does.EndWith("..."));
+        Assert.That(LedgerSankeyLayout.EstimateTextSize(fitted).X, Is.LessThanOrEqualTo(10 * LedgerSankeyLayout.EstimatedCharWidth + 1e-3f));
+
+        var tiny = Diagram(
+            new[] { ("Trade", 40m) },
+            new[] { (FactionSnapshot.StaffWagesCategory, -100m) },
+            80f, 80f);
+        var staff = Node(tiny, "Staff wages (monthly)");
+        Assert.That(staff.FittedLabel, Is.Not.EqualTo("Staff wages (monthly)"),
+            "an 80px-wide diagram must ellipsize the long right-hand label");
+        Assert.That(staff.LabelX + staff.LabelMaxWidth, Is.LessThanOrEqualTo(X + 80f - LedgerSankeyLayout.Padding + 1e-3f));
+        Assert.That(staff.X + staff.Width, Is.LessThanOrEqualTo(staff.LabelX + 1e-3f));
+    }
 }

@@ -42,7 +42,15 @@ public sealed record LedgerSankeyPeriod(
     IReadOnlyList<LedgerCategoryTotal> IncomeCategories,
     IReadOnlyList<LedgerCategoryTotal> ExpenseCategories);
 
-/// <summary>A labelled box in the diagram, in the same coordinate space as the content region.</summary>
+/// <summary>Which side of its bar a node's label sits on.</summary>
+public enum LedgerSankeyLabelSide
+{
+    Left,
+    Right,
+    Above,
+}
+
+/// <summary>A labelled bar in the diagram, in the same coordinate space as the content region.</summary>
 public sealed record LedgerSankeyNode(
     string Id,
     string Label,
@@ -51,7 +59,33 @@ public sealed record LedgerSankeyNode(
     float X,
     float Y,
     float Width,
-    float Height);
+    float Height)
+{
+    /// <summary>Left edge of the label box (name and amount, two lines).</summary>
+    public float LabelX { get; init; }
+
+    /// <summary>Top edge of the label box.</summary>
+    public float LabelY { get; init; }
+
+    /// <summary>Width reserved for the label; text is ellipsized only if it would exceed this.</summary>
+    public float LabelMaxWidth { get; init; }
+
+    /// <summary>Line height used to place the amount under the name.</summary>
+    public float LabelLineHeight { get; init; }
+
+    /// <summary>True when the two lines should be right-aligned in the label box (left-column nodes).</summary>
+    public bool LabelAlignRight { get; init; }
+
+    public LedgerSankeyLabelSide LabelSide { get; init; }
+
+    public string AmountText { get; init; } = "";
+
+    /// <summary>Name to draw; equal to <see cref="Label"/> unless the window was too narrow.</summary>
+    public string FittedLabel { get; init; } = "";
+
+    /// <summary>Amount to draw; equal to <see cref="AmountText"/> unless the window was too narrow.</summary>
+    public string FittedAmount { get; init; } = "";
+}
 
 /// <summary>
 /// A curved band from one node edge to another. <see cref="Share"/> is the amount
@@ -145,10 +179,55 @@ public static class LedgerSankeyLayout
     public const string ShortfallLabel = "Shortfall (from reserves)";
     public const string EmptyMessage = "No ledger entries for this period";
     public const float Padding = 8f;
+    public const float NodeWidth = 14f;
+    public const float NodeWidthMin = 12f;
+    public const float NodeWidthMax = 16f;
+    public const float NodeGap = 5f;
+    public const float LabelGap = 6f;
+    public const float EstimatedCharWidth = 8f;
+    public const float EstimatedLineHeight = 16f;
     public const int BandSamples = 24;
 
-    public static float NodeWidthFor(float width)
-        => Math.Clamp(width * 0.18f, 72f, 140f);
+    /// <summary>Narrow bar width, 12-16 px when the plot can fit three bars, smaller only if it cannot.</summary>
+    public static float NodeWidthFor(float plotWidth)
+    {
+        float width = NodeWidth;
+        if (width * 3f > plotWidth)
+            width = plotWidth / 3f;
+        if (width > NodeWidthMax)
+            width = NodeWidthMax;
+        if (width < 1f)
+            width = 1f;
+        return width;
+    }
+
+    public static Vector2 EstimateTextSize(string text)
+        => new((text?.Length ?? 0) * EstimatedCharWidth, EstimatedLineHeight);
+
+    /// <summary>Ellipsize <paramref name="text"/> only when it does not fit <paramref name="maxWidth"/>.</summary>
+    public static string FitText(string text, float maxWidth, Func<string, Vector2>? measure = null)
+    {
+        text ??= "";
+        measure ??= EstimateTextSize;
+        if (maxWidth <= 0f)
+            return "";
+        if (measure(text).X <= maxWidth)
+            return text;
+        const string ellipsis = "...";
+        if (measure(ellipsis).X > maxWidth)
+            return "";
+        int lo = 0;
+        int hi = text.Length;
+        while (lo < hi)
+        {
+            int mid = (lo + hi + 1) / 2;
+            if (measure(text.Substring(0, mid) + ellipsis).X <= maxWidth)
+                lo = mid;
+            else
+                hi = mid - 1;
+        }
+        return lo == 0 ? ellipsis : text.Substring(0, lo) + ellipsis;
+    }
 
     /// <summary>
     /// Every year, then that year's months, newest first — the periods <see cref="LedgerTree"/> already provides.
@@ -275,8 +354,13 @@ public static class LedgerSankeyLayout
         float x,
         float y,
         float width,
-        float height)
+        float height,
+        Func<string, Vector2>? measure = null,
+        Func<decimal, string>? money = null)
     {
+        measure ??= EstimateTextSize;
+        money ??= static amount => amount.ToString("0.00", CultureInfo.InvariantCulture);
+
         decimal incomeMag = incomeTotal < 0 ? -incomeTotal : incomeTotal;
         decimal expenseMag = expenseTotal < 0 ? -expenseTotal : expenseTotal;
         var incomeSlices = Group(income, incomeMag);
@@ -307,68 +391,137 @@ public static class LedgerSankeyLayout
         if (innerH < 1)
             innerH = 1;
 
-        float nodeW = NodeWidthFor(innerW);
-        if (nodeW * 3 > innerW)
-            nodeW = innerW / 3f;
+        float lineH = Math.Max(1f, measure("Ag").Y);
+        string treasuryMoney = money(throughput);
+        float treasuryLabelW = Math.Max(measure(TreasuryLabel).X, measure(treasuryMoney).X);
+        float topReserve = lineH * 2f + LabelGap;
+        if (topReserve > innerH - 1f)
+            topReserve = Math.Max(0f, innerH - 1f);
+        float plotY = innerY + topReserve;
+        float plotH = innerH - topReserve;
+        if (plotH < 1f)
+            plotH = 1f;
 
-        float leftX = innerX;
-        float rightX = innerX + innerW - nodeW;
-        float midX = innerX + (innerW - nodeW) * 0.5f;
-        float ppu = (float)((double)innerH / (double)throughput);
+        float leftNeed = 0f;
+        foreach (var slice in incomeSlices)
+            leftNeed = Math.Max(leftNeed, Math.Max(measure(slice.Label).X, measure(money(slice.Amount)).X));
+        if (hasShortfall)
+            leftNeed = Math.Max(leftNeed, Math.Max(measure(ShortfallLabel).X, measure(money(shortfall)).X));
+
+        float rightNeed = 0f;
+        foreach (var slice in expenseSlices)
+            rightNeed = Math.Max(rightNeed, Math.Max(measure(slice.Label).X, measure(money(slice.Amount)).X));
+        if (hasNet)
+            rightNeed = Math.Max(rightNeed, Math.Max(measure(NetSavedLabel).X, measure(money(saved)).X));
+
+        const float minBand = 24f;
+        float minPlot = NodeWidthMin * 3f + minBand * 2f;
+        float labelBudget = innerW - 2f * LabelGap - minPlot;
+        if (labelBudget < 0f)
+        {
+            minPlot = Math.Max(3f, innerW - 2f * LabelGap);
+            labelBudget = Math.Max(0f, innerW - 2f * LabelGap - minPlot);
+        }
+        float leftW = leftNeed;
+        float rightW = rightNeed;
+        float want = leftW + rightW;
+        if (want > labelBudget && want > 0f)
+        {
+            float scale = labelBudget / want;
+            leftW *= scale;
+            rightW *= scale;
+        }
+
+        float plotX = innerX + leftW + LabelGap;
+        float plotW = innerW - leftW - rightW - 2f * LabelGap;
+        if (plotW < 1f)
+            plotW = 1f;
+
+        float nodeW = NodeWidthFor(plotW);
+        if (nodeW * 3f > plotW)
+            nodeW = plotW / 3f;
+        if (nodeW < 1f)
+            nodeW = 1f;
+
+        float leftX = plotX;
+        float rightX = plotX + plotW - nodeW;
+        float midX = plotX + (plotW - nodeW) * 0.5f;
+
+        int leftCount = incomeSlices.Count + (hasShortfall ? 1 : 0);
+        int rightCount = expenseSlices.Count + (hasNet ? 1 : 0);
+        int gapCount = Math.Max(0, Math.Max(leftCount, rightCount) - 1);
+        float gapSpace = gapCount * NodeGap;
+        float usableH = plotH - gapSpace;
+        if (usableH < 1f)
+            usableH = 1f;
+        float ppu = (float)((double)usableH / (double)throughput);
 
         var nodes = new List<LedgerSankeyNode>();
         var bands = new List<LedgerSankeyBand>();
 
-        float incomeTop = innerY;
-        float cursor = incomeTop;
+        float cursor = plotY;
         var incomeNodes = new List<(LedgerSankeySlice Slice, LedgerSankeyNode Node)>();
-        foreach (var slice in incomeSlices)
+        for (int i = 0; i < incomeSlices.Count; i++)
         {
+            var slice = incomeSlices[i];
             float h = (float)((double)slice.Amount * ppu);
-            var node = new LedgerSankeyNode(
+            var node = PlaceNode(
                 "in-" + slice.Label, slice.Label, slice.Amount, LedgerSankeyNodeKind.Income,
-                leftX, cursor, nodeW, h);
+                leftX, cursor, nodeW, h,
+                innerX, leftW, plotY, y + height, true, LedgerSankeyLabelSide.Left,
+                lineH, measure, money);
             nodes.Add(node);
             incomeNodes.Add((slice, node));
             cursor += h;
+            if (i < incomeSlices.Count - 1 || hasShortfall)
+                cursor += NodeGap;
         }
 
         LedgerSankeyNode? shortfallNode = null;
         if (hasShortfall)
         {
             float h = (float)((double)shortfall * ppu);
-            shortfallNode = new LedgerSankeyNode(
+            shortfallNode = PlaceNode(
                 "shortfall", ShortfallLabel, shortfall, LedgerSankeyNodeKind.Shortfall,
-                leftX, cursor, nodeW, h);
+                leftX, cursor, nodeW, h,
+                innerX, leftW, plotY, y + height, true, LedgerSankeyLabelSide.Left,
+                lineH, measure, money);
             nodes.Add(shortfallNode);
         }
 
         float treasuryH = (float)((double)throughput * ppu);
-        var treasury = new LedgerSankeyNode(
-            "treasury", TreasuryLabel, throughput, LedgerSankeyNodeKind.Treasury,
-            midX, innerY, nodeW, treasuryH);
+        var treasury = PlaceTreasury(
+            throughput, midX, plotY, nodeW, treasuryH,
+            innerX, innerW, innerY, plotY, lineH, measure, money);
         nodes.Add(treasury);
 
-        cursor = innerY;
+        cursor = plotY;
         var expenseNodes = new List<(LedgerSankeySlice Slice, LedgerSankeyNode Node)>();
-        foreach (var slice in expenseSlices)
+        for (int i = 0; i < expenseSlices.Count; i++)
         {
+            var slice = expenseSlices[i];
             float h = (float)((double)slice.Amount * ppu);
-            var node = new LedgerSankeyNode(
+            var node = PlaceNode(
                 "ex-" + slice.Label, slice.Label, slice.Amount, LedgerSankeyNodeKind.Expense,
-                rightX, cursor, nodeW, h);
+                rightX, cursor, nodeW, h,
+                rightX + nodeW + LabelGap, rightW, plotY, y + height, false, LedgerSankeyLabelSide.Right,
+                lineH, measure, money);
             nodes.Add(node);
             expenseNodes.Add((slice, node));
             cursor += h;
+            if (i < expenseSlices.Count - 1 || hasNet)
+                cursor += NodeGap;
         }
 
         LedgerSankeyNode? netNode = null;
         if (hasNet)
         {
             float h = (float)((double)saved * ppu);
-            netNode = new LedgerSankeyNode(
+            netNode = PlaceNode(
                 "net", NetSavedLabel, saved, LedgerSankeyNodeKind.NetSaved,
-                rightX, cursor, nodeW, h);
+                rightX, cursor, nodeW, h,
+                rightX + nodeW + LabelGap, rightW, plotY, y + height, false, LedgerSankeyLabelSide.Right,
+                lineH, measure, money);
             nodes.Add(netNode);
         }
 
@@ -376,7 +529,7 @@ public static class LedgerSankeyLayout
         float treasuryRight = midX + nodeW;
         float leftEdge = leftX + nodeW;
         float rightEdge = rightX;
-        float tIn = innerY;
+        float tIn = plotY;
         foreach (var (slice, node) in incomeNodes)
         {
             decimal share = throughput == 0 ? 0 : slice.Amount / throughput;
@@ -396,7 +549,7 @@ public static class LedgerSankeyLayout
                 treasuryLeft, tIn, tIn + shortfallNode.Height));
         }
 
-        float tOut = innerY;
+        float tOut = plotY;
         foreach (var (slice, node) in expenseNodes)
         {
             decimal share = throughput == 0 ? 0 : slice.Amount / throughput;
@@ -417,6 +570,94 @@ public static class LedgerSankeyLayout
         }
 
         return new LedgerSankeyDiagram(nodes, bands, null);
+    }
+
+    static LedgerSankeyNode PlaceNode(
+        string id,
+        string label,
+        decimal amount,
+        LedgerSankeyNodeKind kind,
+        float barX,
+        float barY,
+        float barW,
+        float barH,
+        float labelBoxX,
+        float labelBoxW,
+        float plotY,
+        float contentBottom,
+        bool alignRight,
+        LedgerSankeyLabelSide side,
+        float lineH,
+        Func<string, Vector2> measure,
+        Func<decimal, string> money)
+    {
+        string amountText = money(amount);
+        string fittedLabel = FitText(label, labelBoxW, measure);
+        string fittedAmount = FitText(amountText, labelBoxW, measure);
+        float labelH = lineH * 2f;
+        float labelY = barY + (barH - labelH) * 0.5f;
+        float minY = plotY;
+        float maxY = contentBottom - Padding - labelH;
+        if (maxY < minY)
+            labelY = minY;
+        else if (labelY < minY)
+            labelY = minY;
+        else if (labelY > maxY)
+            labelY = maxY;
+        return new LedgerSankeyNode(id, label, amount, kind, barX, barY, barW, barH)
+        {
+            LabelX = labelBoxX,
+            LabelY = labelY,
+            LabelMaxWidth = labelBoxW,
+            LabelLineHeight = lineH,
+            LabelAlignRight = alignRight,
+            LabelSide = side,
+            AmountText = amountText,
+            FittedLabel = fittedLabel,
+            FittedAmount = fittedAmount,
+        };
+    }
+
+    static LedgerSankeyNode PlaceTreasury(
+        decimal amount,
+        float barX,
+        float barY,
+        float barW,
+        float barH,
+        float innerX,
+        float innerW,
+        float innerY,
+        float plotY,
+        float lineH,
+        Func<string, Vector2> measure,
+        Func<decimal, string> money)
+    {
+        string amountText = money(amount);
+        float boxW = Math.Min(innerW, Math.Max(measure(TreasuryLabel).X, measure(amountText).X));
+        string fittedLabel = FitText(TreasuryLabel, innerW, measure);
+        string fittedAmount = FitText(amountText, innerW, measure);
+        boxW = Math.Min(innerW, Math.Max(measure(fittedLabel).X, measure(fittedAmount).X));
+        float labelX = barX + barW * 0.5f - boxW * 0.5f;
+        if (labelX < innerX)
+            labelX = innerX;
+        if (labelX + boxW > innerX + innerW)
+            labelX = innerX + innerW - boxW;
+        float labelH = lineH * 2f;
+        float labelY = plotY - LabelGap - labelH;
+        if (labelY < innerY)
+            labelY = innerY;
+        return new LedgerSankeyNode("treasury", TreasuryLabel, amount, LedgerSankeyNodeKind.Treasury, barX, barY, barW, barH)
+        {
+            LabelX = labelX,
+            LabelY = labelY,
+            LabelMaxWidth = boxW,
+            LabelLineHeight = lineH,
+            LabelAlignRight = false,
+            LabelSide = LedgerSankeyLabelSide.Above,
+            AmountText = amountText,
+            FittedLabel = fittedLabel,
+            FittedAmount = fittedAmount,
+        };
     }
 
     public static bool BandContains(LedgerSankeyBand band, float x, float y, int samples = BandSamples)

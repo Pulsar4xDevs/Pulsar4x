@@ -137,7 +137,9 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
             origin.X,
             origin.Y,
             avail.X,
-            avail.Y);
+            avail.Y,
+            ImGui.CalcTextSize,
+            LedgerTree.Money);
 
         if (diagram.IsEmpty)
         {
@@ -165,17 +167,9 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
                 3f);
         }
 
-        float line = ImGui.GetTextLineHeight();
-        float pad = 6f;
         foreach (var node in diagram.Nodes)
         {
-            float textY = node.Y + Math.Max(2f, (node.Height - line * 2f) * 0.5f);
-            ImGui.SetCursorScreenPos(new Vector2(node.X + pad, textY));
-            ImGui.PushTextWrapPos(node.X + node.Width - pad);
-            ImGui.TextUnformatted(node.Label);
-            ImGui.SetCursorScreenPos(new Vector2(node.X + pad, textY + line));
-            ImGui.TextUnformatted(LedgerTree.Money(node.Amount));
-            ImGui.PopTextWrapPos();
+            DrawNodeLabel(node);
         }
 
         if (ImGui.IsWindowHovered())
@@ -201,18 +195,46 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
             _ => LedgerSankeyNodeKind.Shortfall,
         }, node);
 
+    static void DrawNodeLabel(LedgerSankeyNode node)
+    {
+        float line = node.LabelLineHeight > 1f ? node.LabelLineHeight : ImGui.GetTextLineHeight();
+        DrawAlignedLabel(node, node.FittedLabel, node.LabelY);
+        DrawAlignedLabel(node, node.FittedAmount, node.LabelY + line);
+    }
+
+    static void DrawAlignedLabel(LedgerSankeyNode node, string text, float y)
+    {
+        if (string.IsNullOrEmpty(text))
+            return;
+        float x = node.LabelX;
+        if (node.LabelAlignRight)
+        {
+            float w = ImGui.CalcTextSize(text).X;
+            x = node.LabelX + Math.Max(0f, node.LabelMaxWidth - w);
+        }
+        ImGui.SetCursorScreenPos(new Vector2(x, y));
+        ImGui.TextUnformatted(text);
+    }
+
     static uint Colour(LedgerSankeyNodeKind kind, bool node)
     {
-        float a = node ? 0.97f : 0.94f;
-        Vector4 colour = kind switch
+        Vector4 rgb = kind switch
         {
-            LedgerSankeyNodeKind.Income => new Vector4(0.22f, 0.62f, 0.35f, a),
-            LedgerSankeyNodeKind.Expense => new Vector4(0.78f, 0.28f, 0.26f, a),
-            LedgerSankeyNodeKind.NetSaved => new Vector4(0.18f, 0.55f, 0.52f, a),
-            LedgerSankeyNodeKind.Shortfall => new Vector4(0.78f, 0.52f, 0.20f, a),
-            _ => new Vector4(0.32f, 0.40f, 0.52f, node ? 0.95f : a),
+            LedgerSankeyNodeKind.Income => new Vector4(0.22f, 0.62f, 0.35f, 1f),
+            LedgerSankeyNodeKind.Expense => new Vector4(0.78f, 0.28f, 0.26f, 1f),
+            LedgerSankeyNodeKind.NetSaved => new Vector4(0.18f, 0.55f, 0.52f, 1f),
+            LedgerSankeyNodeKind.Shortfall => new Vector4(0.78f, 0.52f, 0.20f, 1f),
+            _ => new Vector4(0.32f, 0.40f, 0.52f, 1f),
         };
-        return ImGui.ColorConvertFloat4ToU32(colour);
+        if (node)
+            return ImGui.ColorConvertFloat4ToU32(rgb);
+        const float lift = 0.40f;
+        var band = new Vector4(
+            rgb.X + (1f - rgb.X) * lift,
+            rgb.Y + (1f - rgb.Y) * lift,
+            rgb.Z + (1f - rgb.Z) * lift,
+            0.50f);
+        return ImGui.ColorConvertFloat4ToU32(band);
     }
 
     static void DrawYear(LedgerYearStatement year)
