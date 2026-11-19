@@ -295,4 +295,36 @@ public class MultiFactionEarthPhase9Tests
             }
         }
     }
+
+    [Test]
+    public void Fold_RehomesTheIndustryHeadAndChairHolder_ToTheSponsor()
+    {
+        var colony = ForceSpawn();
+        var company = colony.GetFactionOwner;
+        int companyId = company.Id;
+        var info = company.GetDataBlob<FactionInfoDB>();
+        Assert.That(GameEngine.People.IndustrySeat.TryGetHead(colony, out var head), Is.True);
+        var chair = colony.GetDataBlob<GameEngine.People.AdminSpaceDB>().CommanderSeats.First(s => s.CommanderID >= 0);
+        Assert.That(_game.GlobalManager.TryGetGlobalEntityById(chair.CommanderID, out var chairHolder) || _sol.TryGetGlobalEntityById(chair.CommanderID, out chairHolder), Is.True);
+        Drain(info, colony);
+        _game.NpcCompanies.Spawned.Single(s => s.FactionId == companyId).BrokeSince = Now.AddDays(-FactionSpawner.FoldDays);
+
+        FactionSpawner.TickSystem(_game, _sol, Now);
+
+        Assert.That(_game.Factions.ContainsKey(companyId), Is.False);
+        int sponsorId = _amc.FactionOwnerID;
+        Assert.That(GameEngine.People.IndustrySeat.HasHead(colony), Is.True, "the head is still seated after the fold");
+        Assert.That(GameEngine.People.IndustrySeat.TryGetHead(colony, out var headAfter), Is.True);
+        Assert.That(headAfter.Id, Is.EqualTo(head.Id));
+        Assert.That(head.FactionOwnerID, Is.EqualTo(sponsorId), "the head now works for the sponsor");
+        Assert.That(chairHolder!.FactionOwnerID, Is.EqualTo(sponsorId), "as does the chair holder");
+        Assert.That(Info(_amc).Commanders, Does.Contain(head));
+        Assert.That(Info(_amc).Commanders, Does.Contain(chairHolder));
+        Assert.That(head.GetDataBlob<Pulsar4X.People.CommanderDB>().AssignedTo, Is.EqualTo(colony.Id));
+        Assert.That(colony.GetDataBlob<GameEngine.People.AdminSpaceDB>().CommanderSeats.Select(s => s.CommanderID), Does.Contain(chairHolder.Id));
+
+        // The sponsor can now lose the head cleanly: the seat empties and the sponsor's NPC refills it.
+        Pulsar4X.People.CommanderFactory.DestroyCommander(head);
+        Assert.That(GameEngine.People.IndustrySeat.HasHead(colony), Is.False);
+    }
 }

@@ -287,4 +287,73 @@ public class IndustrySeatTests : ApiTestBase
         Assert.That(view.IndustryHeadId, Is.EqualTo(admin.Id));
         Assert.That(view.IndustryHeadName, Is.EqualTo(admin.GetName(session.FactionId)));
     }
+
+    [Test]
+    public void DestroyedHead_EmptiesTheSeat_AndTheViewShowsNoHead()
+    {
+        var session = Connect();
+        var colony = MakeColony(session.FactionId);
+        var admin = HireAdmin(colony);
+        _server.SubmitCommand(session, new SeatIndustryHeadCommand(colony.Id, admin.Id));
+
+        CommanderFactory.DestroyCommander(admin);
+
+        Assert.That(Head(colony), Is.EqualTo(-1));
+        Assert.That(IndustrySeat.HasHead(colony), Is.False);
+        var view = _projector.ProjectEntity(colony, session.FactionId).GetView<ColonyView>()!;
+        Assert.That(view.IndustryHeadId, Is.EqualTo(-1));
+        Assert.That(view.IndustryHeadName, Is.Null, "not 'Unknown'");
+    }
+
+    [Test]
+    public void ADanglingId_IsNotShownAsAHead_EvenBeforeAnyCleanUp()
+    {
+        var session = Connect();
+        var colony = MakeColony(session.FactionId);
+        IndustrySeat.Of(colony).HeadId = 987_654_321;
+
+        var view = _projector.ProjectEntity(colony, session.FactionId).GetView<ColonyView>()!;
+        Assert.That(view.IndustryHeadId, Is.EqualTo(-1));
+        Assert.That(view.IndustryHeadName, Is.Null);
+    }
+
+    [Test]
+    public void ADanglingId_IsClearedAfterLoad()
+    {
+        var session = Connect();
+        var colony = MakeColony(session.FactionId);
+        var admin = HireAdmin(colony);
+        var other = MakeColony(session.FactionId, name: "Other");
+        _server.SubmitCommand(session, new SeatIndustryHeadCommand(other.Id, admin.Id));
+        IndustrySeat.Of(colony).HeadId = 987_654_321; // a save from before the fix could hold this
+
+        string json = Game.Save(_game);
+        int next = EntityIDGenerator.NextId;
+        var loaded = Game.Load(json);
+        EntityIDGenerator.NextId = Math.Max(next, EntityIDGenerator.NextId);
+
+        Assert.That(loaded.GlobalManager.TryGetGlobalEntityById(colony.Id, out var loadedColony), Is.True);
+        Assert.That(loadedColony.GetDataBlob<IndustrySeatDB>().HeadId, Is.EqualTo(-1), "the dead id is dropped on load");
+        Assert.That(loaded.GlobalManager.TryGetGlobalEntityById(other.Id, out var loadedOther), Is.True);
+        Assert.That(loadedOther.GetDataBlob<IndustrySeatDB>().HeadId, Is.EqualTo(admin.Id), "a live head is kept");
+    }
+
+    [Test]
+    public void AHeadOfAnotherFaction_IsClearedAfterLoad()
+    {
+        var session = Connect();
+        var colony = MakeColony(session.FactionId);
+        int otherFactionId = _game.Factions.Keys.First(id => id != session.FactionId);
+        var stranger = CommanderFactory.Create(_game.Systems[0], otherFactionId, new CommanderDB("Stranger", 1, Pulsar4X.DataStructures.CommanderTypes.Civilian));
+        IndustrySeat.Of(colony).HeadId = stranger.Id;
+        Assert.That(IndustrySeat.HasHead(colony), Is.False);
+
+        string json = Game.Save(_game);
+        int next = EntityIDGenerator.NextId;
+        var loaded = Game.Load(json);
+        EntityIDGenerator.NextId = Math.Max(next, EntityIDGenerator.NextId);
+
+        Assert.That(loaded.GlobalManager.TryGetGlobalEntityById(colony.Id, out var loadedColony), Is.True);
+        Assert.That(loadedColony.GetDataBlob<IndustrySeatDB>().HeadId, Is.EqualTo(-1));
+    }
 }
