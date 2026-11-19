@@ -497,7 +497,7 @@ namespace Pulsar4X.Client
             ImGui.TextColored(Styles.DescriptiveColor, "Crew");
             ImGui.SameLine();
             ImGui.TextUnformatted(CrewBars.Indicator(shipView));
-            bool under = shipView.CrewTracked && shipView.UnderCrewed;
+            bool under = CrewRules.IsUnderCrewed(shipView);
             if (under)
             {
                 // Same line when it fits; this column is narrow, so otherwise the badge goes just below.
@@ -559,7 +559,7 @@ namespace Pulsar4X.Client
                 }
                 if (!shipView.CrewTracked && !shipView.Automated && ImGui.IsItemHovered())
                     ImGui.SetTooltip("Crew aboard and the crew fraction show once ships carry crew (crew plan phase 3).");
-                if (shipView.CrewTracked && shipView.UnderCrewed)
+                if (CrewRules.IsUnderCrewed(shipView))
                     CrewBars.Badge("Under-crewed", CrewBars.ShortColour,
                         string.IsNullOrEmpty(shipView.CrewNote) ? "Fewer crew aboard than the ship needs." : shipView.CrewNote);
                 if (shipView.NoCaptain)
@@ -3611,18 +3611,36 @@ namespace Pulsar4X.Client
             DisplayShipDropSource(ship, selectedFleetId == fleet.Id ? selectedShips : null);
             // A ship row accepts ships only. A fleet dropped here must not nest under this fleet.
             DisplayShipDropTarget(fleet);
-            if(ship.CrewTracked && ship.UnderCrewed)
+            // Recompute from the live entity view each frame (same CrewRules check as the Crew tab).
+            // The fleet-tree ShipSnapshot is only refreshed on FleetsChanged, so it can stay
+            // under-crewed after a top-up or a refit.
+            var live = LiveShipView(ship);
+            if (CrewRules.FleetCrewWarning(live, ship))
             {
+                int aboard = live?.CrewAboard ?? ship.CrewAboard;
+                int required = live?.CrewRequired ?? ship.CrewRequired;
                 ImGui.SameLine();
                 CrewBars.Badge("crew", CrewBars.ShortColour,
-                    "Under-crewed: " + ship.CrewAboard.ToString("N0") + " of " + ship.CrewRequired.ToString("N0") + " crew aboard.");
+                    "Under-crewed: " + aboard.ToString("N0") + " of " + required.ToString("N0") + " crew aboard.");
             }
-            if (ship.NoCaptain)
+            if (live?.NoCaptain ?? ship.NoCaptain)
             {
                 ImGui.SameLine();
                 CrewBars.Badge("captain", CrewBars.ShortColour, "No captain.");
             }
             ImGui.PopID();
+        }
+
+        /// <summary>The entity <see cref="ShipView"/> the Crew tab uses, or null if it is not in the galaxy yet.</summary>
+        private ShipView? LiveShipView(ShipSnapshot ship)
+        {
+            var galaxy = _uiState.GameClient?.Galaxy;
+            if (galaxy == null)
+                return null;
+            string systemId = string.IsNullOrEmpty(ship.SystemId) ? _uiState.SelectedStarSystemId : ship.SystemId;
+            if (string.IsNullOrEmpty(systemId))
+                return null;
+            return galaxy.GetSystem(systemId)?.GetEntity(ship.Id)?.GetView<ShipView>();
         }
 
         private void DisplayUnassignedBranch(IReadOnlyList<ShipSnapshot> ships)

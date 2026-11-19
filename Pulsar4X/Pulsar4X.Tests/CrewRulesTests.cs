@@ -122,4 +122,79 @@ public class CrewRulesTests
         Assert.That(CrewRules.AutomatedState, Is.EqualTo("Automated, no crew needed"));
         Assert.That(CrewRules.AutomatedLabel, Is.EqualTo("Automated"));
     }
+
+    [Test]
+    public void FleetCrewWarning_MatchesTheCrewTab_AndIgnoresAStaleUnderCrewedSnapshot()
+    {
+        // The bug: the fleet tree cached UnderCrewed=true, while the Crew tab's live view was full and green.
+        var liveFull = new ShipView("Courier", 17)
+        {
+            CrewTracked = true,
+            CrewAboard = 17,
+            CrewBerths = 20,
+            UnderCrewed = false,
+            OfficersAboard = 1,
+            OfficerSlots = 4,
+        };
+        var staleShort = new ShipSnapshot(1, "Courier", "sys")
+        {
+            CrewTracked = true,
+            CrewAboard = 9,
+            CrewRequired = 17,
+            UnderCrewed = true,
+        };
+        Assert.That(CrewRules.IsUnderCrewed(liveFull), Is.False, "Crew tab: full crew is not under-crewed");
+        Assert.That(CrewRules.IsUnderCrewed(staleShort), Is.True, "the stale tree would still warn");
+        Assert.That(CrewRules.FleetCrewWarning(liveFull, staleShort), Is.False,
+            "the fleet list must follow the live Crew tab data, not the stale snapshot");
+        Assert.That(CrewRules.FleetCrewWarning(liveFull, staleShort), Is.EqualTo(CrewRules.IsUnderCrewed(liveFull)));
+
+        // Understaffed: both the list and the tab warn, even if a stale snapshot says the ship is full.
+        var liveShort = liveFull with { CrewAboard = 9, UnderCrewed = true };
+        var staleFull = new ShipSnapshot(1, "Courier", "sys")
+        {
+            CrewTracked = true,
+            CrewAboard = 17,
+            CrewRequired = 17,
+            UnderCrewed = false,
+        };
+        Assert.That(CrewRules.IsUnderCrewed(liveShort), Is.True);
+        Assert.That(CrewRules.FleetCrewWarning(liveShort, staleFull), Is.True);
+        Assert.That(CrewRules.FleetCrewWarning(liveShort, staleFull), Is.EqualTo(CrewRules.IsUnderCrewed(liveShort)));
+
+        // Automated: never a crew warning, even with leftover counts and a stale under-crewed flag.
+        var liveAuto = new ShipView("SensorSat I", 0)
+        {
+            Automated = true,
+            CrewTracked = true,
+            CrewAboard = 0,
+            UnderCrewed = false,
+        };
+        Assert.That(CrewRules.IsUnderCrewed(liveAuto), Is.False);
+        Assert.That(CrewRules.FleetCrewWarning(liveAuto, staleShort), Is.False);
+        Assert.That(CrewRules.FleetCrewWarning(liveAuto, staleShort), Is.EqualTo(CrewRules.IsUnderCrewed(liveAuto)));
+        Assert.That(CrewRules.IsUnderCrewed(tracked: true, automated: true, crewAboard: 0, crewRequired: 10), Is.False,
+            "automated ships never warn, even if leftover required is non-zero");
+
+        // A captain does not count as crew: full crew with no captain is not under-crewed.
+        var fullNoCaptain = liveFull with { OfficersAboard = 0, NoCaptain = true };
+        Assert.That(CrewRules.IsUnderCrewed(fullNoCaptain), Is.False);
+
+        // Untracked aboard numbers are ignored.
+        Assert.That(CrewRules.IsUnderCrewed(tracked: false, automated: false, crewAboard: 0, crewRequired: 17), Is.False);
+
+        // With no live view, recompute from the snapshot's counts, not a leftover UnderCrewed flag.
+        Assert.That(CrewRules.FleetCrewWarning(null, staleShort), Is.True);
+        var snapshotFullButFlagged = new ShipSnapshot(1, "Courier", "sys")
+        {
+            CrewTracked = true,
+            CrewAboard = 17,
+            CrewRequired = 17,
+            UnderCrewed = true,
+        };
+        Assert.That(CrewRules.IsUnderCrewed(snapshotFullButFlagged), Is.False,
+            "recompute from counts; do not trust a stale UnderCrewed flag");
+        Assert.That(CrewRules.FleetCrewWarning(null, snapshotFullButFlagged), Is.False);
+        Assert.That(CrewRules.FleetCrewWarning(null, null), Is.False);
+    }
 }

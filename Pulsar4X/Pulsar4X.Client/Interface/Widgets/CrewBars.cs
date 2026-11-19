@@ -246,7 +246,7 @@ public static class CrewBars
         if (!ship.CrewTracked)
             return rows;
 
-        bool shortAboard = ship.UnderCrewed || ship.CrewFactor < 1;
+        bool shortAboard = CrewRules.IsUnderCrewed(ship) || ship.CrewFactor < 1;
         rows.Add(new PowerRow
         {
             Id = "aboard",

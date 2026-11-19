@@ -92,6 +92,28 @@ public static class CrewRules
         => $"Life support: {people:N0} {(people == 1 ? "person" : "people")} aboard";
 
     /// <summary>
+    /// Under-crewed for the Crew tab and the fleet list: a tracked, non-automated ship
+    /// with fewer crew aboard than it needs. The captain is not crew. Untracked ships
+    /// do not warn (aboard is not meaningful yet). Automated ships never warn.
+    /// </summary>
+    public static bool IsUnderCrewed(bool tracked, bool automated, int crewAboard, int crewRequired)
+        => tracked && !automated && crewAboard < crewRequired;
+
+    public static bool IsUnderCrewed(ShipView ship)
+        => ship != null && IsUnderCrewed(ship.CrewTracked, ship.Automated, ship.CrewAboard, ship.CrewRequired);
+
+    public static bool IsUnderCrewed(ShipSnapshot ship)
+        => ship != null && IsUnderCrewed(ship.CrewTracked, ship.Automated, ship.CrewAboard, ship.CrewRequired);
+
+    /// <summary>
+    /// Fleet-list warning: prefer the live entity <see cref="ShipView"/> (the same data the
+    /// Crew tab uses) so a stale fleet-tree snapshot cannot keep a warning after crew or a
+    /// refit changes. Falls back to the snapshot only when no live view is available.
+    /// </summary>
+    public static bool FleetCrewWarning(ShipView? live, ShipSnapshot? snapshot)
+        => live != null ? IsUnderCrewed(live) : snapshot != null && IsUnderCrewed(snapshot);
+
+    /// <summary>
     /// Player actions that may be gated on an automated ship. Goal, move, well/system
     /// freight (Trade, Haul, Move goods) and destination picks use <see cref="GoalOrMove"/>.
     /// Cargo transfer, refit, fire control and cancel stay allowed.
