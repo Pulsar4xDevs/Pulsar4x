@@ -1315,16 +1315,16 @@ namespace Pulsar4X.Client
             string name = selectedFleet.FlagshipName ?? "the flagship";
             var flagship = FindShip(new[] { selectedFleet }, flagshipId);
             DisplayCaptainButton(flagshipId, FleetCommanderLabel(),
-                "Seats a navy officer on " + name + ". That captain commands this fleet.", flagship);
+                "Seats a navy officer on " + name + ". That captain commands this fleet.", flagship, selectedFleet);
         }
 
-        private void DisplayCaptainButton(int shipId, string label, string tooltip, ShipSnapshot? ship = null)
+        private void DisplayCaptainButton(int shipId, string label, string tooltip, ShipSnapshot? ship = null, FleetSnapshot? fleet = null)
         {
-            if (ship?.CommanderId is int captainId)
-            {
-                PortraitRenderer.For(_uiState).DrawEntity(captainId, PortraitIdentity.Captain, PortraitRenderer.SmallSize);
-                ImGui.SameLine();
-            }
+            var portrait = ship != null ? PortraitIdentity.Commander(ship)
+                : fleet != null ? PortraitIdentity.Commander(fleet)
+                : default;
+            PortraitRenderer.For(_uiState).Draw(portrait, PortraitRenderer.SmallSize);
+            ImGui.SameLine();
             string? refusal = ship == null ? null : CrewRules.AssignCaptainRefusal(ship);
             if (CrewBars.GatedSmallButton(label + "###captain-" + shipId, refusal, tooltip))
                 captainChooserShipId = shipId;
@@ -1359,8 +1359,7 @@ namespace Pulsar4X.Client
                         "captain_" + shipId,
                         close,
                         OfficerRow,
-                        320f,
-                        PortraitIdentity.Captain);
+                        320f);
                     if (selected != current)
                     {
                         SubmitFleetCommand(new AssignCaptainCommand(shipId, selected));

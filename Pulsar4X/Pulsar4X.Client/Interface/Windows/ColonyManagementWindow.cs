@@ -658,9 +658,9 @@ namespace Pulsar4X.Client
                     ImGui.NextColumn();
                     if (readOnly)
                     {
-                        if (colonyView is { AdministratorId: >= 0 })
+                        if (colonyView != null)
                         {
-                            PortraitRenderer.For(_uiState).DrawEntity(colonyView.AdministratorId, PortraitIdentity.Administrator, PortraitRenderer.SmallSize);
+                            PortraitRenderer.For(_uiState).Draw(PortraitIdentity.Administrator(colonyView), PortraitRenderer.SmallSize);
                             ImGui.SameLine();
                         }
                         ImGui.TextUnformatted(string.IsNullOrEmpty(colonyView?.AdministratorName) ? "Unknown" : colonyView!.AdministratorName!);
@@ -826,9 +826,9 @@ namespace Pulsar4X.Client
         {
             bool hasPost = colonyView?.HasAdministrativePost == true;
             string label = string.IsNullOrEmpty(colonyView?.AdministratorName) ? "None" : colonyView!.AdministratorName!;
-            if (colonyView is { AdministratorId: >= 0 })
+            if (colonyView != null)
             {
-                PortraitRenderer.For(_uiState).DrawEntity(colonyView.AdministratorId, PortraitIdentity.Administrator, PortraitRenderer.SmallSize);
+                PortraitRenderer.For(_uiState).Draw(PortraitIdentity.Administrator(colonyView), PortraitRenderer.SmallSize);
                 ImGui.SameLine();
             }
             if (!hasPost)
@@ -874,8 +874,7 @@ namespace Pulsar4X.Client
                         "admin_" + colonyId,
                         close,
                         CivilianRow,
-                        320f,
-                        PortraitIdentity.Administrator);
+                        320f);
                     if (selected != current)
                     {
                         _uiState.GameClient?.SubmitCommandAsync(new AssignAdministratorCommand(colonyId, selected));

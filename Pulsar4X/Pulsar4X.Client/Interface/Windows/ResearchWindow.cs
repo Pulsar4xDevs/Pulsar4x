@@ -212,6 +212,8 @@ namespace Pulsar4X.Client
                 ImGui.TextColored(Styles.DescriptiveColor, "Scientist");
                 ImGui.TableNextColumn();
                 var nameDisplay = researcher.ScientistName ?? "Assign Scientist###assignbtn" + lab.Id;
+                PortraitRenderer.For(_uiState).Draw(PortraitIdentity.Scientist(researcher), PortraitRenderer.SmallSize);
+                ImGui.SameLine();
                 if(ImGui.Button(nameDisplay))
                 {
                     _showAssignmentModal = lab.Id;
@@ -230,8 +232,7 @@ namespace Pulsar4X.Client
                                 research.Scientists,
                                 currentScientistId,
                                 $"lab_{lab.Id}",
-                                closeModal, // Pass close action as cancel
-                                portraitRole: PortraitIdentity.Scientist);
+                                closeModal); // Pass close action as cancel
 
                             if (selectedId != currentScientistId)
                             {

@@ -37,9 +37,19 @@ public sealed class PortraitRenderer
         }
     }
 
+    /// <summary>Draw the portrait, or an empty-chair placeholder when the post is vacant.</summary>
+    public void Draw(PortraitRef portrait, float size)
+        => Draw(portrait.Seed, portrait.Role, PortraitIdentity.FactionColour(_uiState), size);
+
     /// <summary>Draw the portrait for this seed and role at <paramref name="size"/> pixels, reserved in the layout.</summary>
     public void Draw(int seed, string role, Vector4 factionColour, float size)
     {
+        if (PortraitIdentity.IsEmpty(seed, role))
+        {
+            DrawEmpty(size);
+            return;
+        }
+
         EnsureCatalog();
         var picks = PortraitPicker.Pick(_catalog!, seed, role, factionColour);
         Vector2 start = ImGui.GetCursorScreenPos();
@@ -58,14 +68,23 @@ public sealed class PortraitRenderer
         ImGui.Dummy(new Vector2(size, size));
     }
 
-    public void DrawPerson(CommanderSnapshot person, float size, string? contextRole = null)
-        => Draw(PortraitIdentity.Seed(person), PortraitIdentity.Role(person, contextRole), PortraitIdentity.FactionColour(_uiState), size);
+    public void DrawPerson(CommanderSnapshot person, float size)
+        => Draw(PortraitIdentity.Of(person), size);
 
     public void DrawCandidate(CandidateView candidate, float size)
-        => Draw(PortraitIdentity.Seed(candidate), PortraitIdentity.Role(candidate), PortraitIdentity.FactionColour(_uiState), size);
+        => Draw(PortraitIdentity.Of(candidate), size);
 
-    public void DrawEntity(int entityId, string role, float size)
-        => Draw(PortraitIdentity.Seed(entityId), role, PortraitIdentity.FactionColour(_uiState), size);
+    void DrawEmpty(float size)
+    {
+        Vector2 start = ImGui.GetCursorScreenPos();
+        Vector2 end = new(start.X + size, start.Y + size);
+        var drawList = ImGui.GetWindowDrawList();
+        uint fill = ImGui.ColorConvertFloat4ToU32(new Vector4(0.18f, 0.18f, 0.22f, 0.7f));
+        uint border = ImGui.ColorConvertFloat4ToU32(new Vector4(0.45f, 0.45f, 0.5f, 0.55f));
+        drawList.AddRectFilled(start, end, fill, 4f);
+        drawList.AddRect(start, end, border, 4f);
+        ImGui.Dummy(new Vector2(size, size));
+    }
 
     IntPtr Load(string? relativePath)
     {
