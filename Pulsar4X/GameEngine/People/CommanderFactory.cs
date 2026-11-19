@@ -24,6 +24,10 @@ namespace Pulsar4X.People
             if (commanderDB.RankedOn == default)
                 commanderDB.RankedOn = commanderDB.CommissionedOn;
 
+            // One face for life: a hired candidate arrives with the seed they had as a candidate; anyone else draws one now.
+            if (commanderDB.PortraitSeed == 0)
+                commanderDB.PortraitSeed = manager.Game.GlobalManager.NextPortraitSeed();
+
             var blobs = new List<BaseDataBlob>();
             var nameDB = new NameDB(commanderDB.ToString(), factionID, commanderDB.ToString());
             blobs.Add(nameDB);
@@ -109,7 +113,7 @@ namespace Pulsar4X.People
             return CreateScientist(faction, location, name, age, category, maxLabs);
         }
 
-        public static Scientist CreateScientist(Entity faction, Entity location, string name, int age, string category, byte maxLabs)
+        public static Scientist CreateScientist(Entity faction, Entity location, string name, int age, string category, byte maxLabs, int portraitSeed = 0)
         {
             var bonuses = new Dictionary<string, float>();
             if (!string.IsNullOrEmpty(category))
@@ -120,6 +124,7 @@ namespace Pulsar4X.People
             sci.Age = age;
             sci.MaxLabs = maxLabs;
             sci.Bonuses = bonuses;
+            sci.PortraitSeed = portraitSeed != 0 ? portraitSeed : faction.Manager!.Game.GlobalManager.NextPortraitSeed();
 
             var factionTech = faction.GetDataBlob<FactionTechDB>();
             factionTech.AllScientists.Add((sci, location));

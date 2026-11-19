@@ -121,6 +121,7 @@ namespace Pulsar4X.People
                 LabCategory = CommanderFactory.RandomTechCategory(game),
                 MaxLabs = (byte)game.RNG.Next(CommanderFactory.ScientistMinLabs, CommanderFactory.ScientistMaxLabs + 1),
                 JoinedOn = now,
+                PortraitSeed = game.GlobalManager.NextPortraitSeed(), // its own stream: no extra draw from game.RNG
             };
         }
 
@@ -201,12 +202,13 @@ namespace Pulsar4X.People
                     Type = DataStructures.CommanderTypes.Civilian,
                     CommissionedOn = colony.StarSysDateTime,
                     RankedOn = colony.StarSysDateTime,
+                    PortraitSeed = Portraits.SeedOf(candidate), // the face the candidate had
                 };
                 admin = CommanderFactory.Create(colony.Manager, faction.Id, db);
             }
             else
             {
-                scientist = CommanderFactory.CreateScientist(faction, colony, candidate.Name, candidate.Age, candidate.LabCategory, candidate.MaxLabs);
+                scientist = CommanderFactory.CreateScientist(faction, colony, candidate.Name, candidate.Age, candidate.LabCategory, candidate.MaxLabs, Portraits.SeedOf(candidate));
                 colony.GetDataBlob<TeamsHousedDB>().AddTeam(scientist);
             }
             return null;

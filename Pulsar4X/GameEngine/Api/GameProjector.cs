@@ -1028,6 +1028,16 @@ namespace Pulsar4X.Engine.Api
                 PeakWavelengthNm = SensorTools.StarPeakWavelengthNm(s.Temperature),
             };
 
+        // The seated captain of a ship: the captain's seed, and the role "captain" whatever their track. (0, "") when the chair is empty.
+        private static (int seed, string role) ShipCaptainPortrait(Entity ship, int commanderId)
+        {
+            if (commanderId < 0)
+                return (0, "");
+            if (ship.Manager != null && ship.Manager.TryGetGlobalEntityById(commanderId, out var captain))
+                return (Pulsar4X.People.Portraits.SeedOf(captain), PortraitRoles.Captain);
+            return (Pulsar4X.People.Portraits.FromId(commanderId), PortraitRoles.Captain);
+        }
+
         private static ShipView ToShipView(ShipInfoDB shipInfo, Entity ship, int factionId)
         {
             string? commander = null;
@@ -1036,6 +1046,7 @@ namespace Pulsar4X.Engine.Api
             {
                 commander = commanderEntity.GetName(factionId);
             }
+            var captainPortrait = ShipCaptainPortrait(ship, shipInfo.CommanderID);
 
             double totalHealth = 0;
             int totalCount = 0, operationalCount = 0;
@@ -1092,6 +1103,8 @@ namespace Pulsar4X.Engine.Api
                 armorThickness)
             {
                 CrewByComponent = crewRows,
+                CommanderPortraitSeed = captainPortrait.seed,
+                CommanderPortraitRole = captainPortrait.role,
                 CrewBerths = splitNow.Automated && ShipCrew.Tracked(ship) ? 0 : ShipCrew.Berths(parts),
                 BerthsByComponent = berthRows,
                 OfficerSlots = ShipCrew.OfficerSlots(parts),
@@ -1148,6 +1161,18 @@ namespace Pulsar4X.Engine.Api
             };
         }
 
+        // A seated person's portrait seed and role for a view. (0, "") when the post is empty (id below 0). The role is the post's
+        // (the caller passes it), because the post is what the person is doing here. A person who cannot be found still gets the
+        // id-derived seed, so a view never shows seed 0 for someone who is there.
+        private static (int seed, string role) Portrait(EntityManager? manager, int personId, string role)
+        {
+            if (personId < 0)
+                return (0, "");
+            if (manager != null && manager.TryGetGlobalEntityById(personId, out var person))
+                return (Pulsar4X.People.Portraits.SeedOf(person), role);
+            return (Pulsar4X.People.Portraits.FromId(personId), role);
+        }
+
         // The colony's seated industry head, for the owning faction only. (-1, null) when empty.
         private static (int id, string? name) IndustryHead(Entity colony, int factionId)
         {
@@ -1182,6 +1207,7 @@ namespace Pulsar4X.Engine.Api
             int? planetId = c.PlanetEntity.IsValid ? c.PlanetEntity.Id : null;
             int administratorId = -1;
             string? administratorName = null;
+            var administratorPortrait = (seed: 0, role: "");
             bool hasAdministrativePost = false;
             // The chair is the first seat at colony level or wider. A ship bridge does not count.
             if (colony.FactionOwnerID == factionId
@@ -1195,6 +1221,7 @@ namespace Pulsar4X.Engine.Api
                     if (seat.CommanderID >= 0)
                     {
                         administratorId = seat.CommanderID;
+                        administratorPortrait = Portrait(colony.Manager, seat.CommanderID, PortraitRoles.Administrator);
                         administratorName = "Unknown";
                         if (colony.Manager != null
                             && colony.Manager.TryGetGlobalEntityById(seat.CommanderID, out var person))
@@ -1225,10 +1252,15 @@ namespace Pulsar4X.Engine.Api
             }
 
             var (industryHeadId, industryHeadName) = IndustryHead(colony, factionId);
+            var headPortrait = Portrait(colony.Manager, industryHeadId, PortraitRoles.IndustryHead);
             return new ColonyView(population, planetId)
             {
                 IndustryHeadId = industryHeadId,
                 IndustryHeadName = industryHeadName,
+                IndustryHeadPortraitSeed = headPortrait.seed,
+                IndustryHeadPortraitRole = headPortrait.role,
+                AdministratorPortraitSeed = administratorPortrait.seed,
+                AdministratorPortraitRole = administratorPortrait.role,
                 SpeciesPopulations = species,
                 CrewPool = crewPool,
                 CrewPoolBySpecies = crewRows,
@@ -1838,7 +1870,11 @@ namespace Pulsar4X.Engine.Api
                 string category = game.TechCategories.TryGetValue(candidate.LabCategory, out var cat) ? cat.Name : candidate.LabCategory;
                 var view = new CandidateView(candidate.Id, candidate.Name, candidate.Age, at.Id, at.GetName(factionId),
                     (int)game.Settings.CrewWagePerDay, category, candidate.MaxLabs)
-                    { WagePerMonth = (int)game.Settings.CrewWagePerDay * Pulsar4X.Factions.FactionSpending.DaysInMonth(colony.StarSysDateTime) };
+                    {
+                        WagePerMonth = (int)game.Settings.CrewWagePerDay * Pulsar4X.Factions.FactionSpending.DaysInMonth(colony.StarSysDateTime),
+                        PortraitSeed = Pulsar4X.People.Portraits.SeedOf(candidate),
+                        PortraitRole = PortraitRoles.Candidate,
+                    };
                 all.Add(view);
                 if (at.Id == colony.Id)
                     here.Add(view);
@@ -2145,7 +2181,15 @@ namespace Pulsar4X.Engine.Api
             }
 
             var (headId, headName) = IndustryHead(entity, factionId);
-            return new IndustryView(lines) { Pads = pads, IndustryHeadId = headId, IndustryHeadName = headName };
+            var headPortrait = Portrait(entity.Manager, headId, PortraitRoles.IndustryHead);
+            return new IndustryView(lines)
+            {
+                Pads = pads,
+                IndustryHeadId = headId,
+                IndustryHeadName = headName,
+                IndustryHeadPortraitSeed = headPortrait.seed,
+                IndustryHeadPortraitRole = headPortrait.role,
+            };
         }
 
         /// <summary>Crew a launch of this design would board from the colony now: min(required, berths, pool).</summary>
@@ -2473,10 +2517,12 @@ namespace Pulsar4X.Engine.Api
                 locationName = location.GetName(factionId);
 
             string? scientistName = null;
+            var scientistPortrait = (seed: 0, role: "");
             if (r.ScientistId >= 0 && lab.Manager != null
                 && lab.Manager.TryGetGlobalEntityById(r.ScientistId, out var scientist))
             {
                 scientistName = scientist.GetName(factionId);
+                scientistPortrait = (Pulsar4X.People.Portraits.SeedOf(scientist), Pulsar4X.People.Portraits.RoleOf(scientist));
             }
 
             return new ResearcherView(
@@ -2492,6 +2538,8 @@ namespace Pulsar4X.Engine.Api
                 r.FundingLevel,
                 new List<string>(r.TechQueue))
             {
+                ScientistPortraitSeed = scientistPortrait.seed,
+                ScientistPortraitRole = scientistPortrait.role,
                 DaysInMonth = Pulsar4X.Factions.FactionSpending.DaysInMonth(lab.StarSysDateTime),
                 CostPerMonth = r.CostPerDay.GetValue() * Pulsar4X.Factions.FactionSpending.DaysInMonth(lab.StarSysDateTime),
                 NextPayday = Pulsar4X.Factions.FactionSpending.NextPayday(lab.StarSysDateTime),
@@ -2679,6 +2727,11 @@ namespace Pulsar4X.Engine.Api
                 RankName = rankName,
                 RankedOn = commanderDB.RankedOn,
                 AssignmentName = assignment,
+                PortraitSeed = Pulsar4X.People.Portraits.SeedOf(commander.Id, commanderDB.PortraitSeed),
+                // Commanding a ship makes them its captain, whatever their track; otherwise the post decides.
+                PortraitRole = shipCommands != null && shipCommands.ContainsKey(commander.Id)
+                    ? PortraitRoles.Captain
+                    : Pulsar4X.People.Portraits.RoleOf(commander),
             };
         }
 
@@ -2867,6 +2920,8 @@ namespace Pulsar4X.Engine.Api
                 FlagshipName = flagship?.GetName(factionId),
                 CommanderName = commander,
                 CommanderId = commanderId,
+                CommanderPortraitSeed = flagship != null ? ShipCaptainPortrait(flagship, commanderId ?? -1).seed : 0,
+                CommanderPortraitRole = flagship != null ? ShipCaptainPortrait(flagship, commanderId ?? -1).role : "",
                 SystemId = system?.ID,
                 SystemName = system?.NameDB.GetName(factionId),
                 OrbitingEntityId = orbiting?.Id,
@@ -2974,9 +3029,12 @@ namespace Pulsar4X.Engine.Api
                 }
             }
 
+            var captainPortrait = ShipCaptainPortrait(ship, shipInfo?.CommanderID ?? -1);
             return new ShipSnapshot(ship.Id, ship.GetName(factionId), ship.Manager?.ManagerID ?? "",
                                     shipInfo?.Design?.Name ?? "", commander)
             {
+                CommanderPortraitSeed = captainPortrait.seed,
+                CommanderPortraitRole = captainPortrait.role,
                 Goal = ProjectGoals(ship),
                 Orders = ProjectOrders(ship),
                 CanGeoSurvey = ship.HasGeoSurveyAbility(),

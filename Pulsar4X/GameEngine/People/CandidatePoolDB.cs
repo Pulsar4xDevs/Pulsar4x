@@ -22,6 +22,9 @@ namespace Pulsar4X.People
         public byte MaxLabs { get; internal set; }
 
         public DateTime JoinedOn { get; internal set; }
+
+        /// <summary>The number the Client's portrait renderer turns into this person's face. Kept when they are hired. 0 means not set yet (an old save gets one derived from <see cref="Id"/> on load).</summary>
+        public int PortraitSeed { get; internal set; }
     }
 
     /// <summary>

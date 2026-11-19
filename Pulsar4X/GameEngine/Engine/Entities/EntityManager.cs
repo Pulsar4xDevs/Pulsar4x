@@ -89,6 +89,12 @@ namespace Pulsar4X.Engine
 
         public Random RNG;
 
+        // Portrait seeds come from their own counter-based stream (see Portraits), so drawing one never moves RNG.
+        [JsonProperty] private int _portraitDraws;
+
+        /// <summary>The next person's portrait seed: a hash of this manager's master seed and a saved counter. Never 0.</summary>
+        internal int NextPortraitSeed() => Pulsar4X.People.Portraits.Derive(_rngSeed, ++_portraitDraws);
+
         internal int RNGNext()
         {
             return RNG.Next();
