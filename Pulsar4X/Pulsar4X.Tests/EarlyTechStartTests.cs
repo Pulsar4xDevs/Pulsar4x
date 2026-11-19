@@ -339,6 +339,7 @@ public class EarlyTechStartTests
         Assert.That(designs, Does.Not.Contain("default-design-alcubierre-2k"));
     }
 
+    [Category("Slow")]
     [Test]
     public void NewGameWithEarlyMod_RunsAMonthOfGameTimeAndSurvivesASaveAndLoad()
     {

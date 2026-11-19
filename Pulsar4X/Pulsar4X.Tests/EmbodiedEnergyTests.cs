@@ -254,12 +254,13 @@ public class EmbodiedEnergyTests
     {
         var data = Info.Data;
         double hand = EnergyPriceOracle.Delivery_kWhPerKg(_game);
-        // 2 x (4e6/3 kJ + 15 kW x 0.2 AU / 20,233.5 m/s) / 3600 / 1e6 kg = 0.013064, plus (energy
+        // 2 x (4e6/3 kJ + 15 kW x 0.2 AU / 19,681.5 m/s) / 3600 / 1e6 kg = 0.013409, plus (energy
         // phase 6) the turbine's fissile fuel for those kJ at 1,403 kWh/kg: 0.0000055. Crew plan
         // phase 1: the miner's crew quarters (+2,028 kg dry) slowed its drive from 22,029 m/s
-        // (0.012064 before); phase 4: its 4 t reactor (+2,000 kg) from 21,087 m/s (0.012570 before).
+        // (0.012064 before); phase 4: its 4 t reactor (+2,000 kg) from 21,087 m/s (0.012570 before);
+        // crew rules: its 6 crew bunks (+1,387 kg, 50,809 kg) from 20,233.5 m/s (0.013069 before): 0.013409 + 0.0000056.
         // Life support (17 kW) runs anyway and is not charged to the haul.
-        Assert.That(hand, Is.EqualTo(0.013069).Within(1e-6));
+        Assert.That(hand, Is.EqualTo(0.013415).Within(1e-6));
         Assert.That(EnergyPricing.DepotDeliveryKWhPerKg(_game, data), Is.EqualTo(hand).Within(1e-12));
         var legs = EnergyPricing.DepotDeliveryLegs(_game);
         Assert.That(legs, Has.Count.EqualTo(2));

@@ -138,13 +138,20 @@ public class EnergyDemandRefreshTests
         var (lineId, line) = Refinery();
         IndustryTools.AddJob(_earth, lineId, NewJob("hydrolox", 5));
         var job = line.Jobs.Single();
+        // The pass only flags a job as stalled when its cost is more than the line's points for the day (a job
+        // that fits in one day's points and gets no inputs just stays Queued), so run the line at half the cost.
+        line.IndustryTypeRates["refining"] = (int)(job.ProductionPointsCost / 2);
         // No recipe in stock (the colony has none to spare): the job stalls on missing resources.
         foreach (var (id, _) in job.ResourcesCosts)
             Remove(id);
-        Assert.That(RefineryLine().Draw_kW, Is.GreaterThan(RefineryLine().Nameplate_kW * ColonyPowerProcessor.IndustryIdleShare));
+        foreach (var (id, _) in job.ResourcesCosts)
+            Assert.That(_earth.GetDataBlob<CargoStorageDB>().GetUnitsStored(Info.Data.CargoGoods.GetAny(id)!, false), Is.EqualTo(0), $"no {id} left");
+        double idle = RefineryLine().Nameplate_kW * ColonyPowerProcessor.IndustryIdleShare;
+        Assert.That(RefineryLine().Draw_kW, Is.GreaterThan(idle), "a queued job draws before the pass");
         new IndustryProcessor().ProcessEntity(_earth, 0);
-        Assume.That(job.Status, Is.EqualTo(Pulsar4X.DataStructures.IndustryJobStatus.MissingResources));
-        Assert.That(RefineryLine().Draw_kW, Is.EqualTo(RefineryLine().Nameplate_kW * ColonyPowerProcessor.IndustryIdleShare).Within(1e-9));
+        Assert.That(job.Status, Is.EqualTo(Pulsar4X.DataStructures.IndustryJobStatus.MissingResources));
+        Assert.That(job.ProductionPointsLeft, Is.EqualTo(job.ProductionPointsCost), "no progress without inputs");
+        Assert.That(RefineryLine().Draw_kW, Is.EqualTo(idle).Within(1e-9), "a stalled line draws only its hotel share");
     }
 
     // ---- installation jobs ----

@@ -31,6 +31,7 @@ public class EventPauseGeoSurveyTests
     const string BaseMod = "Pulsar4x";
     const string WarpTechStart = "Pulsar4x.Scenario.WarpTechStart";
 
+    [Category("Slow")]
     [Test]
     public void Quickstart_fleet_geo_survey_pauses_at_the_checked_warp_drop_in_only()
     {

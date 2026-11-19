@@ -65,7 +65,7 @@ namespace Pulsar4X.Energy
         /// </summary>
         public static MoveCostShip ReferenceHauler => new()
         {
-            DryMass_kg = 49422, // crew plan phase 1: + crew quarters (10 + 1 berths); phase 4: 4 t reactor
+            DryMass_kg = 50809, // crew plan phase 1: + crew quarters; phase 4: 4 t reactor; crew rules: 6 crew bunks (1 t each) + 10-berth quarters
             FuelMass_kg = 2393601,
             FuelType = "methalox",
             ExhaustVelocity = 3615,
@@ -82,7 +82,7 @@ namespace Pulsar4X.Energy
             EnergyStored = 0,
             EnergyStoreMax = 3000000 + ReferenceReactor_kW,
             EnergyOutputMax = ReferenceReactor_kW,
-            // Crew plan phase 4: 17 crew aboard at 1 kW each, must-run.
+            // Crew plan phase 4: 17 aboard at 1 kW each, must-run: 16 crew (Capacity = min(16 required, 10 + 6 berths)) + the captain.
             LifeSupport_kW = 17,
             // Energy phase 6: the steam turbine makes electricity at 30% of its core heat and
             // burns heat / 40e9 kg/s of fissile fuel, so 1 / (0.3 × 40e9) kg per kJ at any size.

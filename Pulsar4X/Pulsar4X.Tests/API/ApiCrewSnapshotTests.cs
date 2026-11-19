@@ -25,7 +25,8 @@ public class ApiCrewSnapshotTests
     Entity _player = null!;
     GameProjector _projector = null!;
 
-    [SetUp]
+    // Every test here only reads views off the starting game, so one game serves the fixture.
+    [OneTimeSetUp]
     public void SetUp()
     {
         ModsState.RefreshModsList("Data");

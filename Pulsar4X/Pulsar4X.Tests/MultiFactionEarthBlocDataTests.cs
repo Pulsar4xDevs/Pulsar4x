@@ -102,14 +102,19 @@ public class MultiFactionEarthBlocDataTests
     {
         var spc = Named("Sino-Pacific Coalition");
         var amc = Named("Americas Compact");
-        var cg = Info(spc).Data.CargoGoods;
-        // Two years of use at ECN's 50 a day would empty its 20,000 stock; without output SPC's 5,000 would be gone too.
-        for (int month = 0; month < 14; month++)
-        {
-            _game.TimePulse.TimeStep(_game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(30));
-            Assert.That(_game.TimePulse.LastFault, Is.Null);
-        }
-        Assert.That(ColonyNeeds.Stock(spc, "plastic"), Is.GreaterThan(0), "SPC keeps making plastic");
+        // A rate check over ten days (the old 14 x 30-day run took two minutes). SPC makes 150 plastic a day
+        // (5,000 -> 5,150 on day 1) and ECN's use is 50 a day, so with SPC's stock only growing and ECN's working
+        // stock (20,000 plastic, 20,000 hydrocarbons) far above its floor, neither runs dry over the two years.
+        const int days = 10;
+        double spcBefore = ColonyNeeds.Stock(spc, "plastic");
+        double ecnBefore = ColonyNeeds.Stock(_ecn, "plastic");
+        _game.TimePulse.TimeStep(_game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(days));
+        Assert.That(_game.TimePulse.LastFault, Is.Null);
+        double spcRate = (ColonyNeeds.Stock(spc, "plastic") - spcBefore) / days;
+        double ecnRate = (ColonyNeeds.Stock(_ecn, "plastic") - ecnBefore) / days;
+        Assert.That(spcRate, Is.GreaterThanOrEqualTo(100), "SPC keeps making plastic: its stock grows a hundred or more a day");
+        Assert.That(ecnRate, Is.GreaterThanOrEqualTo(-60), "ECN uses about 50 plastic a day, not more");
+        Assert.That(spcRate + ecnRate, Is.GreaterThan(0), "SPC's output covers ECN's use, so the stock the blocs draw on only grows");
         Assert.That(ColonyNeeds.Stock(_ecn, "plastic"), Is.GreaterThanOrEqualTo(1500), "ECN keeps its working stock of plastic");
         Assert.That(ColonyNeeds.Stock(_ecn, "hydrocarbons"), Is.GreaterThanOrEqualTo(750), "ECN keeps its working stock of hydrocarbons");
         Assert.That(ColonyNeeds.Stock(amc, "plastic"), Is.GreaterThanOrEqualTo(0));

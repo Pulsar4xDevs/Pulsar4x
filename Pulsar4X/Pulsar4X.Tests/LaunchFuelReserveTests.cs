@@ -41,6 +41,7 @@ public class LaunchFuelReserveTests
         return store.CurrentStoreInUnits.TryGetValue(item.ID, out var units) ? units : 0;
     }
 
+    [Category("Slow")]
     [Test]
     public void WarpTechStart_EarthKeepsItsFissileRunway_ThroughDay1AndDay30()
     {

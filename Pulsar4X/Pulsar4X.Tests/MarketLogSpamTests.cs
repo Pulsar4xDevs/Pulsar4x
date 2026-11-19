@@ -41,6 +41,7 @@ public class MarketLogSpamTests
     }
 
 
+    [Category("Slow")]
     [TestCase(true)]
     [TestCase(false)]
     public void MarketJobs_DoNotFillTheColonyLog(bool earlyTech)

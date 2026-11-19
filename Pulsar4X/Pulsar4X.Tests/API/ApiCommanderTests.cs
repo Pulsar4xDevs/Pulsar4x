@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Linq;
 using GameEngine.Engine.Orders;
 using GameEngine.People;
@@ -110,18 +112,34 @@ namespace Pulsar4X.Tests
             var session = Connect();
             var commander = MakeCommander(session.FactionId, CommanderTypes.Navy, rank: 3);
 
-            var received = new List<GameEventEnvelope>();
-            using var subscription = _server.Subscribe(session, received.Add);
+            // The server pushes from the engine and background threads (the sim-stopped notice arrives off-thread
+            // after the step), so collect thread-safely and only assert once the sim has stopped and told us so.
+            var received = new ConcurrentQueue<GameEventEnvelope>();
+            using var subscription = _server.Subscribe(session, received.Enqueue);
 
-            var initial = received.LastOrDefault(e => e.Type == GameEventType.CommandersChanged);
+            var initial = received.ToArray().LastOrDefault(e => e.Type == GameEventType.CommandersChanged);
             Assert.That(initial, Is.Not.Null, "expected the roster in the initial connect push");
             Assert.That(initial!.Commanders!.Select(c => c.Id), Does.Contain(commander.Id));
 
-            received.Clear();
-            _server.SetTimeControl(session,
-                new TimeControlRequest(TimeControlAction.StepOnce, StepLength: TimeSpan.FromDays(1)));
+            // The server subscribed to SimulationStopped before this handler, so once ours has run its push is done.
+            using var stopped = new ManualResetEventSlim(false);
+            void onStopped() => stopped.Set();
+            _game.TimePulse.SimulationStopped += onStopped;
+            try
+            {
+                received.Clear();
+                _server.SetTimeControl(session,
+                    new TimeControlRequest(TimeControlAction.StepOnce, StepLength: TimeSpan.FromDays(1)));
+                Assert.That(stopped.Wait(TimeSpan.FromSeconds(30)), Is.True, "the step should finish and announce it stopped");
+            }
+            finally
+            {
+                _game.TimePulse.SimulationStopped -= onStopped;
+            }
+            Assert.That(_game.TimePulse.IsRunning, Is.False);
 
-            Assert.That(received.Any(e => e.Type == GameEventType.CommandersChanged && e.Commanders != null),
+            var pushes = received.ToArray();
+            Assert.That(pushes.Any(e => e.Type == GameEventType.CommandersChanged && e.Commanders != null),
                 Is.True, "expected a roster re-push on clock advance");
         }
 
