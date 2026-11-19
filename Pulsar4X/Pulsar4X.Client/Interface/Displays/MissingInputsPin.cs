@@ -67,11 +67,12 @@ public sealed class MissingInputsPin
     }
 
     /// <summary>
-    /// Queue is offered only when the industry seat is empty (<see cref="IndustryView.IndustryHeadId"/> is -1)
-    /// and this input can be built on the colony.
+    /// Queue is offered only when the industry seat is empty (<see cref="IndustryView.IndustryHeadId"/> is -1),
+    /// this input can be built on the colony, and already-queued jobs do not already cover the shortfall
+    /// (<see cref="MissingInputView.QueueQuantity"/> is above 0).
     /// </summary>
     public static bool ShowQueue(int industryHeadId, MissingInputView? input)
-        => industryHeadId == -1 && input is { CanBuild: true };
+        => industryHeadId == -1 && input is { CanBuild: true } && input.QueueQuantity > 0;
 
     public static bool ShowQueue(int industryHeadId, bool canBuild)
         => industryHeadId == -1 && canBuild;
@@ -79,6 +80,10 @@ public sealed class MissingInputsPin
     public static string StockText(MissingInputView input)
         => input.Short.ToString("N0") + " short / " + input.Required.ToString("N0")
             + " required (" + input.InStock.ToString("N0") + " in stock)";
+
+    /// <summary>"Queued N" when jobs already on the colony will still make some of this input; otherwise empty.</summary>
+    public static string QueuedText(MissingInputView input)
+        => input.Queued > 0 ? "Queued " + input.Queued.ToString("N0") : "";
 
     public static string LineText(MissingInputView input)
         => string.IsNullOrEmpty(input.LineName) ? "—" : input.LineName;

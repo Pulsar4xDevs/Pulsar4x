@@ -23,7 +23,8 @@ public class MissingInputsPinTests
         string designId = "",
         string lineId = "",
         string lineName = "",
-        int queueQuantity = 0)
+        int queueQuantity = 0,
+        long queued = 0)
         => new(itemId, name, required, inStock, shortfall)
         {
             CanBuild = canBuild,
@@ -32,6 +33,7 @@ public class MissingInputsPinTests
             LineName = lineName,
             LineKind = canBuild ? IndustryLineKinds.Factory : "",
             QueueQuantity = queueQuantity,
+            Queued = queued,
         };
 
     static IndustryJobView Job(string jobId, string name, params MissingInputView[] missing)
@@ -144,6 +146,25 @@ public class MissingInputsPinTests
         Assert.That(command.Quantity, Is.EqualTo(39988));
         Assert.That(command.Repeat, Is.False);
         Assert.That(command.AutoInstall, Is.False);
+    }
+
+    [Test]
+    public void QueuedFeeders_ShowQueuedN_AndHideQueueWhenTheShortfallIsCovered()
+    {
+        var partial = Input("p", "Plastic", 40, 0, 40, canBuild: true, designId: "d-p", lineId: "ref", lineName: "Refinery", queueQuantity: 15, queued: 25);
+        Assert.That(MissingInputsPin.QueuedText(partial), Is.EqualTo("Queued 25"));
+        Assert.That(MissingInputsPin.ShowQueue(-1, partial), Is.True);
+        Assert.That(MissingInputsPin.QueueButtonText(partial), Is.EqualTo("Queue 15 on Refinery"));
+        Assert.That(MissingInputsPin.QueueCommand(Colony, partial).Quantity, Is.EqualTo(15));
+
+        var covered = Input("p", "Plastic", 40, 0, 40, canBuild: true, designId: "d-p", lineId: "ref", lineName: "Refinery", queueQuantity: 0, queued: 40);
+        Assert.That(MissingInputsPin.QueuedText(covered), Is.EqualTo("Queued 40"));
+        Assert.That(MissingInputsPin.ShowQueue(-1, covered), Is.False, "Queue stays hidden when queued jobs already cover the shortfall, even if CanBuild is true");
+
+        var none = Input("p", "Plastic", 40, 0, 40, canBuild: true, designId: "d-p", lineId: "ref", lineName: "Refinery", queueQuantity: 40);
+        Assert.That(MissingInputsPin.QueuedText(none), Is.EqualTo(""));
+        Assert.That(MissingInputsPin.ShowQueue(-1, none), Is.True);
+        Assert.That(MissingInputsPin.StockText(none), Is.EqualTo("40 short / 40 required (0 in stock)"));
     }
 
     [Test]

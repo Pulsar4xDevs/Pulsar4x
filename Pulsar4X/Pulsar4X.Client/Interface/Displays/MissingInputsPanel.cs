@@ -73,6 +73,11 @@ public static class MissingInputsPanel
                         ImGui.TextUnformatted(input.Name);
                         ImGui.TableNextColumn();
                         ImGui.TextUnformatted(MissingInputsPin.StockText(input));
+                        if (MissingInputsPin.QueuedText(input) is { Length: > 0 } queued)
+                        {
+                            ImGui.SameLine();
+                            ImGui.TextUnformatted(queued);
+                        }
                         ImGui.TableNextColumn();
                         ImGui.TextUnformatted(MissingInputsPin.LineText(input));
                         ImGui.TableNextColumn();
