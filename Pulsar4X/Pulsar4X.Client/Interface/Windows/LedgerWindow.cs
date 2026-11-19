@@ -150,11 +150,10 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
         foreach (var band in diagram.Bands)
         {
             uint colour = Colour(band.Kind, node: false);
-            foreach (var (a, b, c, dpt) in LedgerSankeyLayout.BandQuads(band))
-            {
-                var pts = new[] { a, b, c, dpt };
-                draw.AddConvexPolyFilled(ref pts[0], 4, colour);
-            }
+            var poly = LedgerSankeyLayout.BandPolygon(band);
+            for (int i = 0; i < poly.Length; i++)
+                draw.PathLineTo(poly[i]);
+            draw.PathFillConcave(colour);
         }
 
         foreach (var node in diagram.Nodes)
@@ -204,7 +203,7 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
 
     static uint Colour(LedgerSankeyNodeKind kind, bool node)
     {
-        float a = node ? 0.92f : 0.62f;
+        float a = node ? 0.97f : 0.94f;
         Vector4 colour = kind switch
         {
             LedgerSankeyNodeKind.Income => new Vector4(0.22f, 0.62f, 0.35f, a),
