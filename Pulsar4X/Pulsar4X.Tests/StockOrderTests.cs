@@ -606,6 +606,112 @@ public class StockOrderTests
         Assert.That(job.Status, Is.EqualTo(IndustryJobStatus.Idle), "then it waits");
     }
 
+    // ----- editing the quantity mid-batch -----
+
+    static IndustryJob QueuedPlainJob(World world, Entity colony, int quantity, bool repeat)
+    {
+        Plastic(world, colony, 1000);
+        Assert.That(Translator.Translate(world.Faction, colony,
+            new QueueIndustryJobCommand(colony.Id, FactoryId, world.Part.UniqueID, quantity, repeat, false)).Accepted, Is.True);
+        return Gizmo(colony);
+    }
+
+    [Test]
+    public void Edit_ARepeatJob_ToLessThanBuilt_StartsANewBatch_InsteadOfStalling()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        var job = QueuedPlainJob(world, colony, 5, repeat: true);
+        job.NumberCompleted = 3;
+
+        var result = Edit(world, colony, FactoryId, job.JobID, 2, true, null);
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(job.NumberOrdered, Is.EqualTo(2));
+        Assert.That(job.NumberCompleted, Is.EqualTo(0), "the count restarts, so it can meet the new quantity");
+        Day(colony);
+        Assert.That(GizmoStock(world, colony), Is.GreaterThan(0), "the repeat job builds");
+        Assert.That(Jobs(colony, FactoryId), Has.Count.EqualTo(1), "and is still on the line");
+    }
+
+    [Test]
+    public void Edit_ARepeatJob_ToExactlyWhatIsBuilt_AlsoStartsANewBatch()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        var job = QueuedPlainJob(world, colony, 5, repeat: true);
+        job.NumberCompleted = 3;
+
+        Edit(world, colony, FactoryId, job.JobID, 3, true, null);
+
+        Assert.That(job.NumberCompleted, Is.EqualTo(0));
+        Assert.That(job.NumberOrdered, Is.EqualTo(3));
+    }
+
+    [Test]
+    public void Edit_ARepeatJob_PartBuilt_KeepsTheProgress()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        var job = QueuedPlainJob(world, colony, 5, repeat: true);
+        job.NumberCompleted = 4;
+        job.ProductionPointsLeft -= 3;
+        long left = job.ProductionPointsLeft;
+
+        Edit(world, colony, FactoryId, job.JobID, 2, true, null);
+
+        Assert.That(job.NumberCompleted, Is.EqualTo(0));
+        Assert.That(job.ProductionPointsLeft, Is.EqualTo(left), "the item in progress is not lost");
+    }
+
+    [Test]
+    public void Edit_AOneShotJob_ToLessThanBuilt_FinishesAndLeavesTheLine()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        var job = QueuedPlainJob(world, colony, 5, repeat: false);
+        job.NumberCompleted = 3;
+
+        var result = Edit(world, colony, FactoryId, job.JobID, 2, false, null);
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(Jobs(colony, FactoryId), Is.Empty, "3 are built and 2 were asked for: done");
+    }
+
+    [Test]
+    public void Edit_AOneShotJob_PartBuilt_FinishesTheItemInProgress_ThenIsDone()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        var job = QueuedPlainJob(world, colony, 5, repeat: false);
+        job.NumberCompleted = 3;
+        job.ProductionPointsLeft -= 3;
+
+        Edit(world, colony, FactoryId, job.JobID, 2, false, null);
+
+        Assert.That(job.NumberOrdered, Is.EqualTo(4), "one more: the part-built item");
+        Day(colony);
+        Assert.That(Jobs(colony, FactoryId), Is.Empty, "it completed and left; it did not stall");
+        Assert.That(GizmoStock(world, colony), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void Edit_AStockOrder_ToLessThanBuilt_RestartsItsBatchAndKeepsItsLevel()
+    {
+        var (world, colony, _) = Ordered(below: 5, quantity: 5, gizmos: 2);
+        var job = Gizmo(colony);
+        Assert.That(job.StockBatchStarted, Is.True);
+        job.NumberCompleted = 3;
+
+        var result = Edit(world, colony, FactoryId, job.JobID, 2, true, 5);
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(job.NumberCompleted, Is.EqualTo(0));
+        Assert.That(job.StockThreshold, Is.EqualTo(5));
+        Day(colony);
+        Assert.That(GizmoStock(world, colony), Is.GreaterThanOrEqualTo(4), "it still builds its batch of 2");
+    }
+
     // ----- save and load -----
 
     [Test]

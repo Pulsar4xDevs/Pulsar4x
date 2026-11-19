@@ -1906,12 +1906,12 @@ namespace Pulsar4X.Engine.Api
                 return Array.Empty<MissingInputView>();
 
             var views = new List<MissingInputView>();
-            foreach (var shortfall in IndustryTools.InputShortfalls(colony, job.ResourcesRequiredRemaining, storage))
+            foreach (var shortfall in IndustryTools.InputShortfalls(colony, job.ResourcesRequiredRemaining, storage, job))
             {
                 var view = new MissingInputView(
                     shortfall.ResourceId,
                     string.IsNullOrEmpty(shortfall.Item.Name) ? ResolveItemName(factionInfo, shortfall.ResourceId) : shortfall.Item.Name,
-                    shortfall.Required, shortfall.InStock, shortfall.Short);
+                    shortfall.Required, shortfall.InStock, shortfall.Short) { Queued = shortfall.Queued };
                 if (shortfall.Builder is { } builder
                     && IndustryTools.FastestLineId(industry, builder.IndustryTypeID) is { } lineId)
                 {

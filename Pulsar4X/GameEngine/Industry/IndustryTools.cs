@@ -100,6 +100,29 @@ namespace Pulsar4X.Industry
                 job.Auto = RepeatJob;
                 job.NumberOrdered = NumberOrderd;
 
+                // A new quantity at or below what is already built would leave the batch never finishing (the count only
+                // ever meets the quantity exactly), so a repeat job would stop building for good. The batch is done
+                // instead: a repeat job starts a new batch of the new size (an item part-built carries over); a one-shot
+                // job is finished and leaves the line, or finishes the part-built item first.
+                if (job.NumberCompleted >= job.NumberOrdered)
+                {
+                    bool partBuilt = job.ProductionPointsLeft < job.ProductionPointsCost
+                        || job.ResourcesRequiredRemaining.Values.Sum() < job.ResourcesCosts.Values.Sum();
+                    if (job.Auto)
+                    {
+                        job.NumberCompleted = 0;
+                        job.StockBatchStarted = partBuilt;
+                    }
+                    else if (partBuilt)
+                        job.NumberOrdered = (ushort)(job.NumberCompleted + 1);
+                    else
+                    {
+                        jobList.Remove(job);
+                        Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(industryEntity);
+                        return;
+                    }
+                }
+
                 // The edit states the whole job: no level means a plain repeat job. A batch already under way finishes first.
                 if (stockThreshold != job.StockThreshold)
                 {
@@ -524,10 +547,12 @@ namespace Pulsar4X.Industry
                 throw new Exception("Unable to find IndustryAbilityDB");
             }
 
-            foreach (var shortfall in InputShortfalls(industryEntity, job.ResourcesRequiredRemaining, stockpile))
+            foreach (var shortfall in InputShortfalls(industryEntity, job.ResourcesRequiredRemaining, stockpile, job))
             {
                 if (shortfall.Builder is not { } des)
                     continue; // a raw resource: nothing here can build it
+                if (shortfall.QueueQuantity == 0)
+                    continue; // jobs already queued on this colony cover the shortfall, so queuing twice adds nothing
                 IndustryJob newjob = new IndustryJob(des);
                 newjob.InitialiseJob(shortfall.QueueQuantity, false);
                 // A job no line here takes is not queued, so it gets no log line. Its inputs are still walked, as before.
@@ -541,23 +566,28 @@ namespace Pulsar4X.Industry
         /// One input a job needs more of than the colony's stockpile holds. The same numbers drive
         /// <see cref="AutoAddSubJobs"/> and the missing-inputs API view, so a one-click "queue this input" matches chaining.
         /// </summary>
-        internal readonly record struct InputShortfall(string ResourceId, ICargoable Item, long Required, long InStock)
+        internal readonly record struct InputShortfall(string ResourceId, ICargoable Item, long Required, long InStock, long Queued = 0)
         {
             /// <summary>Units still needed: required minus stock. Always above 0 for a returned shortfall.</summary>
             public long Short => Required - InStock;
+
+            /// <summary>Units still to queue: the shortfall less what queued jobs will make. 0 when they cover it.</summary>
+            public long ToQueue => Math.Max(0, Short - Queued);
 
             /// <summary>The design that builds this input, or null for a raw resource that cannot be built.</summary>
             public IConstructableDesign? Builder => Item as IConstructableDesign;
 
             /// <summary>The quantity a one-shot feeder job for the shortfall queues, capped at what a job can hold (65535).</summary>
-            public ushort QueueQuantity => (ushort)Math.Min(Short, ushort.MaxValue);
+            public ushort QueueQuantity => (ushort)Math.Min(ToQueue, ushort.MaxValue);
         }
 
         /// <summary>
         /// Every input in <paramref name="required"/> (the current item's remaining resource needs, by id) that the
-        /// stockpile holds less of. Inputs the faction has no cargo good or design for are skipped.
+        /// stockpile holds less of. Inputs the faction has no cargo good or design for are skipped. Each carries how much
+        /// the colony's queued jobs will still make of it (<see cref="QueuedOutput"/>), so feeding the same input twice
+        /// only queues what is still short. <paramref name="parent"/> is the job asking: it never counts as its own supply.
         /// </summary>
-        internal static List<InputShortfall> InputShortfalls(Entity colony, IReadOnlyDictionary<string, long> required, CargoStorageDB? stockpile)
+        internal static List<InputShortfall> InputShortfalls(Entity colony, IReadOnlyDictionary<string, long> required, CargoStorageDB? stockpile, IndustryJob? parent = null)
         {
             var found = new List<InputShortfall>();
             var info = colony.GetFactionOwner.GetDataBlob<FactionInfoDB>();
@@ -573,9 +603,36 @@ namespace Pulsar4X.Industry
                 }
                 long stored = stockpile?.GetUnitsStoredByDesign(cargoItem, false) ?? 0;
                 if (kvp.Value - stored > 0)
-                    found.Add(new InputShortfall(kvp.Key, cargoItem, kvp.Value, stored));
+                    found.Add(new InputShortfall(kvp.Key, cargoItem, kvp.Value, stored,
+                        cargoItem is IConstructableDesign builder ? QueuedOutput(colony, builder, parent) : 0));
             }
             return found;
+        }
+
+        /// <summary>
+        /// What the jobs already queued on the colony's lines will still make of <paramref name="design"/>, counted the way
+        /// chaining sizes a feeder job (<c>NumberOrdered</c> is the shortfall in units): per job, the items left in its
+        /// current batch (ordered less completed). A recipe's output per item is not applied, as chaining does not apply it. A repeat job
+        /// counts only its current batch. A stock order that is idle (its batch not started) counts nothing, because it
+        /// makes nothing until stock drops. <paramref name="except"/> (the parent job) and refit jobs are skipped.
+        /// </summary>
+        internal static long QueuedOutput(Entity colony, IConstructableDesign design, IndustryJob? except = null)
+        {
+            if (!colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
+                return 0;
+            long units = 0;
+            foreach (var line in industry.ProductionLines.Values)
+            {
+                foreach (var queued in line.Jobs)
+                {
+                    if (ReferenceEquals(queued, except) || queued.Refit != null || queued.ItemGuid != design.UniqueID)
+                        continue;
+                    if (queued.StockThreshold != null && !queued.StockBatchStarted)
+                        continue;
+                    units += Math.Max(0, queued.NumberOrdered - queued.NumberCompleted);
+                }
+            }
+            return units;
         }
 
         static string HeadName(Entity colony)

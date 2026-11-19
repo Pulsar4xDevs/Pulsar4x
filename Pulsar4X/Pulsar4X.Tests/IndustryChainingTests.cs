@@ -340,6 +340,7 @@ public class IndustryChainingTests
         var colony = Colony(world);
         SeatHead(world, colony, "Lee");
         Queue(world, colony, FactoryId, world.Part.UniqueID);
+        Jobs(colony, RefineryId).Clear(); // the plastic was made and used, so the next Gizmo is short again
         SeatHead(world, colony, "Moss");
         Queue(world, colony, FactoryId, world.Part.UniqueID);
 
@@ -358,10 +359,11 @@ public class IndustryChainingTests
         SeatHead(world, colony, "Lee");
 
         Queue(world, colony, FactoryId, world.Part.UniqueID);
+        Jobs(colony, RefineryId).Clear(); // the plastic was made and used, so the next Gizmo is short again
         Queue(world, colony, FactoryId, world.Part.UniqueID);
 
-        Assert.That(IndustryLog(colony), Has.Count.EqualTo(2));
-        Assert.That(Jobs(colony, RefineryId), Has.Count.EqualTo(2));
+        Assert.That(IndustryLog(colony), Has.Count.EqualTo(2), "an identical line is still written each time");
+        Assert.That(Jobs(colony, RefineryId), Has.Count.EqualTo(1));
     }
 
     [Test]
@@ -552,6 +554,111 @@ public class IndustryChainingTests
         var chained = Jobs(colony, RefineryId).Single();
         Assert.That(chained.ItemGuid, Is.EqualTo(missing.DesignId));
         Assert.That(chained.NumberOrdered, Is.EqualTo(missing.QueueQuantity));
+    }
+
+    // ----- queued feeders count toward the shortfall (no double Queue) -----
+
+    [Test]
+    public void AfterQueuingTheMissingInput_TheViewShowsItCovered_AndNothingMoreToQueue()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        var before = Missing(colony, FactoryId).Single();
+        Assert.That((before.Short, before.Queued, before.QueueQuantity), Is.EqualTo((40L, 0L, 40)));
+
+        var result = new CommandTranslator(Game).Translate(world.Faction, colony,
+            new QueueIndustryJobCommand(colony.Id, before.LineId, before.DesignId, before.QueueQuantity, false, false));
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+
+        var after = Missing(colony, FactoryId).Single();
+        Assert.That(after.Short, Is.EqualTo(40), "the stock is still short");
+        Assert.That(after.Queued, Is.EqualTo(40));
+        Assert.That(after.CanBuild, Is.True);
+        Assert.That(after.LineId, Is.EqualTo(RefineryId));
+        Assert.That(after.QueueQuantity, Is.EqualTo(0), "a second click would only duplicate the job");
+    }
+
+    [Test]
+    public void AHalfCoveredShortfall_ViewsAndChainsTheRest()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Queue(world, colony, RefineryId, "plastic", 10);
+        Queue(world, colony, FactoryId, world.Part.UniqueID); // no head: only itself
+        var missing = Missing(colony, FactoryId).Single();
+        Assert.That((missing.Short, missing.Queued, missing.QueueQuantity), Is.EqualTo((40L, 10L, 30)));
+
+        SeatHead(world, colony);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+
+        Assert.That(Jobs(colony, RefineryId).Select(j => j.NumberOrdered), Is.EqualTo(new[] { 10, 30 }.Select(n => (ushort)n)),
+            "the 10 already queued are kept, and 30 more are chained");
+        Assert.That(Jobs(colony, RefineryId)[1].NumberOrdered, Is.EqualTo(missing.QueueQuantity), "the view said 30");
+    }
+
+    [Test]
+    public void QueuingTheSameItemTwice_WithAHead_ChainsTheFeederOnce()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        SeatHead(world, colony);
+
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+
+        Assert.That(Jobs(colony, FactoryId), Has.Count.EqualTo(2));
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(40),
+            "the second Gizmo reuses the plastic already queued, as the first one's shortfall is the same stock");
+        Assert.That(IndustryLog(colony), Is.EqualTo(new[] { "Industry (Lee) queued 40 Plastic for Gizmo." }));
+    }
+
+    [Test]
+    public void ARecursiveChain_StaysOnceWhenQueuedTwice()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        SeatHead(world, colony);
+
+        Queue(world, colony, YardId, world.Hull.UniqueID);
+        Queue(world, colony, YardId, world.Hull.UniqueID);
+
+        Assert.That(Jobs(colony, FactoryId).Single().NumberOrdered, Is.EqualTo(1));
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(40));
+    }
+
+    [Test]
+    public void QueuedOutput_CountsTheCurrentBatchOfARepeatJob_AndNotTheParent()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Assert.That(new CommandTranslator(Game).Translate(world.Faction, colony,
+            new QueueIndustryJobCommand(colony.Id, FactoryId, world.Part.UniqueID, 5, true, false)).Accepted, Is.True);
+        var job = Jobs(colony, FactoryId).Single();
+        job.NumberCompleted = 2;
+
+        Assert.That(IndustryTools.QueuedOutput(colony, world.Part), Is.EqualTo(3), "ordered less completed, for this batch only");
+        Assert.That(IndustryTools.QueuedOutput(colony, world.Part, job), Is.EqualTo(0), "the parent job is not its own supply");
+        Assert.That(IndustryTools.QueuedOutput(colony, world.Hull), Is.EqualTo(0), "another item");
+    }
+
+    [Test]
+    public void QueuedOutput_IgnoresAnIdleStockOrder_ButCountsOneThatStartedItsBatch()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        SeatHead(world, colony);
+        Stock(world, colony, "plastic", 1000);
+        colony.GetDataBlob<CargoStorageDB>().AddCargoByUnit(new ComponentInstance(world.Part), 5);
+        Assert.That(new CommandTranslator(Game).Translate(world.Faction, colony,
+            new QueueIndustryJobCommand(colony.Id, FactoryId, world.Part.UniqueID, 2, true, false, 5)).Accepted, Is.True);
+        var job = Jobs(colony, FactoryId).Single();
+        Assert.That(job.Status, Is.EqualTo(IndustryJobStatus.Idle));
+
+        Assert.That(IndustryTools.QueuedOutput(colony, world.Part), Is.EqualTo(0), "idle: it makes nothing until stock drops");
+
+        job.StockBatchStarted = true;
+        Assert.That(IndustryTools.QueuedOutput(colony, world.Part), Is.EqualTo(2));
     }
 
     [Test]

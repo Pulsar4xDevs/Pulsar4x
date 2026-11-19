@@ -1573,6 +1573,14 @@ public sealed record MissingInputView(string ItemId, string Name, long Required,
     /// </summary>
     public bool CanBuild { get; init; }
 
+    /// <summary>
+    /// Quantity of this input that jobs already queued on this colony will still make, in the same measure as
+    /// <see cref="QueueQuantity"/> (a job's ordered less completed, current batch only; an idle stock order counts 0).
+    /// 0 for a raw resource. When this covers
+    /// <see cref="Short"/>, <see cref="QueueQuantity"/> is 0: queuing again would only duplicate the feeder.
+    /// </summary>
+    public long Queued { get; init; }
+
     /// <summary>The design to queue (<c>QueueIndustryJobCommand.DesignId</c>). Empty when <see cref="CanBuild"/> is false.</summary>
     public string DesignId { get; init; } = "";
 
@@ -1587,7 +1595,8 @@ public sealed record MissingInputView(string ItemId, string Name, long Required,
 
     /// <summary>
     /// The quantity to queue (<c>QueueIndustryJobCommand.Quantity</c>): <see cref="Short"/>, capped at 65535 (a job's
-    /// maximum). Equals what automatic chaining queues. 0 when not buildable here. A queue can still be rejected
+    /// maximum) less what <see cref="Queued"/> jobs already cover. Equals what automatic chaining queues. 0 when not
+    /// buildable here, and 0 when queued jobs already cover the shortfall (<see cref="CanBuild"/> stays true). A queue can still be rejected
     /// (for example a hull over the slip); show the rejection reason.
     /// </summary>
     public int QueueQuantity { get; init; }
