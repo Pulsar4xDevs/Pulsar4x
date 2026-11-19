@@ -1479,6 +1479,15 @@ public sealed record IndustryJobView(
     /// <summary>What the job still needs (names pre-resolved), for status tooltips.</summary>
     public IReadOnlyList<ResourceRequirement> RemainingRequirements { get; init; } = Array.Empty<ResourceRequirement>();
 
+    /// <summary>
+    /// Owning faction only. The inputs this job's current item needs more of than the colony's stockpile holds,
+    /// raw resources and buildable parts alike (empty when nothing is short, and for refit jobs). Each entry says
+    /// whether this colony can build it and how a one-click queue is built: submit
+    /// <c>QueueIndustryJobCommand(colonyId, entry.LineId, entry.DesignId, entry.QueueQuantity, false, false)</c>.
+    /// The quantity is what the industry head's automatic chaining would queue for the same shortfall.
+    /// </summary>
+    public IReadOnlyList<MissingInputView> MissingInputs { get; init; } = Array.Empty<MissingInputView>();
+
     /// <summary>Crew one unit of a ship design job needs, people. 0 for anything that is not a ship.</summary>
     public int CrewRequired { get; init; }
 
@@ -1522,6 +1531,55 @@ public sealed record RefitJobInfo(int ShipEntityId, string ShipName, string From
 }
 
 public sealed record ResourceRequirement(string Name, long Amount);
+
+/// <summary>The kinds of production line that can build a missing input, for <see cref="MissingInputView.LineKind"/>.</summary>
+public static class IndustryLineKinds
+{
+    /// <summary>A line that turns raw resources into processed materials (e.g. plastic).</summary>
+    public const string Refinery = "Refinery";
+    /// <summary>A line that builds components, installations and the like.</summary>
+    public const string Factory = "Factory";
+    /// <summary>A line that builds ship hulls.</summary>
+    public const string Shipyard = "Shipyard";
+}
+
+/// <summary>
+/// One input a job is short of at this colony (see <see cref="IndustryJobView.MissingInputs"/>). Quantities are for
+/// the job's current item, as <see cref="IndustryJobView.RemainingRequirements"/> is.
+/// </summary>
+/// <param name="ItemId">The resource or design id the job's cost table uses for this input.</param>
+/// <param name="Name">Display name.</param>
+/// <param name="Required">Units the current item still needs.</param>
+/// <param name="InStock">Units the colony's stockpile holds now.</param>
+/// <param name="Short">Units still missing: <c>Required - InStock</c>, always above 0.</param>
+public sealed record MissingInputView(string ItemId, string Name, long Required, long InStock, long Short)
+{
+    /// <summary>
+    /// True when a production line on this colony can build the input: it is a buildable design (not a raw mineral)
+    /// and a line here takes its type. When false, <see cref="DesignId"/>, <see cref="LineId"/> and the other queue
+    /// fields are empty or 0 and the client should show no Queue button.
+    /// </summary>
+    public bool CanBuild { get; init; }
+
+    /// <summary>The design to queue (<c>QueueIndustryJobCommand.DesignId</c>). Empty when <see cref="CanBuild"/> is false.</summary>
+    public string DesignId { get; init; } = "";
+
+    /// <summary>The colony's fastest line that takes the input (<c>QueueIndustryJobCommand.ProductionLineId</c>), the same line chaining uses. Empty when not buildable here.</summary>
+    public string LineId { get; init; } = "";
+
+    /// <summary>The line's display name. Empty when not buildable here.</summary>
+    public string LineName { get; init; } = "";
+
+    /// <summary>One of <see cref="IndustryLineKinds"/>. Empty when not buildable here.</summary>
+    public string LineKind { get; init; } = "";
+
+    /// <summary>
+    /// The quantity to queue (<c>QueueIndustryJobCommand.Quantity</c>): <see cref="Short"/>, capped at 65535 (a job's
+    /// maximum). Equals what automatic chaining queues. 0 when not buildable here. A queue can still be rejected
+    /// (for example a hull over the slip); show the rejection reason.
+    /// </summary>
+    public int QueueQuantity { get; init; }
+}
 
 /// <summary>Something a production line can build, with per-unit costs and current local availability
 /// so the client can preview a job without engine math.</summary>

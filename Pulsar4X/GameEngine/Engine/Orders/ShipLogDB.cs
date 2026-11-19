@@ -94,6 +94,13 @@ static class ShipLogBook
         => Append(colony, colony.StarSysDateTime, ShipLogKind.Action,
             $"Industry: queued {amount} {item} on {line}{(repeat ? " (repeating)" : "")}.", allowRepeat: true);
 
+    /// <summary>
+    /// A job on a colony line was cancelled, moved or edited: "Industry: cancelled Gizmo on Factory." Each is its own
+    /// line, even a repeat of the last.
+    /// </summary>
+    public static void NoteIndustryChange(Entity colony, string what)
+        => Append(colony, colony.StarSysDateTime, ShipLogKind.Action, "Industry: " + what + ".", allowRepeat: true);
+
     public static void NoteOrdered(Entity entity, Goal goal, DateTime at)
         => Append(entity, at, ShipLogKind.Own, "Ordered: " + Phrase(entity, goal) + ".");
 
