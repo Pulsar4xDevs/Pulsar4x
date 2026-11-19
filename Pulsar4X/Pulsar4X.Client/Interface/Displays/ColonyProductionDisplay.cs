@@ -30,6 +30,8 @@ namespace Pulsar4X.Client
         private readonly HashSet<int> _refitRemove = new();
         private readonly HashSet<int> _refitMount = new();
         private readonly Dictionary<string, DesignFilterWidget> _lineFilters = new();
+        private readonly MissingInputsPin _missingInputsPins = new();
+        private string? _missingInputsRefusal;
 
         internal ColonyProductionDisplay() { }
 
@@ -73,36 +75,52 @@ namespace Pulsar4X.Client
 
             IndustrySeatDisplay.DrawProduction(industry);
 
+            _missingInputsPins.Prune(entityId, industry);
+            var pinnedJobs = _missingInputsPins.PinnedJobs(entityId, industry);
+
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            ProductionLineDisplay(entityId, industry, uiState, cargo);
-            ImGui.SameLine();
+            float footerHeight = pinnedJobs.Count > 0
+                ? MissingInputsPanel.ReservedHeight(pinnedJobs, windowContentSize.Y)
+                : 0f;
+            float gap = footerHeight > 0f ? ImGui.GetStyle().ItemSpacing.Y : 0f;
+            float columnsHeight = Math.Max(ImGui.GetTextLineHeightWithSpacing() * 4f, windowContentSize.Y - footerHeight - gap);
+
+            ProductionLineDisplay(entityId, industry, uiState, cargo, columnsHeight);
 
             var selectedLine = industry.ProductionLines.FirstOrDefault(l => l.Id == _selectedProdLine);
-            if (selectedLine == null)
-                return;
-
-            if (ImGui.BeginChild("JobDescriptionPane", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), ImGuiChildFlags.Borders))
+            if (selectedLine != null)
             {
-                if (_rightPaneIsUpgrade)
+                ImGui.SameLine();
+                if (ImGui.BeginChild("JobDescriptionPane", new Vector2(windowContentSize.X * 0.5f - 8f, columnsHeight), ImGuiChildFlags.Borders))
                 {
-                    DisplayHelpers.Header("Upgrade " + selectedLine.Name);
-                    UpgradeSection(entityId, selectedLine, uiState);
+                    if (_rightPaneIsUpgrade)
+                    {
+                        DisplayHelpers.Header("Upgrade " + selectedLine.Name);
+                        UpgradeSection(entityId, selectedLine, uiState);
+                    }
+                    else if (_rightPaneIsRefit && selectedLine.IsShipyard)
+                    {
+                        DisplayHelpers.Header("New refit for: " + selectedLine.Name);
+                        RefitSection(entityId, selectedLine, uiState);
+                    }
+                    else
+                    {
+                        DisplayHelpers.Header("Create a new job for: " + selectedLine.Name);
+                        NewJobDisplay(entityId, selectedLine, uiState);
+                    }
                 }
-                else if (_rightPaneIsRefit && selectedLine.IsShipyard)
-                {
-                    DisplayHelpers.Header("New refit for: " + selectedLine.Name);
-                    RefitSection(entityId, selectedLine, uiState);
-                }
-                else
-                {
-                    DisplayHelpers.Header("Create a new job for: " + selectedLine.Name);
-                    NewJobDisplay(entityId, selectedLine, uiState);
-                }
+                ImGui.EndChild();
             }
-            ImGui.EndChild();
+
+            if (pinnedJobs.Count > 0)
+            {
+                MissingInputsPanel.Draw(
+                    entityId, industry, pinnedJobs, _missingInputsPins, uiState,
+                    ref _missingInputsRefusal, footerHeight);
+            }
         }
 
-        private void ProductionLineDisplay(int entityId, IndustryView industry, GlobalUIState uiState, CargoStorageView? cargo)
+        private void ProductionLineDisplay(int entityId, IndustryView industry, GlobalUIState uiState, CargoStorageView? cargo, float paneHeight)
         {
             if (industry.ProductionLines.Count == 0)
             {
@@ -111,7 +129,7 @@ namespace Pulsar4X.Client
             }
 
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if (ImGui.BeginChild("ColonyProductionLines", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), ImGuiChildFlags.Borders))
+            if (ImGui.BeginChild("ColonyProductionLines", new Vector2(windowContentSize.X * 0.5f, paneHeight), ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Production Lines");
 
@@ -260,11 +278,20 @@ namespace Pulsar4X.Client
                     var job = line.Jobs[jobIndex];
 
                     ImGui.TableNextColumn();
+                    bool pinned = _missingInputsPins.Contains(entityId, job.JobId);
+                    if (pinned)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
                     ImGui.Text(RefitJobDisplay.Name(job));
+                    if (pinned)
+                        ImGui.PopStyleColor();
+                    if (ImGui.IsItemClicked())
+                        _missingInputsPins.Toggle(entityId, job.JobId);
                     bool nameHovered = ImGui.IsItemHovered();
 
                     ImGui.TableNextColumn();
                     ImGui.Text(RefitJobDisplay.Batch(job));
+                    if (ImGui.IsItemClicked())
+                        _missingInputsPins.Toggle(entityId, job.JobId);
 
                     if (job.Repeat)
                     {
@@ -284,6 +311,8 @@ namespace Pulsar4X.Client
                     else
                         ImGui.Text(job.Status);
                     ImGui.PopStyleColor();
+                    if (ImGui.IsItemClicked())
+                        _missingInputsPins.Toggle(entityId, job.JobId);
                     bool statusHovered = ImGui.IsItemHovered();
                     if (job.IsRefit && RefitJobDisplay.Eta(job) is { } eta)
                     {
