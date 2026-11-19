@@ -205,8 +205,6 @@ namespace Pulsar4X.Industry
                         throw new Exception("resources can't cost 0");
 
                     float pointPerResource = (float)designInfo.IndustryPointCosts / (float)resourceSum;
-                    float startingPointsLeft = batchJob.ProductionPointsLeft;
-                    float startingPointsToUse = industryPointsToUse;
 
                     while (
                         batchJob.NumberCompleted < batchJob.NumberOrdered &&
@@ -243,6 +241,15 @@ namespace Pulsar4X.Industry
                             pointsToUse = (int)Math.Floor(industryPointsToUse);
                         }
 
+                        // No inputs to work with at all: points only come from inputs, so nothing can be done however many
+                        // points the line has. (This used to be guessed from "no progress and the cost is more than the
+                        // line's points for the day", which left a job that fits in a day's points showing Queued.)
+                        if (totalResourceStillReq > 0 && totalResourcesUsed == 0)
+                        {
+                            batchJob.Status = IndustryJobStatus.MissingResources;
+                            break;
+                        }
+
                         double energyPerPoint = batchJob.EnergyPerPoint * energyFactor;
                         if (energyPerPoint > 0 && pointsToUse > 0)
                         {
@@ -259,13 +266,7 @@ namespace Pulsar4X.Industry
                         batchJob.ProductionPointsLeft -= pointsToUse;
                         industryPointsRemaining[designInfo.IndustryTypeID] -= pointsToUse;
 
-                        if(startingPointsLeft == batchJob.ProductionPointsLeft
-                            && batchJob.ProductionPointsCost > startingPointsToUse)
-                        {
-                            // Didn't make any progress mark as missing resources
-                            batchJob.Status = IndustryJobStatus.MissingResources;
-                        }
-                        else if(pointsToUse >= 1 || totalResourcesUsed > 0)
+                        if(pointsToUse >= 1 || totalResourcesUsed > 0)
                         {
                             batchJob.Status = IndustryJobStatus.Processing;
                         }

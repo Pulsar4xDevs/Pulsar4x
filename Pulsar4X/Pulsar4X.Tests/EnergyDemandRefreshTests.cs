@@ -154,6 +154,55 @@ public class EnergyDemandRefreshTests
         Assert.That(RefineryLine().Draw_kW, Is.EqualTo(idle).Within(1e-9), "a stalled line draws only its hotel share");
     }
 
+    // A job with no inputs is MissingResources whatever its cost is against the line's points for the day.
+    [TestCase(1000, TestName = "NoInputs_CostBelowTheLinesPoints_IsMissingResources_ThenRunsOnceStocked")]
+    [TestCase(500, TestName = "NoInputs_CostEqualToTheLinesPoints_IsMissingResources_ThenRunsOnceStocked")]
+    [TestCase(250, TestName = "NoInputs_CostAboveTheLinesPoints_IsMissingResources_ThenRunsOnceStocked")]
+    public void NoInputs_IsMissingResources_RegardlessOfTheLinesPoints_ThenRunsOnceStocked(int linePoints)
+    {
+        var (lineId, line) = Refinery();
+        IndustryTools.AddJob(_earth, lineId, NewJob("hydrolox", 2));
+        var job = line.Jobs.Single();
+        Assert.That(job.ProductionPointsCost, Is.EqualTo(500), "the recipe's cost the cases are set against");
+        line.IndustryTypeRates["refining"] = linePoints;
+        foreach (var (id, _) in job.ResourcesCosts)
+            Remove(id);
+        double idle = RefineryLine().Nameplate_kW * ColonyPowerProcessor.IndustryIdleShare;
+
+        new IndustryProcessor().ProcessEntity(_earth, 0);
+        Assert.That(job.Status, Is.EqualTo(Pulsar4X.DataStructures.IndustryJobStatus.MissingResources));
+        Assert.That(job.ProductionPointsLeft, Is.EqualTo(job.ProductionPointsCost), "no progress without inputs");
+        Assert.That(job.NumberCompleted, Is.EqualTo(0));
+        Assert.That(RefineryLine().Draw_kW, Is.EqualTo(idle).Within(1e-9), "a stalled line draws only its hotel share");
+
+        // Still missing the next day: the status does not flip back to Queued.
+        new IndustryProcessor().ProcessEntity(_earth, 0);
+        Assert.That(job.Status, Is.EqualTo(Pulsar4X.DataStructures.IndustryJobStatus.MissingResources));
+
+        // The inputs arrive: the job takes them and works, with a normal status.
+        StockRecipe("hydrolox", 2);
+        new IndustryProcessor().ProcessEntity(_earth, 0);
+        Assert.That(job.Status, Is.Not.EqualTo(Pulsar4X.DataStructures.IndustryJobStatus.MissingResources));
+        Assert.That(job.Status, Is.Not.EqualTo(Pulsar4X.DataStructures.IndustryJobStatus.Queued));
+        // How far it gets in a day is bounded by the line's points and by the colony's energy for the line.
+        Assert.That(job.NumberCompleted > 0 || job.ProductionPointsLeft < job.ProductionPointsCost, Is.True, "the job made progress");
+        Assert.That(job.ProductionPointsLeft, Is.GreaterThanOrEqualTo(job.NumberCompleted > 0 ? 0 : 500 - linePoints), "no more than the line's points");
+    }
+
+    [Test]
+    public void AJobWithItsInputs_StillProgresses_AndItsLineKeepsDrawing()
+    {
+        var (lineId, line) = Refinery();
+        IndustryTools.AddJob(_earth, lineId, NewJob("hydrolox", 1));
+        var job = line.Jobs.Single();
+        line.IndustryTypeRates["refining"] = 250;
+        StockRecipe("hydrolox", 1);
+        new IndustryProcessor().ProcessEntity(_earth, 0);
+        Assert.That(job.Status, Is.EqualTo(Pulsar4X.DataStructures.IndustryJobStatus.Processing));
+        Assert.That(job.ProductionPointsLeft, Is.LessThan(500).And.GreaterThanOrEqualTo(250), "it worked, within the line's 250 points (the colony's energy for the line may cap it lower)");
+        Assert.That(RefineryLine().Draw_kW, Is.GreaterThan(RefineryLine().Nameplate_kW * ColonyPowerProcessor.IndustryIdleShare));
+    }
+
     // ---- installation jobs ----
 
     [Test]
