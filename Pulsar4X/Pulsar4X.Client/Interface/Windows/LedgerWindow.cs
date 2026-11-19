@@ -14,6 +14,8 @@ namespace Pulsar4X.Client;
 /// </summary>
 public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
 {
+    string? _flowPeriodId;
+
     LedgerWindow()
     {
     }
@@ -54,19 +56,164 @@ public class LedgerWindow : UniquePulsarGuiWindow<LedgerWindow>
             ImGui.Separator();
 
             var years = LedgerTree.Build(faction.Transactions);
-            if (years.Count == 0)
+            if (ImGui.BeginTabBar("LedgerTabs"))
             {
-                ImGui.TextUnformatted("No transactions.");
-                return;
+                if (ImGui.BeginTabItem("Statement"))
+                {
+                    DrawStatement(years);
+                    ImGui.EndTabItem();
+                }
+                if (ImGui.BeginTabItem("Flow"))
+                {
+                    DrawFlow(years);
+                    ImGui.EndTabItem();
+                }
+                ImGui.EndTabBar();
             }
-
-            if (ImGui.BeginChild("LedgerTree", new Vector2(0, ImGui.GetContentRegionAvail().Y), ImGuiChildFlags.None))
-            {
-                for (int y = 0; y < years.Count; y++)
-                    DrawYear(years[y]);
-            }
-            ImGui.EndChild();
         }
+    }
+
+    static void DrawStatement(IReadOnlyList<LedgerYearStatement> years)
+    {
+        if (years.Count == 0)
+        {
+            ImGui.TextUnformatted("No transactions.");
+            return;
+        }
+
+        if (ImGui.BeginChild("LedgerTree", new Vector2(0, ImGui.GetContentRegionAvail().Y), ImGuiChildFlags.None))
+        {
+            for (int y = 0; y < years.Count; y++)
+                DrawYear(years[y]);
+        }
+        ImGui.EndChild();
+    }
+
+    void DrawFlow(IReadOnlyList<LedgerYearStatement> years)
+    {
+        var periods = LedgerSankeyLayout.Periods(years);
+        var period = LedgerSankeyLayout.Resolve(periods, _flowPeriodId);
+        if (period != null)
+            _flowPeriodId = period.Id;
+
+        if (ImGui.BeginCombo("##flow-period", period?.Label ?? "No periods"))
+        {
+            foreach (var option in periods)
+            {
+                bool selected = period != null && option.Id == period.Id;
+                if (ImGui.Selectable(option.Label + "###" + option.Id, selected))
+                    _flowPeriodId = option.Id;
+                if (selected)
+                    ImGui.SetItemDefaultFocus();
+            }
+            ImGui.EndCombo();
+        }
+
+        if (ImGui.BeginChild("LedgerFlow", new Vector2(0, ImGui.GetContentRegionAvail().Y), ImGuiChildFlags.None))
+        {
+            if (period == null)
+                ImGui.TextUnformatted(LedgerSankeyLayout.EmptyMessage);
+            else
+                DrawSankey(period);
+        }
+        ImGui.EndChild();
+    }
+
+    static void DrawSankey(LedgerSankeyPeriod period)
+    {
+        var origin = ImGui.GetCursorScreenPos();
+        var avail = ImGui.GetContentRegionAvail();
+        if (avail.X < 1f)
+            avail.X = 1f;
+        if (avail.Y < 1f)
+            avail.Y = 1f;
+        ImGui.Dummy(avail);
+
+        var diagram = LedgerSankeyLayout.Build(
+            period.IncomeCategories,
+            period.ExpenseCategories,
+            period.IncomeTotal,
+            period.ExpenseTotal,
+            origin.X,
+            origin.Y,
+            avail.X,
+            avail.Y);
+
+        if (diagram.IsEmpty)
+        {
+            ImGui.SetCursorScreenPos(origin);
+            ImGui.TextUnformatted(diagram.EmptyMessage ?? LedgerSankeyLayout.EmptyMessage);
+            return;
+        }
+
+        var draw = ImGui.GetWindowDrawList();
+        foreach (var band in diagram.Bands)
+        {
+            uint colour = Colour(band.Kind, node: false);
+            foreach (var (a, b, c, dpt) in LedgerSankeyLayout.BandQuads(band))
+            {
+                var pts = new[] { a, b, c, dpt };
+                draw.AddConvexPolyFilled(ref pts[0], 4, colour);
+            }
+        }
+
+        foreach (var node in diagram.Nodes)
+        {
+            draw.AddRectFilled(
+                new Vector2(node.X, node.Y),
+                new Vector2(node.X + node.Width, node.Y + node.Height),
+                Colour(node.Kind, node: true),
+                3f);
+        }
+
+        float line = ImGui.GetTextLineHeight();
+        float pad = 6f;
+        foreach (var node in diagram.Nodes)
+        {
+            float textY = node.Y + Math.Max(2f, (node.Height - line * 2f) * 0.5f);
+            ImGui.SetCursorScreenPos(new Vector2(node.X + pad, textY));
+            ImGui.PushTextWrapPos(node.X + node.Width - pad);
+            ImGui.TextUnformatted(node.Label);
+            ImGui.SetCursorScreenPos(new Vector2(node.X + pad, textY + line));
+            ImGui.TextUnformatted(LedgerTree.Money(node.Amount));
+            ImGui.PopTextWrapPos();
+        }
+
+        if (ImGui.IsWindowHovered())
+        {
+            var mouse = ImGui.GetMousePos();
+            var hit = diagram.HitTest(mouse.X, mouse.Y);
+            if (hit != null)
+            {
+                ImGui.BeginTooltip();
+                foreach (var tip in LedgerSankeyLayout.TooltipLines(hit, LedgerTree.Money))
+                    ImGui.TextUnformatted(tip);
+                ImGui.EndTooltip();
+            }
+        }
+    }
+
+    static uint Colour(LedgerSankeyBandKind kind, bool node)
+        => Colour(kind switch
+        {
+            LedgerSankeyBandKind.Income => LedgerSankeyNodeKind.Income,
+            LedgerSankeyBandKind.Expense => LedgerSankeyNodeKind.Expense,
+            LedgerSankeyBandKind.NetSaved => LedgerSankeyNodeKind.NetSaved,
+            _ => LedgerSankeyNodeKind.Shortfall,
+        }, node);
+
+    static uint Colour(LedgerSankeyNodeKind kind, bool node)
+    {
+        float a = node ? 0.92f : 0.62f;
+        Vector4 colour = kind switch
+        {
+            LedgerSankeyNodeKind.Income => new Vector4(0.22f, 0.62f, 0.35f, a),
+            LedgerSankeyNodeKind.Expense => new Vector4(0.78f, 0.28f, 0.26f, a),
+            LedgerSankeyNodeKind.NetSaved => new Vector4(0.18f, 0.55f, 0.52f, a),
+            LedgerSankeyNodeKind.Shortfall => new Vector4(0.78f, 0.52f, 0.20f, a),
+            _ => new Vector4(0.32f, 0.40f, 0.52f, node ? 0.95f : a),
+        };
+        return ImGui.ColorConvertFloat4ToU32(colour);
     }
 
     static void DrawYear(LedgerYearStatement year)
