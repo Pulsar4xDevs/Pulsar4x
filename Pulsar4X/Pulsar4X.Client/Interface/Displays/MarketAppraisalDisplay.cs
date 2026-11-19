@@ -10,7 +10,7 @@ namespace Pulsar4X.Client
 {
     /// <summary>
     /// Appraisal popup: a cargo good or component design's recipe cost at current market prices,
-    /// compared with a listing ask when one is given. Opened from the market or the Production tab.
+    /// compared with a listing ask when one is given. Opened from the market tab.
     /// Formatters and resolvers are pure for tests.
     /// </summary>
     public static class MarketAppraisalDisplay
@@ -118,12 +118,6 @@ namespace Pulsar4X.Client
             => string.IsNullOrEmpty(appraisal.Reason) && appraisal.UnitCost != null;
 
         /// <summary>
-        /// A component constructible (not a ship design or a processed material).
-        /// </summary>
-        public static bool IsComponentDesign(ConstructibleItemView item)
-            => !item.IsShipDesign && !item.IsMaterial;
-
-        /// <summary>
         /// Resolves a cargo or component UniqueID to the id and display name the panel should use.
         /// Looks up <paramref name="designs"/> first, then constructible rows that share that UniqueID.
         /// </summary>
@@ -169,37 +163,6 @@ namespace Pulsar4X.Client
         }
 
         /// <summary>
-        /// Resolves a production-line job to a component UniqueID and name when exactly one
-        /// component constructible on the line shares the job's name. Jobs have no design id on the view.
-        /// </summary>
-        public static bool TryResolveJob(
-            IndustryJobView job,
-            IEnumerable<ConstructibleItemView> constructibles,
-            out string id,
-            out string name)
-        {
-            id = "";
-            name = "";
-            if (job == null || string.IsNullOrEmpty(job.Name) || constructibles == null)
-                return false;
-
-            ConstructibleItemView? match = null;
-            foreach (var item in constructibles)
-            {
-                if (!IsComponentDesign(item) || item.Name != job.Name)
-                    continue;
-                if (match != null)
-                    return false;
-                match = item;
-            }
-            if (match == null || string.IsNullOrEmpty(match.DesignId))
-                return false;
-            id = match.DesignId;
-            name = string.IsNullOrEmpty(match.Name) ? match.DesignId : match.Name;
-            return true;
-        }
-
-        /// <summary>
         /// Opens the single appraisal panel for a cargo good or component design.
         /// A later open replaces the previous one. One unit is fetched; Per 100 / Per 1,000 are scaled on the client.
         /// </summary>
@@ -218,14 +181,6 @@ namespace Pulsar4X.Client
             if (cargoId.Length == 0)
                 return;
             if (ImGui.Button("Appraise"))
-                Open(colonyId, cargoId, name, client, ask);
-        }
-
-        public static void DrawSmallButton(int colonyId, string cargoId, string name, decimal? ask, IGameClient? client)
-        {
-            if (cargoId.Length == 0)
-                return;
-            if (ImGui.SmallButton("Appraise"))
                 Open(colonyId, cargoId, name, client, ask);
         }
 

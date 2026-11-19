@@ -67,6 +67,17 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void Market_OffersAppraise_ForASelectedGoodOrComponent_ExceptInCompareMode()
+        {
+            Assert.That(MarketTabDisplay.OffersAppraise(compare: false, "plastic"), Is.True);
+            Assert.That(MarketTabDisplay.OffersAppraise(compare: false, "uid-factory"), Is.True,
+                "A listed component uses the same selected id as a good.");
+            Assert.That(MarketTabDisplay.OffersAppraise(compare: true, "plastic"), Is.False);
+            Assert.That(MarketTabDisplay.OffersAppraise(compare: false, ""), Is.False);
+            Assert.That(MarketTabDisplay.OffersAppraise(compare: false, null!), Is.False);
+        }
+
+        [Test]
         public void ProductionHaveNeed_AndStockOnHand()
         {
             Assert.That(ColonyProductionDisplay.HaveNeedText(5, 12), Is.EqualTo("Have 5, need 12"));

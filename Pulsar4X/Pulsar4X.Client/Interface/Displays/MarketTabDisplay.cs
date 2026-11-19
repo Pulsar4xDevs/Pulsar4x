@@ -88,6 +88,13 @@ namespace Pulsar4X.Client
             return (float)(1.0 - t);
         }
 
+        /// <summary>
+        /// The market detail pane offers Appraise for the selected good or component,
+        /// except while compare mode is on.
+        /// </summary>
+        public static bool OffersAppraise(bool compare, string selectedId)
+            => !compare && !string.IsNullOrEmpty(selectedId);
+
         static uint FlashRowBg(float amount)
         {
             float a = 0.45f * amount;
@@ -459,7 +466,7 @@ namespace Pulsar4X.Client
             var range = CurrentRange(ui, now, earliest);
             string title = Title(ui, listed, selectedGood, selectedChoice);
             DrawTitle(ui, history, selectedId, title, range);
-            if (!ui.Compare && selectedId.Length > 0)
+            if (OffersAppraise(ui.Compare, selectedId))
             {
                 string goodName = selectedGood?.Name ?? selectedChoice?.Name ?? selectedId;
                 decimal? ask = selectedGood?.Ask;
