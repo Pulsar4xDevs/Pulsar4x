@@ -32,6 +32,9 @@ namespace Pulsar4X.Client
         private readonly Dictionary<string, DesignFilterWidget> _lineFilters = new();
         private readonly MissingInputsPin _missingInputsPins = new();
         private string? _missingInputsRefusal;
+        private string _newJobStockBelowText = "";
+        private readonly Dictionary<string, string> _stockBelowEdits = new();
+        private string? _stockOrderRefusal;
 
         internal ColonyProductionDisplay() { }
 
@@ -106,7 +109,7 @@ namespace Pulsar4X.Client
                     else
                     {
                         DisplayHelpers.Header("Create a new job for: " + selectedLine.Name);
-                        NewJobDisplay(entityId, selectedLine, uiState);
+                        NewJobDisplay(entityId, selectedLine, industry, uiState);
                     }
                 }
                 ImGui.EndChild();
@@ -155,6 +158,7 @@ namespace Pulsar4X.Client
                             _rightPaneIsUpgrade = false;
                             _newJobDesignId = null;
                             _newJobBatchCount = 1;
+                            _newJobStockBelowText = "";
                         }
 
                         if (line.IsShipyard)
@@ -196,7 +200,7 @@ namespace Pulsar4X.Client
                             if (ImGui.IsItemHovered())
                                 ImGui.SetTooltip("Assuming all resources needed are available.");
 
-                            JobsTable(entityId, line, uiState, cargo);
+                            JobsTable(entityId, line, industry, uiState, cargo);
                         }
 
                         if (line.IsShipyard)
@@ -263,7 +267,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void JobsTable(int entityId, ProductionLineView line, GlobalUIState uiState, CargoStorageView? cargo)
+        private void JobsTable(int entityId, ProductionLineView line, IndustryView industry, GlobalUIState uiState, CargoStorageView? cargo)
         {
             if (ImGui.BeginTable(line.Name, 4, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
@@ -300,20 +304,32 @@ namespace Pulsar4X.Client
                     }
 
                     ImGui.TableNextColumn();
-                    var color = job.MissingResources || (job.Refit is { WaitReason.Length: > 0 })
-                        ? Styles.BadColor : Styles.GoodColor;
+                    bool stalled = StockOrderUi.IsStalled(job);
+                    if (stalled)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                    else if (!job.IsIdle)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.GoodColor);
 
-                    ImGui.PushStyleColor(ImGuiCol.Text, color);
-                    if (job.Refit is { WaitReason.Length: > 0 } stalled)
-                        ImGui.TextUnformatted(RefitJobDisplay.WaitReasonText(stalled.WaitReason));
+                    if (job.IsIdle)
+                        ImGui.TextUnformatted(StockOrderUi.StatusText(job));
+                    else if (job.Refit is { WaitReason.Length: > 0 } stalledRefit)
+                        ImGui.TextUnformatted(RefitJobDisplay.WaitReasonText(stalledRefit.WaitReason));
                     else if (job.Status == "Processing")
                         ImGui.Text("Processing (" + job.PercentComplete.ToString("0.#") + "%%)");
                     else
                         ImGui.Text(job.Status);
-                    ImGui.PopStyleColor();
+                    if (stalled || !job.IsIdle)
+                        ImGui.PopStyleColor();
                     if (ImGui.IsItemClicked())
                         _missingInputsPins.Toggle(entityId, job.JobId);
                     bool statusHovered = ImGui.IsItemHovered();
+                    if (job.IsIdle && StockOrderUi.StockSummary(job) is { Length: > 0 } stock)
+                    {
+                        ImGui.SameLine();
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                        ImGui.TextUnformatted(stock);
+                        ImGui.PopStyleColor();
+                    }
                     if (job.IsRefit && RefitJobDisplay.Eta(job) is { } eta)
                     {
                         ImGui.SameLine();
@@ -330,7 +346,13 @@ namespace Pulsar4X.Client
                         CrewBars.Badge("crew", CrewBars.ShortColour, job.CrewWarning);
                     }
 
-                    if (job.IsRefit && (nameHovered || statusHovered))
+                    if (job.IsIdle && (nameHovered || statusHovered))
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.TextUnformatted(StockOrderUi.IdleTooltip(job));
+                        ImGui.EndTooltip();
+                    }
+                    else if (job.IsRefit && (nameHovered || statusHovered))
                     {
                         ImGui.BeginTooltip();
                         ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
@@ -376,9 +398,12 @@ namespace Pulsar4X.Client
                     }
                     ImGui.TableNextColumn();
                     ActionButtons(entityId, line, job.JobId, jobIndex, uiState);
+                    if (StockOrderUi.ShowEditField(industry.IndustryHeadId, job, line.IsShipyard))
+                        StockOrderDisplay.DrawJobEdit(entityId, line, job, _stockBelowEdits, uiState, ref _stockOrderRefusal);
                     ImGui.TableNextRow();
                 }
                 ImGui.EndTable();
+                StockOrderDisplay.DrawRefusal(ref _stockOrderRefusal);
             }
         }
 
@@ -429,7 +454,7 @@ namespace Pulsar4X.Client
             ImGui.PopID();
         }
 
-        private void NewJobDisplay(int entityId, ProductionLineView line, GlobalUIState uiState)
+        private void NewJobDisplay(int entityId, ProductionLineView line, IndustryView industry, GlobalUIState uiState)
         {
             if (line.Constructibles.Count == 0)
             {
@@ -521,6 +546,8 @@ namespace Pulsar4X.Client
             ImGui.Text("Repeat this job?");
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("A repeat job will run until cancelled.");
+            if (StockOrderUi.ShowNewJobField(industry.IndustryHeadId, _newJobRepeat, selectedDesign))
+                StockOrderDisplay.DrawNewJobField(ref _newJobStockBelowText);
 
             bool queueDisabled = QueueConstructionOnCompletion.IsDisabled(selectedDesign);
             bool queueConstruction = QueueConstructionOnCompletion.DisplayedValue(_newJobAutoInstall, selectedDesign);
@@ -543,10 +570,22 @@ namespace Pulsar4X.Client
                 ImGui.BeginDisabled();
             if (ImGui.Button("Queue the job to " + line.Name))
             {
-                uiState.GameClient?.SubmitCommandAsync(new QueueIndustryJobCommand(
-                    entityId, line.Id, selectedDesign.DesignId, _newJobBatchCount,
-                    _newJobRepeat, QueueConstructionOnCompletion.CommandAutoInstall(_newJobAutoInstall, selectedDesign)));
+                if (!StockOrderUi.TryQueueStockBelow(
+                        industry.IndustryHeadId, _newJobRepeat, selectedDesign.IsShipDesign,
+                        _newJobStockBelowText, out var stockBelow, out var stockError))
+                {
+                    _stockOrderRefusal = stockError;
+                }
+                else
+                {
+                    StockOrderDisplay.Submit(uiState, StockOrderUi.QueueCommand(
+                        entityId, line.Id, selectedDesign.DesignId, _newJobBatchCount,
+                        _newJobRepeat,
+                        QueueConstructionOnCompletion.CommandAutoInstall(_newJobAutoInstall, selectedDesign),
+                        stockBelow), ref _stockOrderRefusal);
+                }
             }
+            StockOrderDisplay.DrawRefusal(ref _stockOrderRefusal);
             if (selectedDesign.OverSlip && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && selectedDesign.SlipReason.Length > 0)
                 ImGui.SetTooltip(selectedDesign.SlipReason);
             if (selectedDesign.OverSlip)
