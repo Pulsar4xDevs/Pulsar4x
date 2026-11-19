@@ -27,6 +27,7 @@ namespace Pulsar4X.Client
         private readonly Dictionary<int, int> _academyOfficer = new();
         // The colony whose administrator chair the assign modal is editing.
         private int? _administratorChooserColonyId = null;
+        private string? _industrySeatRefusal;
 
         internal static ColonyManagementWindow GetInstance()
         {
@@ -123,6 +124,7 @@ namespace Pulsar4X.Client
                     MarketAppraisalDisplay.DrawWindow();
 
                     DisplayAdministratorChooser(galaxy);
+                    IndustrySeatDisplay.DrawChooser(galaxy, _uiState, ref _industrySeatRefusal);
             
                 }
             }
@@ -903,6 +905,13 @@ namespace Pulsar4X.Client
                 var colonyView = colony.GetView<ColonyView>();
                 if (colonyView != null)
                 {
+                    if (ImGui.CollapsingHeader("Industry", ImGuiTreeNodeFlags.DefaultOpen)
+                        && _uiState.GameClient?.Galaxy is { } galaxy)
+                    {
+                        IndustrySeatDisplay.DrawStaffing(
+                            colony.Id, colonyView, galaxy, _uiState, ref _industrySeatRefusal);
+                    }
+
                     if (ImGui.CollapsingHeader("Crew pool", ImGuiTreeNodeFlags.DefaultOpen))
                         DisplayCrewPool(colonyView);
                 }

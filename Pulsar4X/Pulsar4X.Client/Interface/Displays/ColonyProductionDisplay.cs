@@ -71,6 +71,8 @@ namespace Pulsar4X.Client
                 return;
             }
 
+            IndustrySeatDisplay.DrawProduction(industry);
+
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
             ProductionLineDisplay(entityId, industry, uiState, cargo);
             ImGui.SameLine();
