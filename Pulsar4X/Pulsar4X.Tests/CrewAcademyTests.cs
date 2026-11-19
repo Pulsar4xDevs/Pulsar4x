@@ -135,6 +135,7 @@ public class CrewAcademyTests
         Assert.That(NavalAcademyCourse.CrewSeatsUsed(Academy), Is.EqualTo(0));
     }
 
+    [Category("Slow")]
     [Test]
     public void Graduation_RunsFromTheAcademyProcessor()
     {

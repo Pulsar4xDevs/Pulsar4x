@@ -181,6 +181,7 @@ public class CrewPayTests
         Assert.That(Wages(Info), Has.Count.EqualTo(lines), "no Wages line before the 1st");
     }
 
+    [Category("Slow")]
     [Test]
     public void TheClock_BillsTheMonth_WhenItRunsPastThe1st()
     {
