@@ -610,14 +610,30 @@ public sealed record SetShipDesignObsoleteCommand(int TargetEntityId, string Des
 
 /// <summary>Queue a batch job on one of the entity's production lines. When <see cref="AutoInstall"/>
 /// is set, the design is a colony installation, and the colony has installation points, completion
-/// queues a construction mount of that instance. It does not mount the part.</summary>
+/// queues a construction mount of that instance. It does not mount the part.
+/// <para><paramref name="StockBelow"/> makes it a stock order: a repeat job that idles while the colony's stock of the item is
+/// at or above that level and runs one batch of <paramref name="Quantity"/> when stock drops below it. It needs
+/// <paramref name="Repeat"/>, an item the colony stores (not a ship), and an industry head seated on the colony; the
+/// level is cleared if the head leaves. Null (the default) is a plain job.</para></summary>
 public sealed record QueueIndustryJobCommand(
     int TargetEntityId,
     string ProductionLineId,
     string DesignId,
     int Quantity,
     bool Repeat,
-    bool AutoInstall) : GameCommand(TargetEntityId);
+    bool AutoInstall,
+    long? StockBelow = null) : GameCommand(TargetEntityId);
+
+/// <summary>Change a queued job's quantity, repeat flag and stock level in one step. It states the whole job: a null
+/// <paramref name="StockBelow"/> turns a stock order back into a plain repeat job. A batch already under way finishes.
+/// The same stock-order rules as <see cref="QueueIndustryJobCommand"/> apply.</summary>
+public sealed record EditIndustryJobCommand(
+    int TargetEntityId,
+    string ProductionLineId,
+    string JobId,
+    int Quantity,
+    bool Repeat,
+    long? StockBelow = null) : GameCommand(TargetEntityId);
 
 /// <summary>Move a queued industry job up (negative delta) or down within its production line.</summary>
 public sealed record ChangeIndustryJobPriorityCommand(

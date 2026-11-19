@@ -258,7 +258,8 @@ namespace Pulsar4X.Energy
         static Pulsar4X.Industry.IndustryJob? HeadJob(Pulsar4X.Industry.IndustryAbilityDB.ProductionLine line, string type)
             => line.Jobs.FirstOrDefault(j => j.TypeID == type
                 && j.NumberCompleted < j.NumberOrdered
-                && j.Status != Pulsar4X.DataStructures.IndustryJobStatus.MissingResources);
+                && j.Status != Pulsar4X.DataStructures.IndustryJobStatus.MissingResources
+                && j.Status != Pulsar4X.DataStructures.IndustryJobStatus.Idle);
 
         public static void Recalc(Entity colonyEntity)
         {

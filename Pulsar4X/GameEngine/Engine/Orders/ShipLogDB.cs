@@ -90,9 +90,13 @@ static class ShipLogBook
             $"Industry ({headName}) queued {amount} {item} for {forItem}.", allowRepeat: true);
 
     /// <summary>A job was queued on a colony line, by the player or a plan: "Industry: queued 5 Gizmo on Factory."</summary>
-    public static void NoteIndustryJob(Entity colony, long amount, string item, string line, bool repeat)
+    public static void NoteIndustryJob(Entity colony, long amount, string item, string line, bool repeat, long? stockBelow = null)
         => Append(colony, colony.StarSysDateTime, ShipLogKind.Action,
-            $"Industry: queued {amount} {item} on {line}{(repeat ? " (repeating)" : "")}.", allowRepeat: true);
+            $"Industry: queued {amount} {item} on {line}{IndustryRepeatNote(repeat, stockBelow)}.", allowRepeat: true);
+
+    /// <summary>" (repeating)" or " (repeating, when stock is below 50)" for a stock order; empty for a one-shot job.</summary>
+    internal static string IndustryRepeatNote(bool repeat, long? stockBelow)
+        => stockBelow is long level ? $" (repeating, when stock is below {level})" : repeat ? " (repeating)" : "";
 
     /// <summary>
     /// A job on a colony line was cancelled, moved or edited: "Industry: cancelled Gizmo on Factory." Each is its own

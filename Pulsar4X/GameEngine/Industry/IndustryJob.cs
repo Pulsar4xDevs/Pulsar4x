@@ -72,6 +72,18 @@ namespace Pulsar4X.Industry
             NumberOrdered = 1;
         }
 
+        /// <summary>
+        /// Stock order (civilian industry plan, slice 7): on a repeat job, the colony's stock level below which a
+        /// batch runs. While the colony stock of the item is at or above it, the job is <see cref="IndustryJobStatus.Idle"/>.
+        /// Null means a plain repeat job. Only an industry head being seated allows it; it is cleared when the head leaves.
+        /// </summary>
+        [JsonProperty]
+        public long? StockThreshold { get; internal set; }
+
+        /// <summary>True from the moment a stock order starts a batch until that batch completes.</summary>
+        [JsonProperty]
+        internal bool StockBatchStarted { get; set; }
+
         public Entity? InstallOn { get; set; } = null;
 
         /// <summary>Set on a shipyard refit job: the ship and the parts it moves. Null on every other job.</summary>

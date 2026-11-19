@@ -176,6 +176,8 @@ namespace Pulsar4X.DataStructures
         MissingResources,
         Processing,
         Completed,
+        /// <summary>A stock order whose item is at or above its "when stock drops below" level: nothing is built until it drops.</summary>
+        Idle,
     }
 
     public enum ComparisonType

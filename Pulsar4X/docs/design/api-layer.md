@@ -172,8 +172,9 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    eligibility, and `IndustryCostItem` cost previews against the local stockpile — so the client
    never constructs an engine `IndustryJob` for preview math the way the old display did). Commands:
    `QueueIndustryJobCommand` (the translator builds and initialises the engine job, applying
-   auto-install only for colony installations), `ChangeIndustryJobPriorityCommand`,
-   `CancelIndustryJobCommand`. The **Construction tab** reads a `ConstructionView` (points/day, the
+   auto-install only for colony installations; its optional `StockBelow` makes a seated-head stock order that idles
+   while colony stock is at or above the level), `EditIndustryJobCommand` (quantity, repeat and stock level),
+   `ChangeIndustryJobPriorityCommand`, `CancelIndustryJobCommand`. The **Construction tab** reads a `ConstructionView` (points/day, the
    FIFO queue with progress, and the faction's queueable installation designs) with
    `AddToConstructionQueueCommand` and, since local-construction jobs carry no id,
    `MoveConstructionJobCommand`/`RemoveConstructionJobCommand` addressing jobs by queue position.
@@ -493,7 +494,7 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `NewtonThrustCommand`, `WarpMoveCommand`,
   `GoToBodyCommand`, `WarpToBodyCommand`, `CirculariseCommand`, `ChangeAltitudeCommand`, `MatchOrbitCommand`,
   `UninstallComponentCommand`, `InstallComponentCommand`, `QueueIndustryJobCommand`,
-  `ChangeIndustryJobPriorityCommand`, `CancelIndustryJobCommand`, `AddToConstructionQueueCommand`,
+  `EditIndustryJobCommand`, `ChangeIndustryJobPriorityCommand`, `CancelIndustryJobCommand`, `AddToConstructionQueueCommand`,
   `MoveConstructionJobCommand`, `RemoveConstructionJobCommand`), `CommandResult`.
 - Events: `GameEventType`, `GameEventEnvelope`, `LogEvent` (the faction's game log, on
   `IClientGalaxy.EventLog`).

@@ -327,4 +327,35 @@ public class MultiFactionEarthPhase9Tests
         Pulsar4X.People.CommanderFactory.DestroyCommander(head);
         Assert.That(GameEngine.People.IndustrySeat.HasHead(colony), Is.False);
     }
+
+    [Test]
+    public void Fold_ClearsTheStockLevels_SoTheSponsorsJobsRepeatAsPlainJobs()
+    {
+        var colony = ForceSpawn();
+        var company = colony.GetFactionOwner;
+        int companyId = company.Id;
+        var info = company.GetDataBlob<FactionInfoDB>();
+        // The NPC colony has no industry of its own: give it one refining line and a repeat job on it.
+        if (!colony.HasDataBlob<Pulsar4X.Industry.IndustryAbilityDB>())
+            colony.SetDataBlob(new Pulsar4X.Industry.IndustryAbilityDB(new Dictionary<string, Pulsar4X.Industry.IndustryAbilityDB.ProductionLine>
+            {
+                ["refinery-line"] = new() { Name = "Refinery", IndustryTypeRates = new() { ["refining"] = 100 } },
+            }));
+        const string lineId = "refinery-line";
+        var plastic = (Pulsar4X.Interfaces.IConstructableDesign)info.Data.CargoGoods.GetAny("plastic")!;
+        var job = new Pulsar4X.Industry.IndustryJob(plastic);
+        job.InitialiseJob(1, true);
+        Pulsar4X.Industry.IndustryTools.AddJob(colony, lineId, job);
+        job.StockThreshold = 1_000_000;
+        Drain(info, colony);
+        _game.NpcCompanies.Spawned.Single(s => s.FactionId == companyId).BrokeSince = Now.AddDays(-FactionSpawner.FoldDays);
+
+        FactionSpawner.TickSystem(_game, _sol, Now);
+
+        Assert.That(_game.Factions.ContainsKey(companyId), Is.False);
+        Assert.That(job.StockThreshold, Is.Null);
+        Assert.That(job.Auto, Is.True, "it carries on as a plain repeat job");
+        Assert.That(colony.GetDataBlob<GameEngine.Engine.Orders.ShipLogDB>().Entries.Select(e => e.Text),
+            Has.Some.Contains("lost its stock level because the colony changed hands; it now repeats as a plain job"));
+    }
 }

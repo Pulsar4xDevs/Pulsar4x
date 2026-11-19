@@ -425,6 +425,8 @@ namespace Pulsar4X.Factions
             }
 
             IndustrySeat.ClearIfDangling(colony);
+            // The folded company's head now works for the sponsor, who did not choose the stock levels: they go.
+            Pulsar4X.Industry.IndustryTools.ClearStockOrders(colony, "the colony changed hands");
         }
 
         static void Rehome(Entity entity, Entity from, Entity to)

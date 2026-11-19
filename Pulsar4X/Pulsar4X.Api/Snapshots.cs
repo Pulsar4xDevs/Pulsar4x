@@ -1488,6 +1488,18 @@ public sealed record IndustryJobView(
     /// </summary>
     public IReadOnlyList<MissingInputView> MissingInputs { get; init; } = Array.Empty<MissingInputView>();
 
+    /// <summary>Stock order: the colony stock level below which a batch runs. Null on a plain job.</summary>
+    public long? StockBelow { get; init; }
+
+    /// <summary>Stock order: the colony's current stock of this job's item. Null on a plain job.</summary>
+    public long? StockOnHand { get; init; }
+
+    /// <summary>True while a stock order waits for its stock to drop (<see cref="Status"/> is "Idle").</summary>
+    public bool IsIdle { get; init; }
+
+    /// <summary>While idle, why: "Stock 120 is at or above 100". Empty otherwise.</summary>
+    public string IdleReason { get; init; } = "";
+
     /// <summary>Crew one unit of a ship design job needs, people. 0 for anything that is not a ship.</summary>
     public int CrewRequired { get; init; }
 

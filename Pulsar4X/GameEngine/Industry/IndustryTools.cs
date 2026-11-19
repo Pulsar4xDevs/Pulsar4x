@@ -89,7 +89,7 @@ namespace Pulsar4X.Industry
             }
         }
 
-        public static void EditExsistingJob(Entity industryEntity, string prodLine, string jobID, bool RepeatJob = false, ushort NumberOrderd = 1, bool autoInstall = false)
+        public static void EditExsistingJob(Entity industryEntity, string prodLine, string jobID, bool RepeatJob = false, ushort NumberOrderd = 1, bool autoInstall = false, long? stockThreshold = null)
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             var jobList = industryDB.ProductionLines[prodLine].Jobs;
@@ -99,6 +99,27 @@ namespace Pulsar4X.Industry
             {
                 job.Auto = RepeatJob;
                 job.NumberOrdered = NumberOrderd;
+
+                // The edit states the whole job: no level means a plain repeat job. A batch already under way finishes first.
+                if (stockThreshold != job.StockThreshold)
+                {
+                    if (stockThreshold == null)
+                    {
+                        job.StockThreshold = null;
+                        job.StockBatchStarted = false;
+                        if (job.Status == IndustryJobStatus.Idle)
+                            job.Status = IndustryJobStatus.Queued;
+                    }
+                    else
+                    {
+                        job.StockThreshold = stockThreshold;
+                        job.StockBatchStarted = job.NumberCompleted > 0
+                            || job.ProductionPointsLeft < job.ProductionPointsCost
+                            || job.Status == IndustryJobStatus.Processing;
+                    }
+                }
+                if (job.StockThreshold != null && StockDesign(industryEntity, job) is { } design)
+                    StockOrderIdles(industryEntity, job, design);
                 Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(industryEntity);
 
                 /*if (job is ConstructJob)
@@ -197,6 +218,10 @@ namespace Pulsar4X.Industry
                         batchJob.Status = IndustryJobStatus.Queued;
                     }
 
+                    // A stock order idles while the colony's stock of its item is at or above its level; below it, one batch runs.
+                    if (batchJob.StockThreshold != null && StockOrderIdles(industryEntity, batchJob, designInfo))
+                        continue;
+
                     if(industryPointsToUse < 1) continue;
 
                     //total number of resources requred for a single job in this batch
@@ -276,6 +301,15 @@ namespace Pulsar4X.Industry
                         {
                             batchJob.Status = IndustryJobStatus.Completed;
                             designInfo.OnConstructionComplete(industryEntity, stockpile, prodLineID, batchJob, designInfo);
+
+                            // A stock order's batch is done (the repeat reset its count): it waits for the stock to drop again,
+                            // or starts the next batch (and re-chains its feeders) when stock is already below the level.
+                            if (batchJob.StockThreshold != null && batchJob.NumberCompleted == 0)
+                            {
+                                batchJob.StockBatchStarted = false;
+                                StockOrderIdles(industryEntity, batchJob, designInfo);
+                                break;
+                            }
                         }
                     }
                 }
@@ -380,6 +414,96 @@ namespace Pulsar4X.Industry
                 {
                     long used = fromCargo.RemoveUnitsByDesign(cargoItem, amountUsedThisTick);
                     toUse[kvp.Key] -= used;
+                }
+            }
+        }
+
+        // ---- stock orders (civilian industry plan, slice 7) ----
+
+        /// <summary>The design a job builds, from its faction's design list, or null when the faction no longer lists it.</summary>
+        internal static IConstructableDesign? StockDesign(Entity colony, IndustryJob job)
+        {
+            var game = colony.Manager?.Game;
+            if (game == null || !game.Factions.TryGetValue(colony.FactionOwnerID, out var faction)
+                || !faction.TryGetDataBlob<FactionInfoDB>(out var info))
+                return null;
+            return info.IndustryDesigns.TryGetValue(job.ItemGuid, out var design) ? design : null;
+        }
+
+        /// <summary>Units of the design's item in the colony's stores (what a stock order compares with its level), or null if it is not a stored item.</summary>
+        internal static long? StockOf(Entity colony, IConstructableDesign design)
+        {
+            if (design is not ICargoable item || !colony.TryGetDataBlob<CargoStorageDB>(out var storage))
+                return null;
+            return storage.GetUnitsStoredByDesign(item, false);
+        }
+
+        /// <summary>
+        /// Why a stock order cannot be set, or null when it can. Used by the queue and edit commands.
+        /// </summary>
+        internal static string? StockOrderRefusal(Entity colony, IConstructableDesign design, bool repeat, long threshold)
+        {
+            if (threshold < 1)
+                return "A stock level must be 1 or more.";
+            if (!GameEngine.People.IndustrySeat.HasHead(colony))
+                return "A stock order needs an industry head. Seat one on this colony first.";
+            if (!repeat)
+                return "A stock order needs a repeat job. Turn on Repeat first.";
+            if (design is Pulsar4X.Ships.ShipDesign || design is not ICargoable)
+                return "A stock order needs an item the colony stores. Ships have no stock level.";
+            return null;
+        }
+
+        /// <summary>
+        /// Called for a job with a stock level. Returns true when it should idle (Status set to Idle). When the head is
+        /// gone it clears the level (the lazy backstop) and returns false. When no batch is running and stock is below
+        /// the level it starts one: it marks the batch started and re-chains the feeders, in the head's name, like slice 3.
+        /// </summary>
+        internal static bool StockOrderIdles(Entity colony, IndustryJob job, IConstructableDesign design)
+        {
+            if (job.StockThreshold is not long level)
+                return false;
+            if (!GameEngine.People.IndustrySeat.HasHead(colony))
+            {
+                ClearStockOrders(colony, "the industry head left");
+                return false;
+            }
+            if (job.StockBatchStarted)
+                return false;
+            if (StockOf(colony, design) is not long stock)
+                return false;
+            if (stock >= level)
+            {
+                job.Status = IndustryJobStatus.Idle;
+                return true;
+            }
+            job.StockBatchStarted = true;
+            if (job.Status == IndustryJobStatus.Idle)
+                job.Status = IndustryJobStatus.Queued;
+            AutoAddSubJobs(colony, job);
+            return false;
+        }
+
+        /// <summary>
+        /// Clears every stock level on the colony's jobs, so they carry on as plain repeat jobs. A later head does not
+        /// bring them back. Writes one colony log line per job.
+        /// </summary>
+        internal static void ClearStockOrders(Entity colony, string why)
+        {
+            if (!colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
+                return;
+            foreach (var (lineId, line) in industry.ProductionLines)
+            {
+                foreach (var job in line.Jobs)
+                {
+                    if (job.StockThreshold == null)
+                        continue;
+                    job.StockThreshold = null;
+                    job.StockBatchStarted = false;
+                    if (job.Status == IndustryJobStatus.Idle)
+                        job.Status = IndustryJobStatus.Queued;
+                    ShipLogBook.NoteIndustryChange(colony,
+                        $"{job.Name} on {(string.IsNullOrEmpty(line.Name) ? lineId : line.Name)} lost its stock level because {why}; it now repeats as a plain job");
                 }
             }
         }

@@ -1973,6 +1973,11 @@ namespace Pulsar4X.Engine.Api
                         CrewWarning = jobDesign is ShipDesign crewed ? JobCrewWarning(entity, crewed) : "",
                         FundsReason = fundsReason,
                         Refit = job.Refit == null ? null : ToRefitJobInfo(entity, factionInfo, factionId, job),
+                        StockBelow = job.StockThreshold,
+                        StockOnHand = job.StockThreshold != null && jobDesign != null ? IndustryTools.StockOf(entity, jobDesign) : null,
+                        IsIdle = job.Status == IndustryJobStatus.Idle,
+                        IdleReason = job.Status == IndustryJobStatus.Idle && job.StockThreshold is long below
+                            ? $"Stock {(jobDesign != null ? IndustryTools.StockOf(entity, jobDesign) : null)} is at or above {below}" : "",
                     });
                 }
 

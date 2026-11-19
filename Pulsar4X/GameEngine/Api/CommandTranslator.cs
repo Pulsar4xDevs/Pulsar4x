@@ -139,6 +139,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(QueueIndustryJobCommand)] = TranslateQueueIndustryJob,
                 [typeof(ChangeIndustryJobPriorityCommand)] = TranslateChangeIndustryJobPriority,
                 [typeof(CancelIndustryJobCommand)] = TranslateCancelIndustryJob,
+                [typeof(EditIndustryJobCommand)] = TranslateEditIndustryJob,
                 [typeof(AddToConstructionQueueCommand)] = TranslateAddToConstructionQueue,
                 [typeof(QueueShipRefitCommand)] = TranslateQueueShipRefit,
                 [typeof(UpgradeFacilityCommand)] = TranslateUpgradeFacility,
@@ -2692,6 +2693,13 @@ namespace Pulsar4X.Engine.Api
                 job.InstallOn = commanded;
             }
 
+            if (queue.StockBelow is long level)
+            {
+                if (IndustryTools.StockOrderRefusal(commanded, design, queue.Repeat, level) is { } stockRefusal)
+                    return CommandResult.Reject(stockRefusal);
+                job.StockThreshold = level;
+            }
+
             job.InitialiseJob((ushort)queue.Quantity, queue.Repeat);
             return Dispatch(IndustryOrder2.CreateNewJobOrder(faction.Id, commanded, queue.ProductionLineId, job));
         }
@@ -2703,6 +2711,31 @@ namespace Pulsar4X.Engine.Api
                 return lineError;
             return Dispatch(IndustryOrder2.CreateChangePriorityOrder(
                 faction.Id, commanded, move.ProductionLineId, move.JobId, (short)move.Delta));
+        }
+
+        private CommandResult TranslateEditIndustryJob(Entity faction, Entity commanded, GameCommand command)
+        {
+            var edit = (EditIndustryJobCommand)command;
+            if (edit.Quantity is < 1 or > ushort.MaxValue)
+                return CommandResult.Reject("Quantity must be between 1 and 65535.");
+            if (ValidateIndustryLine(commanded, edit.ProductionLineId) is { } lineError)
+                return lineError;
+            var job = commanded.GetDataBlob<IndustryAbilityDB>().ProductionLines[edit.ProductionLineId].Jobs
+                .Find(j => j.JobID == edit.JobId);
+            if (job == null)
+                return CommandResult.Reject($"Job {edit.JobId} not found.");
+            if (job.Refit != null)
+                return CommandResult.Reject("A refit job cannot be edited.");
+            if (edit.StockBelow is long level)
+            {
+                var design = IndustryTools.StockDesign(commanded, job);
+                if (design == null)
+                    return CommandResult.Reject($"Design {job.ItemGuid} not found.");
+                if (IndustryTools.StockOrderRefusal(commanded, design, edit.Repeat, level) is { } stockRefusal)
+                    return CommandResult.Reject(stockRefusal);
+            }
+            return Dispatch(IndustryOrder2.CreateEditJobOrder(
+                faction.Id, commanded, edit.ProductionLineId, edit.JobId, (ushort)edit.Quantity, edit.Repeat, false, edit.StockBelow));
         }
 
         private CommandResult TranslateCancelIndustryJob(Entity faction, Entity commanded, GameCommand command)

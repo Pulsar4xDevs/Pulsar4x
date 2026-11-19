@@ -35,6 +35,9 @@ namespace Pulsar4X.Industry
         public bool RepeatJob { get; set; } = false;
         public bool AutoInstall { get; set; } = false;
 
+        /// <summary>Edit orders: the stock level to set ("when stock drops below"), or null for a plain repeat job.</summary>
+        public long? StockThreshold { get; set; }
+
         /// <summary>
         /// Plan orders (RunIndustryPlan, RunMarketPlan) set this false. Even when true, feeder jobs are queued only
         /// while the colony has an industry head seated (<see cref="GameEngine.People.IndustrySeat"/>); the head
@@ -102,7 +105,7 @@ namespace Pulsar4X.Industry
 
         public static IndustryOrder2 CreateEditJobOrder(
             int factionGuid, Entity thisEntity, string productionLineID,
-            string OrderID, ushort quantity = 1, bool repeatJob = false, bool autoInstall = false
+            string OrderID, ushort quantity = 1, bool repeatJob = false, bool autoInstall = false, long? stockThreshold = null
         )
         {
             IndustryOrder2 order = new IndustryOrder2(factionGuid, thisEntity);
@@ -111,6 +114,7 @@ namespace Pulsar4X.Industry
             order.NumberOrderd = quantity;
             order.RepeatJob = repeatJob;
             order.AutoInstall = autoInstall;
+            order.StockThreshold = stockThreshold;
             order.productionLineID = productionLineID;
             return order;
         }
@@ -147,14 +151,28 @@ namespace Pulsar4X.Industry
                             Fail(IndustryTools.RejectionReason(line, jobDesign));
                             return;
                         }
-                        if (AutoAddSubJobs && GameEngine.People.IndustrySeat.HasHead(_entityCommanding))
+                        // A stock order idles until the stock drops, and chains its feeders when a batch starts instead.
+                        if (_job.StockThreshold is long level)
+                        {
+                            var stockDesign = IndustryTools.StockDesign(_entityCommanding, _job);
+                            string? refusal = stockDesign == null
+                                ? "The design is missing."
+                                : IndustryTools.StockOrderRefusal(_entityCommanding, stockDesign, _job.Auto, level);
+                            if (refusal != null)
+                            {
+                                Fail(refusal);
+                                return;
+                            }
+                            IndustryTools.StockOrderIdles(_entityCommanding, _job, stockDesign!);
+                        }
+                        else if (AutoAddSubJobs && GameEngine.People.IndustrySeat.HasHead(_entityCommanding))
                             IndustryTools.AutoAddSubJobs(_entityCommanding, _job);
                         IndustryTools.AddJob(_entityCommanding, productionLineID, _job);
                         string lineName = productionLineID;
                         if (_entityCommanding.GetDataBlob<IndustryAbilityDB>().ProductionLines.TryGetValue(productionLineID, out var queuedLine)
                             && !string.IsNullOrEmpty(queuedLine.Name))
                             lineName = queuedLine.Name;
-                        ShipLogBook.NoteIndustryJob(_entityCommanding, _job.NumberOrdered, _job.Name, lineName, _job.Auto);
+                        ShipLogBook.NoteIndustryJob(_entityCommanding, _job.NumberOrdered, _job.Name, lineName, _job.Auto, _job.StockThreshold);
                     }
                         break;
                     case OrderTypeEnum.CancelJob:
@@ -168,10 +186,22 @@ namespace Pulsar4X.Industry
                     case OrderTypeEnum.EditJob:
                     {
                         var found = FindQueuedJob();
-                        IndustryTools.EditExsistingJob(_entityCommanding, productionLineID, ItemID, RepeatJob, NumberOrderd, AutoInstall);
+                        if (StockThreshold is long level && found.job != null)
+                        {
+                            var stockDesign = IndustryTools.StockDesign(_entityCommanding, found.job);
+                            string? refusal = stockDesign == null
+                                ? "The design is missing."
+                                : IndustryTools.StockOrderRefusal(_entityCommanding, stockDesign, RepeatJob, level);
+                            if (refusal != null)
+                            {
+                                Fail(refusal);
+                                return;
+                            }
+                        }
+                        IndustryTools.EditExsistingJob(_entityCommanding, productionLineID, ItemID, RepeatJob, NumberOrderd, AutoInstall, StockThreshold);
                         if (found.job != null)
                             ShipLogBook.NoteIndustryChange(_entityCommanding,
-                                $"changed {found.job.Name} on {found.lineName} to {NumberOrderd}{(RepeatJob ? " (repeating)" : "")}");
+                                $"changed {found.job.Name} on {found.lineName} to {NumberOrderd}{ShipLogBook.IndustryRepeatNote(RepeatJob, StockThreshold)}");
                         break;
                     }
                     case OrderTypeEnum.ChangePriority:

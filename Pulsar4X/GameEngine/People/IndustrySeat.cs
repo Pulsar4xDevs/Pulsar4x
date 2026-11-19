@@ -1,4 +1,5 @@
 using System;
+using Pulsar4X.Industry;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Colonies;
 using Pulsar4X.DataStructures;
@@ -58,7 +59,10 @@ public static class IndustrySeat
             return;
         if (person.Manager.TryGetGlobalEntityById(db.AssignedTo, out var post)
             && post.TryGetDataBlob<IndustrySeatDB>(out var seat) && seat.HeadId == person.Id)
+        {
             seat.HeadId = IndustrySeatDB.Empty;
+            IndustryTools.ClearStockOrders(post, "the industry head is gone");
+        }
     }
 
     /// <summary>
@@ -80,6 +84,7 @@ public static class IndustrySeat
         if (!colony.TryGetDataBlob<IndustrySeatDB>(out var seat) || seat.HeadId < 0 || TryGetHead(colony, out _))
             return false;
         seat.HeadId = IndustrySeatDB.Empty;
+        IndustryTools.ClearStockOrders(colony, "the industry head is gone");
         return true;
     }
 
@@ -165,8 +170,9 @@ public static class IndustrySeat
         if (HoldsIndustrySeat(person, out var previousColony) && previousColony.Id != colony.Id)
             ClearSeat(previousColony, atDateTime);
 
+        // A new head replacing a seated one keeps the colony's stock orders: the seat is never empty, so no job is left headless.
         if (seat.HeadId >= 0)
-            ClearSeat(colony, atDateTime);
+            ClearSeat(colony, atDateTime, keepStockOrders: true);
 
         seat.HeadId = person.Id;
         person.GetDataBlob<CommanderDB>().AssignedTo = colony.Id;
@@ -183,12 +189,14 @@ public static class IndustrySeat
         return null;
     }
 
-    static void ClearSeat(Entity colony, DateTime atDateTime)
+    static void ClearSeat(Entity colony, DateTime atDateTime, bool keepStockOrders = false)
     {
         if (!colony.TryGetDataBlob<IndustrySeatDB>(out var seat) || seat.HeadId < 0)
             return;
         int leavingId = seat.HeadId;
         seat.HeadId = IndustrySeatDB.Empty;
+        if (!keepStockOrders)
+            IndustryTools.ClearStockOrders(colony, "the industry head left");
         if (colony.Manager != null && colony.Manager.TryGetGlobalEntityById(leavingId, out var leaving)
             && leaving.IsValid && leaving.FactionOwnerID == colony.FactionOwnerID)
         {
