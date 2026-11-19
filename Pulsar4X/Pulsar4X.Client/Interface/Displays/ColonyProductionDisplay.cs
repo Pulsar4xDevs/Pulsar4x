@@ -18,7 +18,7 @@ namespace Pulsar4X.Client
         private string? _newJobDesignId;
         private int _newJobBatchCount = 1;
         private bool _newJobRepeat = false;
-        private bool _newJobAutoInstall = true;
+        private bool _newJobAutoInstall = QueueConstructionOnCompletion.Default;
         private bool _rightPaneIsRefit;
         private bool _rightPaneIsUpgrade;
         private string? _upgradeDesignId;
@@ -491,20 +491,20 @@ namespace Pulsar4X.Client
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("A repeat job will run until cancelled.");
 
-            bool canQueue = selectedDesign.CanAutoInstall;
-            bool queueConstruction = canQueue && _newJobAutoInstall;
-            if (!canQueue)
+            bool queueDisabled = QueueConstructionOnCompletion.IsDisabled(selectedDesign);
+            bool queueConstruction = QueueConstructionOnCompletion.DisplayedValue(_newJobAutoInstall, selectedDesign);
+            if (queueDisabled)
                 ImGui.BeginDisabled();
-            if (ImGui.Checkbox("##queueconstruction", ref queueConstruction))
+            if (ImGui.Checkbox("##queueconstruction", ref queueConstruction) && !QueueConstructionOnCompletion.IsForced(selectedDesign))
                 _newJobAutoInstall = queueConstruction;
             bool queueHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
             ImGui.SameLine();
             ImGui.Text("Queue construction on completion?");
             queueHovered |= ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
-            if (!canQueue)
+            if (queueDisabled)
                 ImGui.EndDisabled();
-            if (queueHovered && selectedDesign.AutoInstallReason.Length > 0)
-                ImGui.SetTooltip(selectedDesign.AutoInstallReason);
+            if (queueHovered && QueueConstructionOnCompletion.Tooltip(selectedDesign) is { Length: > 0 } queueTip)
+                ImGui.SetTooltip(queueTip);
 
             ImGui.NewLine();
 
@@ -514,7 +514,7 @@ namespace Pulsar4X.Client
             {
                 uiState.GameClient?.SubmitCommandAsync(new QueueIndustryJobCommand(
                     entityId, line.Id, selectedDesign.DesignId, _newJobBatchCount,
-                    _newJobRepeat, selectedDesign.CanAutoInstall && _newJobAutoInstall));
+                    _newJobRepeat, QueueConstructionOnCompletion.CommandAutoInstall(_newJobAutoInstall, selectedDesign)));
             }
             if (selectedDesign.OverSlip && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && selectedDesign.SlipReason.Length > 0)
                 ImGui.SetTooltip(selectedDesign.SlipReason);
