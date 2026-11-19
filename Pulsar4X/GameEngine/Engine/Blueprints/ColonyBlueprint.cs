@@ -31,6 +31,18 @@ public class ColonyBlueprint : Blueprint
     /// </summary>
     public bool SeatAdministrator { get; set; }
     /// <summary>
+    /// When true, a starting civilian is seated as the colony's industry head (<c>IndustrySeatDB</c>), a seat apart
+    /// from the city-hall chair, and never the same person as <see cref="SeatAdministrator"/>'s chair holder.
+    /// Set per scenario: Early Tech's player Earth leaves it false; Warp Tech Start sets it on player Earth only.
+    /// A colony with an <see cref="OwnerFaction"/> (an NPC) is always seated, so a missing or false flag there is
+    /// ignored: see <see cref="ShouldSeatIndustryHead"/>.
+    /// </summary>
+    public bool SeatIndustryHead { get; set; }
+
+    /// <summary>True when creation seats an industry head: the flag, or any NPC colony (one with an owner faction). A method, because the mod loader sets every public property.</summary>
+    public bool ShouldSeatIndustryHead() => SeatIndustryHead || !string.IsNullOrEmpty(OwnerFaction);
+
+    /// <summary>
     /// For an <see cref="OwnerFaction"/> colony: unlock only <see cref="StartingItems"/> rather than
     /// every library and tech. Default false keeps the old open-everything placement.
     /// </summary>

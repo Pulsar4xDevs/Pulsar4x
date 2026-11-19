@@ -4,6 +4,7 @@
     "Payload": {
       "UniqueID": "colony-earth",
       "Name": "Default Earth Start",
+      "SeatIndustryHead": true,
       "StartingPopulation": 8000,
       "StartingCrewPool": 100,
       "Installations": [
@@ -316,6 +317,7 @@
     "Payload": {
       "UniqueID": "colony-luna-concord",
       "Name": "Luna Concord",
+      "SeatIndustryHead": true,
       "StartingPopulation": 12000,
       "Body": "Luna",
       "System": "system-sol",
@@ -398,6 +400,7 @@
     "Payload": {
       "UniqueID": "colony-mars-outpost",
       "Name": "Mars Outpost",
+      "SeatIndustryHead": false,
       "StartingPopulation": 1000,
       "Body": "Mars",
       "System": "system-sol",
@@ -437,6 +440,7 @@
     "Payload": {
       "UniqueID": "colony-ceres-depot",
       "Name": "Ceres Depot",
+      "SeatIndustryHead": true,
       "StartingPopulation": 800,
       "Body": "Ceres",
       "System": "system-sol",
@@ -504,6 +508,7 @@
     "Payload": {
       "UniqueID": "colony-earth-amc",
       "Name": "Americas Compact",
+      "SeatIndustryHead": true,
       "StartingPopulation": 1000000,
       "StartingCrewPool": 200,
       "Body": "Earth",
@@ -677,6 +682,7 @@
     "Payload": {
       "UniqueID": "colony-earth-spc",
       "Name": "Sino-Pacific Coalition",
+      "SeatIndustryHead": true,
       "StartingPopulation": 1000000,
       "StartingCrewPool": 200,
       "Body": "Earth",
@@ -849,6 +855,7 @@
     "Payload": {
       "UniqueID": "colony-earth-ecn",
       "Name": "Euro Consortium",
+      "SeatIndustryHead": true,
       "StartingPopulation": 1000000,
       "StartingCrewPool": 200,
       "Body": "Earth",
