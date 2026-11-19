@@ -33,6 +33,10 @@ namespace Pulsar4X.Technology
 
         public new string Name { get; set; }
 
+        /// <summary>The number the Client's portrait renderer turns into this lab technician's face. 0 means not set yet (an old save gets one derived from <c>ID</c> on load).</summary>
+        [JsonProperty]
+        public int PortraitSeed { get; internal set; }
+
         public Scientist()
         {
             TeamType = TeamTypes.Science;
@@ -52,6 +56,7 @@ namespace Pulsar4X.Technology
             MaxLabs = dB.MaxLabs;
             AssignedLabs = dB.AssignedLabs;
             ProjectQueue = dB.ProjectQueue;
+            PortraitSeed = dB.PortraitSeed;
         }
 
         public new object Clone()

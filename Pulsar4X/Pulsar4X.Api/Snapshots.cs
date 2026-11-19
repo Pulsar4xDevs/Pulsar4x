@@ -366,6 +366,28 @@ public sealed record StarView(
     public double PeakWavelengthNm { get; init; }
 }
 
+/// <summary>
+/// The values of every <c>PortraitRole</c> field. A role picks the uniform the Client draws on a person's portrait and follows the
+/// person's current post: a navy or ground officer or a ship's seated captain is <see cref="Captain"/>; a civilian in a city-hall
+/// chair is <see cref="Administrator"/>; the seated industry head is <see cref="IndustryHead"/>; a scientist commander is
+/// <see cref="Scientist"/>; a lab technician is <see cref="LabTechnician"/>; a hiring candidate is <see cref="Candidate"/>; any
+/// other civilian (a hired administrator nobody has seated, an unseated head) is <see cref="Civilian"/>.
+/// </summary>
+public static class PortraitRoles
+{
+    public const string Captain = "captain";
+    public const string Administrator = "administrator";
+    public const string IndustryHead = "industry-head";
+    public const string Scientist = "scientist";
+    public const string LabTechnician = "lab-technician";
+    public const string Civilian = "civilian";
+    public const string Candidate = "candidate";
+
+    /// <summary>All seven, in the spec's order.</summary>
+    public static readonly IReadOnlyList<string> All =
+        new[] { Captain, Administrator, IndustryHead, Scientist, LabTechnician, Civilian, Candidate };
+}
+
 public sealed record ColonyView(long Population, int? PlanetEntityId) : IComponentView
 {
     /// <summary>Per-species population breakdown (names resolved for the requesting faction).</summary>
@@ -380,6 +402,12 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
     /// <summary>Owning faction only. Null when the chair is empty or the colony has no chair.</summary>
     public string? AdministratorName { get; init; }
 
+    /// <summary>The chair holder's portrait seed (see <see cref="CommanderSnapshot.PortraitSeed"/>). 0 when there is no one in the post.</summary>
+    public int AdministratorPortraitSeed { get; init; }
+
+    /// <summary>The chair holder's <see cref="PortraitRoles"/> value (<c>administrator</c> while seated). Empty when there is no one in the post.</summary>
+    public string AdministratorPortraitRole { get; init; } = "";
+
     /// <summary>Owning faction only. True when a colony-level chair exists, even if nobody sits it.</summary>
     public bool HasAdministrativePost { get; init; }
 
@@ -388,6 +416,12 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
 
     /// <summary>Owning faction only. The industry head's name. Null when the seat is empty.</summary>
     public string? IndustryHeadName { get; init; }
+
+    /// <summary>The industry head's portrait seed (see <see cref="CommanderSnapshot.PortraitSeed"/>). 0 when there is no one in the post.</summary>
+    public int IndustryHeadPortraitSeed { get; init; }
+
+    /// <summary>The industry head's <see cref="PortraitRoles"/> value (<c>industry-head</c> while seated). Empty when there is no one in the post.</summary>
+    public string IndustryHeadPortraitRole { get; init; } = "";
 
     /// <summary>
     /// Owning faction only. Trained crew waiting in this colony's pool, people. Academy crew courses graduate
@@ -775,6 +809,12 @@ public sealed record ShipView(
     /// <summary>0 when the ship has no armor.</summary>
     double ArmorThicknessMm = 0) : IComponentView
 {
+    /// <summary>The captain's portrait seed (see <see cref="CommanderSnapshot.PortraitSeed"/>). 0 when there is no one in the post.</summary>
+    public int CommanderPortraitSeed { get; init; }
+
+    /// <summary>The captain's <see cref="PortraitRoles"/> value (<c>captain</c> while seated). Empty when there is no one in the post.</summary>
+    public string CommanderPortraitRole { get; init; } = "";
+
     /// <summary>
     /// Owner only: where <see cref="CrewRequired"/> comes from, one row per component design with crew
     /// (crew per copy x copies). The rows add up to CrewRequired.
@@ -1270,6 +1310,12 @@ public sealed record CandidateView(
 {
     /// <summary>The wage for the current game month (Wage per day × days in the month), cr.</summary>
     public int WagePerMonth { get; init; }
+
+    /// <summary>The candidate's portrait seed. It stays the same after hiring: the hired person's <see cref="CommanderSnapshot.PortraitSeed"/> equals this.</summary>
+    public int PortraitSeed { get; init; }
+
+    /// <summary>Always <see cref="PortraitRoles.Candidate"/>.</summary>
+    public string PortraitRole { get; init; } = PortraitRoles.Candidate;
 }
 
 /// <summary>Every mounted academy on a colony, plus the people a recruit cohort would draw on.</summary>
@@ -1334,6 +1380,12 @@ public sealed record IndustryView(IReadOnlyList<ProductionLineView> ProductionLi
 
     /// <summary>The industry head's name. Null when the seat is empty.</summary>
     public string? IndustryHeadName { get; init; }
+
+    /// <summary>The industry head's portrait seed (see <see cref="CommanderSnapshot.PortraitSeed"/>). 0 when there is no one in the post.</summary>
+    public int IndustryHeadPortraitSeed { get; init; }
+
+    /// <summary>The industry head's <see cref="PortraitRoles"/> value (<c>industry-head</c> while seated). Empty when there is no one in the post.</summary>
+    public string IndustryHeadPortraitRole { get; init; } = "";
 }
 
 public sealed record LaunchPadStateView(long MaxTonnage, bool Free)
@@ -1722,6 +1774,12 @@ public sealed record ResearcherView(
     int FundingLevel,
     IReadOnlyList<string> TechQueue) : IComponentView
 {
+    /// <summary>The lab's scientist's portrait seed (see <see cref="CommanderSnapshot.PortraitSeed"/>). 0 when there is no one in the post.</summary>
+    public int ScientistPortraitSeed { get; init; }
+
+    /// <summary>The lab's scientist's <see cref="PortraitRoles"/> value (<c>scientist</c> while seated). Empty when there is no one in the post.</summary>
+    public string ScientistPortraitRole { get; init; } = "";
+
     /// <summary>Days in the current game month (the research bill is the daily cost times this).</summary>
     public int DaysInMonth { get; init; } = 30;
 
@@ -1813,6 +1871,12 @@ public sealed record CommanderSnapshot(
     /// <summary>Display name of the current posting (commanded ship, lab, admin post), pre-resolved
     /// server-side; null when unassigned.</summary>
     public string? AssignmentName { get; init; }
+
+    /// <summary>The number the Client's portrait renderer turns into this person's face. Set once, kept for life, saved. Never 0 for a person.</summary>
+    public int PortraitSeed { get; init; }
+
+    /// <summary>One of <see cref="PortraitRoles"/>: picks the uniform. Follows the person's current post.</summary>
+    public string PortraitRole { get; init; } = PortraitRoles.Civilian;
 }
 
 /// <summary>The faction's research state: tech categories (game-static), every unlocked tech with
@@ -1983,6 +2047,12 @@ public sealed record ShipSnapshot(
     string DesignName = "",
     string? CommanderName = null)
 {
+    /// <summary>The captain's portrait seed (see <see cref="CommanderSnapshot.PortraitSeed"/>). 0 when there is no one in the post.</summary>
+    public int CommanderPortraitSeed { get; init; }
+
+    /// <summary>The captain's <see cref="PortraitRoles"/> value (<c>captain</c> while seated). Empty when there is no one in the post.</summary>
+    public string CommanderPortraitRole { get; init; } = "";
+
     public GoalSnapshot? Goal { get; init; }
     public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
 
@@ -2110,6 +2180,12 @@ public sealed class FleetSnapshot
     public int? FlagshipId { get; init; }
     public string? FlagshipName { get; init; }
     public string? CommanderName { get; init; }
+
+    /// <summary>The flagship's captain's portrait seed (see <see cref="CommanderSnapshot.PortraitSeed"/>). 0 when there is no one in the post.</summary>
+    public int CommanderPortraitSeed { get; init; }
+
+    /// <summary>The flagship's captain's <see cref="PortraitRoles"/> value (<c>captain</c> while seated). Empty when there is no one in the post.</summary>
+    public string CommanderPortraitRole { get; init; } = "";
 
     /// <summary>
     /// The flagship's captain. Null when the fleet has no flagship or that chair is empty.

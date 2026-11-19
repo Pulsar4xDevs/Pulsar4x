@@ -23,6 +23,14 @@ namespace Pulsar4X.People
         public DateTime RankedOn { get; internal set; }
         public int AssignedTo { get; internal set; } = -1;
 
+        /// <summary>
+        /// The number the Client's portrait renderer turns into this person's face. Set once when the person is created
+        /// (<see cref="CommanderFactory.Create"/>), kept for life and saved. 0 means not set yet: an old save gets one derived
+        /// from the entity id on load (<see cref="Portraits"/>).
+        /// </summary>
+        [JsonProperty]
+        public int PortraitSeed { get; internal set; }
+
 
         public CommanderDB() { }
 
@@ -44,6 +52,7 @@ namespace Pulsar4X.People
             Skills = new Dictionary<SkillDomain, int>(commanderDB.Skills);
             CommissionedOn = commanderDB.CommissionedOn;
             RankedOn = commanderDB.RankedOn;
+            PortraitSeed = commanderDB.PortraitSeed;
         }
 
         public override object Clone()

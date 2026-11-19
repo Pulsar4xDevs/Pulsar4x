@@ -311,6 +311,38 @@ public class MultiFactionEarthPhase7bTests
     // ---- ship crew counts ----
 
     [Test]
+    public void AShipsSeatedCaptain_ShowsOnTheShipFleetAndRosterViews_AsACaptain()
+    {
+        Start(WarpTechStart);
+        var info = _player.GetDataBlob<FactionInfoDB>();
+        var earth = Colonies().First(c => c.FactionOwnerID == _player.Id && c.HasDataBlob<NavalAcademyDB>());
+        var design = info.ShipDesigns["default-ship-design-starship"];
+        var ship = ShipFactory.CreateShip(design, _player, earth.GetDataBlob<ColonyInfoDB>().PlanetEntity, "Portrait Starship");
+        _player.GetDataBlob<Pulsar4X.Fleets.FleetDB>().AddChild(ship); // as the shipyards do
+        // A civilian in the captain's chair is still a captain while they command: the post decides.
+        var captain = Pulsar4X.People.CommanderFactory.Create(_game.GlobalManager, _player.Id,
+            new Pulsar4X.People.CommanderDB("Cap", 1, Pulsar4X.DataStructures.CommanderTypes.Civilian));
+        ship.GetDataBlob<ShipInfoDB>().CommanderID = captain.Id;
+        int seed = captain.GetDataBlob<Pulsar4X.People.CommanderDB>().PortraitSeed;
+        var projector = new GameProjector(_game);
+
+        var view = projector.ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
+        Assert.That((view.CommanderPortraitSeed, view.CommanderPortraitRole), Is.EqualTo((seed, "captain")));
+        var roster = projector.ProjectCommanders(_player.Id)!.Single(c => c.Id == captain.Id);
+        Assert.That((roster.PortraitSeed, roster.PortraitRole), Is.EqualTo((seed, "captain")));
+
+        var (fleets, unattached) = projector.ProjectFleetHierarchy(_player.Id);
+        var snapshot = unattached.Concat(fleets.SelectMany(f => f.Ships)).Single(s => s.Id == ship.Id);
+        Assert.That((snapshot.CommanderPortraitSeed, snapshot.CommanderPortraitRole), Is.EqualTo((seed, "captain")));
+
+        ship.GetDataBlob<ShipInfoDB>().CommanderID = -1;
+        var empty = projector.ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
+        Assert.That((empty.CommanderPortraitSeed, empty.CommanderPortraitRole), Is.EqualTo((0, "")));
+        Assert.That(projector.ProjectCommanders(_player.Id)!.Single(c => c.Id == captain.Id).PortraitRole, Is.EqualTo("civilian"),
+            "no longer commanding");
+    }
+
+    [Test]
     public void ShipCrew_AfterAPartSwap_ShowsOneConsistentNeedAndUnderCrewedMatchesIt()
     {
         Start(WarpTechStart);
