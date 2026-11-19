@@ -49,6 +49,11 @@ public class IndustryChainingTests
         return game;
     }
 
+    // The game allows 32 factions ever, and each test used to create its own. The whole fixture shares one owner
+    // faction and one foreign faction; every test still builds its own star system, colony, designs and people.
+    static readonly Lazy<Entity> SharedFaction = new(() => FactionFactory.CreateFaction(Game, "Chain-" + Guid.NewGuid().ToString("N")));
+    static readonly Lazy<Entity> ForeignFaction = new(() => FactionFactory.CreateFaction(Game, "Other-" + Guid.NewGuid().ToString("N")));
+
     [SetUp]
     public void QuietSystems()
     {
@@ -67,7 +72,7 @@ public class IndustryChainingTests
 
     static World NewWorld()
     {
-        var faction = FactionFactory.CreateFaction(Game, "Chain-" + Guid.NewGuid().ToString("N"));
+        var faction = SharedFaction.Value;
         var info = faction.GetDataBlob<FactionInfoDB>();
         info.Data.Unlock("plastic");
         info.Data.Unlock("hydrocarbons");
@@ -573,7 +578,7 @@ public class IndustryChainingTests
         var world = NewWorld();
         var colony = Colony(world);
         Queue(world, colony, FactoryId, world.Part.UniqueID);
-        var other = FactionFactory.CreateFaction(Game, "Other-" + Guid.NewGuid().ToString("N"));
+        var other = ForeignFaction.Value;
 
         Assert.That(new GameProjector(Game).ProjectEntity(colony, other.Id).GetView<IndustryView>(), Is.Null);
     }
@@ -692,7 +697,7 @@ public class IndustryChainingTests
     {
         var world = NewWorld();
         var colony = Colony(world);
-        var other = FactionFactory.CreateFaction(Game, "Other-" + Guid.NewGuid().ToString("N"));
+        var other = ForeignFaction.Value;
         var stranger = CommanderFactory.Create(world.System, other.Id, new CommanderDB("Stranger", 1, CommanderTypes.Civilian));
         IndustrySeat.Of(colony).HeadId = stranger.Id;
 
