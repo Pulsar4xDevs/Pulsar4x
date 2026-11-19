@@ -2,6 +2,9 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Pulsar4X.Api;
 using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
@@ -190,7 +193,30 @@ namespace Pulsar4X.Engine
 
         #region Entity Management Functions
 
-        public async void AddEntity(Entity entity, IEnumerable<BaseDataBlob>? dataBlobs = null)
+        /// <summary>
+        /// Raises a message to the subscribers without waiting for them. These callers used to be
+        /// <c>async void</c>, which hands any exception to the thread pool and ends the process, and
+        /// also moved a throw from the entity code itself off the calling thread, so the sim step's
+        /// fault catch never saw it. A handler that fails before its first await rethrows here, on
+        /// the caller. One that fails later is recorded as the engine's last fault.
+        /// </summary>
+        private void PublishObserved(Message message)
+        {
+            Task task = MessagePublisher.Instance.Publish(message);
+            if (task.IsCompletedSuccessfully)
+                return;
+            if (task.IsFaulted)
+                ExceptionDispatchInfo.Capture(task.Exception!.GetBaseException()).Throw();
+
+            var game = Game;
+            task.ContinueWith(
+                t => game.TimePulse.NoteBackgroundFault(t.Exception!.GetBaseException()),
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+        }
+
+        public void AddEntity(Entity entity, IEnumerable<BaseDataBlob>? dataBlobs = null)
         {
             if (_entities.ContainsKey(entity.Id))
                 throw new ArgumentException($"Entity with ID {entity.Id} already exists");
@@ -215,7 +241,7 @@ namespace Pulsar4X.Engine
             entity.IsValid = true;
 
             // Update listeners
-            await MessagePublisher.Instance.Publish(
+            PublishObserved(
                 Message.Create(
                     MessageTypes.EntityAdded,
                     entity.Id,
@@ -266,7 +292,7 @@ namespace Pulsar4X.Engine
             return _entities.ContainsKey(entityID);
         }
 
-        internal async void TagEntityForRemoval(Entity entity)
+        internal void TagEntityForRemoval(Entity entity)
         {
             //check we've not already tagged this.
             if (!_entitiesTaggedForRemoval.Contains(entity))
@@ -280,7 +306,7 @@ namespace Pulsar4X.Engine
                 entity.IsValid = false;
                 ManagerSubpulses.RemoveEntity(entity);
                 _entitiesTaggedForRemoval.Add(entity);
-                await MessagePublisher.Instance.Publish(
+                PublishObserved(
                     Message.Create(
                         MessageTypes.EntityRemoved,
                         entity.Id,
@@ -467,7 +493,7 @@ namespace Pulsar4X.Engine
             return false;
         }
 
-        internal async void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
+        internal void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
         {
             ArgumentNullException.ThrowIfNull(dataBlob);
 
@@ -495,11 +521,11 @@ namespace Pulsar4X.Engine
                         null,
                         dataBlob);
 
-                await MessagePublisher.Instance.Publish(message);
+                PublishObserved(message);
             }
         }
 
-        public async void RemoveDatablob<T>(int entityId) where T : BaseDataBlob
+        public void RemoveDatablob<T>(int entityId) where T : BaseDataBlob
         {
             var type = typeof(T);
             if(_datablobStores.TryGetValue(type, out var dataStore))
@@ -516,7 +542,7 @@ namespace Pulsar4X.Engine
                         null,
                         blob);
 
-                await MessagePublisher.Instance.Publish(message);
+                PublishObserved(message);
             }
         }
 
@@ -662,13 +688,13 @@ namespace Pulsar4X.Engine
             return _factionSensorContacts[factionId];
         }
 
-        public async void HideNeutralEntityFromFaction(int factionId, int entityId)
+        public void HideNeutralEntityFromFaction(int factionId, int entityId)
         {
             SetupDefaultNeutralEntitiesForFaction(factionId);
 
             _factionNeutralContacts[factionId].Remove(entityId);
 
-            await MessagePublisher.Instance.Publish(
+            PublishObserved(
                 Message.Create(
                     MessageTypes.EntityHidden,
                     entityId,
@@ -676,13 +702,13 @@ namespace Pulsar4X.Engine
                     factionId));
         }
 
-        public async void ShowNeutralEntityToFaction(int factionId, int entityId)
+        public void ShowNeutralEntityToFaction(int factionId, int entityId)
         {
             SetupDefaultNeutralEntitiesForFaction(factionId);
 
             _factionNeutralContacts[factionId].Add(entityId);
 
-            await MessagePublisher.Instance.Publish(
+            PublishObserved(
                 Message.Create(
                     MessageTypes.EntityRevealed,
                     entityId,

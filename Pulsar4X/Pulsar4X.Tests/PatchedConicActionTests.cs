@@ -68,7 +68,9 @@ public class PatchedConicActionTests
         Assert.That(_starship.GetDataBlob<NewtonThrustAbilityDB>().DeltaV, Is.GreaterThan(10_000));
     }
 
+    // About 1 to 3 minutes on a busy box. The limit is a hang guard with headroom, not a speed target.
     [Test]
+    [Timeout(900_000)]
     public void EarthToMars_CapturesWithin450Days_AcrossThreeSaves()
     {
         var mars = Body("Mars");

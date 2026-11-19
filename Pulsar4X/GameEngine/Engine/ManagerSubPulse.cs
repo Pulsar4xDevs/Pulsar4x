@@ -141,6 +141,12 @@ namespace Pulsar4X.Engine
             _entityManager = entityManager;
             _processManager = entityManager.Game.ProcessorManager;
             _game = entityManager.Game;
+            // Only _systemLocalDateTime is saved. These two are the "now" that AddSystemInterupt
+            // schedules from. Left at default(DateTime), the first datablob added after a load
+            // (for example a spawned faction on the global manager) computed a slot in year 0001
+            // and threw "Trying to add an interrupt in the past".
+            _processToDateTime = _systemLocalDateTime;
+            _subStepDateTime = _systemLocalDateTime;
         }
 
         private void InitHotloopProcessors()

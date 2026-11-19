@@ -438,6 +438,16 @@ namespace Pulsar4X.Engine
             }
         }
 
+        /// <summary>
+        /// A message subscriber failed after its first await, off the simulation thread. Keeps the
+        /// first fault of the run, the same as an escaped step does.
+        /// </summary>
+        internal void NoteBackgroundFault(Exception ex)
+        {
+            if (LastFault == null)
+                NoteFault(ex, system: null);
+        }
+
         private void NoteFault(Exception ex, StarSystem? system)
         {
             if (system == null)
