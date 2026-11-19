@@ -135,7 +135,7 @@ public class MissingInputsPinTests
         Assert.That(MissingInputsPin.StockText(input), Is.EqualTo("39,988 short / 40,000 required (12 in stock)"));
         Assert.That(MissingInputsPin.LineText(input), Is.EqualTo("Refinery"));
         Assert.That(MissingInputsPin.LineText(Input("ore", "Iron Ore", 1, 0, 1)), Is.EqualTo("—"));
-        Assert.That(MissingInputsPin.QueueButtonText(input), Is.EqualTo("Queue 39,988 on Refinery"));
+        Assert.That(MissingInputsPin.QueueButtonText(input), Is.EqualTo("Queue 39,988 jobs on Refinery"));
         Assert.That(MissingInputsPin.HeadText(-1, null), Is.EqualTo("Industry head: Empty"));
         Assert.That(MissingInputsPin.HeadText(7, "Lee"), Is.EqualTo("Industry head: Lee"));
 
@@ -154,7 +154,7 @@ public class MissingInputsPinTests
         var partial = Input("p", "Plastic", 40, 0, 40, canBuild: true, designId: "d-p", lineId: "ref", lineName: "Refinery", queueQuantity: 15, queued: 25);
         Assert.That(MissingInputsPin.QueuedText(partial), Is.EqualTo("Queued 25"));
         Assert.That(MissingInputsPin.ShowQueue(-1, partial), Is.True);
-        Assert.That(MissingInputsPin.QueueButtonText(partial), Is.EqualTo("Queue 15 on Refinery"));
+        Assert.That(MissingInputsPin.QueueButtonText(partial), Is.EqualTo("Queue 15 jobs on Refinery"));
         Assert.That(MissingInputsPin.QueueCommand(Colony, partial).Quantity, Is.EqualTo(15));
 
         var covered = Input("p", "Plastic", 40, 0, 40, canBuild: true, designId: "d-p", lineId: "ref", lineName: "Refinery", queueQuantity: 0, queued: 40);

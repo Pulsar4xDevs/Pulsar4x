@@ -89,7 +89,7 @@ public sealed class MissingInputsPin
         => string.IsNullOrEmpty(input.LineName) ? "—" : input.LineName;
 
     public static string QueueButtonText(MissingInputView input)
-        => "Queue " + input.QueueQuantity.ToString("N0") + " on " + input.LineName;
+        => "Queue " + input.QueueQuantity.ToString("N0") + (input.QueueQuantity == 1 ? " job" : " jobs") + " on " + input.LineName;
 
     public static string HeadText(int industryHeadId, string? industryHeadName)
         => "Industry head: " + IndustrySeatUi.HolderText(industryHeadId, industryHeadName);
