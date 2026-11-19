@@ -654,4 +654,65 @@ public class IndustryChainingTests
 
         Assert.That(IndustryLines(colony), Has.Count.EqualTo(lines));
     }
+
+    // ----- a head who is gone (dangling seat) -----
+
+    [Test]
+    public void DestroyedHead_ClearsTheSeat_AndJobsStopChaining()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        var head = SeatHead(world, colony);
+        Assert.That(IndustrySeat.HasHead(colony), Is.True);
+
+        CommanderFactory.DestroyCommander(head);
+
+        Assert.That(IndustrySeat.HasHead(colony), Is.False);
+        Assert.That(IndustrySeat.HeadId(colony), Is.EqualTo(-1), "the seat is emptied, not left pointing at a dead id");
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        Assert.That(Jobs(colony, RefineryId), Is.Empty, "no head, no chaining");
+        Assert.That(IndustryLog(colony), Is.Empty);
+    }
+
+    [Test]
+    public void ADanglingHeadId_CountsAsEmpty()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        IndustrySeat.Of(colony).HeadId = 987_654_321; // nobody has this id
+
+        Assert.That(IndustrySeat.HasHead(colony), Is.False);
+        Assert.That(IndustrySeat.TryGetHead(colony, out _), Is.False);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        Assert.That(Jobs(colony, RefineryId), Is.Empty);
+    }
+
+    [Test]
+    public void AHeadOfAnotherFaction_CountsAsEmpty()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        var other = FactionFactory.CreateFaction(Game, "Other-" + Guid.NewGuid().ToString("N"));
+        var stranger = CommanderFactory.Create(world.System, other.Id, new CommanderDB("Stranger", 1, CommanderTypes.Civilian));
+        IndustrySeat.Of(colony).HeadId = stranger.Id;
+
+        Assert.That(IndustrySeat.HasHead(colony), Is.False);
+        Assert.That(IndustrySeat.TryGetHead(colony, out _), Is.False);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        Assert.That(Jobs(colony, RefineryId), Is.Empty);
+    }
+
+    [Test]
+    public void AfterTheHeadDies_ANewHeadCanBeSeated_AndChainingResumes()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        CommanderFactory.DestroyCommander(SeatHead(world, colony, "Old"));
+
+        SeatHead(world, colony, "New");
+
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        Assert.That(Jobs(colony, RefineryId), Has.Count.EqualTo(1));
+        Assert.That(IndustryLog(colony).Single(), Does.StartWith("Industry (New) queued"));
+    }
 }

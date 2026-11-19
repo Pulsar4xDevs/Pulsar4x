@@ -275,4 +275,39 @@ public class IndustrySeatStartTests
         Assert.That(lines, Has.None.EqualTo("Industry: NewJob."));
         Assert.That(lines.Last(), Does.StartWith("Industry: queued 1 ").And.Contain(" on ").And.EndWith("."));
     }
+
+    [Test]
+    public void DestroyedHead_ThenAutoHire_BackFillsTheNpcSeat()
+    {
+        var game = Start(WarpTechStart);
+        var bloc = Named(game, "Americas Compact");
+        Recruitment.Refresh(bloc, bloc.StarSysDateTime);
+        Assert.That(IndustrySeat.TryGetHead(bloc, out var head), Is.True);
+        int oldId = head.Id;
+        Assert.That(bloc.GetDataBlob<CandidatePoolDB>().Candidates, Is.Not.Empty);
+
+        CommanderFactory.DestroyCommander(head);
+        Assert.That(IndustrySeat.HasHead(bloc), Is.False, "a dead head leaves the seat empty");
+
+        Recruitment.AutoHire(bloc);
+
+        Assert.That(IndustrySeat.HasHead(bloc), Is.True, "the monthly auto-hire refills it");
+        Assert.That(IndustrySeat.HeadId(bloc), Is.Not.EqualTo(oldId));
+        AssertHeadNotChair(bloc);
+    }
+
+    [Test]
+    public void ADanglingHeadId_ThenAutoHire_BackFillsTheNpcSeat()
+    {
+        var game = Start(WarpTechStart);
+        var bloc = Named(game, "Americas Compact");
+        Recruitment.Refresh(bloc, bloc.StarSysDateTime);
+        IndustrySeat.Of(bloc).HeadId = 987_654_321;
+        Assert.That(IndustrySeat.HasHead(bloc), Is.False);
+
+        Recruitment.AutoHire(bloc);
+
+        Assert.That(IndustrySeat.HasHead(bloc), Is.True);
+        AssertHeadNotChair(bloc);
+    }
 }

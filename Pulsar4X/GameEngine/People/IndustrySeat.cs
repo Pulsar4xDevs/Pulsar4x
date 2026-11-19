@@ -15,19 +15,72 @@ public static class IndustrySeat
 {
     public const string BothPosts = "One person cannot hold both the city-hall chair and the industry seat.";
 
-    /// <summary>The seated head's entity id, or -1 when the seat is empty or the colony has none.</summary>
+    /// <summary>
+    /// The seated head's entity id, or -1 when the seat is empty, the colony has none, or the stored id no longer
+    /// names a live person of the colony's faction (see <see cref="TryGetHead"/>).
+    /// </summary>
     public static int HeadId(Entity colony)
-        => colony.TryGetDataBlob<IndustrySeatDB>(out var seat) ? seat.HeadId : IndustrySeatDB.Empty;
+        => TryGetHead(colony, out var head) ? head.Id : IndustrySeatDB.Empty;
 
-    /// <summary>True when the colony has a seated industry head.</summary>
-    public static bool HasHead(Entity colony) => HeadId(colony) >= 0;
+    /// <summary>True when the colony has a seated industry head who still exists and works for the colony's faction.</summary>
+    public static bool HasHead(Entity colony) => TryGetHead(colony, out _);
 
-    /// <summary>The seated head entity, when there is one and it still resolves.</summary>
+    /// <summary>
+    /// The seated head, when there is one. The seat only counts as filled while the stored id resolves to a
+    /// living commander owned by the colony's faction; a dead or foreign id is an empty seat.
+    /// </summary>
     public static bool TryGetHead(Entity colony, out Entity head)
     {
         head = default!;
-        int id = HeadId(colony);
-        return id >= 0 && colony.Manager != null && colony.Manager.TryGetGlobalEntityById(id, out head);
+        int id = StoredHeadId(colony);
+        if (id < 0 || colony.Manager == null || !colony.Manager.TryGetGlobalEntityById(id, out head))
+            return false;
+        if (head == null || !head.IsValid || head.FactionOwnerID != colony.FactionOwnerID
+            || !head.HasDataBlob<CommanderDB>())
+        {
+            head = default!;
+            return false;
+        }
+        return true;
+    }
+
+    // What the seat datablob holds, whether or not it still resolves.
+    static int StoredHeadId(Entity colony)
+        => colony.TryGetDataBlob<IndustrySeatDB>(out var seat) ? seat.HeadId : IndustrySeatDB.Empty;
+
+    /// <summary>
+    /// Empties the seat of this person, if they hold one, without a log line. For a commander being removed from
+    /// the game: nothing may be left pointing at them.
+    /// </summary>
+    public static void ClearOnRemoval(Entity person)
+    {
+        if (!person.TryGetDataBlob<CommanderDB>(out var db) || db.AssignedTo < 0 || person.Manager == null)
+            return;
+        if (person.Manager.TryGetGlobalEntityById(db.AssignedTo, out var post)
+            && post.TryGetDataBlob<IndustrySeatDB>(out var seat) && seat.HeadId == person.Id)
+            seat.HeadId = IndustrySeatDB.Empty;
+    }
+
+    /// <summary>
+    /// After a load: any seat whose stored id no longer names a live person of the colony's faction is emptied
+    /// (a save from before commanders cleared their seat on death can hold one).
+    /// </summary>
+    internal static void AfterLoad(Game game)
+    {
+        foreach (var manager in game.GlobalManagerDictionary.Values)
+        {
+            foreach (var colony in manager.GetAllEntitiesWithDataBlob<IndustrySeatDB>())
+                ClearIfDangling(colony);
+        }
+    }
+
+    /// <summary>Empties the seat when its stored id is not a live head. Returns true when it did.</summary>
+    internal static bool ClearIfDangling(Entity colony)
+    {
+        if (!colony.TryGetDataBlob<IndustrySeatDB>(out var seat) || seat.HeadId < 0 || TryGetHead(colony, out _))
+            return false;
+        seat.HeadId = IndustrySeatDB.Empty;
+        return true;
     }
 
     /// <summary>True when the person is the seated industry head of the colony they are assigned to.</summary>
@@ -107,6 +160,7 @@ public static class IndustrySeat
         var seat = Of(colony);
         if (seat.HeadId == person.Id)
             return null;
+        ClearIfDangling(colony); // a dead or foreign id is no one to push out
 
         if (HoldsIndustrySeat(person, out var previousColony) && previousColony.Id != colony.Id)
             ClearSeat(previousColony, atDateTime);
@@ -135,7 +189,8 @@ public static class IndustrySeat
             return;
         int leavingId = seat.HeadId;
         seat.HeadId = IndustrySeatDB.Empty;
-        if (colony.Manager != null && colony.Manager.TryGetGlobalEntityById(leavingId, out var leaving))
+        if (colony.Manager != null && colony.Manager.TryGetGlobalEntityById(leavingId, out var leaving)
+            && leaving.IsValid && leaving.FactionOwnerID == colony.FactionOwnerID)
         {
             if (leaving.TryGetDataBlob<CommanderDB>(out var db) && db.AssignedTo == colony.Id)
                 db.AssignedTo = -1;

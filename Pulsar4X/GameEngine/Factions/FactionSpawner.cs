@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.People;
 using Pulsar4X.Api;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Colonies;
@@ -13,6 +14,7 @@ using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
 using Pulsar4X.Fleets;
 using Pulsar4X.Names;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
@@ -343,6 +345,7 @@ namespace Pulsar4X.Factions
                 if (!sponsorInfo.Colonies.Contains(colony))
                     sponsorInfo.Colonies.Add(colony);
                 Rehome(colony, company, sponsor);
+                RehomeColonyPeople(colony, info, sponsorInfo, company, sponsor);
                 if (colony.TryGetDataBlob<ColonyInfoDB>(out var colonyInfo)
                     && colonyInfo.PlanetEntity.TryGetDataBlob<MineralsDB>(out var minerals))
                     minerals.GrantFactionAccess(sponsorInfo.FactionMask);
@@ -375,6 +378,53 @@ namespace Pulsar4X.Factions
                 otherInfo.Stances.Remove(company.Id);
                 otherInfo.Grants.Remove(company.Id);
             }
+        }
+
+        /// <summary>
+        /// The people who sit the colony's posts (city-hall chairs and the industry seat) keep their posts and now
+        /// work for the sponsor. An industry seat whose head cannot be found is emptied, so it never points at
+        /// someone of the folded faction.
+        /// </summary>
+        static void RehomeColonyPeople(Entity colony, FactionInfoDB from, FactionInfoDB to, Entity company, Entity sponsor)
+        {
+            var people = new Dictionary<int, Entity>();
+            foreach (var commander in from.Commanders.ToList())
+            {
+                if (commander.TryGetDataBlob<CommanderDB>(out var db) && db.AssignedTo == colony.Id)
+                    people[commander.Id] = commander;
+            }
+            if (colony.TryGetDataBlob<IndustrySeatDB>(out var seat) && seat.HeadId >= 0
+                && colony.Manager != null && colony.Manager.TryGetGlobalEntityById(seat.HeadId, out var head)
+                && head.FactionOwnerID == company.Id)
+                people[head.Id] = head;
+            if (colony.TryGetDataBlob<AdminSpaceDB>(out var admin))
+            {
+                foreach (var chair in admin.CommanderSeats)
+                {
+                    if (chair.CommanderID >= 0 && colony.Manager != null
+                        && colony.Manager.TryGetGlobalEntityById(chair.CommanderID, out var holder)
+                        && holder.FactionOwnerID == company.Id)
+                        people[holder.Id] = holder;
+                }
+            }
+
+            foreach (var person in people.Values)
+            {
+                from.Commanders.Remove(person);
+                if (!to.Commanders.Contains(person))
+                    to.Commanders.Add(person);
+                person.FactionOwnerID = sponsor.Id;
+                if (person.TryGetDataBlob<NameDB>(out var names))
+                {
+                    string name = names.GetName(company.Id);
+                    if (string.IsNullOrEmpty(name))
+                        name = names.DefaultName;
+                    if (!string.IsNullOrEmpty(name))
+                        names.SetName(sponsor.Id, name);
+                }
+            }
+
+            IndustrySeat.ClearIfDangling(colony);
         }
 
         static void Rehome(Entity entity, Entity from, Entity to)

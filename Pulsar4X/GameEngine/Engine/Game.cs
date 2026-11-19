@@ -334,6 +334,9 @@ namespace Pulsar4X.Engine
             // Power state saved under older rules (demand, battery limits) is brought up to date.
             Pulsar4X.Energy.EnergyLoadRefresh.AfterLoad(loadedGame);
 
+            // A seat left pointing at a dead or foreign person (from before a commander's death cleared it) is emptied.
+            GameEngine.People.IndustrySeat.AfterLoad(loadedGame);
+
             // A save from before captains counted as crew boards each seated captain once; a bridgeless ship is automated and carries no crew.
             foreach (var manager in loadedGame.GlobalManagerDictionary.Values)
                 foreach (var ship in manager.GetAllEntitiesWithDataBlob<Pulsar4X.Ships.ShipCrewDB>())
