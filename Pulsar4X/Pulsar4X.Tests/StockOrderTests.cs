@@ -284,9 +284,9 @@ public class StockOrderTests
 
         var plastic = Jobs(colony, RefineryId).Single();
         Assert.That(plastic.ItemGuid, Is.EqualTo("plastic"));
-        Assert.That(plastic.NumberOrdered, Is.EqualTo(40));
+        Assert.That(plastic.NumberOrdered, Is.EqualTo(20), "40 plastic short, 2 made per batch");
         Assert.That(plastic.Auto, Is.False);
-        Assert.That(Log(colony, "Industry ("), Is.EqualTo(new[] { "Industry (Lee) queued 40 Plastic for Gizmo." }));
+        Assert.That(Log(colony, "Industry ("), Is.EqualTo(new[] { "Industry (Lee) queued 20 Plastic for Gizmo." }));
         Assert.That(Gizmo(colony).Status, Is.EqualTo(IndustryJobStatus.MissingResources));
     }
 
@@ -300,7 +300,7 @@ public class StockOrderTests
 
         Assert.That(GizmoStock(world, colony), Is.EqualTo(1));
         Assert.That(PlasticStock(world, colony), Is.EqualTo(0));
-        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(40), "the next batch's plastic is chained");
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(20), "the next batch's plastic is chained");
         Assert.That(Log(colony, "Industry ("), Has.Count.EqualTo(1));
     }
 
@@ -309,8 +309,8 @@ public class StockOrderTests
     {
         var (world, colony, _) = Ordered(below: 3, quantity: 1, plastic: 0);
 
-        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(40));
-        Assert.That(Log(colony, "Industry ("), Is.EqualTo(new[] { "Industry (Lee) queued 40 Plastic for Gizmo." }));
+        Assert.That(Jobs(colony, RefineryId).Single().NumberOrdered, Is.EqualTo(20));
+        Assert.That(Log(colony, "Industry ("), Is.EqualTo(new[] { "Industry (Lee) queued 20 Plastic for Gizmo." }));
     }
 
     // ----- rejections -----

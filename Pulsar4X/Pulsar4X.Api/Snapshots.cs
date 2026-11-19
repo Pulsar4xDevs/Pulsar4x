@@ -1574,10 +1574,10 @@ public sealed record MissingInputView(string ItemId, string Name, long Required,
     public bool CanBuild { get; init; }
 
     /// <summary>
-    /// Quantity of this input that jobs already queued on this colony will still make, in the same measure as
-    /// <see cref="QueueQuantity"/> (a job's ordered less completed, current batch only; an idle stock order counts 0).
-    /// 0 for a raw resource. When this covers
-    /// <see cref="Short"/>, <see cref="QueueQuantity"/> is 0: queuing again would only duplicate the feeder.
+    /// Units of this input that jobs already queued on this colony will still make, in item units like
+    /// <see cref="Required"/>, <see cref="InStock"/> and <see cref="Short"/> (not jobs): each queued job's remaining batches
+    /// (ordered less completed, current batch only) times the recipe's output per batch. An idle stock order counts 0.
+    /// 0 for a raw resource. When this covers <see cref="Short"/>, <see cref="QueueQuantity"/> is 0: queuing again would only duplicate the feeder.
     /// </summary>
     public long Queued { get; init; }
 
@@ -1594,8 +1594,9 @@ public sealed record MissingInputView(string ItemId, string Name, long Required,
     public string LineKind { get; init; } = "";
 
     /// <summary>
-    /// The quantity to queue (<c>QueueIndustryJobCommand.Quantity</c>): <see cref="Short"/>, capped at 65535 (a job's
-    /// maximum) less what <see cref="Queued"/> jobs already cover. Equals what automatic chaining queues. 0 when not
+    /// The quantity to queue (<c>QueueIndustryJobCommand.Quantity</c>), in jobs (batches), not item units:
+    /// <c>ceil((Short - Queued) / the recipe's output per batch)</c>, capped at 65535 (a job's maximum). A recipe that makes
+    /// 2 per batch and is 40 short queues 20 (41 short queues 21). Equals what automatic chaining queues. 0 when not
     /// buildable here, and 0 when queued jobs already cover the shortfall (<see cref="CanBuild"/> stays true). A queue can still be rejected
     /// (for example a hull over the slip); show the rejection reason.
     /// </summary>
