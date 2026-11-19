@@ -28,6 +28,11 @@ public static class IndustrySeatDisplay
         ref string? refusal)
     {
         TakePendingRefusal(ref refusal);
+        if (IndustrySeatUi.IsSeated(view.IndustryHeadId))
+        {
+            PortraitRenderer.For(uiState).DrawEntity(view.IndustryHeadId, PortraitIdentity.IndustryHead, PortraitRenderer.SmallSize);
+            ImGui.SameLine();
+        }
         ImGui.TextUnformatted("Industry head: " + IndustrySeatUi.HolderText(view.IndustryHeadId, view.IndustryHeadName));
 
         var candidates = IndustrySeatUi.Candidates(
@@ -107,7 +112,8 @@ public static class IndustrySeatDisplay
                     "industry-head_" + colonyId,
                     close,
                     person => person.Name,
-                    320f);
+                    320f,
+                    PortraitIdentity.IndustryHead);
                 if (selected >= 0)
                 {
                     Submit(uiState, new SeatIndustryHeadCommand(colonyId, selected));

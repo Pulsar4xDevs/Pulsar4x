@@ -1320,6 +1320,11 @@ namespace Pulsar4X.Client
 
         private void DisplayCaptainButton(int shipId, string label, string tooltip, ShipSnapshot? ship = null)
         {
+            if (ship?.CommanderId is int captainId)
+            {
+                PortraitRenderer.For(_uiState).DrawEntity(captainId, PortraitIdentity.Captain, PortraitRenderer.SmallSize);
+                ImGui.SameLine();
+            }
             string? refusal = ship == null ? null : CrewRules.AssignCaptainRefusal(ship);
             if (CrewBars.GatedSmallButton(label + "###captain-" + shipId, refusal, tooltip))
                 captainChooserShipId = shipId;
@@ -1354,7 +1359,8 @@ namespace Pulsar4X.Client
                         "captain_" + shipId,
                         close,
                         OfficerRow,
-                        320f);
+                        320f,
+                        PortraitIdentity.Captain);
                     if (selected != current)
                     {
                         SubmitFleetCommand(new AssignCaptainCommand(shipId, selected));

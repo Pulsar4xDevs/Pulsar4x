@@ -230,7 +230,8 @@ namespace Pulsar4X.Client
                                 research.Scientists,
                                 currentScientistId,
                                 $"lab_{lab.Id}",
-                                closeModal); // Pass close action as cancel
+                                closeModal, // Pass close action as cancel
+                                portraitRole: PortraitIdentity.Scientist);
 
                             if (selectedId != currentScientistId)
                             {

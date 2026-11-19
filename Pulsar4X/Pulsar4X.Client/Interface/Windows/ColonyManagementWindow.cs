@@ -657,7 +657,14 @@ namespace Pulsar4X.Client
                     ImGui.PopStyleColor();
                     ImGui.NextColumn();
                     if (readOnly)
+                    {
+                        if (colonyView is { AdministratorId: >= 0 })
+                        {
+                            PortraitRenderer.For(_uiState).DrawEntity(colonyView.AdministratorId, PortraitIdentity.Administrator, PortraitRenderer.SmallSize);
+                            ImGui.SameLine();
+                        }
                         ImGui.TextUnformatted(string.IsNullOrEmpty(colonyView?.AdministratorName) ? "Unknown" : colonyView!.AdministratorName!);
+                    }
                     else
                         DisplayAdministratorButton(colonyView, colony.Id);
                     ImGui.NextColumn();
@@ -819,6 +826,11 @@ namespace Pulsar4X.Client
         {
             bool hasPost = colonyView?.HasAdministrativePost == true;
             string label = string.IsNullOrEmpty(colonyView?.AdministratorName) ? "None" : colonyView!.AdministratorName!;
+            if (colonyView is { AdministratorId: >= 0 })
+            {
+                PortraitRenderer.For(_uiState).DrawEntity(colonyView.AdministratorId, PortraitIdentity.Administrator, PortraitRenderer.SmallSize);
+                ImGui.SameLine();
+            }
             if (!hasPost)
                 ImGui.BeginDisabled();
             if (ImGui.SmallButton(label + "###admin-" + colonyId) && hasPost)
@@ -862,7 +874,8 @@ namespace Pulsar4X.Client
                         "admin_" + colonyId,
                         close,
                         CivilianRow,
-                        320f);
+                        320f,
+                        PortraitIdentity.Administrator);
                     if (selected != current)
                     {
                         _uiState.GameClient?.SubmitCommandAsync(new AssignAdministratorCommand(colonyId, selected));
@@ -879,6 +892,8 @@ namespace Pulsar4X.Client
                         ImGui.TextDisabled("No candidates anywhere right now.");
                     foreach (var candidate in candidates)
                     {
+                        PortraitRenderer.For(_uiState).DrawCandidate(candidate, PortraitRenderer.SmallSize);
+                        ImGui.SameLine();
                         if (ImGui.Button("Hire###hire-admin-" + candidate.Id))
                         {
                             _uiState.GameClient?.SubmitCommandAsync(new HireCandidateCommand(
@@ -952,6 +967,9 @@ namespace Pulsar4X.Client
             }
             foreach (var candidate in view.Candidates)
             {
+                PortraitRenderer.For(_uiState).DrawCandidate(candidate, PortraitRenderer.SmallSize);
+                ImGui.SameLine();
+                ImGui.BeginGroup();
                 ImGui.Text(candidate.Name + ", age " + candidate.Age);
                 ImGui.Text("Lab: " + candidate.LabCategory + ", up to " + candidate.MaxLabs + " labs. Wage " + CandidateWageText(candidate) + ".");
                 if (ImGui.Button("Hire as administrator###recruit-admin-" + candidate.Id))
@@ -961,6 +979,7 @@ namespace Pulsar4X.Client
                 if (ImGui.Button("Hire as lab technician###recruit-lab-" + candidate.Id))
                     _uiState.GameClient?.SubmitCommandAsync(
                         new HireCandidateCommand(colonyId, candidate.Id, HireRole.LabTechnician));
+                ImGui.EndGroup();
                 ImGui.Separator();
             }
         }

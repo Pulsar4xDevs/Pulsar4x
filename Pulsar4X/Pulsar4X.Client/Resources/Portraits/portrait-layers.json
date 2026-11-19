@@ -1,0 +1,30 @@
+{
+  "roles": [
+    "captain",
+    "administrator",
+    "industry-head",
+    "scientist",
+    "lab-technician",
+    "civilian",
+    "candidate"
+  ],
+  "layers": [
+    { "id": "background", "folder": "background", "tint": "none", "emptyChance": 0, "byRole": false },
+    { "id": "back-hair", "folder": "back-hair", "tint": "hair", "emptyChance": 0.15, "byRole": false },
+    { "id": "neck", "folder": "neck", "tint": "skin", "emptyChance": 0, "byRole": false },
+    { "id": "uniform", "folder": "uniform", "tint": "uniform", "emptyChance": 0, "byRole": true },
+    { "id": "head", "folder": "head", "tint": "skin", "emptyChance": 0, "byRole": false },
+    { "id": "eyes", "folder": "eyes", "tint": "eye", "emptyChance": 0, "byRole": false },
+    { "id": "nose-mouth", "folder": "nose-mouth", "tint": "none", "emptyChance": 0, "byRole": false },
+    { "id": "hair", "folder": "hair", "tint": "hair", "emptyChance": 0.05, "byRole": false },
+    { "id": "extras", "folder": "extras", "tint": "none", "emptyChance": 0.5, "byRole": false },
+    { "id": "insignia", "folder": "insignia", "tint": "faction", "emptyChance": 0.2, "byRole": false },
+    { "id": "badge", "folder": "badge", "tint": "none", "emptyChance": 0.35, "byRole": false }
+  ],
+  "palettes": {
+    "skin": ["#F1C27D", "#E0AC69", "#C68642", "#8D5524", "#5C3317"],
+    "hair": ["#1C1C1C", "#4A3728", "#A0522D", "#D4A017", "#C0C0C0", "#6B3A2A"],
+    "eye": ["#4B3621", "#3B6B1F", "#2E5A88", "#5A4B3B", "#1A1A1A"],
+    "uniform": ["#3A3F4A", "#2C3E50", "#4A3728", "#3D4F3A", "#5C4A3A"]
+  }
+}

@@ -1,0 +1,122 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Numerics;
+using ImGuiNET;
+using Pulsar4X.Api;
+using SDL3;
+
+namespace Pulsar4X.Client;
+
+/// <summary>
+/// Draws a layered portrait with ImGui draw-list AddImage and a multiply tint.
+/// Textures are cached per file. Missing art is skipped quietly.
+/// </summary>
+public sealed class PortraitRenderer
+{
+    public const float SmallSize = 48f;
+    public const float LargeSize = 128f;
+
+    static readonly object Gate = new();
+    static PortraitCatalog? _catalog;
+    static bool _catalogLoaded;
+    static readonly Dictionary<string, IntPtr> Cache = new(StringComparer.OrdinalIgnoreCase);
+
+    readonly GlobalUIState _uiState;
+
+    PortraitRenderer(GlobalUIState uiState) => _uiState = uiState;
+
+    public static PortraitRenderer For(GlobalUIState uiState) => new(uiState);
+
+    public static PortraitCatalog Catalog
+    {
+        get
+        {
+            EnsureCatalog();
+            return _catalog!;
+        }
+    }
+
+    /// <summary>Draw the portrait for this seed and role at <paramref name="size"/> pixels, reserved in the layout.</summary>
+    public void Draw(int seed, string role, Vector4 factionColour, float size)
+    {
+        EnsureCatalog();
+        var picks = PortraitPicker.Pick(_catalog!, seed, role, factionColour);
+        Vector2 start = ImGui.GetCursorScreenPos();
+        Vector2 end = new(start.X + size, start.Y + size);
+        var drawList = ImGui.GetWindowDrawList();
+        foreach (var pick in picks)
+        {
+            IntPtr texture = Load(pick.File);
+            if (texture == IntPtr.Zero)
+                texture = Load(pick.FallbackFile);
+            if (texture == IntPtr.Zero)
+                continue;
+            uint tint = ImGui.ColorConvertFloat4ToU32(pick.Tint);
+            drawList.AddImage(texture.ToTextureRef(), start, end, Vector2.Zero, Vector2.One, tint);
+        }
+        ImGui.Dummy(new Vector2(size, size));
+    }
+
+    public void DrawPerson(CommanderSnapshot person, float size, string? contextRole = null)
+        => Draw(PortraitIdentity.Seed(person), PortraitIdentity.Role(person, contextRole), PortraitIdentity.FactionColour(_uiState), size);
+
+    public void DrawCandidate(CandidateView candidate, float size)
+        => Draw(PortraitIdentity.Seed(candidate), PortraitIdentity.Role(candidate), PortraitIdentity.FactionColour(_uiState), size);
+
+    public void DrawEntity(int entityId, string role, float size)
+        => Draw(PortraitIdentity.Seed(entityId), role, PortraitIdentity.FactionColour(_uiState), size);
+
+    IntPtr Load(string? relativePath)
+    {
+        if (string.IsNullOrEmpty(relativePath))
+            return IntPtr.Zero;
+        lock (Gate)
+        {
+            if (Cache.TryGetValue(relativePath, out var cached))
+                return cached;
+
+            IntPtr loaded = IntPtr.Zero;
+            try
+            {
+                var renderer = _uiState.ViewPort?.Renderer ?? IntPtr.Zero;
+                if (renderer != IntPtr.Zero)
+                {
+                    string path = Path.Combine(PulsarMainWindow.ResourcesPath, "Portraits", relativePath);
+                    if (File.Exists(path))
+                        loaded = Image.LoadTexture(renderer, path);
+                }
+            }
+            catch
+            {
+                loaded = IntPtr.Zero;
+            }
+
+            Cache[relativePath] = loaded;
+            return loaded;
+        }
+    }
+
+    static void EnsureCatalog()
+    {
+        if (_catalogLoaded)
+            return;
+        lock (Gate)
+        {
+            if (_catalogLoaded)
+                return;
+            try
+            {
+                string dir = Path.Combine(PulsarMainWindow.ResourcesPath, "Portraits");
+                _catalog = PortraitCatalog.Load(dir);
+            }
+            catch
+            {
+                _catalog = new PortraitCatalog(
+                    Array.Empty<PortraitLayerSpec>(),
+                    new Dictionary<string, IReadOnlyList<Vector4>>());
+            }
+            _catalogLoaded = true;
+        }
+    }
+}

@@ -150,6 +150,8 @@ namespace Pulsar4X.Client
                 foreach(var person in people)
                 {
                     ImGui.TableNextColumn();
+                    PortraitRenderer.For(_uiState).DrawPerson(person, PortraitRenderer.SmallSize);
+                    ImGui.SameLine();
                     if(ImGui.Selectable($"{person.Name}###{person.Id}", _selectedId == person.Id,
                         ImGuiSelectableFlags.SpanAllColumns))
                     {
@@ -185,7 +187,7 @@ namespace Pulsar4X.Client
 
         private void DisplayPersonDetail(CommanderSnapshot person, DateTime now)
         {
-            DisplayHelpers.PersonCard(_uiState, person, now);
+            DisplayHelpers.PersonCard(_uiState, person, now, PortraitRenderer.LargeSize);
         }
 
         private static string RankDisplay(CommanderSnapshot person)

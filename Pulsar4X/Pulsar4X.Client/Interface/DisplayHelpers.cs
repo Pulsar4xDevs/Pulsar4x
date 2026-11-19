@@ -160,9 +160,8 @@ namespace Pulsar4X.Client
         /// Portrait, service lines, skill domains, known skills, and bonuses. The personnel
         /// card, the assign chooser, and the entity card all use this.
         /// </summary>
-        public static void PersonCard(GlobalUIState state, CommanderSnapshot person, DateTime now)
+        public static void PersonCard(GlobalUIState state, CommanderSnapshot person, DateTime now, float portraitSize = PortraitRenderer.SmallSize, string? portraitRole = null)
         {
-            float portraitSize = 32f;
             float headerPadding = 4f;
             float headerHeight = portraitSize + headerPadding * 2;
 
@@ -177,12 +176,8 @@ namespace Pulsar4X.Client
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + headerPadding);
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + headerPadding);
 
-            IntPtr portraitTexture = state.Img_Character();
-            if (portraitTexture != IntPtr.Zero)
-            {
-                ImGui.Image(portraitTexture.ToTextureRef(), new Vector2(portraitSize, portraitSize));
-                ImGui.SameLine();
-            }
+            PortraitRenderer.For(state).DrawPerson(person, portraitSize, portraitRole);
+            ImGui.SameLine();
 
             float textHeight = ImGui.GetTextLineHeight();
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + (portraitSize - textHeight) / 2);
@@ -291,7 +286,8 @@ namespace Pulsar4X.Client
         /// </summary>
         public static int PeopleChooser(GlobalUIState state, IReadOnlyList<Pulsar4X.Api.CommanderSnapshot> people,
             int currentlySelectedId, string instanceKey = "default", Action? onCancel = null,
-            Func<Pulsar4X.Api.CommanderSnapshot, string>? rowLabel = null, float listWidth = 200f)
+            Func<Pulsar4X.Api.CommanderSnapshot, string>? rowLabel = null, float listWidth = 200f,
+            string? portraitRole = null)
         {
             // Track which person is selected in the UI (not yet assigned)
             string selectionKey = $"{instanceKey}_snapshot";
@@ -334,6 +330,8 @@ namespace Pulsar4X.Client
                         ? rowLabel(person)
                         : person.IsAssigned ? person.Name + " *" : person.Name;
 
+                    PortraitRenderer.For(state).DrawPerson(person, PortraitRenderer.SmallSize, portraitRole);
+                    ImGui.SameLine();
                     if(ImGui.Selectable(displayName + $"###{person.Id}", isSelected))
                     {
                         _peopleChooserSelections[selectionKey] = person.Id;
@@ -371,7 +369,7 @@ namespace Pulsar4X.Client
                     }
                     else if(selectedPerson != null)
                     {
-                        PersonCard(state, selectedPerson, DateTime.UtcNow);
+                        PersonCard(state, selectedPerson, DateTime.UtcNow, PortraitRenderer.SmallSize, portraitRole);
                     }
                     else
                     {

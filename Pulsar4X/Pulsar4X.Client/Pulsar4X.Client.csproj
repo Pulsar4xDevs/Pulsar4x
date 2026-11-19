@@ -108,6 +108,9 @@
     <Content Include="Resources\**\*.bmp;Resources\**\*.png;Resources\**\*.ico;Resources\**\*.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Portraits\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
     <ItemGroup>
