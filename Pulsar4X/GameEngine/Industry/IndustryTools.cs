@@ -1,4 +1,5 @@
 using System;
+using GameEngine.Engine.Orders;
 using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Datablobs;
@@ -383,6 +384,11 @@ namespace Pulsar4X.Industry
             }
         }
 
+        /// <summary>
+        /// Queues a one-shot job on this colony's fastest accepting line for each buildable input the stockpile is
+        /// short of, recursively, and writes one colony log line per job, in the industry head's name. This is the
+        /// industry head's work: the caller checks <see cref="GameEngine.People.IndustrySeat.HasHead"/> first.
+        /// </summary>
         public static void AutoAddSubJobs(Entity industryEntity, IndustryJob job)
         {
             if(!industryEntity.TryGetDataBlob<CargoStorageDB>(out var stockpile))
@@ -419,7 +425,9 @@ namespace Pulsar4X.Industry
                         IConstructableDesign des = (IConstructableDesign)cargoItem;
                         IndustryJob newjob = new IndustryJob(des);
                         newjob.InitialiseJob((ushort)numReq, false);
-                        SetJobToFastest(industryDB, newjob);
+                        // A job no line here takes is not queued, so it gets no log line. Its inputs are still walked, as before.
+                        if (SetJobToFastest(industryDB, newjob))
+                            ShipLogBook.NoteIndustryQueued(industryEntity, HeadName(industryEntity), numReq, newjob.Name, job.Name);
                         AutoAddSubJobs(industryEntity, newjob); //recursivly add jobs.
                     }
                 }
@@ -427,7 +435,16 @@ namespace Pulsar4X.Industry
 
 
         }
-        internal static void SetJobToFastest(IndustryAbilityDB industrydb, IndustryJob job)
+        static string HeadName(Entity colony)
+        {
+            if (GameEngine.People.IndustrySeat.TryGetHead(colony, out var head)
+                && head.TryGetDataBlob<Pulsar4X.People.CommanderDB>(out var db)
+                && !string.IsNullOrEmpty(db.Name))
+                return db.Name;
+            return "head";
+        }
+
+        internal static bool SetJobToFastest(IndustryAbilityDB industrydb, IndustryJob job)
         {
             var typID = job.TypeID;
             (string lineID, int rate) bestLine = (String.Empty, 0);
@@ -443,8 +460,10 @@ namespace Pulsar4X.Industry
                 if (rate > bestLine.rate)
                     bestLine = (line.Key, rate);
             }
-            if(bestLine.lineID != String.Empty)
-                AddJob(industrydb, bestLine.lineID, job);
+            if (bestLine.lineID == String.Empty)
+                return false;
+            AddJob(industrydb, bestLine.lineID, job);
+            return true;
         }
     }
 }

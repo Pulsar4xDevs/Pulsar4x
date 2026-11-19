@@ -34,6 +34,11 @@ namespace Pulsar4X.Industry
         public bool RepeatJob { get; set; } = false;
         public bool AutoInstall { get; set; } = false;
 
+        /// <summary>
+        /// Plan orders (RunIndustryPlan, RunMarketPlan) set this false. Even when true, feeder jobs are queued only
+        /// while the colony has an industry head seated (<see cref="GameEngine.People.IndustrySeat"/>); the head
+        /// always chains, so there is no per-job choice for a player to make.
+        /// </summary>
         public bool AutoAddSubJobs { get; set; } = true;
         public short Delta { get; set; }
 
@@ -141,7 +146,7 @@ namespace Pulsar4X.Industry
                             Fail(IndustryTools.RejectionReason(line, jobDesign));
                             return;
                         }
-                        if(AutoAddSubJobs)
+                        if (AutoAddSubJobs && GameEngine.People.IndustrySeat.HasHead(_entityCommanding))
                             IndustryTools.AutoAddSubJobs(_entityCommanding, _job);
                         IndustryTools.AddJob(_entityCommanding, productionLineID, _job);
                     }

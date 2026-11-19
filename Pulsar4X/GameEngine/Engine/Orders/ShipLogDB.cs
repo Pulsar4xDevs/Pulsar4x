@@ -58,7 +58,7 @@ public class ShipLogDB : BaseDataBlob
 /// </summary>
 static class ShipLogBook
 {
-    public static void Append(Entity entity, DateTime at, ShipLogKind kind, string text, int otherId = -1)
+    public static void Append(Entity entity, DateTime at, ShipLogKind kind, string text, int otherId = -1, bool allowRepeat = false)
     {
         if (entity == null || string.IsNullOrWhiteSpace(text))
             return;
@@ -69,7 +69,7 @@ static class ShipLogBook
             entity.SetDataBlob(book);
         }
 
-        if (book.Entries.Count > 0 && book.Entries[^1].Text == text)
+        if (!allowRepeat && book.Entries.Count > 0 && book.Entries[^1].Text == text)
             return;
 
         book.Entries.Add(new ShipLogEntry
@@ -80,6 +80,14 @@ static class ShipLogBook
             Text = text,
         });
     }
+
+    /// <summary>
+    /// The colony's industry head queued a feeder job for another job, e.g.
+    /// "Industry (Lee) queued 40 Plastic for Hull Section." Every chained job gets its own line, even a repeat of the last.
+    /// </summary>
+    public static void NoteIndustryQueued(Entity colony, string headName, long amount, string item, string forItem)
+        => Append(colony, colony.StarSysDateTime, ShipLogKind.Own,
+            $"Industry ({headName}) queued {amount} {item} for {forItem}.", allowRepeat: true);
 
     public static void NoteOrdered(Entity entity, Goal goal, DateTime at)
         => Append(entity, at, ShipLogKind.Own, "Ordered: " + Phrase(entity, goal) + ".");
