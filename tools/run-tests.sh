@@ -69,10 +69,13 @@ run() {   # run <command...> under the timeout, if one is set and available
 art_args=()
 [ -n "${ARTIFACTS_PATH:-}" ] && art_args=(--artifacts-path "$ARTIFACTS_PATH")
 
+# [Explicit] tests are meant to be run by name, but the NUnit adapter also runs them when a class-name filter
+# (shard mode) selects them, so they carry Category("Explicit") and are always left out here. Run one by name:
+#   dotnet test ... --filter "Name~WarpTech_TwoYearsHeadless_ZeroDeaths"
 case "$mode" in
-    fast) base_filter='Category!=Slow' ;;
-    slow) base_filter='Category=Slow' ;;
-    all)  base_filter='' ;;
+    fast) base_filter='Category!=Slow&Category!=Explicit' ;;
+    slow) base_filter='Category=Slow&Category!=Explicit' ;;
+    all)  base_filter='Category!=Explicit' ;;
 esac
 filter="$base_filter"
 if [ -n "$extra_filter" ]; then
@@ -86,7 +89,7 @@ start=$SECONDS
 
 if [ "$build" = 1 ]; then
     echo "== build ($configuration)"
-    if ! run "$dotnet_bin" build "$project" -c "$configuration" ${art_args[@]+"${art_args[@]}"} -nologo -v q; then
+    if ! run "$dotnet_bin" build "$project" -c "$configuration" ${art_args[@]+"${art_args[@]}"} -nologo -v q -clp:ErrorsOnly; then
         echo "BUILD FAILED" >&2
         exit 1
     fi

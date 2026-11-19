@@ -318,7 +318,7 @@ public class MultiFactionEarthPhase7aTests
     /// their gap; with no NPC freighters yet, the test stands in for the hauler from day 180 by filling what they bid
     /// for once a month. Nobody may die.
     /// </summary>
-    [Test, Explicit("Long: two game years headless (several minutes); run by name.")]
+    [Test, Explicit("Long: two game years headless (several minutes); run by name."), Category("Slow"), Category("Explicit")]
     public void WarpTech_TwoYearsHeadless_ZeroDeaths()
     {
         Start(WarpTechStart);
@@ -364,7 +364,7 @@ public class MultiFactionEarthPhase7aTests
         Assert.That(Needs(Named("Mars HQ")).ShortSince, Is.Null, "Mars feeds itself");
     }
 
-    [Test, Explicit("Long: two game years headless (several minutes); run by name.")]
+    [Test, Explicit("Long: two game years headless (several minutes); run by name."), Category("Slow"), Category("Explicit")]
     public void EarlyTech_TwoYearsHeadless_ZeroDeaths()
     {
         Start(EarlyTech);
