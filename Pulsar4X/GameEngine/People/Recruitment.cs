@@ -223,8 +223,9 @@ namespace Pulsar4X.People
         }
 
         /// <summary>
-        /// A faction that hires for itself fills empty admin seats first, then a lab technician if the colony
-        /// has a lab and nobody to run it. A player faction never auto-hires.
+        /// A faction that hires for itself fills empty admin seats first, then an empty industry seat, then a lab
+        /// technician if the colony has a lab and nobody to run it. A player faction never auto-hires, so a player's
+        /// industry seat stays as the player left it.
         /// </summary>
         public static void AutoHire(Entity colony)
         {
@@ -252,6 +253,13 @@ namespace Pulsar4X.People
                     db.AssignedTo = colony.Id;
                 }
             }
+
+            // An empty industry seat is filled next, with a separate hire: never the city-hall holder.
+            if (colony.TryGetDataBlob<Pulsar4X.Colonies.ColonyInfoDB>(out _) && !IndustrySeat.HasHead(colony)
+                && pool.Candidates.Count > 0
+                && Hire(faction, colony, pool.Candidates[0].Id, HireRole.Administrator, out var head, out _) == null
+                && head != null)
+                IndustrySeat.Seat(colony, head, colony.StarSysDateTime);
 
             if (pool.Candidates.Count == 0 || !HasLab(colony))
                 return;

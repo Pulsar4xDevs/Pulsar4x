@@ -89,6 +89,11 @@ static class ShipLogBook
         => Append(colony, colony.StarSysDateTime, ShipLogKind.Own,
             $"Industry ({headName}) queued {amount} {item} for {forItem}.", allowRepeat: true);
 
+    /// <summary>A job was queued on a colony line, by the player or a plan: "Industry: queued 5 Gizmo on Factory."</summary>
+    public static void NoteIndustryJob(Entity colony, long amount, string item, string line, bool repeat)
+        => Append(colony, colony.StarSysDateTime, ShipLogKind.Action,
+            $"Industry: queued {amount} {item} on {line}{(repeat ? " (repeating)" : "")}.", allowRepeat: true);
+
     public static void NoteOrdered(Entity entity, Goal goal, DateTime at)
         => Append(entity, at, ShipLogKind.Own, "Ordered: " + Phrase(entity, goal) + ".");
 
@@ -115,6 +120,10 @@ static class ShipLogBook
         // A posting has its own sentence, written when the chair actually changes.
         if (action is AssignAdministratorOrder or UnassignAdministratorOrder
             or AssignScientistOrder or UnassignScientistOrder)
+            return;
+        // A job order writes its own line when it runs ("Industry: queued 5 Gizmo on Factory."), with the
+        // item and line. The generic "Industry: NewJob." read badly beside the head's lines.
+        if (action is Pulsar4X.Industry.IndustryOrder2)
             return;
         // A listing is the market book changing, not something the colony did. It is only
         // queued when the numbers moved, which for a producing colony is every few days, and

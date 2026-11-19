@@ -176,6 +176,8 @@ namespace Pulsar4X.Colonies
 
             if (colonyBlueprint.SeatAdministrator)
                 SeatStartingAdministrator(game, faction, startingSystem, colonyEntity);
+            if (colonyBlueprint.ShouldSeatIndustryHead())
+                SeatStartingIndustryHead(game, faction, startingSystem, colonyEntity);
 
             // Add starting fleets
             foreach(var fleet in colonyBlueprint.Fleets ?? new List<ColonyBlueprint.FleetBlueprint>())
@@ -394,6 +396,16 @@ namespace Pulsar4X.Colonies
             Ask = ask,
             Bid = bid,
         };
+
+        // A starting civilian in the industry seat. A separate person from any chair holder, never the chair's.
+        static void SeatStartingIndustryHead(Game game, Entity faction, StarSystem system, Entity colony)
+        {
+            var adminDB = CommanderFactory.CreateAdmin(game);
+            adminDB.CommissionedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365.25 * 10);
+            adminDB.RankedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365);
+            var head = CommanderFactory.Create(system, faction.Id, adminDB);
+            IndustrySeat.Seat(colony, head, game.TimePulse.GameGlobalDateTime);
+        }
 
         static void SeatStartingAdministrator(Game game, Entity faction, StarSystem system, Entity colony)
         {

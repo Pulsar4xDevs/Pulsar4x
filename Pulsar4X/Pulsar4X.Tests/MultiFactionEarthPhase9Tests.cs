@@ -60,6 +60,17 @@ public class MultiFactionEarthPhase9Tests
     }
 
     [Test]
+    public void ForcedSpawn_SeatsAnIndustryHead_WhoIsNotTheChairHolder()
+    {
+        var colony = ForceSpawn();
+
+        Assert.That(GameEngine.People.IndustrySeat.TryGetHead(colony, out var head), Is.True, "a spawned company starts with a head");
+        Assert.That(head.FactionOwnerID, Is.EqualTo(colony.FactionOwnerID));
+        var chair = colony.GetDataBlob<GameEngine.People.AdminSpaceDB>().CommanderSeats.First(seat => seat.CommanderID >= 0);
+        Assert.That(chair.CommanderID, Is.Not.EqualTo(head.Id), "the head and the chair holder are different people");
+    }
+
+    [Test]
     public void ForcedSpawn_ChartersACompany_WithTheKitAndSponsorTech_AndPublishesTheEvent()
     {
         long popBefore = Pop(_amc);

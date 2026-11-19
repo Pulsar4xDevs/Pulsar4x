@@ -46,6 +46,7 @@
     "Payload": {
       "UniqueID": "colony-early-earth",
       "Name": "Early Tech Earth Start",
+      "SeatIndustryHead": false,
       "StartingPopulation": 8000,
       "StartingCrewPool": 100,
       "Installations": [
@@ -375,6 +376,7 @@
     "Payload": {
       "UniqueID": "colony-early-earth-amc",
       "Name": "Americas Compact",
+      "SeatIndustryHead": true,
       "StartingPopulation": 1000000,
       "StartingCrewPool": 200,
       "Body": "Earth",
@@ -529,6 +531,7 @@
     "Payload": {
       "UniqueID": "colony-early-earth-spc",
       "Name": "Sino-Pacific Coalition",
+      "SeatIndustryHead": true,
       "StartingPopulation": 1000000,
       "StartingCrewPool": 200,
       "Body": "Earth",
@@ -682,6 +685,7 @@
     "Payload": {
       "UniqueID": "colony-early-earth-ecn",
       "Name": "Euro Consortium",
+      "SeatIndustryHead": true,
       "StartingPopulation": 1000000,
       "StartingCrewPool": 200,
       "Body": "Earth",

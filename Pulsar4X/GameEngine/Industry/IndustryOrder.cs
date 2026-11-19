@@ -149,6 +149,11 @@ namespace Pulsar4X.Industry
                         if (AutoAddSubJobs && GameEngine.People.IndustrySeat.HasHead(_entityCommanding))
                             IndustryTools.AutoAddSubJobs(_entityCommanding, _job);
                         IndustryTools.AddJob(_entityCommanding, productionLineID, _job);
+                        string lineName = productionLineID;
+                        if (_entityCommanding.GetDataBlob<IndustryAbilityDB>().ProductionLines.TryGetValue(productionLineID, out var queuedLine)
+                            && !string.IsNullOrEmpty(queuedLine.Name))
+                            lineName = queuedLine.Name;
+                        ShipLogBook.NoteIndustryJob(_entityCommanding, _job.NumberOrdered, _job.Name, lineName, _job.Auto);
                     }
                         break;
                     case OrderTypeEnum.CancelJob:

@@ -240,6 +240,7 @@ namespace Pulsar4X.Factions
                     new() { CargoId = cargoId, Role = "Sell" }
                 },
                 SeatAdministrator = true,
+                SeatIndustryHead = true,
                 TechFromStartingItems = true,
             };
 
