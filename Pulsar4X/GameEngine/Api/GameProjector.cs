@@ -1148,6 +1148,24 @@ namespace Pulsar4X.Engine.Api
             };
         }
 
+        // The colony's seated industry head, for the owning faction only. (-1, null) when empty.
+        private static (int id, string? name) IndustryHead(Entity colony, int factionId)
+        {
+            if (colony.FactionOwnerID != factionId)
+                return (-1, null);
+            int id = IndustrySeat.HeadId(colony);
+            if (id < 0)
+                return (-1, null);
+            string name = "Unknown";
+            if (colony.Manager != null && colony.Manager.TryGetGlobalEntityById(id, out var person))
+            {
+                string resolved = person.GetName(factionId);
+                if (!string.IsNullOrEmpty(resolved))
+                    name = resolved;
+            }
+            return (id, name);
+        }
+
         private static ColonyView ToColonyView(ColonyInfoDB c, Entity colony, int factionId)
         {
             long population = 0;
@@ -1206,8 +1224,11 @@ namespace Pulsar4X.Engine.Api
                 }
             }
 
+            var (industryHeadId, industryHeadName) = IndustryHead(colony, factionId);
             return new ColonyView(population, planetId)
             {
+                IndustryHeadId = industryHeadId,
+                IndustryHeadName = industryHeadName,
                 SpeciesPopulations = species,
                 CrewPool = crewPool,
                 CrewPoolBySpecies = crewRows,
@@ -2081,7 +2102,8 @@ namespace Pulsar4X.Engine.Api
                 }
             }
 
-            return new IndustryView(lines) { Pads = pads };
+            var (headId, headName) = IndustryHead(entity, factionId);
+            return new IndustryView(lines) { Pads = pads, IndustryHeadId = headId, IndustryHeadName = headName };
         }
 
         /// <summary>Crew a launch of this design would board from the colony now: min(required, berths, pool).</summary>

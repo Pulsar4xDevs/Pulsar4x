@@ -310,6 +310,16 @@ public sealed record AssignCaptainCommand(int TargetEntityId, int CommanderId) :
 public sealed record AssignAdministratorCommand(int TargetEntityId, int CommanderId) : GameCommand(TargetEntityId);
 
 /// <summary>
+/// Seats a hired civilian (unassigned administrator) as the industry head of the colony <c>TargetEntityId</c>.
+/// Rejected when the person holds a city-hall chair, is not a civilian of this faction, or is unknown.
+/// A person already heading another colony's industry moves; whoever sat this seat leaves it.
+/// </summary>
+public sealed record SeatIndustryHeadCommand(int TargetEntityId, int CommanderId) : GameCommand(TargetEntityId);
+
+/// <summary>Empties the industry seat of the colony <c>TargetEntityId</c>. Accepted when the seat is already empty.</summary>
+public sealed record UnseatIndustryHeadCommand(int TargetEntityId) : GameCommand(TargetEntityId);
+
+/// <summary>
 /// Hire one candidate from this colony's pool. Targets the colony whose pool holds the candidate. One person
 /// leaves the population. An administrator joins unassigned, or takes <see cref="PostColonyId"/>'s chair when
 /// that is set. A lab technician is housed on the candidate's colony.

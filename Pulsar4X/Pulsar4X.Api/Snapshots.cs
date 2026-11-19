@@ -383,6 +383,12 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
     /// <summary>Owning faction only. True when a colony-level chair exists, even if nobody sits it.</summary>
     public bool HasAdministrativePost { get; init; }
 
+    /// <summary>Owning faction only. The seated industry head's entity id (a seat apart from the city-hall chair). -1 when the seat is empty.</summary>
+    public int IndustryHeadId { get; init; } = -1;
+
+    /// <summary>Owning faction only. The industry head's name. Null when the seat is empty.</summary>
+    public string? IndustryHeadName { get; init; }
+
     /// <summary>
     /// Owning faction only. Trained crew waiting in this colony's pool, people. Academy crew courses graduate
     /// into it; launches draw from it; scrapped ships return to it.
@@ -1322,6 +1328,12 @@ public sealed record IndustryView(IReadOnlyList<ProductionLineView> ProductionLi
 {
     /// <summary>Launch pads on this colony. Empty when the colony has no launch complex.</summary>
     public IReadOnlyList<LaunchPadStateView> Pads { get; init; } = Array.Empty<LaunchPadStateView>();
+
+    /// <summary>The seated industry head's entity id on this colony. -1 when the seat is empty or this entity is not a colony.</summary>
+    public int IndustryHeadId { get; init; } = -1;
+
+    /// <summary>The industry head's name. Null when the seat is empty.</summary>
+    public string? IndustryHeadName { get; init; }
 }
 
 public sealed record LaunchPadStateView(long MaxTonnage, bool Free)

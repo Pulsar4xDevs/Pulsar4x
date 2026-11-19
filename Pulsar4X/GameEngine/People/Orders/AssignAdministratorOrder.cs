@@ -68,6 +68,10 @@ public class AssignAdministratorOrder : EntityAction
         if(!administrator.TryGetDataBlob<CommanderDB>(out var commanderDB))
             return;
 
+        // An industry head cannot also hold the city-hall chair.
+        if (IndustrySeat.ChairRefusal(administrator) != null)
+            return;
+
         int previousId = post.CommanderID;
 
         // Need to find the current assignment and unassign them

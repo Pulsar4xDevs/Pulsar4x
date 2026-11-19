@@ -90,6 +90,8 @@ namespace Pulsar4X.Engine.Api
                 [typeof(SetFlagshipCommand)] = TranslateSetFlagship,
                 [typeof(AssignCaptainCommand)] = TranslateAssignCaptain,
                 [typeof(AssignAdministratorCommand)] = TranslateAssignAdministrator,
+                [typeof(SeatIndustryHeadCommand)] = TranslateSeatIndustryHead,
+                [typeof(UnseatIndustryHeadCommand)] = TranslateUnseatIndustryHead,
                 [typeof(HireCandidateCommand)] = TranslateHireCandidate,
                 [typeof(TrainAcademyClassCommand)] = TranslateTrainAcademyClass,
                 [typeof(AcademyCommandCourseCommand)] = TranslateAcademyCommandCourse,
@@ -2033,6 +2035,11 @@ namespace Pulsar4X.Engine.Api
             if (commanderDB.Type != DataStructures.CommanderTypes.Civilian)
                 return CommandResult.Reject("Only a civilian can administer a colony.");
 
+            // The city-hall chair and the industry seat need different people.
+            var industryRefusal = IndustrySeat.ChairRefusal(person);
+            if (industryRefusal != null)
+                return CommandResult.Reject(industryRefusal);
+
             if (chair.CommanderID == person.Id)
                 return CommandResult.Ok(Guid.NewGuid().ToString("N"));
 
@@ -2062,6 +2069,43 @@ namespace Pulsar4X.Engine.Api
             foreach (var entity in vacated)
                 PublishPersonnelChanged(entity);
 
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        // ----- industry head (commanded entity: the colony). A seat apart from the city-hall chair. -----
+
+        private CommandResult TranslateSeatIndustryHead(Entity faction, Entity commanded, GameCommand command)
+        {
+            var seat = (SeatIndustryHeadCommand)command;
+            if (!commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("An industry head sits a colony.");
+
+            Entity? person = TryResolve(seat.CommanderId, out var found) ? found : null;
+            if (person != null && person.FactionOwnerID != faction.Id)
+                person = null;
+
+            var refusal = IndustrySeat.SeatRefusal(commanded, person, seat.CommanderId);
+            if (refusal != null)
+                return CommandResult.Reject(refusal);
+
+            // The head may be moving from another colony: both colonies' views change.
+            Entity? from = IndustrySeat.HoldsIndustrySeat(person!, out var previous) && previous.Id != commanded.Id ? previous : null;
+            refusal = IndustrySeat.Seat(commanded, person!, commanded.StarSysDateTime);
+            if (refusal != null)
+                return CommandResult.Reject(refusal);
+
+            PublishPersonnelChanged(commanded);
+            if (from != null)
+                PublishPersonnelChanged(from);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateUnseatIndustryHead(Entity faction, Entity commanded, GameCommand command)
+        {
+            var refusal = IndustrySeat.Unseat(commanded, commanded.StarSysDateTime);
+            if (refusal != null)
+                return CommandResult.Reject(refusal);
+            PublishPersonnelChanged(commanded);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
