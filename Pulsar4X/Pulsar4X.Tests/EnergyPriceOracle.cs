@@ -49,10 +49,10 @@ static class EnergyPriceOracle
     public static double Steel_kWh => (70 + 88 * Ext("iron") + 11 * Ext("chromium") + 1 * Ext("hydrocarbons")) / 100;
 
     /// <summary>
-    /// Delivery to the Ceres depot by hand, kWh per kg: the stock miner (dry 47,422 kg with its crew quarters, warp power 2 MW,
+    /// Delivery to the Ceres depot by hand, kWh per kg: the stock miner (dry 50,809 kg with its crew quarters and bunks, warp power 2 MW,
     /// bleed 0.5, bubble 4/3 GJ to open, 15 kW to hold) warps the settings' distance along the belt
     /// (radial 0 is priced as falling: bleed-capped at half its drive speed of
-    /// int(2e6 / 47,422 x 1000) = 42,174 m/s; 44,058 before crew quarters), back full with 1,000 t and out empty.
+    /// int(2e6 / 50,809 x 1000) = 39,363 m/s; 42,174 before the crew-rules bunks and reactor), back full with 1,000 t and out empty.
     /// Energy per leg = 4e6/3 kJ + 15 kW x distance / speed; over the 1,000,000 kg hold.
     /// </summary>
     /// <summary>
@@ -66,8 +66,9 @@ static class EnergyPriceOracle
         double au = game.Settings.DepotDeliveryDistance_AU;
         if (!(au > 0))
             return 0;
-        // Crew plan phase 4: the miner's 4 t reactor (+2,000 kg dry, 49,422 kg) slows its drive from 42,174 m/s.
-        double speed = 40467 * 0.5;
+        // Crew rules: the miner's 6 crew bunks (+1,387 kg dry, 50,809 kg) slow its drive: int(2e6 / 50,809 x 1000) = 39,363 m/s
+        // (40,467 at 49,422 kg), bleed-capped at half.
+        double speed = 39363 * 0.5;
         double legKJ = 4e6 / 3 + 15 * (au * UniversalConstants.Units.MetersPerAu / speed);
         // Energy phase 6: the turbine's fissile fuel for that energy (50 kW of heat per 15 kW,
         // 40e9 kJ per kg) at its embodied energy.
