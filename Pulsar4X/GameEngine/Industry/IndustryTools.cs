@@ -400,41 +400,60 @@ namespace Pulsar4X.Industry
                 throw new Exception("Unable to find IndustryAbilityDB");
             }
 
-            var resReq = job.ResourcesRequiredRemaining;
-            foreach (var kvp in resReq)
+            foreach (var shortfall in InputShortfalls(industryEntity, job.ResourcesRequiredRemaining, stockpile))
             {
-                ICargoable? cargoItem = industryEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(kvp.Key);
+                if (shortfall.Builder is not { } des)
+                    continue; // a raw resource: nothing here can build it
+                IndustryJob newjob = new IndustryJob(des);
+                newjob.InitialiseJob(shortfall.QueueQuantity, false);
+                // A job no line here takes is not queued, so it gets no log line. Its inputs are still walked, as before.
+                if (SetJobToFastest(industryDB, newjob))
+                    ShipLogBook.NoteIndustryQueued(industryEntity, HeadName(industryEntity), shortfall.QueueQuantity, newjob.Name, job.Name);
+                AutoAddSubJobs(industryEntity, newjob); //recursivly add jobs.
+            }
+        }
+
+        /// <summary>
+        /// One input a job needs more of than the colony's stockpile holds. The same numbers drive
+        /// <see cref="AutoAddSubJobs"/> and the missing-inputs API view, so a one-click "queue this input" matches chaining.
+        /// </summary>
+        internal readonly record struct InputShortfall(string ResourceId, ICargoable Item, long Required, long InStock)
+        {
+            /// <summary>Units still needed: required minus stock. Always above 0 for a returned shortfall.</summary>
+            public long Short => Required - InStock;
+
+            /// <summary>The design that builds this input, or null for a raw resource that cannot be built.</summary>
+            public IConstructableDesign? Builder => Item as IConstructableDesign;
+
+            /// <summary>The quantity a one-shot feeder job for the shortfall queues, capped at what a job can hold (65535).</summary>
+            public ushort QueueQuantity => (ushort)Math.Min(Short, ushort.MaxValue);
+        }
+
+        /// <summary>
+        /// Every input in <paramref name="required"/> (the current item's remaining resource needs, by id) that the
+        /// stockpile holds less of. Inputs the faction has no cargo good or design for are skipped.
+        /// </summary>
+        internal static List<InputShortfall> InputShortfalls(Entity colony, IReadOnlyDictionary<string, long> required, CargoStorageDB? stockpile)
+        {
+            var found = new List<InputShortfall>();
+            var info = colony.GetFactionOwner.GetDataBlob<FactionInfoDB>();
+            foreach (var kvp in required)
+            {
+                ICargoable? cargoItem = info.Data.CargoGoods.GetAny(kvp.Key);
                 if (cargoItem is null)
                 {
-                    if (industryEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().IndustryDesigns.TryGetValue(kvp.Key, out var design)
-                        && design != null)
-                    {
+                    if (info.IndustryDesigns.TryGetValue(kvp.Key, out var design) && design != null)
                         cargoItem = (ICargoable)design;
-                    }
                     else
-                    {
                         continue;
-                    }
                 }
-                var numStored = stockpile.GetUnitsStoredByDesign(cargoItem, false);
-                var numReq = kvp.Value - numStored;
-                if (numReq > 0)
-                {
-                    if (cargoItem is IConstructableDesign)
-                    {
-                        IConstructableDesign des = (IConstructableDesign)cargoItem;
-                        IndustryJob newjob = new IndustryJob(des);
-                        newjob.InitialiseJob((ushort)numReq, false);
-                        // A job no line here takes is not queued, so it gets no log line. Its inputs are still walked, as before.
-                        if (SetJobToFastest(industryDB, newjob))
-                            ShipLogBook.NoteIndustryQueued(industryEntity, HeadName(industryEntity), numReq, newjob.Name, job.Name);
-                        AutoAddSubJobs(industryEntity, newjob); //recursivly add jobs.
-                    }
-                }
+                long stored = stockpile?.GetUnitsStoredByDesign(cargoItem, false) ?? 0;
+                if (kvp.Value - stored > 0)
+                    found.Add(new InputShortfall(kvp.Key, cargoItem, kvp.Value, stored));
             }
-
-
+            return found;
         }
+
         static string HeadName(Entity colony)
         {
             if (GameEngine.People.IndustrySeat.TryGetHead(colony, out var head)
@@ -444,12 +463,11 @@ namespace Pulsar4X.Industry
             return "head";
         }
 
-        internal static bool SetJobToFastest(IndustryAbilityDB industrydb, IndustryJob job)
+        /// <summary>The colony line that builds this industry type fastest, or null when none takes it. Shipyards take only ships.</summary>
+        internal static string? FastestLineId(IndustryAbilityDB industrydb, string typID)
         {
-            var typID = job.TypeID;
             (string lineID, int rate) bestLine = (String.Empty, 0);
-            var plines = industrydb.ProductionLines;
-            foreach (var line in plines)
+            foreach (var line in industrydb.ProductionLines)
             {
                 if (!line.Value.IndustryTypeRates.TryGetValue(typID, out int rate))
                     rate = -1;
@@ -460,9 +478,15 @@ namespace Pulsar4X.Industry
                 if (rate > bestLine.rate)
                     bestLine = (line.Key, rate);
             }
-            if (bestLine.lineID == String.Empty)
+            return bestLine.lineID == String.Empty ? null : bestLine.lineID;
+        }
+
+        internal static bool SetJobToFastest(IndustryAbilityDB industrydb, IndustryJob job)
+        {
+            var lineId = FastestLineId(industrydb, job.TypeID);
+            if (lineId == null)
                 return false;
-            AddJob(industrydb, bestLine.lineID, job);
+            AddJob(industrydb, lineId, job);
             return true;
         }
     }

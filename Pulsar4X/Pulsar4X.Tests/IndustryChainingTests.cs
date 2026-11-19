@@ -372,4 +372,286 @@ public class IndustryChainingTests
         Assert.That(Jobs(colony, FactoryId), Has.Count.EqualTo(1));
         Assert.That(IndustryLog(colony), Is.Empty);
     }
+
+    // ----- the missing-inputs view (slice 5) -----
+
+    static IndustryView View(Entity colony, int? viewer = null)
+        => new GameProjector(Game).ProjectEntity(colony, viewer ?? colony.FactionOwnerID).GetView<IndustryView>()!;
+
+    static IReadOnlyList<MissingInputView> Missing(Entity colony, string lineId, int index = 0)
+        => View(colony).ProductionLines.Single(l => l.Id == lineId).Jobs[index].MissingInputs;
+
+    static void Stock(World world, Entity colony, string cargoId, long units)
+        => Assert.That(colony.GetDataBlob<CargoStorageDB>().AddCargoByUnit(world.Info.Data.CargoGoods.GetAny(cargoId)!, units), Is.EqualTo(units));
+
+    [Test]
+    public void MissingRawResource_IsListedButNotBuildable()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Queue(world, colony, RefineryId, "plastic"); // plastic needs 1 hydrocarbons; none on hand
+
+        var missing = Missing(colony, RefineryId).Single();
+
+        Assert.That(missing.ItemId, Is.EqualTo("hydrocarbons"));
+        Assert.That(missing.Name, Is.EqualTo("Hydrocarbons"));
+        Assert.That((missing.Required, missing.InStock, missing.Short), Is.EqualTo((1L, 0L, 1L)));
+        Assert.That(missing.CanBuild, Is.False);
+        Assert.That(missing.DesignId, Is.Empty);
+        Assert.That(missing.LineId, Is.Empty);
+        Assert.That(missing.LineKind, Is.Empty);
+        Assert.That(missing.QueueQuantity, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void MissingPlastic_IsBuildableAtTheRefinery()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+
+        var missing = Missing(colony, FactoryId).Single();
+
+        Assert.That(missing.ItemId, Is.EqualTo("plastic"));
+        Assert.That(missing.Name, Is.EqualTo("Plastic"));
+        Assert.That((missing.Required, missing.InStock, missing.Short), Is.EqualTo((40L, 0L, 40L)));
+        Assert.That(missing.CanBuild, Is.True);
+        Assert.That(missing.DesignId, Is.EqualTo("plastic"));
+        Assert.That(missing.LineId, Is.EqualTo(RefineryId));
+        Assert.That(missing.LineName, Is.EqualTo("Refinery"));
+        Assert.That(missing.LineKind, Is.EqualTo(IndustryLineKinds.Refinery));
+        Assert.That(missing.QueueQuantity, Is.EqualTo(40));
+    }
+
+    [Test]
+    public void MissingComponent_IsBuildableAtTheFactory_NotTheShipyard()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        // A leftover component rate on the yard must not win, as in chaining.
+        colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[YardId].IndustryTypeRates["component-construction"] = 1000;
+        Queue(world, colony, YardId, world.Hull.UniqueID);
+
+        var missing = Missing(colony, YardId).Single();
+
+        Assert.That(missing.ItemId, Is.EqualTo(world.Part.UniqueID));
+        Assert.That(missing.Name, Is.EqualTo("Gizmo"));
+        Assert.That(missing.CanBuild, Is.True);
+        Assert.That(missing.DesignId, Is.EqualTo(world.Part.UniqueID));
+        Assert.That(missing.LineId, Is.EqualTo(FactoryId));
+        Assert.That(missing.LineKind, Is.EqualTo(IndustryLineKinds.Factory));
+        Assert.That(missing.QueueQuantity, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void AShipyardLine_IsReportedAsAShipyard()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        // An input whose industry type is ship assembly, to exercise the kind (stock hulls are not inputs in real data).
+        var slipItem = new ComponentDesign
+        {
+            UniqueID = "chain-slip-" + Guid.NewGuid().ToString("N"),
+            Name = "Slip Frame",
+            IndustryTypeID = "ship-assembly",
+            ComponentMountType = ComponentMountType.ShipComponent,
+            CargoTypeID = "general-storage",
+            MassPerUnit = 1,
+            VolumePerUnit = 1,
+            IndustryPointCosts = 1,
+        };
+        world.Info.IndustryDesigns[slipItem.UniqueID] = slipItem;
+        world.Part.ResourceCosts.Clear();
+        world.Part.ResourceCosts[slipItem.UniqueID] = 1;
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+
+        var missing = Missing(colony, FactoryId).Single();
+
+        Assert.That(missing.LineId, Is.EqualTo(YardId));
+        Assert.That(missing.LineKind, Is.EqualTo(IndustryLineKinds.Shipyard));
+    }
+
+    [Test]
+    public void StockOnHand_ReducesTheShortfall()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Stock(world, colony, "plastic", 15);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+
+        var missing = Missing(colony, FactoryId).Single();
+
+        Assert.That((missing.Required, missing.InStock, missing.Short), Is.EqualTo((40L, 15L, 25L)));
+        Assert.That(missing.QueueQuantity, Is.EqualTo(25));
+    }
+
+    [Test]
+    public void NothingMissing_GivesAnEmptyList()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Stock(world, colony, "plastic", 40);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+
+        Assert.That(Missing(colony, FactoryId), Is.Empty);
+
+        // A job with no inputs at all is empty too.
+        world.Part.ResourceCosts.Clear();
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        Assert.That(Missing(colony, FactoryId, 1), Is.Empty);
+    }
+
+    [Test]
+    public void AnInputNoLineTakes_IsListedAsNotBuildableHere()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        colony.GetDataBlob<IndustryAbilityDB>().ProductionLines.Remove(RefineryId);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+
+        var missing = Missing(colony, FactoryId).Single();
+
+        Assert.That(missing.ItemId, Is.EqualTo("plastic"));
+        Assert.That(missing.Short, Is.EqualTo(40));
+        Assert.That(missing.CanBuild, Is.False, "this colony has no refinery");
+        Assert.That(missing.LineId, Is.Empty);
+    }
+
+    [Test]
+    public void QueueQuantity_IsCappedAtWhatAJobCanHold()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        world.Part.ResourceCosts["plastic"] = 100_000;
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+
+        var missing = Missing(colony, FactoryId).Single();
+
+        Assert.That(missing.Short, Is.EqualTo(100_000));
+        Assert.That(missing.QueueQuantity, Is.EqualTo(ushort.MaxValue));
+    }
+
+    [Test]
+    public void TheQuantityAndLine_MatchWhatChainingQueues()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Stock(world, colony, "plastic", 15);
+        Queue(world, colony, FactoryId, world.Part.UniqueID); // no head: only itself
+        var missing = Missing(colony, FactoryId).Single();
+        Assert.That(Jobs(colony, RefineryId), Is.Empty);
+
+        SeatHead(world, colony);
+        Queue(world, colony, FactoryId, world.Part.UniqueID); // a head: chains the same shortfall
+
+        var chained = Jobs(colony, RefineryId).Single();
+        Assert.That(chained.ItemGuid, Is.EqualTo(missing.DesignId));
+        Assert.That(chained.NumberOrdered, Is.EqualTo(missing.QueueQuantity));
+    }
+
+    [Test]
+    public void TheView_CanQueueTheMissingInput_WithTheExistingCommand()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        var missing = Missing(colony, FactoryId).Single();
+
+        var result = new CommandTranslator(Game).Translate(world.Faction, colony,
+            new QueueIndustryJobCommand(colony.Id, missing.LineId, missing.DesignId, missing.QueueQuantity, false, false));
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var queued = Jobs(colony, RefineryId).Single();
+        Assert.That(queued.ItemGuid, Is.EqualTo("plastic"));
+        Assert.That(queued.NumberOrdered, Is.EqualTo(40));
+        Assert.That(queued.Auto, Is.False);
+    }
+
+    [Test]
+    public void AForeignViewer_SeesNoIndustryView()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        var other = FactionFactory.CreateFaction(Game, "Other-" + Guid.NewGuid().ToString("N"));
+
+        Assert.That(new GameProjector(Game).ProjectEntity(colony, other.Id).GetView<IndustryView>(), Is.Null);
+    }
+
+    // ----- cancel / priority / edit log lines -----
+
+    static List<string> IndustryLines(Entity colony)
+        => colony.GetDataBlob<ShipLogDB>().Entries.Select(e => e.Text).Where(t => t.StartsWith("Industry:")).ToList();
+
+    [Test]
+    public void CancellingAJob_WritesALogLine()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        var id = Jobs(colony, FactoryId).Single().JobID;
+
+        var result = new CommandTranslator(Game).Translate(world.Faction, colony, new CancelIndustryJobCommand(colony.Id, FactoryId, id));
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(Jobs(colony, FactoryId), Is.Empty);
+        Assert.That(IndustryLines(colony), Is.EqualTo(new[]
+        {
+            "Industry: queued 1 Gizmo on Factory.",
+            "Industry: cancelled Gizmo on Factory.",
+        }));
+    }
+
+    [Test]
+    public void MovingAJob_WritesALogLine_OnlyWhenItMoves()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        for (int i = 0; i < 3; i++)
+            Queue(world, colony, FactoryId, world.Part.UniqueID);
+        var last = Jobs(colony, FactoryId)[2].JobID;
+        var translator = new CommandTranslator(Game);
+
+        translator.Translate(world.Faction, colony, new ChangeIndustryJobPriorityCommand(colony.Id, FactoryId, last, -1));
+        Assert.That(Jobs(colony, FactoryId)[1].JobID, Is.EqualTo(last));
+        Assert.That(IndustryLines(colony).Last(), Is.EqualTo("Industry: moved Gizmo up on Factory."));
+
+        translator.Translate(world.Faction, colony, new ChangeIndustryJobPriorityCommand(colony.Id, FactoryId, last, 1));
+        Assert.That(Jobs(colony, FactoryId)[2].JobID, Is.EqualTo(last));
+        Assert.That(IndustryLines(colony).Last(), Is.EqualTo("Industry: moved Gizmo down on Factory."));
+
+        int lines = IndustryLines(colony).Count;
+        translator.Translate(world.Faction, colony, new ChangeIndustryJobPriorityCommand(colony.Id, FactoryId, last, 1));
+        Assert.That(IndustryLines(colony), Has.Count.EqualTo(lines), "already last: it does not move, so no line");
+    }
+
+    [Test]
+    public void EditingAJob_WritesALogLine()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        var id = Jobs(colony, FactoryId).Single().JobID;
+
+        Assert.That(Game.OrderHandler.HandleOrder(IndustryOrder2.CreateEditJobOrder(world.Faction.Id, colony, FactoryId, id, 10, true)), Is.True);
+        Assert.That(IndustryLines(colony).Last(), Is.EqualTo("Industry: changed Gizmo on Factory to 10 (repeating)."));
+
+        Assert.That(Game.OrderHandler.HandleOrder(IndustryOrder2.CreateEditJobOrder(world.Faction.Id, colony, FactoryId, id, 3, false)), Is.True);
+        Assert.That(IndustryLines(colony).Last(), Is.EqualTo("Industry: changed Gizmo on Factory to 3."));
+        var job = Jobs(colony, FactoryId).Single();
+        Assert.That((job.NumberOrdered, job.Auto), Is.EqualTo(((ushort)3, false)));
+    }
+
+    [Test]
+    public void ChangingAJobThatIsGone_WritesNothing()
+    {
+        var world = NewWorld();
+        var colony = Colony(world);
+        Queue(world, colony, FactoryId, world.Part.UniqueID);
+        int lines = IndustryLines(colony).Count;
+
+        new CommandTranslator(Game).Translate(world.Faction, colony, new CancelIndustryJobCommand(colony.Id, FactoryId, "no-such-job"));
+
+        Assert.That(IndustryLines(colony), Has.Count.EqualTo(lines));
+    }
 }

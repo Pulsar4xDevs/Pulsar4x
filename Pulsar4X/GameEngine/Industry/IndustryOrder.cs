@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
@@ -157,19 +158,52 @@ namespace Pulsar4X.Industry
                     }
                         break;
                     case OrderTypeEnum.CancelJob:
+                    {
+                        var found = FindQueuedJob();
                         IndustryTools.CancelExsistingJob(_entityCommanding, productionLineID, ItemID);
+                        if (found.job != null)
+                            ShipLogBook.NoteIndustryChange(_entityCommanding, $"cancelled {found.job.Name} on {found.lineName}");
                         break;
+                    }
                     case OrderTypeEnum.EditJob:
+                    {
+                        var found = FindQueuedJob();
                         IndustryTools.EditExsistingJob(_entityCommanding, productionLineID, ItemID, RepeatJob, NumberOrderd, AutoInstall);
+                        if (found.job != null)
+                            ShipLogBook.NoteIndustryChange(_entityCommanding,
+                                $"changed {found.job.Name} on {found.lineName} to {NumberOrderd}{(RepeatJob ? " (repeating)" : "")}");
                         break;
+                    }
                     case OrderTypeEnum.ChangePriority:
+                    {
+                        var found = FindQueuedJob();
+                        int before = found.job == null ? -1 : found.jobs!.IndexOf(found.job);
                         IndustryTools.ChangeJobPriority(_entityCommanding, productionLineID, ItemID, Delta);
+                        int after = found.job == null ? -1 : found.jobs!.IndexOf(found.job);
+                        // A job already at the end it was pushed to does not move, so it writes nothing.
+                        if (found.job != null && after != before)
+                            ShipLogBook.NoteIndustryChange(_entityCommanding,
+                                $"moved {found.job.Name} {(after < before ? "up" : "down")} on {found.lineName}");
                         break;
+                    }
                 }
 
 
                 IsRunning = true;
             }
+        }
+
+        // The job this order names (by job id) on its line, with the line's display name, for the colony log.
+        private (IndustryJob? job, List<IndustryJob>? jobs, string lineName) FindQueuedJob()
+        {
+            if (_entityCommanding.TryGetDataBlob<IndustryAbilityDB>(out var industry)
+                && industry.ProductionLines.TryGetValue(productionLineID, out var line))
+            {
+                var job = line.Jobs.Find(j => j.JobID == ItemID);
+                if (job != null)
+                    return (job, line.Jobs, string.IsNullOrEmpty(line.Name) ? productionLineID : line.Name);
+            }
+            return (null, null, productionLineID);
         }
 
         internal override bool IsValidCommand(Game game)

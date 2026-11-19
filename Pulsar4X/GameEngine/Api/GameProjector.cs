@@ -1897,6 +1897,42 @@ namespace Pulsar4X.Engine.Api
 
         // ----- industry / local construction -----
 
+        // The job's current item's inputs the stockpile is short of. Shares IndustryTools.InputShortfalls and
+        // FastestLineId with the industry head's chaining, so a one-click queue matches what chaining would do.
+        private static IReadOnlyList<MissingInputView> ProjectMissingInputs(
+            Entity colony, IndustryAbilityDB industry, CargoStorageDB? storage, FactionInfoDB factionInfo, IndustryJob job)
+        {
+            if (job.ResourcesRequiredRemaining.Count == 0)
+                return Array.Empty<MissingInputView>();
+
+            var views = new List<MissingInputView>();
+            foreach (var shortfall in IndustryTools.InputShortfalls(colony, job.ResourcesRequiredRemaining, storage))
+            {
+                var view = new MissingInputView(
+                    shortfall.ResourceId,
+                    string.IsNullOrEmpty(shortfall.Item.Name) ? ResolveItemName(factionInfo, shortfall.ResourceId) : shortfall.Item.Name,
+                    shortfall.Required, shortfall.InStock, shortfall.Short);
+                if (shortfall.Builder is { } builder
+                    && IndustryTools.FastestLineId(industry, builder.IndustryTypeID) is { } lineId)
+                {
+                    var line = industry.ProductionLines[lineId];
+                    view = view with
+                    {
+                        CanBuild = true,
+                        DesignId = builder.UniqueID,
+                        LineId = lineId,
+                        LineName = string.IsNullOrEmpty(line.Name) ? lineId : line.Name,
+                        LineKind = IndustryTools.IsShipyardLine(line) ? IndustryLineKinds.Shipyard
+                            : builder.IndustryTypeID == "refining" ? IndustryLineKinds.Refinery
+                            : IndustryLineKinds.Factory,
+                        QueueQuantity = shortfall.QueueQuantity,
+                    };
+                }
+                views.Add(view);
+            }
+            return views;
+        }
+
         private static IndustryView? ToIndustryView(IndustryAbilityDB industry, Entity entity, int factionId)
         {
             var game = entity.Manager?.Game;
@@ -1931,6 +1967,7 @@ namespace Pulsar4X.Engine.Api
                         percent, job.ProductionPointsLeft)
                     {
                         RemainingRequirements = requirements,
+                        MissingInputs = ProjectMissingInputs(entity, industry, storage, factionInfo, job),
                         CrewRequired = factionInfo.IndustryDesigns.TryGetValue(job.ItemGuid, out var jobDesign) && jobDesign is ShipDesign jobShip
                             ? jobShip.CrewReq : 0,
                         CrewWarning = jobDesign is ShipDesign crewed ? JobCrewWarning(entity, crewed) : "",
