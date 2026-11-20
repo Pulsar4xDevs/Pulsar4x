@@ -81,6 +81,13 @@ namespace Pulsar4X.People
         [PublicAPI]
         public double TemperatureToleranceRange { get; internal set; }
 
+        /// <summary>
+        /// The Client portrait pack that draws this species' people (<c>Portraits/species/&lt;pack&gt;</c>). It lives on the species, not on
+        /// each person, so a view derives it from here and an old save with no pack just reads "human".
+        /// </summary>
+        [PublicAPI]
+        public string PortraitPack { get; internal set; } = "human";
+
         public SpeciesDB() { }
 
         public SpeciesDB(double baseGravity, double minGravity, double maxGravity, double basePressure, double minPressure, double maxPressure, double baseTemp, double minTemp, double maxTemp, string breathableGas = "O2")
@@ -106,7 +113,10 @@ namespace Pulsar4X.People
         {
             return new SpeciesDB(BaseGravity, MinimumGravityConstraint, MaximumGravityConstraint,
                 BasePressure, MinimumPressureConstraint, MaximumPressureConstraint,
-                BaseTemperature, MinimumTemperatureConstraint, MaximumTemperatureConstraint, BreathableGasSymbol);
+                BaseTemperature, MinimumTemperatureConstraint, MaximumTemperatureConstraint, BreathableGasSymbol)
+            {
+                PortraitPack = PortraitPack,
+            };
         }
     }
 }

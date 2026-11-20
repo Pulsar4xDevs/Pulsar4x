@@ -45,6 +45,48 @@ public static class Portraits
     public static int SeedOf(Entity person)
         => person.TryGetDataBlob<CommanderDB>(out var db) ? SeedOf(person.Id, db.PortraitSeed) : FromId(person.Id);
 
+    /// <summary>The pack a person with no species and no faction species gets.</summary>
+    public const string DefaultPack = "human";
+
+    /// <summary>The portrait pack of a species entity, or null when the id does not resolve to a species.</summary>
+    static string? PackOfSpecies(EntityManager? manager, int speciesId)
+    {
+        if (speciesId < 0 || manager == null || !manager.TryGetGlobalEntityById(speciesId, out var species)
+            || !species.TryGetDataBlob<SpeciesDB>(out var db))
+            return null;
+        return string.IsNullOrWhiteSpace(db.PortraitPack) ? DefaultPack : db.PortraitPack;
+    }
+
+    /// <summary>
+    /// The portrait pack for a person, derived each time from species data (never saved per person): their own species if they
+    /// have one that still exists, else the owning faction's primary species (the first on its list), else "human".
+    /// </summary>
+    public static string PackFor(EntityManager? manager, int speciesId, int factionId)
+    {
+        var own = PackOfSpecies(manager, speciesId);
+        if (own != null)
+            return own;
+        if (manager != null && factionId >= 0 && manager.TryGetGlobalEntityById(factionId, out var faction)
+            && faction.TryGetDataBlob<FactionInfoDB>(out var info))
+        {
+            foreach (var species in info.Species)
+            {
+                var pack = PackOfSpecies(manager, species.Id);
+                if (pack != null)
+                    return pack;
+            }
+        }
+        return DefaultPack;
+    }
+
+    /// <summary>The pack for a commander entity: their <see cref="CommanderDB.SpeciesId"/>, else their faction's (or <paramref name="fallbackFactionId"/>'s) primary species.</summary>
+    public static string PackFor(Entity person, int fallbackFactionId = -1)
+    {
+        int speciesId = person.TryGetDataBlob<CommanderDB>(out var db) ? db.SpeciesId : -1;
+        int factionId = person.FactionOwnerID >= 0 ? person.FactionOwnerID : fallbackFactionId;
+        return PackFor(person.Manager, speciesId, factionId);
+    }
+
     /// <summary>A candidate's seed, or the id-derived one for a candidate saved before seeds existed.</summary>
     public static int SeedOf(Candidate candidate) => SeedOf(candidate.Id, candidate.PortraitSeed);
 

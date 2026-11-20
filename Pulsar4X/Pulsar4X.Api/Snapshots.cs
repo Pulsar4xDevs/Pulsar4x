@@ -407,6 +407,8 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
 
     /// <summary>The chair holder's <see cref="PortraitRoles"/> value (<c>administrator</c> while seated). Empty when there is no one in the post.</summary>
     public string AdministratorPortraitRole { get; init; } = "";
+    /// <summary>The Client portrait pack (species folder) that draws this person: their species, else their faction's primary species, else "human". Empty for an empty post.</summary>
+    public string AdministratorPortraitSpecies { get; init; } = "";
 
     /// <summary>Owning faction only. True when a colony-level chair exists, even if nobody sits it.</summary>
     public bool HasAdministrativePost { get; init; }
@@ -422,6 +424,8 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
 
     /// <summary>The industry head's <see cref="PortraitRoles"/> value (<c>industry-head</c> while seated). Empty when there is no one in the post.</summary>
     public string IndustryHeadPortraitRole { get; init; } = "";
+    /// <summary>The Client portrait pack (species folder) that draws this person: their species, else their faction's primary species, else "human". Empty for an empty post.</summary>
+    public string IndustryHeadPortraitSpecies { get; init; } = "";
 
     /// <summary>
     /// Owning faction only. Trained crew waiting in this colony's pool, people. Academy crew courses graduate
@@ -814,6 +818,8 @@ public sealed record ShipView(
 
     /// <summary>The captain's <see cref="PortraitRoles"/> value (<c>captain</c> while seated). Empty when there is no one in the post.</summary>
     public string CommanderPortraitRole { get; init; } = "";
+    /// <summary>The Client portrait pack (species folder) that draws this person: their species, else their faction's primary species, else "human". Empty for an empty post.</summary>
+    public string CommanderPortraitSpecies { get; init; } = "";
 
     /// <summary>
     /// Owner only: where <see cref="CrewRequired"/> comes from, one row per component design with crew
@@ -1316,6 +1322,8 @@ public sealed record CandidateView(
 
     /// <summary>Always <see cref="PortraitRoles.Candidate"/>.</summary>
     public string PortraitRole { get; init; } = PortraitRoles.Candidate;
+    /// <summary>The Client portrait pack (species folder) that draws this person: their species, else their faction's primary species, else "human".</summary>
+    public string PortraitSpecies { get; init; } = "human";
 }
 
 /// <summary>Every mounted academy on a colony, plus the people a recruit cohort would draw on.</summary>
@@ -1386,6 +1394,8 @@ public sealed record IndustryView(IReadOnlyList<ProductionLineView> ProductionLi
 
     /// <summary>The industry head's <see cref="PortraitRoles"/> value (<c>industry-head</c> while seated). Empty when there is no one in the post.</summary>
     public string IndustryHeadPortraitRole { get; init; } = "";
+    /// <summary>The Client portrait pack (species folder) that draws this person: their species, else their faction's primary species, else "human". Empty for an empty post.</summary>
+    public string IndustryHeadPortraitSpecies { get; init; } = "";
 }
 
 public sealed record LaunchPadStateView(long MaxTonnage, bool Free)
@@ -1779,6 +1789,8 @@ public sealed record ResearcherView(
 
     /// <summary>The lab's scientist's <see cref="PortraitRoles"/> value (<c>scientist</c> while seated). Empty when there is no one in the post.</summary>
     public string ScientistPortraitRole { get; init; } = "";
+    /// <summary>The Client portrait pack (species folder) that draws this person: their species, else their faction's primary species, else "human". Empty for an empty post.</summary>
+    public string ScientistPortraitSpecies { get; init; } = "";
 
     /// <summary>Days in the current game month (the research bill is the daily cost times this).</summary>
     public int DaysInMonth { get; init; } = 30;
@@ -1877,6 +1889,8 @@ public sealed record CommanderSnapshot(
 
     /// <summary>One of <see cref="PortraitRoles"/>: picks the uniform. Follows the person's current post.</summary>
     public string PortraitRole { get; init; } = PortraitRoles.Civilian;
+    /// <summary>The Client portrait pack (species folder) that draws this person: their species, else their faction's primary species, else "human".</summary>
+    public string PortraitSpecies { get; init; } = "human";
 }
 
 /// <summary>The faction's research state: tech categories (game-static), every unlocked tech with
@@ -2052,6 +2066,8 @@ public sealed record ShipSnapshot(
 
     /// <summary>The captain's <see cref="PortraitRoles"/> value (<c>captain</c> while seated). Empty when there is no one in the post.</summary>
     public string CommanderPortraitRole { get; init; } = "";
+    /// <summary>The Client portrait pack (species folder) that draws this person: their species, else their faction's primary species, else "human". Empty for an empty post.</summary>
+    public string CommanderPortraitSpecies { get; init; } = "";
 
     public GoalSnapshot? Goal { get; init; }
     public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
@@ -2186,6 +2202,8 @@ public sealed class FleetSnapshot
 
     /// <summary>The flagship's captain's <see cref="PortraitRoles"/> value (<c>captain</c> while seated). Empty when there is no one in the post.</summary>
     public string CommanderPortraitRole { get; init; } = "";
+    /// <summary>The Client portrait pack (species folder) that draws this person: their species, else their faction's primary species, else "human". Empty for an empty post.</summary>
+    public string CommanderPortraitSpecies { get; init; } = "";
 
     /// <summary>
     /// The flagship's captain. Null when the fleet has no flagship or that chair is empty.

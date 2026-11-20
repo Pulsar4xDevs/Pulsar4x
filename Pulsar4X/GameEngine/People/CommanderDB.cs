@@ -31,6 +31,13 @@ namespace Pulsar4X.People
         [JsonProperty]
         public int PortraitSeed { get; internal set; }
 
+        /// <summary>
+        /// The species entity this person belongs to, or -1 when unknown (the founding staff, and anyone saved before this existed).
+        /// It picks the portrait pack; a view falls back to the owning faction's primary species when it is -1.
+        /// </summary>
+        [JsonProperty]
+        public int SpeciesId { get; internal set; } = -1;
+
 
         public CommanderDB() { }
 
@@ -53,6 +60,7 @@ namespace Pulsar4X.People
             CommissionedOn = commanderDB.CommissionedOn;
             RankedOn = commanderDB.RankedOn;
             PortraitSeed = commanderDB.PortraitSeed;
+            SpeciesId = commanderDB.SpeciesId;
         }
 
         public override object Clone()

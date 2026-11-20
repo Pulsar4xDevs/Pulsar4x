@@ -203,6 +203,7 @@ namespace Pulsar4X.People
                     CommissionedOn = colony.StarSysDateTime,
                     RankedOn = colony.StarSysDateTime,
                     PortraitSeed = Portraits.SeedOf(candidate), // the face the candidate had
+                    SpeciesId = speciesId,
                 };
                 admin = CommanderFactory.Create(colony.Manager, faction.Id, db);
             }

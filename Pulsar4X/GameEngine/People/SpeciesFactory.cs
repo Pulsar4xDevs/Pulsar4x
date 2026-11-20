@@ -30,6 +30,7 @@ namespace Pulsar4X.People
                     MinimumTemperatureConstraint = speciesBlueprint.Temperature.Minimum ?? 0,
                     MaximumTemperatureConstraint = speciesBlueprint.Temperature.Maximum ?? 0,
                     BreathableGasSymbol = speciesBlueprint.BreathableGasSymbol ?? "O2",
+                    PortraitPack = string.IsNullOrWhiteSpace(speciesBlueprint.PortraitPack) ? "human" : speciesBlueprint.PortraitPack,
                 }
             });
 
