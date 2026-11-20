@@ -437,6 +437,9 @@ public class RefitIndustryJobTests
         var storage = yard.GetDataBlob<CargoStorageDB>();
         var quarters = AnyShipPart(info);
         var ship = NewShip(yard, faction, info.ShipDesigns.Values.First(d => d.MassPerUnit <= line.MaxVolume));
+        // No industry head: with one seated the missing part is queued and built by itself (RefitPartsTests).
+        if (GameEngine.People.IndustrySeat.HasHead(yard))
+            GameEngine.People.IndustrySeat.Unseat(yard, yard.StarSysDateTime);
 
         var queued = new CommandTranslator(game).Translate(faction, yard, new QueueShipRefitCommand(
             yard.Id, lineId, ship.Id, Array.Empty<int>(), Array.Empty<int>(), null, new[] { quarters.UniqueID }));

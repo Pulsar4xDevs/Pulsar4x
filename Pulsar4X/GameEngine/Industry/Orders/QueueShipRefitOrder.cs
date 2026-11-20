@@ -81,6 +81,9 @@ public class QueueShipRefitOrder : EntityAction
                 industryJob.Status = Pulsar4X.DataStructures.IndustryJobStatus.MissingResources;
         }
         IndustryTools.AddJob(_yard, _lineId, industryJob);
+        // With an industry head seated, the parts the refit waits for are queued now.
+        if (refit.MountDesignIds.Count > 0)
+            IndustryTools.AutoQueueRefitParts(_yard);
         EventManager.Instance.Publish(
             Event.Create(
                 EventType.ShipRefitBegan,

@@ -104,6 +104,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
                 return ShipRefitJob.NoStorageFor + part.Name + ".";
         }
 
+        ReleaseLostParts(storage, job);
         ClaimStoredParts(yard, storage, job);
         var waiting = new List<string>();
         foreach (var part in job.Mount)
@@ -131,10 +132,35 @@ public class LocalConstructionProcessor : IHotloopProcessor
             && faction.TryGetDataBlob<FactionInfoDB>(out var info) ? info : null;
 
     /// <summary>
+    /// A claimed part listed twice (an older claim did not see the job's own list), or no longer in the warehouse
+    /// (sold, used, moved), goes back to "wanted" by design, so another stored part of that design can be claimed.
+    /// Without this a refit held the same instance twice, passed the stock check, failed to take it a second time
+    /// and waited for ever.
+    /// </summary>
+    internal static void ReleaseLostParts(CargoStorageDB storage, ShipRefitJob job)
+    {
+        var seen = new HashSet<int>();
+        List<ComponentInstance>? keep = null;
+        for (int i = 0; i < job.Mount.Count; i++)
+        {
+            var part = job.Mount[i];
+            bool lost = !seen.Add(part.ID) || storage.GetUnitsStored(part, false) < 1;
+            if (lost && keep == null)
+                keep = job.Mount.Take(i).ToList();
+            if (lost)
+                job.MountDesignIds.Add(part.Design.UniqueID);
+            else
+                keep?.Add(part);
+        }
+        if (keep != null)
+            job.Mount = keep;
+    }
+
+    /// <summary>
     /// Moves a stored part of each still-wanted design into the job's mount list, which reserves it.
     /// A part stored as a stack of the design becomes one instance first.
     /// </summary>
-    static void ClaimStoredParts(Entity yard, CargoStorageDB storage, ShipRefitJob job)
+    internal static void ClaimStoredParts(Entity yard, CargoStorageDB storage, ShipRefitJob job)
     {
         if (job.MountDesignIds.Count == 0)
             return;
@@ -145,7 +171,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
         {
             if (!info.ComponentDesigns.TryGetValue(id, out var design))
                 continue;
-            var found = FindStoredPart(yard, storage, design);
+            var found = FindStoredPart(yard, storage, design, job);
             if (found == null)
                 continue;
             job.Mount.Add(found);
@@ -153,10 +179,13 @@ public class LocalConstructionProcessor : IHotloopProcessor
         }
     }
 
-    static ComponentInstance? FindStoredPart(Entity yard, CargoStorageDB storage, ComponentDesign design)
+    static ComponentInstance? FindStoredPart(Entity yard, CargoStorageDB storage, ComponentDesign design, ShipRefitJob job)
     {
         foreach (var (instance, _) in CargoMath.InstancesOf(storage, design))
         {
+            // The job may not be on a line yet (it claims when queued), so Reserved does not see its own list.
+            if (job.Mount.Any(part => part.ID == instance.ID))
+                continue;
             if (!ShipRefitJob.Reserved(yard, instance.ID))
                 return instance;
         }

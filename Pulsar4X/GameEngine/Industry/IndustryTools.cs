@@ -362,6 +362,9 @@ namespace Pulsar4X.Industry
             if (blocker != null)
             {
                 job.Status = IndustryJobStatus.MissingResources;
+                // With an industry head seated, parts nobody has queued yet are queued (once).
+                if (refit.MountDesignIds.Count > 0)
+                    AutoQueueRefitParts(yard);
                 return;
             }
 
@@ -644,6 +647,55 @@ namespace Pulsar4X.Industry
                 }
             }
             return units;
+        }
+
+        /// <summary>
+        /// The industry head's work for refits: every part the colony's waiting refit jobs still want (no stored part to
+        /// claim) is queued on the fastest line that builds it, less what jobs already queued on the colony will make,
+        /// so it never queues twice. Feeders are chained like <see cref="AutoAddSubJobs"/>. Does nothing without a
+        /// seated head. Returns the number of jobs queued.
+        /// </summary>
+        internal static int AutoQueueRefitParts(Entity colony)
+        {
+            if (!GameEngine.People.IndustrySeat.HasHead(colony)
+                || !colony.TryGetDataBlob<IndustryAbilityDB>(out var industryDB)
+                || colony.GetFactionOwner == null
+                || !colony.GetFactionOwner.TryGetDataBlob<FactionInfoDB>(out var info))
+                return 0;
+
+            // Wanted parts by design, over every refit on the colony's lines, with the first refit that wants each.
+            // Parts already in stock are claimed first, so only what is truly missing is queued.
+            colony.TryGetDataBlob<CargoStorageDB>(out var storage);
+            var wanted = new Dictionary<string, (long Count, string ForJob)>();
+            foreach (var (_, job) in ShipRefitJob.JobsOf(colony).ToList())
+            {
+                if (storage != null && job.Refit!.MountDesignIds.Count > 0)
+                    LocalConstructionProcessor.ClaimStoredParts(colony, storage, job.Refit);
+                foreach (var id in job.Refit!.MountDesignIds)
+                {
+                    wanted.TryGetValue(id, out var entry);
+                    wanted[id] = (entry.Count + 1, entry.ForJob ?? job.Name);
+                }
+            }
+
+            int queuedJobs = 0;
+            foreach (var (id, (count, forJob)) in wanted)
+            {
+                if (!info.IndustryDesigns.TryGetValue(id, out var design) || design == null)
+                    continue;
+                long toMake = count - QueuedOutput(colony, design);
+                if (toMake <= 0)
+                    continue; // jobs already queued here cover it
+                long perBatch = OutputPerItem(design);
+                var newJob = new IndustryJob(design);
+                newJob.InitialiseJob((ushort)Math.Min((toMake + perBatch - 1) / perBatch, ushort.MaxValue), false);
+                if (!SetJobToFastest(industryDB, newJob))
+                    continue; // no line here builds it
+                queuedJobs++;
+                ShipLogBook.NoteIndustryQueued(colony, HeadName(colony), newJob.NumberOrdered, newJob.Name, forJob);
+                AutoAddSubJobs(colony, newJob);
+            }
+            return queuedJobs;
         }
 
         static string HeadName(Entity colony)
