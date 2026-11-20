@@ -76,7 +76,7 @@
     "Payload": {
       "UniqueID": "tech-electromagnetic-sensors",
       "Name": "Electromagnetic Sensors",
-      "Description": "Detecting and measuring the electromagnetic spectrum. Opens the antenna techs and the Geological Surveyor; Antenna Sensitivity level 2 leads on to the Gravitational Surveyor and jump point work.",
+      "Description": "Detecting and measuring the electromagnetic spectrum. Opens the antenna techs and the Geological Surveyor.",
       "Category": "tech-category-sensors",
       "MaxLevel": 1,
       "DataFormula": "1",
@@ -87,6 +87,41 @@
           "tech-antenna-efficiency",
           "tech-antenna-bandwidth",
           "tech-geo-surveyor"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-gravitic-theory",
+      "Name": "Gravitic Theory",
+      "Description": "Gravity as a field and as geometry: gravitational waves, lensing and the equivalence principle. Opens the Gravitational Surveyor and Spacetime Metric Theory.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 1000",
+      "Unlocks": {
+        "1": [
+          "tech-gravitational-surveyor",
+          "tech-spacetime-metric-theory"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-spacetime-metric-theory",
+      "Name": "Spacetime Metric Theory",
+      "Description": "Solving the field equations for engineered geometries: warp metrics and the negative energy they demand. Opens the Alcubierre Warp Drive. Needs Gravitic Theory.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 8000",
+      "Unlocks": {
+        "1": [
+          "tech-early-warp-drive"
         ]
       }
     }
@@ -647,16 +682,11 @@
     "Payload": {
       "UniqueID": "tech-antenna-sensitivity",
       "Name": "Antenna Sensitivity",
-      "Description": "Better antennas pick up smaller signals from background noise. Feeds the Passive Sensor. Needs Electromagnetic Sensors. Level 2 opens the Gravitational Surveyor.",
+      "Description": "Better antennas pick up smaller signals from background noise. Feeds the Passive Sensor. Needs Electromagnetic Sensors.",
       "Category": "tech-category-sensors",
       "MaxLevel": 9,
       "DataFormula": "0.01 - [Level] * 0.001",
-      "CostFormula": "(1 + [Level]) * 500",
-      "Unlocks": {
-        "2": [
-          "tech-gravitational-surveyor"
-        ]
-      }
+      "CostFormula": "(1 + [Level]) * 500"
     }
   },
   {
@@ -782,7 +812,7 @@
     "Payload": {
       "UniqueID": "tech-gravitational-surveyor",
       "Name": "Gravitational Surveyor",
-      "Description": "Surveying gravitational anomalies to find jump points. Unlocks the Gravitational Surveyor. Needs Antenna Sensitivity level 2.",
+      "Description": "Surveying gravitational anomalies to find jump points. Unlocks the Gravitational Surveyor and opens JumpPoint Stabilization. Needs Gravitic Theory.",
       "Category": "tech-category-designs",
       "MaxLevel": 1,
       "DataFormula": "(1 + [Level]) * 5000",
@@ -836,7 +866,7 @@
     "Payload": {
       "UniqueID": "tech-early-nuclear-power",
       "Name": "Nuclear Power",
-      "Description": "Fission reactors, steam turbine reactors and RTGs. Needs Nuclear Theory. Leads on to directed energy and to Reactor Power Conversion, which leads on to warp research.",
+      "Description": "Fission reactors, steam turbine reactors and RTGs. Needs Nuclear Theory. Leads on to directed energy and to Reactor Power Conversion.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",
@@ -880,7 +910,7 @@
     "Payload": {
       "UniqueID": "tech-early-warp-drive",
       "Name": "Alcubierre Warp Drive",
-      "Description": "The Alcubierre Warp Drive and the research lines that improve it: bubble creation and sustain costs, then gravitational coupling, bleed, miniaturization and collapse efficiency. Needs Reactor Power Conversion level 2.",
+      "Description": "The Alcubierre Warp Drive and the research lines that improve it: bubble creation and sustain costs, then gravitational coupling, bleed, miniaturization and collapse efficiency. Needs Spacetime Metric Theory.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",
@@ -961,12 +991,7 @@
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 10,
       "DataFormula": "0.30 + [Level] * 0.015",
-      "CostFormula": "(1 + [Level]) * 1000",
-      "Unlocks": {
-        "2": [
-          "tech-early-warp-drive"
-        ]
-      }
+      "CostFormula": "(1 + [Level]) * 1000"
     }
   },
   {
