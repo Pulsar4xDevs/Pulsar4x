@@ -97,7 +97,8 @@ public class EarlyTechStartTests
         {
             "tech-early-nuclear-power",
             "tech-early-directed-energy", "tech-early-warp-drive",
-            "tech-nuclear-theory", "tech-nuclear-engines"
+            "tech-nuclear-theory", "tech-nuclear-engines",
+            "tech-gravitic-theory", "tech-spacetime-metric-theory"
         })
             Assert.That(store.Techs, Does.ContainKey(id), id);
         // The old gate nodes are gone: a scenario lists the techs it opens itself.
@@ -634,12 +635,18 @@ public class EarlyTechStartTests
         // The generic 50 kW/kg reactor is retired from new games.
         Assert.That(data.ComponentTemplates.ContainsKey("reactor"), Is.False);
         Assert.That(data.IsResearchable("tech-early-directed-energy"), Is.True);
-        // Warp sits behind Reactor Power Conversion level 2, not Nuclear Power itself.
-        Assert.That(data.IsResearchable("tech-power-conversion"), Is.True);
+        // Warp sits behind Spacetime Metric Theory (itself behind Gravitic Theory), not behind any nuclear tech.
         Assert.That(data.IsResearchable("tech-early-warp-drive"), Is.False);
         data.IncrementTechLevel("tech-power-conversion");
-        Assert.That(data.IsResearchable("tech-early-warp-drive"), Is.False);
         data.IncrementTechLevel("tech-power-conversion");
+        Assert.That(data.IsResearchable("tech-early-warp-drive"), Is.False);
+        Assert.That(data.IsResearchable("tech-gravitic-theory"), Is.True, "open at the start");
+        Assert.That(data.IsResearchable("tech-spacetime-metric-theory"), Is.False);
+        data.IncrementTechLevel("tech-gravitic-theory");
+        Assert.That(data.IsResearchable("tech-gravitational-surveyor"), Is.True);
+        Assert.That(data.IsResearchable("tech-spacetime-metric-theory"), Is.True);
+        Assert.That(data.IsResearchable("tech-early-warp-drive"), Is.False);
+        data.IncrementTechLevel("tech-spacetime-metric-theory");
         Assert.That(data.IsResearchable("tech-early-warp-drive"), Is.True);
 
         data.IncrementTechLevel("tech-early-warp-drive");

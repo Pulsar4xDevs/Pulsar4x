@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace Pulsar4X.Client;
@@ -26,6 +27,13 @@ public sealed record TechTreeInput(
     IReadOnlyList<TechTreeSpec> Techs,
     IReadOnlyList<TechTreeUnlockable> Unlockables);
 
+/// <summary>
+/// Cost of a <c>CostFormula</c> at a given NCalc <c>Level</c> parameter.
+/// The first researchable level uses Level=0, so game level k costs <c>CostFormula(Level=k-1)</c>.
+/// Return null when the formula cannot be evaluated.
+/// </summary>
+public delegate long? TechCostEvaluate(string formula, int formulaLevel);
+
 public enum TechTreeUnlockKind
 {
     Tech,
@@ -35,6 +43,9 @@ public enum TechTreeUnlockKind
 }
 
 public sealed record TechTreeUnlockTarget(int Level, string Id, string Name, TechTreeUnlockKind Kind);
+
+/// <summary>One researchable level of a tech, with its own cost and running cumulative RP.</summary>
+public sealed record TechTreeLevel(int Level, long Cost, long CumulativeRp, bool CostFailed);
 
 public sealed class TechTreeNode
 {
@@ -51,6 +62,27 @@ public sealed class TechTreeNode
     public float Y { get; set; }
     public IReadOnlyList<string> Prerequisites { get; set; } = Array.Empty<string>();
     public IReadOnlyList<TechTreeUnlockTarget> Unlocks { get; set; } = Array.Empty<TechTreeUnlockTarget>();
+
+    /// <summary>Cheapest cumulative RP at which this tech can start: 0 for a root, otherwise the
+    /// minimum over parents of the parent's cumulative RP at the Unlocks level that opens this tech.</summary>
+    public long UnlockRp { get; set; }
+
+    /// <summary>Levels 1..MaxLevel, each ending at that level's cumulative RP.</summary>
+    public IReadOnlyList<TechTreeLevel> Levels { get; set; } = Array.Empty<TechTreeLevel>();
+
+    public int RpRow { get; set; }
+    public float RpX { get; set; }
+    public float RpWidth { get; set; }
+    public float RpY { get; set; }
+
+    /// <summary>Cumulative RP at the end of <paramref name="level"/>, or <see cref="UnlockRp"/> when level is 0.</summary>
+    public long CumulativeRpAt(int level)
+    {
+        if (level <= 0 || Levels.Count == 0)
+            return UnlockRp;
+        int index = Math.Min(level, Levels.Count) - 1;
+        return Levels[index].CumulativeRp;
+    }
 }
 
 public sealed record TechTreeEdge(string From, string To, int AtLevel);
@@ -63,12 +95,14 @@ public sealed class TechTreeWarnings
     public IReadOnlyList<TechTreeCycle> Cycles { get; init; } = Array.Empty<TechTreeCycle>();
     public IReadOnlyList<string> Orphans { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> NoComponentTechs { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> FailedCostFormulas { get; init; } = Array.Empty<string>();
 }
 
 /// <summary>
 /// Layered left-to-right layout and analysis for the tech tree. No ImGui.
 /// Column is the length of the longest prerequisite chain (no prereqs → column 0).
 /// Cycle edges are dropped from the layout DAG so column assignment cannot hang.
+/// The RP-graph layout places each tech on a log RP axis; see <see cref="RpLogOffset"/>.
 /// </summary>
 public sealed class TechTreeGraph
 {
@@ -76,6 +110,18 @@ public sealed class TechTreeGraph
     public const float NodeHeight = 64f;
     public const float ColumnGap = 80f;
     public const float RowGap = 20f;
+
+    /// <summary>
+    /// Log-axis offset in RP. A tech at cumulative RP r is placed at
+    /// <c>log10(r + 250) - log10(250)</c> decades, so roots at 0 sit at x=0 and small
+    /// costs still have a visible width. A hard floor would collapse every bar below the floor.
+    /// </summary>
+    public const double RpLogOffset = 250;
+
+    public const float RpPixelsPerDecade = 280f;
+    public const float RpBarHeight = 28f;
+    public const float RpRowGap = 8f;
+    public const float RpPackGap = 6f;
 
     readonly Dictionary<string, TechTreeNode> _nodes;
     readonly Dictionary<string, List<string>> _forward;
@@ -85,13 +131,15 @@ public sealed class TechTreeGraph
     public IReadOnlyList<TechTreeNode> Nodes { get; }
     public IReadOnlyList<TechTreeEdge> Edges => _edges;
     public TechTreeWarnings Warnings { get; }
+    public long MaxCumulativeRp { get; }
 
     TechTreeGraph(
         IReadOnlyList<TechTreeNode> nodes,
         IReadOnlyList<TechTreeEdge> edges,
         Dictionary<string, List<string>> forward,
         Dictionary<string, List<string>> backward,
-        TechTreeWarnings warnings)
+        TechTreeWarnings warnings,
+        long maxCumulativeRp)
     {
         Nodes = nodes;
         _edges = edges;
@@ -99,6 +147,7 @@ public sealed class TechTreeGraph
         _forward = forward;
         _backward = backward;
         Warnings = warnings;
+        MaxCumulativeRp = maxCumulativeRp;
     }
 
     public TechTreeNode? Find(string id)
@@ -124,7 +173,7 @@ public sealed class TechTreeGraph
             .ToList();
     }
 
-    public static TechTreeGraph Build(TechTreeInput? input)
+    public static TechTreeGraph Build(TechTreeInput? input, TechCostEvaluate? costEvaluate = null)
     {
         var techs = input?.Techs ?? Array.Empty<TechTreeSpec>();
         var unlockables = (input?.Unlockables ?? Array.Empty<TechTreeUnlockable>())
@@ -193,6 +242,8 @@ public sealed class TechTreeGraph
         AssignColumns(nodes, dagEdges);
         OrderRows(nodes.Values, dagEdges);
         Place(nodes.Values);
+        var failedCosts = AssignResearchPoints(nodes, dagEdges, costEvaluate);
+        PackRpRows(nodes.Values, dagEdges);
 
         var orphans = nodes.Values
             .Where(n => n.Prerequisites.Count == 0 && !n.Unlocks.Any(u => u.Kind == TechTreeUnlockKind.Tech))
@@ -212,6 +263,7 @@ public sealed class TechTreeGraph
             Cycles = cycles,
             Orphans = orphans,
             NoComponentTechs = noComponents,
+            FailedCostFormulas = failedCosts,
         };
 
         var ordered = nodes.Values
@@ -220,7 +272,10 @@ public sealed class TechTreeGraph
             .ThenBy(n => n.Id, StringComparer.Ordinal)
             .ToList();
 
-        return new TechTreeGraph(ordered, originalEdges, forward, backward, warnings);
+        long maxRp = 0;
+        foreach (var node in ordered)
+            maxRp = Math.Max(maxRp, node.CumulativeRpAt(node.Levels.Count));
+        return new TechTreeGraph(ordered, originalEdges, forward, backward, warnings, maxRp);
     }
 
     static Dictionary<string, List<string>> NewAdj(IEnumerable<string> ids)
@@ -443,7 +498,240 @@ public sealed class TechTreeGraph
         }
     }
 
-    IReadOnlyList<string> Walk(Dictionary<string, List<string>> adj, string start)
+
+    /// <summary>Layout X for a cumulative RP value on the offset-log axis. RP 0 maps to 0.</summary>
+    public static float RpToX(double rp)
+    {
+        double value = Math.Max(0, rp);
+        return (float)((Math.Log10(value + RpLogOffset) - Math.Log10(RpLogOffset)) * RpPixelsPerDecade);
+    }
+
+    /// <summary>Inverse of <see cref="RpToX"/>.</summary>
+    public static double XToRp(float x)
+        => Math.Pow(10, (x / RpPixelsPerDecade) + Math.Log10(RpLogOffset)) - RpLogOffset;
+
+    /// <summary>
+    /// 1-2-5 ticks starting at 500 (500, 1k, 2k, 5k, …) far enough to cover <paramref name="maxRp"/>.
+    /// </summary>
+    public static IReadOnlyList<long> RulerTicks(double maxRp)
+    {
+        var ticks = new List<long>();
+        double cap = Math.Max(maxRp, 500);
+        for (int exp = 2; exp <= 18; exp++)
+        {
+            long mag = 1;
+            for (int i = 0; i < exp; i++)
+                mag *= 10;
+            foreach (long step in new long[] { 1, 2, 5 })
+            {
+                long tick = step * mag;
+                if (tick < 500)
+                    continue;
+                ticks.Add(tick);
+                if (tick >= cap)
+                    return ticks;
+            }
+        }
+        return ticks;
+    }
+
+    static List<string> AssignResearchPoints(
+        Dictionary<string, TechTreeNode> nodes,
+        IReadOnlyList<TechTreeEdge> dag,
+        TechCostEvaluate? costEvaluate)
+    {
+        TechCostEvaluate evaluate = costEvaluate ?? ParseConstantCost;
+        var incoming = dag.ToLookup(e => e.To, StringComparer.Ordinal);
+        var outgoing = dag.ToLookup(e => e.From, StringComparer.Ordinal);
+        var indegree = nodes.Keys.ToDictionary(id => id, _ => 0, StringComparer.Ordinal);
+        foreach (var edge in dag)
+        {
+            if (indegree.ContainsKey(edge.To))
+                indegree[edge.To]++;
+        }
+
+        var queue = new Queue<string>();
+        foreach (var id in indegree.Keys.OrderBy(k => k, StringComparer.Ordinal))
+        {
+            if (indegree[id] == 0)
+                queue.Enqueue(id);
+        }
+
+        var failed = new SortedSet<string>(StringComparer.Ordinal);
+        var pending = new HashSet<string>(nodes.Keys, StringComparer.Ordinal);
+        int cap = nodes.Count * 2 + 8;
+        int seen = 0;
+        while ((queue.Count > 0 || pending.Count > 0) && seen < cap)
+        {
+            seen++;
+            string id;
+            if (queue.Count > 0)
+                id = queue.Dequeue();
+            else
+            {
+                id = pending.OrderBy(k => k, StringComparer.Ordinal).First();
+                queue.Enqueue(id);
+                continue;
+            }
+            if (!pending.Remove(id))
+                continue;
+
+            var node = nodes[id];
+            long cheapest = long.MaxValue;
+            int parents = 0;
+            foreach (var edge in incoming[id])
+            {
+                if (!nodes.TryGetValue(edge.From, out var parent))
+                    continue;
+                parents++;
+                cheapest = Math.Min(cheapest, parent.CumulativeRpAt(Math.Max(1, edge.AtLevel)));
+            }
+            node.UnlockRp = parents == 0 ? 0 : cheapest;
+
+            int levelCount = Math.Max(1, node.MaxLevel);
+            var levels = new List<TechTreeLevel>(levelCount);
+            long running = node.UnlockRp;
+            for (int level = 1; level <= levelCount; level++)
+            {
+                long? cost = evaluate(node.CostFormula ?? "", level - 1);
+                bool failedCost = cost == null;
+                if (failedCost)
+                {
+                    failed.Add(node.Id);
+                    cost = 0;
+                }
+                if (cost < 0)
+                    cost = 0;
+                running += cost.Value;
+                levels.Add(new TechTreeLevel(level, cost.Value, running, failedCost));
+            }
+            node.Levels = levels;
+            node.RpX = RpToX(node.UnlockRp);
+            node.RpWidth = Math.Max(0, RpToX(running) - node.RpX);
+
+            foreach (var edge in outgoing[id])
+            {
+                if (!indegree.ContainsKey(edge.To))
+                    continue;
+                indegree[edge.To]--;
+                if (indegree[edge.To] == 0)
+                    queue.Enqueue(edge.To);
+            }
+        }
+
+        return failed.ToList();
+    }
+
+    static long? ParseConstantCost(string formula, int _)
+    {
+        if (string.IsNullOrWhiteSpace(formula))
+            return null;
+        if (long.TryParse(formula.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out long value))
+            return value < 0 ? 0 : value;
+        return null;
+    }
+
+    /// <summary>
+    /// Pack RP bars by family: walk each DAG root's descendants (cheapest-parent first),
+    /// greedily stack bars in that family so they do not overlap on X, then place the next
+    /// family on the rows below. This keeps branches together and is readable on a wide axis.
+    /// </summary>
+    static void PackRpRows(IEnumerable<TechTreeNode> all, IReadOnlyList<TechTreeEdge> dag)
+    {
+        var nodes = all.ToDictionary(n => n.Id, StringComparer.Ordinal);
+        var outgoing = dag.ToLookup(e => e.From, StringComparer.Ordinal);
+        var indegree = nodes.Keys.ToDictionary(id => id, _ => 0, StringComparer.Ordinal);
+        foreach (var edge in dag)
+        {
+            if (indegree.ContainsKey(edge.To))
+                indegree[edge.To]++;
+        }
+
+        var roots = nodes.Values
+            .Where(n => indegree[n.Id] == 0)
+            .OrderBy(n => n.Name, StringComparer.Ordinal)
+            .ThenBy(n => n.Id, StringComparer.Ordinal)
+            .ToList();
+
+        var visited = new HashSet<string>(StringComparer.Ordinal);
+        int rowBase = 0;
+        foreach (var root in roots)
+        {
+            var family = new List<TechTreeNode>();
+            CollectFamily(root.Id, nodes, outgoing, visited, family);
+            if (family.Count == 0)
+                continue;
+            int used = PackFamily(family);
+            foreach (var node in family)
+            {
+                node.RpRow += rowBase;
+                node.RpY = node.RpRow * (RpBarHeight + RpRowGap);
+            }
+            rowBase += used;
+        }
+
+        // Any leftover (should be none) gets its own row.
+        foreach (var node in nodes.Values.OrderBy(n => n.Name, StringComparer.Ordinal))
+        {
+            if (visited.Contains(node.Id))
+                continue;
+            node.RpRow = rowBase;
+            node.RpY = node.RpRow * (RpBarHeight + RpRowGap);
+            node.RpX = RpToX(node.UnlockRp);
+            long end = node.CumulativeRpAt(node.Levels.Count);
+            node.RpWidth = Math.Max(0, RpToX(end) - node.RpX);
+            rowBase++;
+        }
+    }
+
+    static void CollectFamily(
+        string start,
+        Dictionary<string, TechTreeNode> nodes,
+        ILookup<string, TechTreeEdge> outgoing,
+        HashSet<string> visited,
+        List<TechTreeNode> family)
+    {
+        if (!visited.Add(start) || !nodes.TryGetValue(start, out var node))
+            return;
+        family.Add(node);
+        var children = outgoing[start]
+            .Select(e => e.To)
+            .Distinct(StringComparer.Ordinal)
+            .Where(id => nodes.ContainsKey(id) && !visited.Contains(id))
+            .Select(id => nodes[id])
+            .OrderBy(n => n.UnlockRp)
+            .ThenBy(n => n.Name, StringComparer.Ordinal)
+            .ThenBy(n => n.Id, StringComparer.Ordinal)
+            .ToList();
+        foreach (var child in children)
+            CollectFamily(child.Id, nodes, outgoing, visited, family);
+    }
+
+    static int PackFamily(List<TechTreeNode> family)
+    {
+        var rows = new List<List<(float X0, float X1)>>();
+        foreach (var node in family)
+        {
+            long endRp = node.CumulativeRpAt(node.Levels.Count);
+            node.RpX = RpToX(node.UnlockRp);
+            node.RpWidth = Math.Max(0, RpToX(endRp) - node.RpX);
+            float x0 = node.RpX;
+            float x1 = node.RpX + node.RpWidth;
+            int row = 0;
+            for (; row < rows.Count; row++)
+            {
+                if (rows[row].All(span => x1 <= span.X0 + 0.01f || x0 >= span.X1 - 0.01f))
+                    break;
+            }
+            if (row == rows.Count)
+                rows.Add(new List<(float, float)>());
+            rows[row].Add((x0, x1));
+            node.RpRow = row;
+        }
+        return rows.Count;
+    }
+
+        IReadOnlyList<string> Walk(Dictionary<string, List<string>> adj, string start)
     {
         if (start == null || !_nodes.ContainsKey(start))
             return Array.Empty<string>();

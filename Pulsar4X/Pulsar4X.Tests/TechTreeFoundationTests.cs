@@ -7,7 +7,7 @@ using Pulsar4X.Modding;
 namespace Pulsar4X.Tests;
 
 /// <summary>
-/// The tech tree's shape (tech-tree-proposal Phase 1, data only): six foundation roots, everything else under one of them,
+/// The tech tree's shape (tech-tree-proposal Phase 1, data only): seven foundation roots, everything else under one of them,
 /// level-gated edges for depth, warp deep and jump shallow. A tech's prerequisites are the techs whose Unlocks list it;
 /// they are OR. Column 1 is a root; a tech's column is the longest chain of parents above it plus one.
 /// </summary>
@@ -17,7 +17,7 @@ public class TechTreeFoundationTests
     static readonly string[] Foundations =
     {
         "tech-conventional-engine", "tech-electrical-engineering", "tech-industry-basics",
-        "tech-life-sciences", "tech-nuclear-theory", "tech-electromagnetic-sensors",
+        "tech-life-sciences", "tech-nuclear-theory", "tech-electromagnetic-sensors", "tech-gravitic-theory",
     };
     // Weapons techs wait on the damage model rework and are not re-parented.
     static readonly string[] WeaponRoots = { "tech-high-explosives", "tech-fission-warheads", "tech-triggers", "tech-guidance" };
@@ -55,7 +55,7 @@ public class TechTreeFoundationTests
         => Edges(store).Where(e => e.Child == id).Select(e => (e.Parent, e.Level)).ToList();
 
     [Test]
-    public void TheRoots_AreTheSixFoundations_AndTheDeferredWeaponTechs()
+    public void TheRoots_AreTheSevenFoundations_AndTheDeferredWeaponTechs()
     {
         var store = Store();
         var children = Edges(store).Select(e => e.Child).ToHashSet();
@@ -69,6 +69,11 @@ public class TechTreeFoundationTests
         Assert.That(store.Techs["tech-nuclear-theory"].Name, Is.EqualTo("Nuclear Theory"));
         Assert.That(store.Techs["tech-electromagnetic-sensors"].Name, Is.EqualTo("Electromagnetic Sensors"));
         Assert.That(store.Techs.Keys, Has.None.Contain("remote-sensing"));
+        var gravitic = store.Techs["tech-gravitic-theory"];
+        Assert.That(gravitic.Name, Is.EqualTo("Gravitic Theory"));
+        Assert.That(gravitic.MaxLevel, Is.EqualTo(1));
+        Assert.That(gravitic.CostFormula, Is.EqualTo("(1 + [Level]) * 1000"));
+        Assert.That(gravitic.Unlocks.Values.SelectMany(l => l), Is.EquivalentTo(new[] { "tech-gravitational-surveyor", "tech-spacetime-metric-theory" }));
         foreach (var id in new[] { "tech-electrical-engineering", "tech-industry-basics", "tech-life-sciences", "tech-electromagnetic-sensors" })
         {
             Assert.That(store.Techs[id].MaxLevel, Is.EqualTo(1), id);
@@ -93,7 +98,7 @@ public class TechTreeFoundationTests
         }
         Assert.That(store.Techs.Keys.Except(reached), Is.Empty);
         Assert.That(columns.Values.Max(), Is.LessThanOrEqualTo(8), "the proposal's acceptance bound");
-        Assert.That(columns.Values.Max(), Is.GreaterThanOrEqualTo(7), "the warp line reaches column 7");
+        Assert.That(columns.Values.Max(), Is.GreaterThanOrEqualTo(6), "the warp line reaches column 6");
     }
 
     [Test]
@@ -116,6 +121,7 @@ public class TechTreeFoundationTests
         Under("tech-life-sciences", "tech-life-support-efficiency", "tech-infra-pressure-max-extension", "tech-infra-gravity-range",
             "tech-infra-pressure-range", "tech-infra-gravity-max-extension", "tech-infra-gravity-min-extension");
         Under("tech-electromagnetic-sensors", "tech-antenna-sensitivity", "tech-antenna-efficiency", "tech-antenna-bandwidth", "tech-geo-surveyor");
+        Under("tech-gravitic-theory", "tech-gravitational-surveyor", "tech-spacetime-metric-theory");
         foreach (var id in new[] { "tech-antenna-sensitivity", "tech-antenna-efficiency", "tech-antenna-bandwidth" })
             Assert.That(store.Techs[id].Category, Is.EqualTo("tech-category-sensors"), id);
         // Weapons techs stay where they were.
@@ -130,7 +136,7 @@ public class TechTreeFoundationTests
         var store = Store();
         Assert.That(Parents(store, "tech-construction-bay"), Is.EqualTo(new[] { ("tech-construction-automation", 2) }));
         Assert.That(Parents(store, "tech-asteroid-mining"), Is.EqualTo(new[] { ("tech-mining-production", 3) }));
-        Assert.That(Parents(store, "tech-gravitational-surveyor"), Is.EqualTo(new[] { ("tech-antenna-sensitivity", 2) }));
+        Assert.That(store.Techs["tech-antenna-sensitivity"].Unlocks, Is.Empty, "Antenna Sensitivity no longer opens the surveyor");
         Assert.That(Parents(store, "tech-nuclear-pulse-engine"), Is.EqualTo(new[] { ("tech-nuclear-solid-engine", 3) }));
         Assert.That(Parents(store, "tech-combined-cycle"), Is.EqualTo(new[] { ("tech-thermal-efficiency", 4) }));
         // Every gate level can be reached.
@@ -139,43 +145,48 @@ public class TechTreeFoundationTests
     }
 
     [Test]
-    public void Warp_GoesDeep_BehindReactorPowerConversion()
+    public void Warp_SitsBehindSpacetimeMetricTheory_WhichIsExpensive()
     {
         var store = Store();
         var columns = Columns(store);
-        Assert.That(Parents(store, "tech-early-warp-drive"), Is.EqualTo(new[] { ("tech-power-conversion", 2) }),
-            "not Nuclear Power directly; level 2 keeps the Euro bloc's level 1 start from opening it");
+        Assert.That(Parents(store, "tech-early-warp-drive"), Is.EqualTo(new[] { ("tech-spacetime-metric-theory", 1) }),
+            "warp no longer needs Reactor Power Conversion or any nuclear tech");
+        Assert.That(Parents(store, "tech-spacetime-metric-theory"), Is.EqualTo(new[] { ("tech-gravitic-theory", 1) }));
+        Assert.That(store.Techs["tech-spacetime-metric-theory"].CostFormula, Is.EqualTo("(1 + [Level]) * 8000"));
+        Assert.That(store.Techs["tech-spacetime-metric-theory"].MaxLevel, Is.EqualTo(1));
+        Assert.That(store.Techs["tech-power-conversion"].Unlocks, Is.Empty);
         Assert.That(store.Techs["tech-early-nuclear-power"].Unlocks.Values.SelectMany(l => l), Does.Not.Contain("tech-early-warp-drive"));
         Assert.That(Parents(store, "tech-power-conversion"), Is.EqualTo(new[] { ("tech-early-nuclear-power", 1) }));
-        Assert.That(columns["tech-early-warp-drive"], Is.EqualTo(4));
+        Assert.That(columns["tech-spacetime-metric-theory"], Is.EqualTo(2));
+        Assert.That(columns["tech-early-warp-drive"], Is.EqualTo(3));
         Assert.That(Parents(store, "tech-alcubierre-bubble-creation-cost"), Is.EqualTo(new[] { ("tech-early-warp-drive", 1) }));
         Assert.That(Parents(store, "tech-alcubierre-sustain-cost"), Is.EqualTo(new[] { ("tech-early-warp-drive", 1) }));
         Assert.That(Parents(store, "tech-alcubierre-miniaturization"), Is.EqualTo(new[] { ("tech-alcubierre-bubble-creation-cost", 3) }));
         Assert.That(Parents(store, "tech-alcubierre-bleed"), Is.EqualTo(new[] { ("tech-alcubierre-sustain-cost", 4) }));
         Assert.That(Parents(store, "tech-alcubierre-gravitational-coupling"), Is.EqualTo(new[] { ("tech-alcubierre-sustain-cost", 4) }));
         Assert.That(Parents(store, "tech-alcubierre-collapse-efficiency"), Is.EqualTo(new[] { ("tech-alcubierre-gravitational-coupling", 3) }));
-        Assert.That(columns["tech-alcubierre-collapse-efficiency"], Is.EqualTo(7));
-        Assert.That(columns["tech-alcubierre-bleed"], Is.EqualTo(6));
+        Assert.That(columns["tech-alcubierre-collapse-efficiency"], Is.EqualTo(6));
+        Assert.That(columns["tech-alcubierre-bleed"], Is.EqualTo(5));
     }
 
     [Test]
-    public void Jump_StaysShallow_AndNeedsNeitherWarpNorNuclear()
+    public void Jump_StaysShallow_AndNeedsNeitherWarpNorNuclearNorSensors()
     {
         var store = Store();
         var columns = Columns(store);
         Assert.That(Parents(store, "tech-jumppoint-stabilization"), Is.EqualTo(new[] { ("tech-gravitational-surveyor", 1) }));
         Assert.That(Parents(store, "tech-jumppoint-stabilization-size-reduction"), Is.EqualTo(new[] { ("tech-jumppoint-stabilization", 1) }));
         Assert.That(Parents(store, "tech-jumppoint-stabilization-time-reduction"), Is.EqualTo(new[] { ("tech-jumppoint-stabilization", 1) }));
-        Assert.That(columns["tech-gravitational-surveyor"], Is.EqualTo(3));
-        Assert.That(columns["tech-jumppoint-stabilization"], Is.EqualTo(4));
-        Assert.That(columns["tech-jumppoint-stabilization-size-reduction"], Is.EqualTo(5));
+        Assert.That(columns["tech-gravitational-surveyor"], Is.EqualTo(2));
+        Assert.That(columns["tech-jumppoint-stabilization"], Is.EqualTo(3));
+        Assert.That(columns["tech-jumppoint-stabilization-size-reduction"], Is.EqualTo(4));
         Assert.That(store.Techs["tech-early-warp-drive"].Unlocks.Values.SelectMany(l => l),
             Has.None.StartsWith("tech-jumppoint").And.None.EqualTo("tech-gravitational-surveyor"));
-        // The whole jump chain stays inside the sensors branch.
+        // The whole jump chain stays inside the gravitics branch.
         string id = "tech-jumppoint-stabilization-time-reduction";
         var chain = new List<string> { id };
         while (Parents(store, chain.Last()).FirstOrDefault().Parent is { } p) chain.Add(p);
-        Assert.That(chain, Is.EqualTo(new[] { id, "tech-jumppoint-stabilization", "tech-gravitational-surveyor", "tech-antenna-sensitivity", "tech-electromagnetic-sensors" }));
+        Assert.That(chain, Is.EqualTo(new[] { id, "tech-jumppoint-stabilization", "tech-gravitational-surveyor", "tech-gravitic-theory" }));
     }
 
     [Test]
@@ -208,6 +219,10 @@ public class TechTreeFoundationTests
             // The early start keeps the academy techs shut, so its Industrial Base is open rather than researched.
             Assert.That(items.Contains("tech-industry-basics"), Is.EqualTo(industryBaseResearched), scenario);
             Assert.That(open.Contains("tech-industry-basics"), Is.EqualTo(!industryBaseResearched), scenario);
+            // Gravitic Theory: researched with the surveyor in the warp start, only open in the early start.
+            Assert.That(items.Contains("tech-gravitic-theory"), Is.EqualTo(industryBaseResearched), scenario);
+            Assert.That(open.Contains("tech-gravitic-theory"), Is.EqualTo(!industryBaseResearched), scenario);
+            Assert.That(open.Contains("tech-spacetime-metric-theory"), Is.False, scenario);
         }
     }
 }

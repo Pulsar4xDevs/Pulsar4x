@@ -287,7 +287,8 @@
         "tech-industrial-energy-efficiency",
         "tech-construction-automation",
         "tech-construction-bay",
-        "tech-industry-basics"
+        "tech-industry-basics",
+        "tech-gravitic-theory"
       ],
       "ComponentDesigns": [
         "default-design-farm-site",
@@ -533,7 +534,8 @@
         "tech-industrial-energy-efficiency",
         "tech-construction-automation",
         "tech-construction-bay",
-        "tech-industry-basics"
+        "tech-industry-basics",
+        "tech-gravitic-theory"
       ],
       "ComponentDesigns": [
         "default-design-farm-site",
@@ -697,7 +699,8 @@
         "tech-administration-level",
         "tech-nuclear-theory",
         "tech-construction-bay",
-        "tech-industry-basics"
+        "tech-industry-basics",
+        "tech-gravitic-theory"
       ],
       "ComponentDesigns": [
         "default-design-farm-site",
@@ -871,7 +874,8 @@
         "tech-construction-automation",
         "tech-construction-bay",
         "tech-industry-basics",
-        "tech-early-warp-drive"
+        "tech-early-warp-drive",
+        "tech-gravitic-theory"
       ],
       "ComponentDesigns": [
         "default-design-farm-site",
