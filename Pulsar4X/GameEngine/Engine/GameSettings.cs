@@ -103,6 +103,12 @@ namespace Pulsar4X.Engine
 
         #endregion
 
+        /// <summary>
+        /// Recycling: the share of an item's build resources a recycle job returns (components inside are broken down
+        /// into their own resources first), and the share of its build points the job takes.
+        /// </summary>
+        public const double RecycleReturnFraction = 0.5;
+
         #region Crew life support and pay (crew plan phases 4-5)
 
         public const double DefaultShipLifeSupport_kWPerCrew = 1.0;

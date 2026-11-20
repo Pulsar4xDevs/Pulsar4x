@@ -431,6 +431,21 @@ public sealed record MoveTechInQueueCommand(int TargetEntityId, string TechId, b
 // ----- installations/components (commanded entity: the colony or ship holding them) -----
 #region Faction Installation / Component Commands
 
+/// <summary>
+/// Scrap a ship at the colony <c>TargetEntityId</c>. The ship must be this faction's, in transfer range of the colony and
+/// not in a refit; the colony needs a shipyard line (<see cref="ProductionLineId"/>, or its first shipyard when null).
+/// The job spends the yard's ship-assembly points; when done everything aboard is unloaded to the colony, the crew go to
+/// its pool, the captain is left unassigned and part of the build resources come back to the warehouse.
+/// </summary>
+public sealed record RecycleShipCommand(int TargetEntityId, int ShipEntityId, string? ProductionLineId = null) : GameCommand(TargetEntityId);
+
+/// <summary>
+/// Recycle <see cref="Quantity"/> units of a component or (uninstalled) installation design held in the warehouse of the
+/// colony <c>TargetEntityId</c>, on a factory line that builds that design (<see cref="ProductionLineId"/>, or the fastest
+/// one when null). Each unit returns part of its build resources.
+/// </summary>
+public sealed record RecycleComponentCommand(int TargetEntityId, string DesignId, int Quantity, string? ProductionLineId = null) : GameCommand(TargetEntityId);
+
 /// <summary>Uninstall one installed component of the given design and move it into cargo storage.</summary>
 public sealed record UninstallComponentCommand(int TargetEntityId, string DesignId) : GameCommand(TargetEntityId);
 

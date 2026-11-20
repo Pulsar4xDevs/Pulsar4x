@@ -2012,6 +2012,11 @@ namespace Pulsar4X.Engine.Api
                         CrewWarning = jobDesign is ShipDesign crewed ? JobCrewWarning(entity, crewed) : "",
                         FundsReason = fundsReason,
                         Refit = job.Refit == null ? null : ToRefitJobInfo(entity, factionInfo, factionId, job),
+                        Recycle = job.Recycle == null ? null : new RecycleJobInfo(job.Recycle.Kind.ToString(), job.Recycle.ShipEntityId, job.Recycle.DesignId)
+                        {
+                            Returns = ReturnRows(factionInfo, job.Recycle.Returns),
+                            WaitReason = job.WaitReason,
+                        },
                         StockBelow = job.StockThreshold,
                         StockOnHand = job.StockThreshold != null && jobDesign != null ? IndustryTools.StockOf(entity, jobDesign) : null,
                         IsIdle = job.Status == IndustryJobStatus.Idle,
@@ -2185,8 +2190,11 @@ namespace Pulsar4X.Engine.Api
 
             var (headId, headName) = IndustryHead(entity, factionId);
             var headPortrait = Portrait(entity.Manager, headId, PortraitRoles.IndustryHead, entity.FactionOwnerID);
+            bool owner = entity.FactionOwnerID == factionId && entity.HasDataBlob<ColonyInfoDB>();
             return new IndustryView(lines)
             {
+                RecycleShips = owner ? RecycleShipCandidates(entity, factionInfo) : Array.Empty<RecycleCandidateView>(),
+                RecycleItems = owner ? RecycleItemCandidates(entity, factionInfo) : Array.Empty<RecycleCandidateView>(),
                 Pads = pads,
                 IndustryHeadId = headId,
                 IndustryHeadName = headName,
@@ -2484,6 +2492,66 @@ namespace Pulsar4X.Engine.Api
         }
 
         /// <summary>Resolves an industry resource id (cargo good or component design) to a display name.</summary>
+        private static IReadOnlyList<ResourceRequirement> ReturnRows(FactionInfoDB info, IReadOnlyDictionary<string, long> returns)
+            => returns.Select(r => new ResourceRequirement(ResolveItemName(info, r.Key), r.Value)).ToList();
+
+        // This faction's ships in transfer range of the colony, with why each cannot be scrapped here.
+        private static IReadOnlyList<RecycleCandidateView> RecycleShipCandidates(Entity colony, FactionInfoDB info)
+        {
+            if (colony.Manager == null)
+                return Array.Empty<RecycleCandidateView>();
+            string? line = Recycling.ShipyardLine(colony);
+            var rows = new List<RecycleCandidateView>();
+            foreach (var ship in colony.Manager.GetAllEntitiesWithDataBlob<ShipInfoDB>())
+            {
+                if (ship.FactionOwnerID != colony.FactionOwnerID || !LocalConstructionProcessor.InTransferRange(colony, ship))
+                    continue;
+                var design = ship.GetDataBlob<ShipInfoDB>().Design;
+                if (design == null)
+                    continue;
+                rows.Add(new RecycleCandidateView("Ship", ship.Id, design.UniqueID, ship.GetName(colony.FactionOwnerID), 1, line)
+                {
+                    Returns = ReturnRows(info, Recycling.ReturnsOf(info, design)),
+                    PointCost = Recycling.PointsOf(design),
+                    Refusal = line == null ? Recycling.NoShipyard : Recycling.ShipRejection(colony, line, ship) ?? "",
+                });
+            }
+            return rows.OrderBy(r => r.Name, StringComparer.Ordinal).ThenBy(r => r.ShipEntityId).ToList();
+        }
+
+        // Component and installation designs in the colony's warehouse, with the line that would recycle them.
+        private static IReadOnlyList<RecycleCandidateView> RecycleItemCandidates(Entity colony, FactionInfoDB info)
+        {
+            if (!colony.TryGetDataBlob<CargoStorageDB>(out var storage))
+                return Array.Empty<RecycleCandidateView>();
+            var designs = new Dictionary<string, Pulsar4X.Components.ComponentDesign>();
+            foreach (var store in storage.TypeStores.Values)
+            {
+                foreach (var cargo in store.Cargoables.Values)
+                {
+                    var design = cargo as Pulsar4X.Components.ComponentDesign
+                        ?? (cargo as Pulsar4X.Components.ComponentInstance)?.Design;
+                    if (design != null && info.ComponentDesigns.ContainsKey(design.UniqueID))
+                        designs[design.UniqueID] = design;
+                }
+            }
+            var rows = new List<RecycleCandidateView>();
+            foreach (var design in designs.Values)
+            {
+                long available = Recycling.Available(colony, storage, design);
+                if (available <= 0)
+                    continue;
+                string? line = Recycling.LineFor(colony, design);
+                rows.Add(new RecycleCandidateView("Component", -1, design.UniqueID, design.Name, available, line)
+                {
+                    Returns = ReturnRows(info, Recycling.ReturnsOf(info, design)),
+                    PointCost = Recycling.PointsOf(design),
+                    Refusal = line == null ? Recycling.NotThisLine : Recycling.ComponentRejection(colony, line, design.UniqueID, 1) ?? "",
+                });
+            }
+            return rows.OrderBy(r => r.Name, StringComparer.Ordinal).ToList();
+        }
+
         private static string ResolveItemName(FactionInfoDB factionInfo, string resourceId)
         {
             if (factionInfo.ComponentDesigns.TryGetValue(resourceId, out var design)) return design.Name;

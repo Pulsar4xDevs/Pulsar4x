@@ -322,7 +322,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
     /// into the colony's housing the way landing does (<see cref="PassengerAdapter.Land"/>). Partial moves are
     /// fine: what does not fit stays aboard. Logs one entry per item moved.
     /// </summary>
-    static void UnloadOverflow(Entity yard, CargoStorageDB colonyStore, Entity ship, string storeType, double volume)
+    internal static void UnloadOverflow(Entity yard, CargoStorageDB colonyStore, Entity ship, string storeType, double volume)
     {
         if (!ship.TryGetDataBlob<CargoStorageDB>(out var cargo)
             || !cargo.TypeStores.TryGetValue(storeType, out var store))

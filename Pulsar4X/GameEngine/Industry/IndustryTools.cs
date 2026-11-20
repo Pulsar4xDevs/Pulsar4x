@@ -29,6 +29,10 @@ namespace Pulsar4X.Industry
                 return false;
             if (design is ShipRefitDesign)
                 return IsShipyardLine(line);
+            if (design is RecycleDesign)
+                // A ship is taken apart in a slip, anything else on a factory line that builds its type.
+                return line.IndustryTypeRates.ContainsKey(design.IndustryTypeID)
+                    && IsShipyardLine(line) == (design.IndustryTypeID == ShipAssemblyIndustryType);
             if (!line.IndustryTypeRates.ContainsKey(design.IndustryTypeID))
                 return false;
             if (IsShipyardLine(line) && design is not ShipDesign)
@@ -230,6 +234,11 @@ namespace Pulsar4X.Industry
                     if (batchJob.Refit != null)
                     {
                         AdvanceRefit(industryEntity, stockpile, prodLine, batchJob, ref refitPool);
+                        continue;
+                    }
+                    if (batchJob.Recycle != null)
+                    {
+                        Recycling.Advance(industryEntity, stockpile, prodLine, batchJob, industryPointsRemaining);
                         continue;
                     }
 

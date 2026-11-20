@@ -1396,6 +1396,37 @@ public sealed record IndustryView(IReadOnlyList<ProductionLineView> ProductionLi
     public string IndustryHeadPortraitRole { get; init; } = "";
     /// <summary>The Client portrait pack (species folder) that draws this person: their species, else their faction's primary species, else "human". Empty for an empty post.</summary>
     public string IndustryHeadPortraitSpecies { get; init; } = "";
+
+    /// <summary>Owner only. This faction's ships in transfer range that the colony could scrap (<c>RecycleShipCommand</c>); <see cref="RecycleCandidateView.Refusal"/> says why one cannot.</summary>
+    public IReadOnlyList<RecycleCandidateView> RecycleShips { get; init; } = Array.Empty<RecycleCandidateView>();
+
+    /// <summary>Owner only. Component and installation designs in the warehouse that could be recycled (<c>RecycleComponentCommand</c>).</summary>
+    public IReadOnlyList<RecycleCandidateView> RecycleItems { get; init; } = Array.Empty<RecycleCandidateView>();
+}
+
+/// <summary>
+/// Something a colony could recycle. <see cref="Kind"/> is "Ship" or "Component". <see cref="LineId"/> is the line the
+/// job would go on (null when none can take it); <see cref="Refusal"/> is empty when it can be queued.
+/// </summary>
+public sealed record RecycleCandidateView(string Kind, int ShipEntityId, string DesignId, string Name, long Available, string? LineId)
+{
+    /// <summary>What one item returns to the warehouse.</summary>
+    public IReadOnlyList<ResourceRequirement> Returns { get; init; } = Array.Empty<ResourceRequirement>();
+
+    /// <summary>Industry points per item.</summary>
+    public long PointCost { get; init; }
+
+    public string Refusal { get; init; } = "";
+}
+
+/// <summary>What a recycle job adds to its <see cref="IndustryJobView"/>. Progress and counts are the job's own.</summary>
+public sealed record RecycleJobInfo(string Kind, int ShipEntityId, string DesignId)
+{
+    /// <summary>What each item returns to the warehouse.</summary>
+    public IReadOnlyList<ResourceRequirement> Returns { get; init; } = Array.Empty<ResourceRequirement>();
+
+    /// <summary>Why it waits (ship out of range, cargo aboard with no room ashore, part gone from the warehouse). Empty when it can run.</summary>
+    public string WaitReason { get; init; } = "";
 }
 
 public sealed record LaunchPadStateView(long MaxTonnage, bool Free)
@@ -1579,6 +1610,12 @@ public sealed record IndustryJobView(
 
     /// <summary>True for a shipyard refit job.</summary>
     public bool IsRefit => Refit != null;
+
+    /// <summary>Non-null on a recycle job.</summary>
+    public RecycleJobInfo? Recycle { get; init; }
+
+    /// <summary>True for a recycle job.</summary>
+    public bool IsRecycle => Recycle != null;
 }
 
 /// <summary>
