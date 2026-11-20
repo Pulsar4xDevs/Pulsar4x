@@ -29,41 +29,8 @@ public static class IndustrySeatDisplay
     {
         TakePendingRefusal(ref refusal);
         ImGui.TextUnformatted("Industry head: " + IndustrySeatUi.HolderText(view.IndustryHeadId, view.IndustryHeadName));
-
-        var candidates = IndustrySeatUi.Candidates(
-            galaxy.Commanders,
-            IndustrySeatUi.CityHallIds(IndustrySeatUi.ColonyViews(galaxy)));
-        bool seated = IndustrySeatUi.IsSeated(view.IndustryHeadId);
-        bool canSeat = candidates.Count > 0;
-
-        if (!canSeat)
-            ImGui.BeginDisabled();
-        if (ImGui.Button("Seat###industry-seat-" + colonyId) && canSeat)
-            _chooserColonyId = colonyId;
-        if (!canSeat)
-            ImGui.EndDisabled();
-        if (!canSeat && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-            ImGui.SetTooltip("No unassigned civilians. Hire an administrator first.\nA city-hall chair holder cannot take this seat.");
-
-        ImGui.SameLine();
-        if (!seated)
-            ImGui.BeginDisabled();
-        if (ImGui.Button("Unseat###industry-unseat-" + colonyId) && seated)
-        {
-            Submit(uiState, new UnseatIndustryHeadCommand(colonyId));
-            TakePendingRefusal(ref refusal);
-        }
-        if (!seated)
-            ImGui.EndDisabled();
-        if (!seated && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-            ImGui.SetTooltip("The industry seat is already empty.");
-
-        if (!string.IsNullOrEmpty(refusal))
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
-            ImGui.TextUnformatted(refusal);
-            ImGui.PopStyleColor();
-        }
+        DrawSeatButtons(colonyId, view.IndustryHeadId, galaxy, uiState, ref refusal);
+        DrawRefusal(refusal);
     }
 
     public static void DrawChooser(
@@ -103,14 +70,74 @@ public static class IndustrySeatDisplay
             person => person.Name);
     }
 
-    public static void DrawProduction(IndustryView industry, GlobalUIState uiState)
+    public static void DrawProduction(
+        int colonyId,
+        IndustryView industry,
+        IClientGalaxy? galaxy,
+        GlobalUIState uiState,
+        ref string? refusal)
     {
+        TakePendingRefusal(ref refusal);
         PortraitRenderer.For(uiState).Draw(PortraitIdentity.IndustryHead(industry), PortraitRenderer.SmallSize);
         ImGui.SameLine();
         ImGui.BeginGroup();
         ImGui.TextUnformatted(IndustrySeatUi.HolderText(industry.IndustryHeadId, industry.IndustryHeadName));
         ImGui.TextUnformatted("Industry head");
         ImGui.EndGroup();
+        if (galaxy != null)
+        {
+            ImGui.SameLine();
+            ImGui.BeginGroup();
+            DrawSeatButtons(colonyId, industry.IndustryHeadId, galaxy, uiState, ref refusal);
+            ImGui.EndGroup();
+        }
+        DrawRefusal(refusal);
+    }
+
+    /// <summary>Seat opens the shared assignment chooser; Unseat is disabled when the seat is empty.</summary>
+    static void DrawSeatButtons(
+        int colonyId,
+        int industryHeadId,
+        IClientGalaxy galaxy,
+        GlobalUIState uiState,
+        ref string? refusal)
+    {
+        var candidates = IndustrySeatUi.Candidates(
+            galaxy.Commanders,
+            IndustrySeatUi.CityHallIds(IndustrySeatUi.ColonyViews(galaxy)));
+        bool seated = IndustrySeatUi.IsSeated(industryHeadId);
+        bool canSeat = candidates.Count > 0;
+
+        if (!canSeat)
+            ImGui.BeginDisabled();
+        if (ImGui.Button("Seat###industry-seat-" + colonyId) && canSeat)
+            _chooserColonyId = colonyId;
+        if (!canSeat)
+            ImGui.EndDisabled();
+        if (!canSeat && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            ImGui.SetTooltip("No unassigned civilians. Hire an administrator first.\nA city-hall chair holder cannot take this seat.");
+
+        ImGui.SameLine();
+        if (!seated)
+            ImGui.BeginDisabled();
+        if (ImGui.Button("Unseat###industry-unseat-" + colonyId) && seated)
+        {
+            Submit(uiState, new UnseatIndustryHeadCommand(colonyId));
+            TakePendingRefusal(ref refusal);
+        }
+        if (!seated)
+            ImGui.EndDisabled();
+        if (!seated && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            ImGui.SetTooltip("The industry seat is already empty.");
+    }
+
+    static void DrawRefusal(string? refusal)
+    {
+        if (string.IsNullOrEmpty(refusal))
+            return;
+        ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
+        ImGui.TextUnformatted(refusal);
+        ImGui.PopStyleColor();
     }
 
     static void Submit(GlobalUIState uiState, GameCommand command)

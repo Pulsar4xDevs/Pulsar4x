@@ -227,7 +227,7 @@ namespace Pulsar4X.Client
                 {
                     _productionDisplay ??= new ColonyProductionDisplay();
                     _productionDisplay.Display(selectedColony.Id, selectedColony.GetView<IndustryView>(), _uiState,
-                        selectedColony.GetView<CargoStorageView>());
+                        selectedColony.GetView<CargoStorageView>(), _uiState.GameClient?.Galaxy, ref _industrySeatRefusal);
                     ImGui.EndTabItem();
                 }
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Construction) && ImGui.BeginTabItem("Construction"))

@@ -61,7 +61,7 @@ namespace Pulsar4X.Client
             return units;
         }
 
-        public void Display(int entityId, IndustryView? industry, GlobalUIState uiState, CargoStorageView? cargo = null)
+        public void Display(int entityId, IndustryView? industry, GlobalUIState uiState, CargoStorageView? cargo, IClientGalaxy? galaxy, ref string? industrySeatRefusal)
         {
             if (industry == null)
             {
@@ -76,7 +76,7 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            IndustrySeatDisplay.DrawProduction(industry, uiState);
+            IndustrySeatDisplay.DrawProduction(entityId, industry, galaxy, uiState, ref industrySeatRefusal);
 
             _missingInputsPins.Prune(entityId, industry);
             var pinnedJobs = MissingInputsUi.Enabled
