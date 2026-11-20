@@ -164,6 +164,7 @@ namespace Pulsar4X.People
 
             // A dead commander leaves any industry seat they held.
             GameEngine.People.IndustrySeat.ClearOnRemoval(commanderToDestroy);
+            GameEngine.People.MarketSeat.ClearOnRemoval(commanderToDestroy);
 
             commanderToDestroy.Destroy();
         }

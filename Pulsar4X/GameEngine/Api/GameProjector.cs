@@ -1173,6 +1173,45 @@ namespace Pulsar4X.Engine.Api
             return (Pulsar4X.People.Portraits.SeedOf(person), role, Pulsar4X.People.Portraits.PackFor(person, fallbackFactionId));
         }
 
+        // A colony's warehouse stock rules, with stock and queued output, ordered by item name.
+        private static IReadOnlyList<StockRuleView> StockRuleViews(Entity colony, CargoStorageDB storage)
+        {
+            if (!colony.TryGetDataBlob<Pulsar4X.Logistics.ColonyStockRulesDB>(out var db) || db.Rules.Count == 0)
+                return Array.Empty<StockRuleView>();
+            var info = colony.GetFactionOwner.TryGetDataBlob<FactionInfoDB>(out var owner) ? owner : null;
+            var rows = new List<StockRuleView>();
+            foreach (var rule in db.Rules.Values)
+            {
+                var item = Pulsar4X.Logistics.StockRules.Item(colony, rule.CargoId);
+                long queued = info != null && info.IndustryDesigns.TryGetValue(rule.CargoId, out var design) && design != null
+                    ? IndustryTools.QueuedOutput(colony, design) : 0;
+                rows.Add(new StockRuleView(rule.CargoId, item?.Name ?? rule.CargoId, rule.Min, rule.Max)
+                {
+                    Stock = item != null ? storage.GetUnitsStoredByDesign(item, false) : 0,
+                    Queued = queued,
+                });
+            }
+            return rows.OrderBy(r => r.Name, StringComparer.Ordinal).ToList();
+        }
+
+        // The colony's seated market head, for the owning faction only. (-1, null) when empty.
+        private static (int id, string? name) MarketHead(Entity colony, int factionId)
+        {
+            if (colony.FactionOwnerID != factionId)
+                return (-1, null);
+            int id = MarketSeat.HeadId(colony);
+            if (id < 0)
+                return (-1, null);
+            string name = "Unknown";
+            if (colony.Manager != null && colony.Manager.TryGetGlobalEntityById(id, out var person))
+            {
+                string resolved = person.GetName(factionId);
+                if (!string.IsNullOrEmpty(resolved))
+                    name = resolved;
+            }
+            return (id, name);
+        }
+
         // The colony's seated industry head, for the owning faction only. (-1, null) when empty.
         private static (int id, string? name) IndustryHead(Entity colony, int factionId)
         {
@@ -1252,11 +1291,14 @@ namespace Pulsar4X.Engine.Api
             }
 
             var (industryHeadId, industryHeadName) = IndustryHead(colony, factionId);
+            var (marketHeadId, marketHeadName) = MarketHead(colony, factionId);
             var headPortrait = Portrait(colony.Manager, industryHeadId, PortraitRoles.IndustryHead, colony.FactionOwnerID);
             return new ColonyView(population, planetId)
             {
                 IndustryHeadId = industryHeadId,
                 IndustryHeadName = industryHeadName,
+                MarketHeadId = marketHeadId,
+                MarketHeadName = marketHeadName,
                 IndustryHeadPortraitSeed = headPortrait.seed,
                 IndustryHeadPortraitRole = headPortrait.role,
                 IndustryHeadPortraitSpecies = headPortrait.species,
@@ -1785,6 +1827,7 @@ namespace Pulsar4X.Engine.Api
                         MountCost = mountCost,
                         ShowInstall = showInstall,
                         DesignId = designId,
+                        CargoId = string.IsNullOrEmpty(designId) ? cargoable.UniqueID : designId,
                         IsCrate = isCrate,
                     });
                 }
@@ -1800,6 +1843,9 @@ namespace Pulsar4X.Engine.Api
             {
                 Stores = stores,
                 InstallColonyIds = installColonies.Select(colony => colony.Id).ToList(),
+                StockRules = isColony ? StockRuleViews(holder, storage) : Array.Empty<StockRuleView>(),
+                IndustrySeatFilled = isColony && IndustrySeat.HasHead(holder),
+                MarketSeatFilled = isColony && MarketSeat.ManagesMarket(holder),
             };
         }
 

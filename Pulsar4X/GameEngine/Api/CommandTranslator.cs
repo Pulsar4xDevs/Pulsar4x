@@ -92,6 +92,10 @@ namespace Pulsar4X.Engine.Api
                 [typeof(AssignAdministratorCommand)] = TranslateAssignAdministrator,
                 [typeof(SeatIndustryHeadCommand)] = TranslateSeatIndustryHead,
                 [typeof(UnseatIndustryHeadCommand)] = TranslateUnseatIndustryHead,
+                [typeof(SeatMarketHeadCommand)] = TranslateSeatMarketHead,
+                [typeof(UnseatMarketHeadCommand)] = TranslateUnseatMarketHead,
+                [typeof(SetStockRuleCommand)] = TranslateSetStockRule,
+                [typeof(ClearStockRuleCommand)] = TranslateClearStockRule,
                 [typeof(HireCandidateCommand)] = TranslateHireCandidate,
                 [typeof(TrainAcademyClassCommand)] = TranslateTrainAcademyClass,
                 [typeof(AcademyCommandCourseCommand)] = TranslateAcademyCommandCourse,
@@ -2107,6 +2111,55 @@ namespace Pulsar4X.Engine.Api
             if (refusal != null)
                 return CommandResult.Reject(refusal);
             PublishPersonnelChanged(commanded);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        // ----- market head and warehouse stock rules (commanded entity: the colony). -----
+
+        private CommandResult TranslateSeatMarketHead(Entity faction, Entity commanded, GameCommand command)
+        {
+            var seat = (SeatMarketHeadCommand)command;
+            if (!commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("A market head sits a colony.");
+            Entity? person = TryResolve(seat.CommanderId, out var found) ? found : null;
+            if (person != null && person.FactionOwnerID != faction.Id)
+                person = null;
+            var refusal = MarketSeat.SeatRefusal(commanded, person, seat.CommanderId);
+            if (refusal != null)
+                return CommandResult.Reject(refusal);
+            Entity? from = MarketSeat.HoldsMarketSeat(person!, out var previous) && previous.Id != commanded.Id ? previous : null;
+            refusal = MarketSeat.Seat(commanded, person!, commanded.StarSysDateTime);
+            if (refusal != null)
+                return CommandResult.Reject(refusal);
+            PublishPersonnelChanged(commanded);
+            if (from != null)
+                PublishPersonnelChanged(from);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateUnseatMarketHead(Entity faction, Entity commanded, GameCommand command)
+        {
+            var refusal = MarketSeat.Unseat(commanded, commanded.StarSysDateTime);
+            if (refusal != null)
+                return CommandResult.Reject(refusal);
+            PublishPersonnelChanged(commanded);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateSetStockRule(Entity faction, Entity commanded, GameCommand command)
+        {
+            var set = (SetStockRuleCommand)command;
+            var refusal = Pulsar4X.Logistics.StockRules.Set(commanded, set.CargoId, set.Min, set.Max);
+            return refusal == null ? CommandResult.Ok(Guid.NewGuid().ToString("N")) : CommandResult.Reject(refusal);
+        }
+
+        private CommandResult TranslateClearStockRule(Entity faction, Entity commanded, GameCommand command)
+        {
+            var clear = (ClearStockRuleCommand)command;
+            var refusal = Pulsar4X.Logistics.StockRules.Refusal(commanded, clear.CargoId, null, null);
+            if (refusal != null)
+                return CommandResult.Reject(refusal);
+            Pulsar4X.Logistics.StockRules.Clear(commanded, clear.CargoId);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 

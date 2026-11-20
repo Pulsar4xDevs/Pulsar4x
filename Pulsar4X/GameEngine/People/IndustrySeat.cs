@@ -128,6 +128,8 @@ public static class IndustrySeat
     /// </summary>
     public static string? ChairRefusal(Entity person)
     {
+        if (MarketSeat.HoldsMarketSeat(person, out _))
+            return $"{NameOf(person)} is a market head. {MarketSeat.OnePost}";
         if (!HoldsIndustrySeat(person, out _))
             return null;
         return $"{NameOf(person)} is an industry head. {BothPosts}";
@@ -149,6 +151,8 @@ public static class IndustrySeat
             return "Only a hired civilian administrator can head industry.";
         if (HoldsChair(person) || (colony.TryGetDataBlob<AdminSpaceDB>(out _) && SitsChairOn(colony, person.Id)))
             return $"{NameOf(person)} holds a city-hall chair. {BothPosts}";
+        if (MarketSeat.HoldsMarketSeat(person, out _))
+            return $"{NameOf(person)} is a market head. {MarketSeat.OnePost}";
         return null;
     }
 

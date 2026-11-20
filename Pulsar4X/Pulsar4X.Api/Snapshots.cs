@@ -419,6 +419,12 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
     /// <summary>Owning faction only. The industry head's name. Null when the seat is empty.</summary>
     public string? IndustryHeadName { get; init; }
 
+    /// <summary>Owning faction only. The seated market head's entity id (a seat apart from the chair and the industry seat). -1 when empty.</summary>
+    public int MarketHeadId { get; init; } = -1;
+
+    /// <summary>Owning faction only. The market head's name. Null when the seat is empty.</summary>
+    public string? MarketHeadName { get; init; }
+
     /// <summary>The industry head's portrait seed (see <see cref="CommanderSnapshot.PortraitSeed"/>). 0 when there is no one in the post.</summary>
     public int IndustryHeadPortraitSeed { get; init; }
 
@@ -1180,8 +1186,31 @@ public sealed record CargoStorageView(
 {
     public IReadOnlyList<CargoTypeStoreView> Stores { get; init; } = Array.Empty<CargoTypeStoreView>();
 
+    /// <summary>A colony's warehouse stock rules, one per item, ordered by name. Empty for a ship.</summary>
+    public IReadOnlyList<StockRuleView> StockRules { get; init; } = Array.Empty<StockRuleView>();
+
+    /// <summary>True when the colony's industry seat is filled, so Min rules queue production.</summary>
+    public bool IndustrySeatFilled { get; init; }
+
+    /// <summary>True when the colony's market is managed (market seat filled, or an NPC colony), so Max rules sell and the market prices itself.</summary>
+    public bool MarketSeatFilled { get; init; }
+
     /// <summary>Same-faction colonies in transfer range. Empty for a colony and for a ship with no rate.</summary>
     public IReadOnlyList<int> InstallColonyIds { get; init; } = Array.Empty<int>();
+}
+
+/// <summary>
+/// One warehouse stock rule. <see cref="Min"/>: keep at least this much (with the industry seat, production is queued
+/// toward it). <see cref="Max"/>: sell if above (with the market seat). Null = unset. Set with
+/// <c>SetStockRuleCommand</c>, clear with <c>ClearStockRuleCommand</c>.
+/// </summary>
+public sealed record StockRuleView(string CargoId, string Name, long? Min, long? Max)
+{
+    /// <summary>Units in the warehouse now.</summary>
+    public long Stock { get; init; }
+
+    /// <summary>Units the colony's queued production jobs will still make of it.</summary>
+    public long Queued { get; init; }
 }
 
 public sealed record CargoTypeStoreView(
@@ -1217,6 +1246,9 @@ public sealed record CargoItemView(
 
     /// <summary>The component design's id when this row is a component instance, else empty.</summary>
     public string DesignId { get; init; } = "";
+
+    /// <summary>The item's cargo id (the id a stock rule takes); the design id for a component instance.</summary>
+    public string CargoId { get; init; } = "";
 
     /// <summary>A finished facility a Construction Bay can mount: the design is crate-able.</summary>
     public bool IsCrate { get; init; }
