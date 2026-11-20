@@ -120,6 +120,8 @@ public class ShipRefitJob
             return OverSlip;
         if (TryFind(ship, out _, out _))
             return InRefit;
+        if (Recycling.TryFindShip(ship, out _, out _))
+            return Recycling.QueuedForRecycling;
         if (remove.Count == 0 && mount.Count == 0 && (wanted == null || wanted.Count == 0))
             return NothingToRefit;
         foreach (var design in wanted ?? Array.Empty<ComponentDesign>())

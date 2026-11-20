@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using GameEngine.Engine.Orders;
+using Pulsar4X.Api;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
@@ -63,6 +65,22 @@ public class RecycleOrder : EntityAction
             : Recycling.ComponentJob(_colony, Recycling.ComponentDesignOf(_colony, _designId!)!, _quantity);
         IndustryTools.AddJob(_colony, _lineId, job);
         ShipLogBook.NoteIndustryChange(_colony, $"queued {job.Name}" + (job.NumberOrdered > 1 ? $" x{job.NumberOrdered}" : ""));
+        if (_ship != null)
+            StandDown(_ship, atDateTime);
+    }
+
+    /// <summary>
+    /// A ship queued for scrapping stops what it is doing, so it cannot leave transfer range and stall the job. Uses
+    /// the player's own cancel paths: the current goal is cancelled now (<c>CancelGoalCommand</c>), then any order
+    /// still queued is cancelled (<c>CancelOrderCommand</c>). Movement code is not touched.
+    /// </summary>
+    internal static void StandDown(Entity ship, DateTime at)
+    {
+        AgentProcessor.CancelGoal(ship, CancelTiming.Now, at);
+        if (!ship.TryGetDataBlob<ActionQueueDB>(out var queue))
+            return;
+        foreach (var action in queue.ActionList.ToList())
+            AgentProcessor.CancelAction(ship, action, at);
     }
 
     internal override bool IsFinished() => true;

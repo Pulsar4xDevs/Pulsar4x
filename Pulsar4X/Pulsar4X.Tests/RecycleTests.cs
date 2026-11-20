@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Client;
@@ -26,7 +27,7 @@ namespace Pulsar4X.Tests;
 /// </summary>
 [TestFixture]
 [NonParallelizable]
-public class RecyclingTests
+public class RecycleTests
 {
     const string WarpTech = "Pulsar4x.Scenario.WarpTechStart";
 
@@ -222,6 +223,56 @@ public class RecyclingTests
         Assert.That(Send(_colony, new RecycleComponentCommand(_colony.Id, part.UniqueID, 1, _yardLine)).RejectionReason, Is.EqualTo(Recycling.NotThisLine));
         Assert.That(Send(_colony, new RecycleComponentCommand(_colony.Id, "no-such-part", 1)).RejectionReason, Is.EqualTo(Recycling.UnknownDesign));
         Assert.That(Send(_colony, new RecycleComponentCommand(_colony.Id, part.UniqueID, 1)).Accepted, Is.True);
+    }
+
+    ComponentInstance InstalledPart(Entity ship)
+        => ship.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.First(c => ShipRefitJob.IsShipPart(c.Design));
+
+    CommandResult QueueRefit(Entity ship)
+        => Send(_colony, new QueueShipRefitCommand(_colony.Id, _yardLine, ship.Id, new[] { InstalledPart(ship).ID }, Array.Empty<int>(), null));
+
+    [Test]
+    public void ARefit_IsRefused_OnAShipQueuedForRecycling()
+    {
+        var ship = NewShip();
+        Assert.That(Send(_colony, new RecycleShipCommand(_colony.Id, ship.Id)).Accepted, Is.True);
+        Assert.That(QueueRefit(ship).RejectionReason, Is.EqualTo(Recycling.QueuedForRecycling));
+        Assert.That(ShipRefitJob.TryFind(ship, out _, out _), Is.False);
+        Assert.That(ShipRefitJob.Rejection(_colony, _yardLine, ship, new[] { InstalledPart(ship) }, Array.Empty<ComponentInstance>()),
+            Is.EqualTo(Recycling.QueuedForRecycling), "the order's own check refuses it too");
+    }
+
+    [Test]
+    public void Recycling_IsRefused_OnAShipInRefit()
+    {
+        var ship = NewShip();
+        var refit = QueueRefit(ship);
+        Assert.That(refit.Accepted, Is.True, refit.RejectionReason);
+        Assert.That(Send(_colony, new RecycleShipCommand(_colony.Id, ship.Id)).RejectionReason, Is.EqualTo(Recycling.InRefit));
+        Assert.That(Recycling.TryFindShip(ship, out _, out _), Is.False);
+    }
+
+    [Test]
+    public void QueueingAShipForRecycling_CancelsItsPlottedOrders_AndItTakesNoNewOnes()
+    {
+        var ship = NewShip();
+        // A move plotted but not yet begun (the player's plot runs its first burn at once, which already takes the
+        // ship out of transfer range: the case this guards against). Built with the planner, queued as a plot is.
+        var planet = _colony.GetDataBlob<ColonyInfoDB>().PlanetEntity;
+        List<EntityAction> actions = new();
+        Assert.That(planet.Manager!.GetAllEntitiesWithDataBlob<Pulsar4X.Galaxy.SystemBodyInfoDB>()
+            .Any(b => b.Id != planet.Id && Pulsar4X.Movement.MovePlanner.TryBuildMoveActions(ship, b, out actions, out _) && actions.Count > 0), Is.True);
+        foreach (var action in actions)
+            ship.GetDataBlob<ActionQueueDB>().Enqueue(action);
+        Assert.That(ship.GetDataBlob<ActionQueueDB>().ActionList.Count, Is.GreaterThan(0), "the ship has a plotted move");
+
+        var recycle = Send(_colony, new RecycleShipCommand(_colony.Id, ship.Id));
+        Assert.That(recycle.Accepted, Is.True, recycle.RejectionReason);
+        Assert.That(ship.GetDataBlob<ActionQueueDB>().ActionList.Count, Is.EqualTo(0), "the plotted move is cancelled");
+        Assert.That(new CommandTranslator(_game).Translate(_faction, ship, new ChangeAltitudeCommand(ship.Id, 5e7)).RejectionReason,
+            Is.EqualTo(Recycling.QueuedForRecycling), "and it takes no new one");
+        if (ship.TryGetDataBlob<GoalsDB>(out var goals) && goals.GivenGoal != null)
+            Assert.That(goals.GivenGoal.PlayerCancelled || goals.GivenGoal.Status is GameEngine.Engine.Orders.GoalStatus.Completed or GameEngine.Engine.Orders.GoalStatus.Failed, Is.True);
     }
 
     [Test]
