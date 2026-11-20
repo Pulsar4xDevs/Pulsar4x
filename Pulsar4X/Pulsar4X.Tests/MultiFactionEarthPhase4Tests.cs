@@ -118,6 +118,10 @@ public class MultiFactionEarthPhase4Tests
     [Test]
     public void NewOfferStockRow_AsksTheSeedAsk()
     {
+        // The player's market only prices stock by itself with a market head seated.
+        var head = Pulsar4X.People.CommanderFactory.Create(_company.Manager!, _company.FactionOwnerID,
+            new Pulsar4X.People.CommanderDB("Mara", 1, Pulsar4X.DataStructures.CommanderTypes.Civilian));
+        Assert.That(GameEngine.People.MarketSeat.Seat(_company, head, _company.StarSysDateTime), Is.Null);
         SetStock(_company, "iron", 5_000);
         _company.GetDataBlob<ColonyMarketPolicyDB>().Rows.Remove("iron");
         Plan(_company, _company.StarSysDateTime);

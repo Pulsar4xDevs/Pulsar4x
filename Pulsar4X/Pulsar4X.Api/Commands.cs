@@ -320,6 +320,27 @@ public sealed record SeatIndustryHeadCommand(int TargetEntityId, int CommanderId
 public sealed record UnseatIndustryHeadCommand(int TargetEntityId) : GameCommand(TargetEntityId);
 
 /// <summary>
+/// Seats a hired civilian as the market head of the colony <c>TargetEntityId</c>. With a market head the colony's market
+/// prices its own listings and sells stock above the warehouse Max. Rejected when the person holds a city-hall chair or
+/// the industry seat, is not a civilian of this faction, or is unknown. A head of another colony's market moves.
+/// </summary>
+public sealed record SeatMarketHeadCommand(int TargetEntityId, int CommanderId) : GameCommand(TargetEntityId);
+
+/// <summary>Empties the market seat of the colony <c>TargetEntityId</c>. Accepted when the seat is already empty.</summary>
+public sealed record UnseatMarketHeadCommand(int TargetEntityId) : GameCommand(TargetEntityId);
+
+/// <summary>
+/// Sets the warehouse stock rule for one item at the colony <c>TargetEntityId</c>. <see cref="Min"/>: keep at least this
+/// many units (never sold; with the industry seat filled, production is queued toward it). <see cref="Max"/>: sell if
+/// above (with the market seat filled, the surplus is listed). Null leaves a bound unset; both null clears the rule.
+/// Rejected for a negative bound, Max below Min, or an item the faction does not know.
+/// </summary>
+public sealed record SetStockRuleCommand(int TargetEntityId, string CargoId, long? Min, long? Max) : GameCommand(TargetEntityId);
+
+/// <summary>Clears the warehouse stock rule for one item at the colony <c>TargetEntityId</c>. Accepted when there is none.</summary>
+public sealed record ClearStockRuleCommand(int TargetEntityId, string CargoId) : GameCommand(TargetEntityId);
+
+/// <summary>
 /// Hire one candidate from this colony's pool. Targets the colony whose pool holds the candidate. One person
 /// leaves the population. An administrator joins unassigned, or takes <see cref="PostColonyId"/>'s chair when
 /// that is set. A lab technician is housed on the candidate's colony.

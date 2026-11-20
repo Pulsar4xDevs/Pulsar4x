@@ -72,6 +72,9 @@ public static class BlocDemand
             else
                 row.ShortSince = null;
 
+            // Repricing the bid is the market's own pricing: only a managed market does it.
+            if (!GameEngine.People.MarketSeat.ManagesMarket(colony))
+                continue;
             decimal ask = EnergyPricing.SeedAsk(game, info.Data, row.CargoId);
             row.Bid = Math.Round(ask * (decimal)(row.BidFactor * Premium(row, now)), 2, MidpointRounding.AwayFromZero);
         }

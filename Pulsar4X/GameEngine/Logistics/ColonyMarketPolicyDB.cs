@@ -14,6 +14,13 @@ public sealed class MarketPolicyRow
     public decimal Ask;
     public decimal Bid;
 
+    /// <summary>
+    /// True for a row the market priced by itself (stock offered at its seed price, or a warehouse Max sale), not the
+    /// player. It is listed only while the market is managed (<see cref="GameEngine.People.MarketSeat.ManagesMarket"/>);
+    /// otherwise it is withdrawn.
+    /// </summary>
+    public bool AutoPriced;
+
     /// <summary>Bloc demand (multi-faction phase 4): units the colony's abstract economy uses per day. 0 = none.</summary>
     public double UsePerDay;
     /// <summary>Bloc demand: bid = seed ask x this x the shortage premium. 0 = not a demand row (bid left alone).</summary>
@@ -43,6 +50,7 @@ public sealed class MarketPolicyRow
         AutoProduce = AutoProduce,
         Ask = Ask,
         Bid = Bid,
+        AutoPriced = AutoPriced,
         UsePerDay = UsePerDay,
         BidFactor = BidFactor,
         ShortSince = ShortSince,

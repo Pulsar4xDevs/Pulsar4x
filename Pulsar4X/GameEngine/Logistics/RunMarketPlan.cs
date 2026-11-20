@@ -32,8 +32,32 @@ public class RunMarketPlan : IGoalPlanner
             MigrationBook.Refresh(manager);
 
 
+        // Auto-pricing and the warehouse Max sale need a managed market (a seated market head, or an NPC's).
+        bool managed = GameEngine.People.MarketSeat.ManagesMarket(managedEntity);
+        if (managed && managedEntity.HasDataBlob<ColonyStockRulesDB>())
+        {
+            if (!managedEntity.TryGetDataBlob<ColonyMarketPolicyDB>(out var rulePolicy))
+            {
+                rulePolicy = new ColonyMarketPolicyDB();
+                managedEntity.SetDataBlob(rulePolicy);
+            }
+            StockRules.AddSellRows(managedEntity, rulePolicy);
+        }
+
         if (!managedEntity.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy) || policy.Rows.Count == 0)
             return PlanResult.Continue(new List<EntityAction>());
+
+        // Without one, rows the market priced by itself are withdrawn; the player's own prices stay.
+        if (!managed)
+        {
+            foreach (var key in policy.Rows.Where(pair => pair.Value.AutoPriced).Select(pair => pair.Key).ToList())
+            {
+                policy.Rows.Remove(key);
+                MarketBook.RemoveListing(managedEntity, key);
+            }
+            if (policy.Rows.Count == 0)
+                return PlanResult.Continue(new List<EntityAction>());
+        }
 
         var info = FactionOf(managedEntity);
 
@@ -62,6 +86,8 @@ public class RunMarketPlan : IGoalPlanner
             long needed = Needed(managedEntity, cargoId);
             long queued = AlreadyQueued(managedEntity, cargoId);
             long hold = Math.Max(row.Min, needed);
+            // Warehouse rules: Min is never sold; Max is sold above when the market is managed.
+            long sellHold = StockRules.SellHold(managedEntity, cargoId, hold, managed);
             ranked.Add(new RowWork
             {
                 Row = row,
@@ -69,8 +95,9 @@ public class RunMarketPlan : IGoalPlanner
                 Stock = stock,
                 Queued = queued,
                 Hold = hold,
+                SellHold = sellHold,
                 Deficit = hold - stock,
-                Surplus = Math.Max(0, stock - hold),
+                Surplus = Math.Max(0, stock - sellHold),
             });
         }
 
@@ -122,7 +149,7 @@ public class RunMarketPlan : IGoalPlanner
             var desired = new MarketListing
             {
                 CargoId = item.CargoId,
-                SellQuantity = Math.Max(0, item.Stock - item.Hold),
+                SellQuantity = Math.Max(0, item.Stock - item.SellHold),
                 Ask = item.Row.Ask,
                 BuyQuantity = BuyQuantityOf(managedEntity, item),
                 Bid = item.Row.Bid,
@@ -241,6 +268,7 @@ public class RunMarketPlan : IGoalPlanner
         public long Stock;
         public long Queued;
         public long Hold;
+        public long SellHold;
         public long Deficit;
         public long Surplus;
     }

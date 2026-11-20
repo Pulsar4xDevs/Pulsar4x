@@ -646,7 +646,7 @@ namespace Pulsar4X.Industry
             return units;
         }
 
-        static string HeadName(Entity colony)
+        internal static string HeadName(Entity colony)
         {
             if (GameEngine.People.IndustrySeat.TryGetHead(colony, out var head)
                 && head.TryGetDataBlob<Pulsar4X.People.CommanderDB>(out var db)

@@ -26,7 +26,8 @@ public class OfferStockPlan : IGoalPlanner
         if (!string.IsNullOrEmpty(industry.Message))
             notes.Add(industry.Message);
 
-        if (managedEntity.HasDataBlob<LogiBaseDB>())
+        // Offering stock prices it: only a managed market (a seated market head, or an NPC's) does that.
+        if (managedEntity.HasDataBlob<LogiBaseDB>() && GameEngine.People.MarketSeat.ManagesMarket(managedEntity))
             Offer(managedEntity, notes);
 
         // Multi-faction phase 4: bloc demand rows consume, and their bids follow the shortage premium.
@@ -111,6 +112,7 @@ public class OfferStockPlan : IGoalPlanner
             Min = 0,
             Max = 0,
             AutoProduce = false,
+            AutoPriced = true,
             Ask = data == null ? 0 : Pulsar4X.Energy.EnergyPricing.SeedAsk(game, data, cargoId),
             Bid = data == null ? 0 : Pulsar4X.Energy.EnergyPricing.SeedBid(game, data, cargoId),
         };

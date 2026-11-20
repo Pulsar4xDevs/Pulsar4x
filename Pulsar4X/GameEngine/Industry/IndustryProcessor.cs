@@ -22,6 +22,8 @@ namespace Pulsar4X.Industry
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
+            // The industry head first queues production toward the colony's warehouse minimums.
+            Pulsar4X.Logistics.StockRules.QueueTowardMin(entity);
             IndustryTools.ConstructStuff(entity);
         }
 
