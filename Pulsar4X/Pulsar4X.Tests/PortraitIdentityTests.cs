@@ -114,6 +114,25 @@ public class PortraitIdentityTests
     }
 
     [Test]
+    public void SpeciesFromView_DefaultsToHuman_UntilEngineFieldsLand()
+    {
+        Assert.That(PortraitIdentity.SpeciesFromView(), Is.EqualTo("human"));
+        Assert.That(PortraitIdentity.ResolveSpecies(null), Is.EqualTo("human"));
+        Assert.That(PortraitIdentity.ResolveSpecies(""), Is.EqualTo("human"));
+        Assert.That(PortraitIdentity.ResolveSpecies("  "), Is.EqualTo("human"));
+        Assert.That(PortraitIdentity.ResolveSpecies("zephyrian"), Is.EqualTo("zephyrian"));
+
+        var person = new CommanderSnapshot(9, "Lee", CommanderKind.Civilian, false, 0, 0, default)
+        {
+            PortraitSeed = 404,
+            PortraitRole = PortraitRoles.IndustryHead,
+        };
+        Assert.That(PortraitIdentity.Of(person).Species, Is.EqualTo("human"));
+        Assert.That(PortraitIdentity.Fallback(3, CommanderKind.Navy).Species, Is.EqualTo("human"));
+        Assert.That(new PortraitRef(4, "captain").Species, Is.EqualTo("human"));
+    }
+
+    [Test]
     public void Fallback_IsOnlyTheIdAndKind_ForAViewWithNoPortraitField()
     {
         Assert.That(PortraitIdentity.Fallback(9, CommanderKind.Navy), Is.EqualTo(new PortraitRef(9, PortraitRoles.Captain)));

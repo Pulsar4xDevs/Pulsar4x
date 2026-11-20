@@ -3,55 +3,62 @@ using Pulsar4X.Api;
 
 namespace Pulsar4X.Client;
 
-/// <summary>A portrait seed and role taken from a person or post view.</summary>
-public readonly record struct PortraitRef(int Seed, string Role)
+public readonly record struct PortraitRef(int Seed, string Role, string Species = "human")
 {
     public bool IsEmpty => PortraitIdentity.IsEmpty(Seed, Role);
 }
 
-/// <summary>
-/// Maps view portrait fields into a <see cref="PortraitRef"/>.
-/// A seed of 0 or a role of "" means the post is empty.
-/// Kind and entity-id fallbacks are only for a view that has no portrait field.
-/// </summary>
 public static class PortraitIdentity
 {
-    /// <summary>Fallback faction tint until the API exposes a faction colour.</summary>
+    public const string DefaultSpecies = "human";
+
     public static readonly Vector4 DefaultFactionColour = new(0.30f, 0.48f, 0.82f, 1f);
 
     public static bool IsEmpty(int seed, string? role)
         => seed == 0 || string.IsNullOrEmpty(role);
 
+    /// <summary>
+    /// Temporary species for every portrait until engine PortraitSpecies fields land.
+    /// Change only this method when those fields are merged.
+    /// </summary>
+    public static string SpeciesFromView() => DefaultSpecies;
+
+    public static string ResolveSpecies(string? species)
+        => string.IsNullOrWhiteSpace(species) ? SpeciesFromView() : species.Trim();
+
+    static PortraitRef From(int seed, string? role, string? species = null)
+        => new(seed, role ?? "", ResolveSpecies(species));
+
     public static PortraitRef Of(CommanderSnapshot person)
-        => new(person.PortraitSeed, person.PortraitRole ?? "");
+        => From(person.PortraitSeed, person.PortraitRole);
 
     public static PortraitRef Of(CandidateView candidate)
-        => new(candidate.PortraitSeed, candidate.PortraitRole ?? "");
+        => From(candidate.PortraitSeed, candidate.PortraitRole);
 
     public static PortraitRef Administrator(ColonyView view)
-        => new(view.AdministratorPortraitSeed, view.AdministratorPortraitRole ?? "");
+        => From(view.AdministratorPortraitSeed, view.AdministratorPortraitRole);
 
     public static PortraitRef IndustryHead(ColonyView view)
-        => new(view.IndustryHeadPortraitSeed, view.IndustryHeadPortraitRole ?? "");
+        => From(view.IndustryHeadPortraitSeed, view.IndustryHeadPortraitRole);
 
     public static PortraitRef IndustryHead(IndustryView view)
-        => new(view.IndustryHeadPortraitSeed, view.IndustryHeadPortraitRole ?? "");
+        => From(view.IndustryHeadPortraitSeed, view.IndustryHeadPortraitRole);
 
     public static PortraitRef Commander(ShipView view)
-        => new(view.CommanderPortraitSeed, view.CommanderPortraitRole ?? "");
+        => From(view.CommanderPortraitSeed, view.CommanderPortraitRole);
 
     public static PortraitRef Commander(ShipSnapshot ship)
-        => new(ship.CommanderPortraitSeed, ship.CommanderPortraitRole ?? "");
+        => From(ship.CommanderPortraitSeed, ship.CommanderPortraitRole);
 
     public static PortraitRef Commander(FleetSnapshot fleet)
-        => new(fleet.CommanderPortraitSeed, fleet.CommanderPortraitRole ?? "");
+        => From(fleet.CommanderPortraitSeed, fleet.CommanderPortraitRole);
 
     public static PortraitRef Scientist(ResearcherView lab)
-        => new(lab.ScientistPortraitSeed, lab.ScientistPortraitRole ?? "");
+        => From(lab.ScientistPortraitSeed, lab.ScientistPortraitRole);
 
     /// <summary>Only for a view that has no portrait field.</summary>
     public static PortraitRef Fallback(int entityId, CommanderKind kind)
-        => new(entityId, RoleFromKind(kind));
+        => From(entityId, RoleFromKind(kind));
 
     public static string RoleFromKind(CommanderKind kind) => kind switch
     {

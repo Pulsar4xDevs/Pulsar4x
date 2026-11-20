@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using ImGuiNET;
@@ -10,23 +9,31 @@ namespace Pulsar4X.Client;
 
 /// <summary>
 /// Draws a layered portrait with ImGui draw-list AddImage and a multiply tint.
-/// Textures are cached per file. Missing art is skipped quietly.
+/// Successful textures are cached per file. Misses are not cached, so Reload can retry.
+/// Missing art is skipped quietly.
 /// </summary>
 public sealed class PortraitRenderer
 {
     public const float SmallSize = 48f;
     public const float LargeSize = 128f;
+    public const float TemplateSize = PortraitAnchors.TemplateSize;
 
     static readonly object Gate = new();
     static PortraitCatalog? _catalog;
     static bool _catalogLoaded;
-    static readonly Dictionary<string, IntPtr> Cache = new(StringComparer.OrdinalIgnoreCase);
+    static readonly PortraitAssetCache<IntPtr> Cache = new();
+    static IntPtr _rendererTag;
 
     readonly GlobalUIState _uiState;
 
     PortraitRenderer(GlobalUIState uiState) => _uiState = uiState;
 
-    public static PortraitRenderer For(GlobalUIState uiState) => new(uiState);
+    public static PortraitRenderer For(GlobalUIState uiState)
+    {
+        var renderer = new PortraitRenderer(uiState);
+        renderer.ForgetCacheIfRendererChanged();
+        return renderer;
+    }
 
     public static PortraitCatalog Catalog
     {
@@ -37,12 +44,43 @@ public sealed class PortraitRenderer
         }
     }
 
+    /// <summary>Rescan species packs on disk and drop cached textures so new art is picked up.</summary>
+    public static void Reload()
+    {
+        lock (Gate)
+        {
+            ClearCacheUnlocked();
+            _catalogLoaded = false;
+            string dir = Path.Combine(PulsarMainWindow.ResourcesPath, "Portraits");
+            try
+            {
+                _catalog = PortraitCatalog.Load(dir);
+            }
+            catch
+            {
+                _catalog = new PortraitCatalog(
+                    Array.Empty<PortraitLayerSpec>(),
+                    new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IReadOnlyList<Vector4>>());
+            }
+            _catalogLoaded = true;
+        }
+    }
+
+    public static void ClearCache()
+    {
+        lock (Gate)
+            ClearCacheUnlocked();
+    }
+
+    /// <summary>Exposed for tests: the live texture-slot cache (successful loads only).</summary>
+    internal static PortraitAssetCache<IntPtr> TextureCache => Cache;
+
     /// <summary>Draw the portrait, or an empty-chair placeholder when the post is vacant.</summary>
-    public void Draw(PortraitRef portrait, float size)
-        => Draw(portrait.Seed, portrait.Role, PortraitIdentity.FactionColour(_uiState), size);
+    public void Draw(PortraitRef portrait, float size, PortraitPickOverrides? overrides = null)
+        => Draw(portrait.Seed, portrait.Role, PortraitIdentity.FactionColour(_uiState), size, portrait.Species, overrides);
 
     /// <summary>Draw the portrait for this seed and role at <paramref name="size"/> pixels, reserved in the layout.</summary>
-    public void Draw(int seed, string role, Vector4 factionColour, float size)
+    public void Draw(int seed, string role, Vector4 factionColour, float size, string? species = null, PortraitPickOverrides? overrides = null)
     {
         if (PortraitIdentity.IsEmpty(seed, role))
         {
@@ -51,9 +89,9 @@ public sealed class PortraitRenderer
         }
 
         EnsureCatalog();
-        var picks = PortraitPicker.Pick(_catalog!, seed, role, factionColour);
-        Vector2 start = ImGui.GetCursorScreenPos();
-        Vector2 end = new(start.X + size, start.Y + size);
+        ForgetCacheIfRendererChanged();
+        var picks = PortraitPicker.Pick(_catalog!, seed, role, factionColour, species, overrides);
+        Vector2 origin = ImGui.GetCursorScreenPos();
         var drawList = ImGui.GetWindowDrawList();
         foreach (var pick in picks)
         {
@@ -62,6 +100,9 @@ public sealed class PortraitRenderer
                 texture = Load(pick.FallbackFile);
             if (texture == IntPtr.Zero)
                 continue;
+            Vector2 shift = PortraitAnchors.ScaleOffset(pick.Offset, size);
+            Vector2 start = origin + shift;
+            Vector2 end = new(start.X + size, start.Y + size);
             uint tint = ImGui.ColorConvertFloat4ToU32(pick.Tint);
             drawList.AddImage(texture.ToTextureRef(), start, end, Vector2.Zero, Vector2.One, tint);
         }
@@ -90,29 +131,61 @@ public sealed class PortraitRenderer
     {
         if (string.IsNullOrEmpty(relativePath))
             return IntPtr.Zero;
+
+        ForgetCacheIfRendererChanged();
+        if (Cache.TryGet(relativePath, out var cached))
+            return cached;
+
+        IntPtr loaded = IntPtr.Zero;
+        try
+        {
+            var renderer = _uiState.ViewPort?.Renderer ?? IntPtr.Zero;
+            if (renderer != IntPtr.Zero)
+            {
+                string path = Path.Combine(PulsarMainWindow.ResourcesPath, "Portraits", relativePath);
+                if (File.Exists(path))
+                    loaded = Image.LoadTexture(renderer, path);
+            }
+        }
+        catch
+        {
+            loaded = IntPtr.Zero;
+        }
+
+        // Misses are not cached, so a later Reload can retry the file.
+        if (loaded != IntPtr.Zero)
+            Cache.Set(relativePath, loaded);
+        return loaded;
+    }
+
+    void ForgetCacheIfRendererChanged()
+    {
+        var renderer = _uiState.ViewPort?.Renderer ?? IntPtr.Zero;
         lock (Gate)
         {
-            if (Cache.TryGetValue(relativePath, out var cached))
-                return cached;
+            if (renderer == _rendererTag)
+                return;
+            ClearCacheUnlocked();
+            _rendererTag = renderer;
+        }
+    }
 
-            IntPtr loaded = IntPtr.Zero;
+    static void ClearCacheUnlocked()
+    {
+        var values = Cache.SnapshotValues(t => t);
+        Cache.Clear();
+        foreach (var texture in values)
+        {
+            if (texture == IntPtr.Zero)
+                continue;
             try
             {
-                var renderer = _uiState.ViewPort?.Renderer ?? IntPtr.Zero;
-                if (renderer != IntPtr.Zero)
-                {
-                    string path = Path.Combine(PulsarMainWindow.ResourcesPath, "Portraits", relativePath);
-                    if (File.Exists(path))
-                        loaded = Image.LoadTexture(renderer, path);
-                }
+                SDL.DestroyTexture(texture);
             }
             catch
             {
-                loaded = IntPtr.Zero;
+                // The renderer may already have been torn down.
             }
-
-            Cache[relativePath] = loaded;
-            return loaded;
         }
     }
 
@@ -133,7 +206,7 @@ public sealed class PortraitRenderer
             {
                 _catalog = new PortraitCatalog(
                     Array.Empty<PortraitLayerSpec>(),
-                    new Dictionary<string, IReadOnlyList<Vector4>>());
+                    new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IReadOnlyList<Vector4>>());
             }
             _catalogLoaded = true;
         }

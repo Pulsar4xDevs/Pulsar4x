@@ -105,13 +105,10 @@
 
   <ItemGroup>
     <!-- Copy all resource files with PreserveNewest -->
-    <Content Include="Resources\**\*.bmp;Resources\**\*.png;Resources\**\*.ico;Resources\**\*.ttf">
+    <Content Include="Resources\**\*.bmp;Resources\**\*.png;Resources\**\*.ico;Resources\**\*.ttf" Exclude="Resources\Portraits\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Portraits\**\*.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Portraits\**\*.md">
+    <Content Include="Resources\Portraits\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -56,6 +56,12 @@ public static class DevToolWindows
             DevToolPlacement.SettingsList));
 
         state.RegisterDevTool(new DevToolRegistration(
+            "portrait-builder", "Show Portrait Builder",
+            () => PortraitBuilderWindow.GetInstance().ToggleActive(),
+            () => PortraitBuilderWindow.GetInstance().GetActive(),
+            DevToolPlacement.SettingsList));
+
+        state.RegisterDevTool(new DevToolRegistration(
             "performance-window", "Show Pulsar Performance Window",
             () => PerformanceWindow.GetInstance().ToggleActive(),
             () => PerformanceWindow.GetInstance().GetActive(),

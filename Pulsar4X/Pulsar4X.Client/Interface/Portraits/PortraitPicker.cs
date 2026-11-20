@@ -5,7 +5,34 @@ using System.Numerics;
 namespace Pulsar4X.Client;
 
 /// <summary>One layer after a seeded pick. <see cref="File"/> is null when the layer is empty.</summary>
-public sealed record PortraitLayerPick(string? File, string? FallbackFile, Vector4 Tint);
+public sealed record PortraitLayerPick(
+    string? File,
+    string? FallbackFile,
+    Vector4 Tint,
+    Vector2 Offset = default,
+    string? Anchor = null,
+    int FileIndex = -1,
+    int FileCount = 0);
+
+/// <summary>
+/// Optional pins for the debug portrait builder. Overriding a layer or palette
+/// pins that pick; everything else still comes from the seed.
+/// A layer value of <c>null</c> means None (the layer is empty).
+/// </summary>
+public sealed class PortraitPickOverrides
+{
+    public Dictionary<string, int?> Layers { get; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, int> Palettes { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public bool HasLayer(string id) => Layers.ContainsKey(id);
+    public bool HasPalette(string name) => Palettes.ContainsKey(name);
+
+    public void Clear()
+    {
+        Layers.Clear();
+        Palettes.Clear();
+    }
+}
 
 /// <summary>
 /// Seeded layer and palette picks for a layered portrait. Pure: no ImGui, no I/O.
@@ -34,64 +61,174 @@ public static class PortraitPicker
         int seed,
         string? role,
         Vector4 factionColour)
+        => Pick(catalog, seed, role, factionColour, species: null, overrides: null);
+
+    public static IReadOnlyList<PortraitLayerPick> Pick(
+        PortraitCatalog catalog,
+        int seed,
+        string? role,
+        Vector4 factionColour,
+        string? species,
+        PortraitPickOverrides? overrides = null)
     {
+        var pack = catalog.ResolveSpecies(species);
         var rng = new PortraitRng(seed);
         string resolved = NormalizeRole(role, catalog.Roles);
-        var skin = PickPalette(rng, catalog, "skin");
-        var hair = PickPalette(rng, catalog, "hair");
-        var eye = PickPalette(rng, catalog, "eye");
-        var uniform = PickPalette(rng, catalog, "uniform");
 
-        var picks = new List<PortraitLayerPick>(catalog.Layers.Count);
-        foreach (var layer in catalog.Layers)
+        var palettePicks = new Dictionary<string, Vector4>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in pack.Palettes)
+            palettePicks[pair.Key] = NextPalette(rng, pair.Value);
+
+        if (overrides != null)
+        {
+            foreach (var pin in overrides.Palettes)
+            {
+                if (!pack.Palettes.TryGetValue(pin.Key, out var colours) || colours.Count == 0)
+                    continue;
+                int index = pin.Value;
+                if (index < 0) index = 0;
+                palettePicks[pin.Key] = colours[index % colours.Count];
+            }
+        }
+
+        var seeded = new List<PortraitLayerPick>(pack.Layers.Count);
+        foreach (var layer in pack.Layers)
         {
             bool empty = layer.EmptyChance > 0f && rng.NextSingle() < layer.EmptyChance;
-            if (empty)
-            {
-                picks.Add(new PortraitLayerPick(null, null, Vector4.One));
-                continue;
-            }
-
+            var files = FilesOf(pack, layer);
             string? file;
             string? fallback = null;
-            if (layer.ByRole)
+            int fileIndex = -1;
+            if (empty)
             {
-                file = layer.Folder + "/" + resolved + ".png";
-                fallback = layer.Folder + "/" + CivilianRole + ".png";
+                file = null;
+            }
+            else if (layer.ByRole)
+            {
+                file = PortraitCatalog.LayerPath(layer, resolved + ".png");
+                fallback = PortraitCatalog.LayerPath(layer, CivilianRole + ".png");
                 if (string.Equals(file, fallback, StringComparison.OrdinalIgnoreCase))
                     fallback = null;
+                fileIndex = IndexOf(files, file);
             }
             else
             {
-                file = PickFile(rng, catalog, layer.Folder);
+                file = files.Count == 0 ? null : files[rng.Next(files.Count)];
+                fileIndex = IndexOf(files, file);
             }
 
-            var tint = layer.Tint switch
-            {
-                "skin" => skin,
-                "hair" => hair,
-                "eye" => eye,
-                "uniform" => uniform,
-                "faction" => factionColour,
-                _ => Vector4.One,
-            };
-            picks.Add(new PortraitLayerPick(file, fallback, tint));
+            var tint = ResolveTint(layer.Tint, palettePicks, factionColour);
+            seeded.Add(new PortraitLayerPick(file, fallback, tint, Vector2.Zero, layer.Anchor, fileIndex, files.Count));
         }
-        return picks;
+
+        if (overrides != null)
+        {
+            for (int i = 0; i < pack.Layers.Count; i++)
+            {
+                var layer = pack.Layers[i];
+                if (!overrides.Layers.TryGetValue(layer.Id, out var pin))
+                    continue;
+                var files = FilesOf(pack, layer);
+                string? file;
+                string? fallback = null;
+                int fileIndex = -1;
+                if (pin is null || files.Count == 0)
+                {
+                    file = null;
+                }
+                else if (layer.ByRole)
+                {
+                    int index = pin.Value;
+                    if (index < 0) index = 0;
+                    file = files[index % files.Count];
+                    fileIndex = index % files.Count;
+                    fallback = PortraitCatalog.LayerPath(layer, CivilianRole + ".png");
+                    if (string.Equals(file, fallback, StringComparison.OrdinalIgnoreCase))
+                        fallback = null;
+                }
+                else
+                {
+                    int index = pin.Value;
+                    if (index < 0) index = 0;
+                    file = files[index % files.Count];
+                    fileIndex = index % files.Count;
+                }
+                var current = seeded[i];
+                seeded[i] = current with { File = file, FallbackFile = fallback, FileIndex = fileIndex, FileCount = files.Count };
+            }
+        }
+
+        string? headFile = FindHeadFile(pack, seeded);
+        for (int i = 0; i < seeded.Count; i++)
+        {
+            var pick = seeded[i];
+            string? anchor = pack.Layers[i].Anchor;
+            if (string.IsNullOrEmpty(anchor))
+                continue;
+            var offset = OffsetFor(pack, headFile, anchor);
+            seeded[i] = pick with { Offset = offset, Anchor = anchor };
+        }
+
+        return seeded;
     }
 
-    static Vector4 PickPalette(PortraitRng rng, PortraitCatalog catalog, string name)
+    public static IReadOnlyList<string> FilesOf(PortraitSpeciesPack pack, PortraitLayerSpec layer)
     {
-        if (!catalog.Palettes.TryGetValue(name, out var colours) || colours.Count == 0)
+        if (pack.FilesByFolder.TryGetValue(layer.Folder, out var files))
+            return files;
+        return Array.Empty<string>();
+    }
+
+    static Vector4 NextPalette(PortraitRng rng, IReadOnlyList<Vector4> colours)
+    {
+        if (colours.Count == 0)
             return Vector4.One;
         return colours[rng.Next(colours.Count)];
     }
 
-    static string? PickFile(PortraitRng rng, PortraitCatalog catalog, string folder)
+    static Vector4 ResolveTint(string tint, IReadOnlyDictionary<string, Vector4> palettes, Vector4 factionColour)
     {
-        if (!catalog.FilesByFolder.TryGetValue(folder, out var files) || files.Count == 0)
-            return null;
-        return files[rng.Next(files.Count)];
+        if (string.IsNullOrWhiteSpace(tint) || string.Equals(tint, "none", StringComparison.OrdinalIgnoreCase))
+            return Vector4.One;
+        if (string.Equals(tint, "faction", StringComparison.OrdinalIgnoreCase))
+            return factionColour;
+        if (palettes.TryGetValue(tint, out var colour))
+            return colour;
+        return Vector4.One;
+    }
+
+    static int IndexOf(IReadOnlyList<string> files, string? file)
+    {
+        if (string.IsNullOrEmpty(file))
+            return -1;
+        for (int i = 0; i < files.Count; i++)
+        {
+            if (string.Equals(files[i], file, StringComparison.OrdinalIgnoreCase))
+                return i;
+        }
+        return -1;
+    }
+
+    static string? FindHeadFile(PortraitSpeciesPack pack, IReadOnlyList<PortraitLayerPick> picks)
+    {
+        for (int i = 0; i < pack.Layers.Count; i++)
+        {
+            var layer = pack.Layers[i];
+            if (string.Equals(layer.Id, "head", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(layer.Folder, "head", StringComparison.OrdinalIgnoreCase))
+                return picks[i].File ?? picks[i].FallbackFile;
+        }
+        return null;
+    }
+
+    static Vector2 OffsetFor(PortraitSpeciesPack pack, string? headFile, string anchor)
+    {
+        if (string.IsNullOrEmpty(headFile))
+            return Vector2.Zero;
+        if (pack.HeadAnchors.TryGetValue(headFile, out var anchors)
+            && anchors.TryGetValue(anchor, out var offset))
+            return offset;
+        return Vector2.Zero;
     }
 }
 
