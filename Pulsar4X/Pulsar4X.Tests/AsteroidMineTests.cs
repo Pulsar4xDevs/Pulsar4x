@@ -346,12 +346,11 @@ public class AsteroidMineTests
     }
 
     [Test]
-    public void ModernTechnology_DoesNotUnlockTheMiner()
+    public void OpeningTheTech_DoesNotUnlockTheMiner()
     {
         var faction = Faction();
         var data = faction.GetDataBlob<FactionInfoDB>().Data;
-        data.Unlock("tech-modern-technology");
-        data.IncrementTechLevel("tech-modern-technology");
+        data.Unlock("tech-asteroid-mining"); // open for research, as a scenario's StartingResearchable does
 
         Assert.That(data.ComponentTemplates.ContainsKey("asteroid-miner"), Is.False);
         Assert.That(data.LockedComponentTemplates.ContainsKey("asteroid-miner"), Is.True);

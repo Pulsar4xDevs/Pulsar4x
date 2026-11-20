@@ -123,10 +123,14 @@ public class CrewFormulaTests
     [Test]
     public void ConstructionAutomation_IsReachableFromBothStarts()
     {
-        foreach (var root in new[] { "tech-modern-technology", "tech-early-technology" })
+        // A start has no gate tech any more: each scenario's colonies list the techs they open (or research) at the start.
+        foreach (var scenario in new[] { "warp-tech-start", "early-tech" })
         {
-            var unlocks = _game.StartingGameData.Techs[root].Unlocks.SelectMany(kv => kv.Value);
-            Assert.That(unlocks, Does.Contain(CrewTech.ConstructionAutomation), root);
+            var colonies = Newtonsoft.Json.Linq.JArray.Parse(System.IO.File.ReadAllText($"Data/scenarios/{scenario}/colonies.json"));
+            var starts = colonies.Select(c => (c["Payload"] ?? c))
+                .SelectMany(c => ((c["StartingResearchable"] ?? new Newtonsoft.Json.Linq.JArray()).Concat(c["StartingItems"] ?? new Newtonsoft.Json.Linq.JArray())))
+                .Select(t => (string?)t);
+            Assert.That(starts, Does.Contain(CrewTech.ConstructionAutomation), scenario);
         }
     }
 

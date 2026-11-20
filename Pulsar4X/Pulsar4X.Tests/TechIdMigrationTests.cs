@@ -102,6 +102,50 @@ public class TechIdMigrationTests
     }
 
     [Test]
+    public void AnOldSave_HoldingARemovedGateNode_LoadsWithoutIt()
+    {
+        var (game, faction, _) = NewGame();
+        var data = faction.GetDataBlob<FactionInfoDB>().Data;
+        var anyTech = data.LockedTechs.Values.First();
+        foreach (var removed in TechIdMigration.Removed)
+        {
+            // As an old save held it: a researched node that unlocked others, and another tech's list naming it.
+            var node = new Tech(new Pulsar4X.Blueprints.TechBlueprint
+            {
+                UniqueID = removed, Name = removed, MaxLevel = 1, CostFormula = "0", DataFormula = "1", Category = "x",
+                Unlocks = new Dictionary<int, List<string>> { [1] = new List<string> { anyTech.UniqueID } },
+            }) { Level = 1 };
+            data.Techs.Add(removed, node);
+            anyTech.Unlocks[1] = new List<string> { removed };
+        }
+
+        var json = Game.Save(game);
+        int next = EntityIDGenerator.NextId;
+        var loaded = Game.Load(json);
+        EntityIDGenerator.NextId = Math.Max(next, EntityIDGenerator.NextId);
+
+        var after = loaded.Factions.Values.Single(f => f.Id == faction.Id).GetDataBlob<FactionInfoDB>().Data;
+        foreach (var removed in TechIdMigration.Removed)
+        {
+            Assert.That(after.Techs.ContainsKey(removed), Is.False, removed);
+            Assert.That(after.LockedTechs.ContainsKey(removed), Is.False, removed);
+        }
+        Assert.That(after.LockedTechs.Values.Concat(after.Techs.Values).SelectMany(t => t.Unlocks.Values.SelectMany(l => l)),
+            Has.None.EqualTo("tech-modern-technology").And.None.EqualTo("tech-early-technology"));
+        Assert.That(after.LockedTechs.ContainsKey(anyTech.UniqueID) || after.Techs.ContainsKey(anyTech.UniqueID), Is.True);
+    }
+
+    [Test]
+    public void ARemovedGateNode_InAResearchQueue_IsDropped()
+    {
+        var lab = new ResearcherDB(null!);
+        lab.TechQueue.Enqueue("tech-modern-technology");
+        lab.TechQueue.Enqueue("tech-ion-engine");
+        TechIdMigration.MigrateQueue(lab);
+        Assert.That(lab.TechQueue.ToList(), Is.EqualTo(new[] { "tech-ion-engine" }));
+    }
+
+    [Test]
     public void ARenamedTech_InAResearchQueue_IsRenamedInPlace_KeepingTheOrder()
     {
         var lab = new ResearcherDB(null!);

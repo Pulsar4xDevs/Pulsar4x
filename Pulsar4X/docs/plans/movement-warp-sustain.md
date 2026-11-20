@@ -45,7 +45,7 @@ In `GameData/basemod/TemplateFiles/techs.json`, next to `tech-alcubierre-sustain
 - `tech-alcubierre-gravitational-coupling`. Name "Alcubierre Gravitational Coupling". Category `tech-category-power-propulsion`. MaxLevel 10. `DataFormula` `1 - [Level] * 0.08`. Cost formula the same shape as the sustain tech, `500 + [Level] * 500`. Level 0 is 1. Level 10 is 0.2. The bill shrinks. It does not reach zero. Zero on the blob stays the "no climb" switch for an old save and for a test.
 - `tech-alcubierre-bleed`. Name "Alcubierre Bleed". Same category, max, and cost. `DataFormula` `0.5 + [Level] * 0.05`. Level 0 is 0.5. Level 10 is 1.
 
-Add both ids to the `tech-modern-technology` unlock list, beside the other alcubierre ids. Earth's `StartingItems` increments modern technology to level 1, which unlocks these at level 0. A blueprint faction increments every tech once after unlocking all of them, so its coupling tech is level 1 (`0.92 × 0.0025`). That is the same one-step head start sustain already gets. Leave it.
+Add both ids to the warp-tech-start colonies' `StartingResearchable` lists, beside the other alcubierre ids, so they start unlocked at level 0. A blueprint faction increments every tech once after unlocking all of them, so its coupling tech is level 1 (`0.92 × 0.0025`). That is the same one-step head start sustain already gets. Leave it.
 
 On the alcubierre template in `engines.json`, two `GuiTextDisplay` properties, and pass them at the end of the existing `AtbConstrArgs`:
 

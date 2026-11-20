@@ -32,13 +32,13 @@ public class NuclearTechTreeTests
     }
 
     [Test]
-    public void NuclearTheory_IsAnEarlyRootTech_WithAModestCost()
+    public void NuclearTheory_IsARootTech_WithAModestCost()
     {
         var store = Store();
         var theory = store.Techs["tech-nuclear-theory"];
         Assert.That(theory.Name, Is.EqualTo("Nuclear Theory"));
         Assert.That(theory.MaxLevel, Is.EqualTo(1));
-        Assert.That(Parents(store, "tech-nuclear-theory"), Is.EquivalentTo(new[] { "tech-early-technology", "tech-modern-technology" }));
+        Assert.That(Parents(store, "tech-nuclear-theory"), Is.Empty, "a root: each scenario lists it as open at the start");
         Assert.That(theory.CostFormula, Is.EqualTo("(1 + [Level]) * 1000"));
         Assert.That(store.Techs["tech-early-nuclear-power"].CostFormula, Is.EqualTo("(1 + [Level]) * 2000"), "Nuclear Power keeps its cost");
     }
@@ -77,8 +77,8 @@ public class NuclearTechTreeTests
         Assert.That(store.Techs.Keys, Has.None.Contain("plasma"), "no plasma thrusters yet");
         Assert.That(Parents(store, "tech-ion-engine"), Is.EqualTo(new[] { "tech-electric-thrusters" }));
         Assert.That(Parents(store, "tech-electric-thrusters"), Is.EqualTo(new[] { "tech-conductors" }));
-        Assert.That(Chain(store, "tech-ion-engine").Take(4),
-            Is.EqualTo(new[] { "tech-ion-engine", "tech-electric-thrusters", "tech-conductors", Chain(store, "tech-conductors")[1] }));
+        Assert.That(Chain(store, "tech-ion-engine"),
+            Is.EqualTo(new[] { "tech-ion-engine", "tech-electric-thrusters", "tech-conductors" }), "Conductors is a root");
         Assert.That(store.Techs["tech-conventional-engine"].Unlocks.Values.SelectMany(l => l), Does.Not.Contain("tech-ion-engine"));
         Assert.That(Chain(store, "tech-ion-engine"), Has.None.StartsWith("tech-nuclear-"));
         Assert.That(Chain(store, "tech-ion-engine"), Has.None.EqualTo("tech-early-nuclear-power"));
@@ -86,10 +86,43 @@ public class NuclearTechTreeTests
     }
 
     [Test]
+    public void TheGateNodes_AreGone_AndEachStartListsTheNuclearTheoryRoot()
+    {
+        var store = Store();
+        Assert.That(store.Techs.Keys, Does.Not.Contain("tech-modern-technology"));
+        Assert.That(store.Techs.Keys, Does.Not.Contain("tech-early-technology"));
+        foreach (var scenario in new[] { "warp-tech-start", "early-tech" })
+        {
+            var colonies = Newtonsoft.Json.Linq.JArray.Parse(System.IO.File.ReadAllText($"Data/scenarios/{scenario}/colonies.json"));
+            foreach (var colony in colonies.Select(c => c["Payload"] ?? c))
+            {
+                var items = ((colony["StartingItems"] ?? new Newtonsoft.Json.Linq.JArray()).Concat(colony["StartingResearchable"] ?? new Newtonsoft.Json.Linq.JArray()))
+                    .Select(t => (string?)t).Where(t => t != null && t.StartsWith("tech-")).ToList();
+                Assert.That(items, Is.All.Not.EqualTo("tech-modern-technology").And.Not.EqualTo("tech-early-technology"), scenario);
+                foreach (var id in items)
+                    Assert.That(store.Techs.ContainsKey(id), Is.True, id);
+                // Nuclear Power is researched only where Nuclear Theory is too.
+                if (items.Contains("tech-early-nuclear-power"))
+                    Assert.That(items, Does.Contain("tech-nuclear-theory"), scenario);
+            }
+        }
+    }
+
+    [Test]
+    public void TheWarheads_SitBehindHighExplosives()
+    {
+        var store = Store();
+        Assert.That(Parents(store, "tech-high-explosives-warheads"), Is.EqualTo(new[] { "tech-high-explosives" }));
+        Assert.That(Parents(store, "tech-fragmentation-warheads"), Is.EqualTo(new[] { "tech-high-explosives" }));
+    }
+
+    [Test]
     public void EveryTech_IsStillReachable_FromAStartingTech()
     {
         var store = Store();
-        var reached = new HashSet<string> { "tech-early-technology", "tech-modern-technology" };
+        // The roots are the techs nothing unlocks; a scenario opens them (StartingResearchable) or researches them (StartingItems).
+        var unlocked = store.Techs.Values.SelectMany(t => t.Unlocks.Values.SelectMany(l => l)).ToHashSet();
+        var reached = store.Techs.Keys.Where(id => !unlocked.Contains(id)).ToHashSet();
         var queue = new Queue<string>(reached);
         while (queue.Count > 0)
             foreach (var id in store.Techs[queue.Dequeue()].Unlocks.Values.SelectMany(l => l).Where(i => store.Techs.ContainsKey(i)))

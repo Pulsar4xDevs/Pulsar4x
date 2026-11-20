@@ -33,6 +33,14 @@ namespace Pulsar4X.Colonies
         {
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
 
+            // Open the techs the faction may research from the start (unlocked, level 0, not researched)
+            foreach(var id in colonyBlueprint.StartingResearchable ?? new List<string>())
+            {
+                factionInfo.Data.Unlock(id);
+                if(factionInfo.Data.Techs.TryGetValue(id, out var researchable))
+                    researchable.ResearchCost = researchable.TechCostFormula();
+            }
+
             // Unlock the starting items
             foreach(var id in colonyBlueprint.StartingItems ?? new List<string>())
             {

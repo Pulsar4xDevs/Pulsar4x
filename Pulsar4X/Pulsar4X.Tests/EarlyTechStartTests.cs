@@ -95,11 +95,14 @@ public class EarlyTechStartTests
 
         foreach (var id in new[]
         {
-            "tech-early-technology", "tech-early-nuclear-power",
+            "tech-early-nuclear-power",
             "tech-early-directed-energy", "tech-early-warp-drive",
             "tech-nuclear-theory", "tech-nuclear-engines"
         })
             Assert.That(store.Techs, Does.ContainKey(id), id);
+        // The old gate nodes are gone: a scenario lists the techs it opens itself.
+        Assert.That(store.Techs, Does.Not.ContainKey("tech-early-technology"));
+        Assert.That(store.Techs, Does.Not.ContainKey("tech-modern-technology"));
     }
 
     [Test]
@@ -376,7 +379,10 @@ public class EarlyTechStartTests
             Assert.That(data.LockedComponentTemplates.ContainsKey(locked), Is.True, locked);
         }
 
-        Assert.That(data.Techs["tech-early-technology"].Level, Is.EqualTo(1));
+        Assert.That(data.Techs.ContainsKey("tech-early-technology"), Is.False, "no gate node");
+        Assert.That(data.Techs["tech-conventional-engine"].Level, Is.EqualTo(1), "researched at the start");
+        Assert.That(data.IsResearchable("tech-mining-production"), Is.True, "open at the start, not researched");
+        Assert.That(data.Techs["tech-mining-production"].Level, Is.EqualTo(0));
         Assert.That(data.IsResearchable("tech-nuclear-theory"), Is.True);
         Assert.That(data.Techs.ContainsKey("tech-early-nuclear-power"), Is.False, "Nuclear Power waits for Nuclear Theory");
         Assert.That(data.Techs.ContainsKey("tech-early-warp-drive"), Is.False);
@@ -433,7 +439,7 @@ public class EarlyTechStartTests
             Assert.That(id, Does.Not.Contain("jump"), id);
             Assert.That(id, Does.Not.Contain("gravitational"), id);
         }
-        foreach (var id in new[] { "tech-early-warp-drive", "tech-gravitational-surveyor", "tech-modern-technology" })
+        foreach (var id in new[] { "tech-early-warp-drive", "tech-gravitational-surveyor" })
             Assert.That(data.Techs.ContainsKey(id), Is.False, id);
 
         foreach (var id in new[] { "alcubierre-warp-drive", "gravitational-surveyor" })

@@ -115,7 +115,8 @@ public class EnergyTechTests
         new ModLoader().LoadScenario(colonyId == "colony-earth"
             ? "Data/scenarios/warp-tech-start/scenarioInfo.json"
             : "Data/scenarios/early-tech/scenarioInfo.json", store);
-        var start = store.Colonies[colonyId].StartingItems!;
+        // What a start researches, and what it only opens (StartingResearchable).
+        var start = store.Colonies[colonyId].StartingItems!.Concat(store.Colonies[colonyId].StartingResearchable ?? new List<string>()).ToList();
 
         // Every level of every tech can be researched, so whatever any level unlocks is reachable.
         var reachable = new HashSet<string>(start);

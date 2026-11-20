@@ -96,7 +96,7 @@ Data, under `GameData/basemod/`:
 - `TemplateFiles/engines.json` — propulsion, and the Alcubierre electrical coefficients. Leave the newtonian formulas. Creation and sustain are the warp budget above.
 - `TemplateFiles/energy.json` — reactor, battery, RTG, steam turbine, solar. The stock steam plant is 15 kW. The generic reactor's fuel-as-construction removal stays. Its 50 kW/kg operating stat was left alone.
 - `TemplateFiles/storage.json`, `weapons.json`, `electronics.json`, `armor.json`, `ordnance.json` — other templates.
-- `TemplateFiles/techs.json`, `techs-bureaucracy.json`, `techCategories.json` — research. `Unlocks` is sparse. `tech-modern-technology` unlocks a pile at level 1.
+- `TemplateFiles/techs.json`, `techs-bureaucracy.json`, `techCategories.json` — research. `Unlocks` is sparse. There is no gate tech: each scenario colony lists its researched techs in `StartingItems` and the techs it opens (unlocked, level 0) in `StartingResearchable`.
 - `GameData/scenarios/warp-tech-start/designs/componentDesigns.json` and `shipDesigns.json` — stock designs (Merlin, factory, mine, yard), loaded by the Warp Tech Start scenario.
 - `GameData/scenarios/warp-tech-start/colonies.json` — starting installations and cargo. Earth's minerals stay in `GameData/systems/sol/earth.json` (`randomHW`).
 - `Industry.mmd` — hand-drawn chain. Stale. Trust the JSON.

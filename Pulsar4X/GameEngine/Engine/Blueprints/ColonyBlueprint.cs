@@ -56,6 +56,11 @@ public class ColonyBlueprint : Blueprint
     public List<string>? OrdnanceDesigns { get; set; }
     public List<string>? ShipDesigns { get; set; }
     public List<string>? StartingItems { get; set; }
+    /// <summary>
+    /// Techs the faction can research from the start but has not researched: each is unlocked (level 0) and nothing more.
+    /// A tech in <see cref="StartingItems"/> is researched; one here is only open. Applied before StartingItems.
+    /// </summary>
+    public List<string>? StartingResearchable { get; set; }
     public List<LaunchQueueBlueprint>? LaunchQueue { get; set; }
     public List<FleetBlueprint>? Fleets { get; set; }
     /// <summary>Multi-faction phase 4: bloc market rows seeded into the colony's market policy.</summary>

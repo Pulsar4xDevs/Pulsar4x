@@ -441,7 +441,13 @@
       "Category": "tech-category-missiles-kinetic-weapons",
       "MaxLevel": 10,
       "DataFormula": "1.66 + [Level] * 0.1",
-      "CostFormula": "(1 + [Level]) * 2500"
+      "CostFormula": "(1 + [Level]) * 2500",
+      "Unlocks": {
+        "1": [
+          "tech-high-explosives-warheads",
+          "tech-fragmentation-warheads"
+        ]
+      }
     }
   },
   {
@@ -550,71 +556,6 @@
       "MaxLevel": 95,
       "DataFormula": "500 + [Level] * 100",
       "CostFormula": "(1 + [Level]) * 500"
-    }
-  },
-  {
-    "Type": "Tech",
-    "Payload": {
-      "UniqueID": "tech-modern-technology",
-      "Name": "Modern Technology",
-      "Description": "Unlocks all modern technologies needed for space flight and exploration",
-      "Category": "tech-category-missiles-kinetic-weapons",
-      "MaxLevel": 1,
-      "DataFormula": "1",
-      "CostFormula": "0",
-      "Unlocks": {
-        "1": [
-          "tech-mining-production",
-          "tech-battery-capacity",
-          "tech-capacitors",
-          "tech-conductors",
-          "tech-alcubierre-miniaturization",
-          "tech-alcubierre-bubble-creation-cost",
-          "tech-alcubierre-sustain-cost",
-          "tech-alcubierre-gravitational-coupling",
-          "tech-alcubierre-bleed",
-          "tech-alcubierre-collapse-efficiency",
-          "tech-solid-fuel",
-          "tech-conventional-engine",
-          "tech-nuclear-theory",
-          "tech-jumppoint-stabilization",
-          "tech-jumppoint-stabilization-size-reduction",
-          "tech-jumppoint-stabilization-time-reduction",
-          "tech-high-explosives",
-          "tech-high-explosives-warheads",
-          "tech-fragmentation-warheads",
-          "tech-fission-warheads",
-          "tech-laser-warheads",
-          "tech-triggers",
-          "tech-guidance",
-          "tech-antenna-sensitivity",
-          "tech-antenna-efficiency",
-          "tech-antenna-bandwidth",
-          "tech-factory-max-size",
-          "tech-shipyard-slip-max-size",
-          "tech-academy-larger-classes",
-          "tech-academy-better-instruction",
-          "tech-academy-candidate-search",
-          "tech-geo-surveyor",
-          "tech-asteroid-mining",
-          "tech-administration-level",
-          "tech-infra-gravity-range",
-          "tech-infra-gravity-min-extension",
-          "tech-infra-gravity-max-extension",
-          "tech-infra-pressure-range",
-          "tech-infra-pressure-max-extension",
-          "tech-thermal-efficiency",
-          "tech-grid-distribution",
-          "tech-industrial-energy-efficiency",
-          "tech-construction-automation",
-          "tech-construction-bay",
-          "tech-life-support-efficiency",
-          "tech-fuel-cells",
-          "tech-reactor-power-density",
-          "tech-power-conversion",
-          "tech-fission-power-plant"
-        ]
-      }
     }
   },
   {
@@ -762,49 +703,6 @@
       "MaxLevel": 10,
       "DataFormula": "0.2 - [Level] * 0.01",
       "CostFormula": "(1 + [Level]) * 500"
-    }
-  },
-  {
-    "Type": "Tech",
-    "Payload": {
-      "UniqueID": "tech-early-technology",
-      "Name": "Early Technology",
-      "Description": "Starting gate for the Early Tech Start: opens the basic industrial, survey and propulsion research lines. Ships move by reaction drive only; nuclear theory must be researched first, then nuclear power, and warp and jump-point technology after that.",
-      "Category": "tech-category-missiles-kinetic-weapons",
-      "MaxLevel": 1,
-      "DataFormula": "1",
-      "CostFormula": "0",
-      "Unlocks": {
-        "1": [
-          "tech-mining-production",
-          "tech-battery-capacity",
-          "tech-capacitors",
-          "tech-conductors",
-          "tech-solid-fuel",
-          "tech-conventional-engine",
-          "tech-antenna-sensitivity",
-          "tech-antenna-efficiency",
-          "tech-antenna-bandwidth",
-          "tech-factory-max-size",
-          "tech-shipyard-slip-max-size",
-          "tech-geo-surveyor",
-          "tech-asteroid-mining",
-          "tech-administration-level",
-          "tech-infra-gravity-range",
-          "tech-infra-gravity-min-extension",
-          "tech-infra-gravity-max-extension",
-          "tech-infra-pressure-range",
-          "tech-infra-pressure-max-extension",
-          "tech-nuclear-theory",
-          "tech-thermal-efficiency",
-          "tech-grid-distribution",
-          "tech-industrial-energy-efficiency",
-          "tech-construction-automation",
-          "tech-construction-bay",
-          "tech-life-support-efficiency",
-          "tech-fuel-cells"
-        ]
-      }
     }
   },
   {
