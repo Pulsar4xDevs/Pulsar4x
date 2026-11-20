@@ -75,9 +75,16 @@ public static class PortraitPicker
         var rng = new PortraitRng(seed);
         string resolved = NormalizeRole(role, catalog.Roles);
 
+        // Pick one colour per palette in species.json key order, then pick the layers.
+        // That matches compose_preview.py and keeps layers that share a palette in sync.
         var palettePicks = new Dictionary<string, Vector4>(StringComparer.OrdinalIgnoreCase);
-        foreach (var pair in pack.Palettes)
-            palettePicks[pair.Key] = NextPalette(rng, pair.Value);
+        var paletteNames = pack.PaletteOrder.Count > 0 ? pack.PaletteOrder : pack.Palettes.Keys;
+        foreach (var name in paletteNames)
+        {
+            if (!pack.Palettes.TryGetValue(name, out var colours))
+                continue;
+            palettePicks[name] = NextPalette(rng, colours);
+        }
 
         if (overrides != null)
         {

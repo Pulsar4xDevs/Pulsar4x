@@ -1,0 +1,127 @@
+{
+  "id": "kzari",
+  "name": "Kzari",
+  "author": "Grok Bot (AI-generated for the Pulsar4X project)",
+  "version": "1.0.0",
+  "license": "Generated for Pulsar4X; see ART-LICENSE.md",
+  "layers": [
+    {
+      "id": "background",
+      "folder": "background",
+      "tint": "none",
+      "emptyChance": 0,
+      "byRole": false,
+      "shared": true
+    },
+    {
+      "id": "crest-back",
+      "folder": "crest-back",
+      "tint": "crest",
+      "emptyChance": 0.45,
+      "byRole": false,
+      "anchor": "hairline"
+    },
+    {
+      "id": "neck",
+      "folder": "neck",
+      "tint": "chitin",
+      "emptyChance": 0,
+      "byRole": false
+    },
+    {
+      "id": "uniform",
+      "folder": "uniform",
+      "tint": "uniform",
+      "emptyChance": 0,
+      "byRole": true
+    },
+    {
+      "id": "head",
+      "folder": "head",
+      "tint": "chitin",
+      "emptyChance": 0,
+      "byRole": false
+    },
+    {
+      "id": "crest",
+      "folder": "crest",
+      "tint": "crest",
+      "emptyChance": 0.15,
+      "byRole": false,
+      "anchor": "hairline"
+    },
+    {
+      "id": "eyes",
+      "folder": "eyes",
+      "tint": "eye",
+      "emptyChance": 0,
+      "byRole": false,
+      "anchor": "eyes"
+    },
+    {
+      "id": "mandibles",
+      "folder": "mandibles",
+      "tint": "chitin",
+      "emptyChance": 0,
+      "byRole": false,
+      "anchor": "mouth"
+    },
+    {
+      "id": "extras",
+      "folder": "extras",
+      "tint": "none",
+      "emptyChance": 0.55,
+      "byRole": false,
+      "anchor": "eyes"
+    },
+    {
+      "id": "insignia",
+      "folder": "insignia",
+      "tint": "faction",
+      "emptyChance": 0.2,
+      "byRole": false,
+      "shared": true
+    },
+    {
+      "id": "badge",
+      "folder": "badge",
+      "tint": "none",
+      "emptyChance": 0.35,
+      "byRole": false,
+      "shared": true
+    }
+  ],
+  "palettes": {
+    "chitin": [
+      "#7FA56B",
+      "#5E9C8F",
+      "#B8864B",
+      "#A5573F",
+      "#8E7FB0",
+      "#5F7FA8",
+      "#B45A6E",
+      "#C9C2A4"
+    ],
+    "crest": [
+      "#E8A33D",
+      "#D4476B",
+      "#3FB6C9",
+      "#9BCB3C",
+      "#7B5BC9",
+      "#E8E2C8"
+    ],
+    "eye": [
+      "#FFB300",
+      "#8FE03A",
+      "#B06CFF",
+      "#3CE0F0",
+      "#FF4A3D"
+    ],
+    "uniform": [
+      "#FFFFFF",
+      "#F4F1EC",
+      "#ECEFF4",
+      "#F2F0E8"
+    ]
+  }
+}

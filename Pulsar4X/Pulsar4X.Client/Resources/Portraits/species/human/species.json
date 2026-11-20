@@ -1,0 +1,161 @@
+{
+  "id": "human",
+  "name": "Human",
+  "author": "Grok Bot (AI-generated for the Pulsar4X project)",
+  "version": "1.0.0",
+  "license": "Generated for Pulsar4X; see ART-LICENSE.md",
+  "layers": [
+    {
+      "id": "background",
+      "folder": "background",
+      "tint": "none",
+      "emptyChance": 0,
+      "byRole": false,
+      "shared": true
+    },
+    {
+      "id": "back-hair",
+      "folder": "back-hair",
+      "tint": "hair",
+      "emptyChance": 0.6,
+      "byRole": false,
+      "anchor": "hairline"
+    },
+    {
+      "id": "neck",
+      "folder": "neck",
+      "tint": "skin",
+      "emptyChance": 0,
+      "byRole": false
+    },
+    {
+      "id": "uniform",
+      "folder": "uniform",
+      "tint": "uniform",
+      "emptyChance": 0,
+      "byRole": true
+    },
+    {
+      "id": "head",
+      "folder": "head",
+      "tint": "skin",
+      "emptyChance": 0,
+      "byRole": false
+    },
+    {
+      "id": "eye-whites",
+      "folder": "eye-whites",
+      "tint": "none",
+      "emptyChance": 0,
+      "byRole": false,
+      "anchor": "eyes"
+    },
+    {
+      "id": "eyes",
+      "folder": "eyes",
+      "tint": "eye",
+      "emptyChance": 0,
+      "byRole": false,
+      "anchor": "eyes"
+    },
+    {
+      "id": "brows",
+      "folder": "brows",
+      "tint": "hair",
+      "emptyChance": 0,
+      "byRole": false,
+      "anchor": "eyes"
+    },
+    {
+      "id": "nose",
+      "folder": "nose",
+      "tint": "skin",
+      "emptyChance": 0,
+      "byRole": false,
+      "anchor": "nose"
+    },
+    {
+      "id": "mouth",
+      "folder": "mouth",
+      "tint": "none",
+      "emptyChance": 0,
+      "byRole": false,
+      "anchor": "mouth"
+    },
+    {
+      "id": "facial-hair",
+      "folder": "facial-hair",
+      "tint": "hair",
+      "emptyChance": 0.6,
+      "byRole": false,
+      "anchor": "mouth"
+    },
+    {
+      "id": "hair",
+      "folder": "hair",
+      "tint": "hair",
+      "emptyChance": 0.05,
+      "byRole": false,
+      "anchor": "hairline"
+    },
+    {
+      "id": "extras",
+      "folder": "extras",
+      "tint": "none",
+      "emptyChance": 0.5,
+      "byRole": false,
+      "anchor": "eyes"
+    },
+    {
+      "id": "insignia",
+      "folder": "insignia",
+      "tint": "faction",
+      "emptyChance": 0.2,
+      "byRole": false,
+      "shared": true
+    },
+    {
+      "id": "badge",
+      "folder": "badge",
+      "tint": "none",
+      "emptyChance": 0.35,
+      "byRole": false,
+      "shared": true
+    }
+  ],
+  "palettes": {
+    "skin": [
+      "#F6D3B8",
+      "#EEBF98",
+      "#E0A878",
+      "#C98A5E",
+      "#A56A42",
+      "#8A5231",
+      "#6B3B22",
+      "#4A2A18"
+    ],
+    "hair": [
+      "#1C1A1A",
+      "#3B2A20",
+      "#5C3D2A",
+      "#8B5A2B",
+      "#B58A45",
+      "#D9B866",
+      "#A8472B",
+      "#C9C9CC"
+    ],
+    "eye": [
+      "#4B3621",
+      "#3B6B1F",
+      "#2E5A88",
+      "#6B7B8C",
+      "#7A5B2E"
+    ],
+    "uniform": [
+      "#FFFFFF",
+      "#F4F1EC",
+      "#ECEFF4",
+      "#F2F0E8"
+    ]
+  }
+}

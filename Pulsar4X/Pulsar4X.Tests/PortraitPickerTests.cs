@@ -123,26 +123,26 @@ public class PortraitPickerTests
     }
 
     [Test]
-    public void Parse_ShippedPortraitLayersJson()
+    public void Parse_ShippedHumanSpeciesJson()
     {
-        string? path = FindShippedJson();
-        Assert.That(path, Is.Not.Null, "portrait-layers.json should be findable from the test run or the client project");
-        string json = File.ReadAllText(path!);
-        Assert.That(json, Does.Contain("uniformByRole"), "the shipped catalog documents per-role uniform colours");
-        var catalog = PortraitCatalog.Parse(json);
+        string? dir = FindShippedPortraitsDir();
+        Assert.That(dir, Is.Not.Null, "species/human/species.json should be findable from the test run or the client project");
+        string path = Path.Combine(dir!, "species", "human", "species.json");
+        var catalog = PortraitCatalog.Parse(File.ReadAllText(path));
         Assert.That(catalog.Layers.Select(l => l.Id), Is.EqualTo(new[]
         {
             "background", "back-hair", "neck", "uniform", "head", "eye-whites", "eyes",
-            "brows", "nose-mouth", "facial-hair", "hair", "extras", "insignia", "badge",
+            "brows", "nose", "mouth", "facial-hair", "hair", "extras", "insignia", "badge",
         }));
         Assert.That(catalog.Layers.Single(l => l.Id == "uniform").ByRole, Is.True);
-        Assert.That(catalog.Layers.Select(l => l.Id), Does.Not.Contain("uniformByRole"),
-            "unknown root keys such as uniformByRole must be ignored, not treated as a layer");
+        Assert.That(catalog.Layers.Single(l => l.Id == "background").Shared, Is.True);
+        Assert.That(catalog.Layers.Single(l => l.Id == "back-hair").Anchor, Is.EqualTo("hairline"));
+        Assert.That(catalog.Layers.Single(l => l.Id == "extras").Anchor, Is.EqualTo("eyes"));
         Assert.That(catalog.Palettes.ContainsKey("skin"), Is.True);
         Assert.That(catalog.Palettes.ContainsKey("hair"), Is.True);
         Assert.That(catalog.Palettes.ContainsKey("eye"), Is.True);
         Assert.That(catalog.Palettes.ContainsKey("uniform"), Is.True);
-        Assert.That(catalog.Palettes.ContainsKey("uniformByRole"), Is.False);
+        Assert.That(catalog.PaletteOrder, Is.EqualTo(new[] { "skin", "hair", "eye", "uniform" }));
         Assert.That(catalog.Roles, Does.Contain("industry-head"));
         Assert.That(catalog.Roles, Does.Contain("candidate"));
         Assert.That(catalog.Roles, Does.Contain("captain"));
@@ -196,21 +196,20 @@ public class PortraitPickerTests
     }
 
     [Test]
-    public void ShippedArt_ListsBaldHairAndHasNoBadgeFolder()
+    public void ShippedArt_ListsBaldHairAndSharedBadge()
     {
-        string? path = FindShippedJson();
-        Assert.That(path, Is.Not.Null);
-        string dir = Path.GetDirectoryName(path!)!;
-        var catalog = PortraitCatalog.Load(dir);
+        string? dir = FindShippedPortraitsDir();
+        Assert.That(dir, Is.Not.Null);
+        var catalog = PortraitCatalog.Load(dir!);
+        var human = catalog.ResolveSpecies("human");
 
-        Assert.That(Directory.Exists(Path.Combine(dir, "badge")), Is.False,
-            "badge art is not shipped; the layer stays in the catalog and must be skipped quietly");
-        Assert.That(catalog.FilesByFolder.ContainsKey("badge"), Is.False);
-        Assert.That(catalog.Layers.Any(l => l.Id == "badge"), Is.True);
+        Assert.That(human.Layers.Any(l => l.Id == "badge"), Is.True);
+        Assert.That(human.Layers.Single(l => l.Id == "badge").Shared, Is.True);
+        Assert.That(human.FilesByFolder["badge"], Does.Contain("shared/badge/01.png"));
+        Assert.That(Directory.Exists(Path.Combine(dir!, "shared", "badge")), Is.True);
 
-        Assert.That(catalog.FilesByFolder.ContainsKey("hair"), Is.True);
-        Assert.That(catalog.FilesByFolder["hair"], Does.Contain("hair/11.png"));
-        string bald = Path.Combine(dir, "hair", "11.png");
+        Assert.That(human.FilesByFolder["hair"], Does.Contain("species/human/hair/11.png"));
+        string bald = Path.Combine(dir!, "species", "human", "hair", "11.png");
         Assert.That(File.Exists(bald), Is.True);
         var header = new byte[8];
         using (var stream = File.OpenRead(bald))
@@ -221,7 +220,7 @@ public class PortraitPickerTests
         Assert.That(() =>
         {
             for (int seed = 0; seed < 200; seed++)
-                PortraitPicker.Pick(catalog, seed, "captain", Vector4.One);
+                PortraitPicker.Pick(catalog, seed, "captain", Vector4.One, "human");
         }, Throws.Nothing);
 
         var onlyBald = PortraitCatalog.Parse(
@@ -231,7 +230,7 @@ public class PortraitPickerTests
         Assert.That(pick[0].File, Is.EqualTo("hair/11.png"));
     }
 
-    static string? FindShippedJson()
+    internal static string? FindShippedPortraitsDir()
     {
         var starts = new[]
         {
@@ -243,13 +242,13 @@ public class PortraitPickerTests
         {
             var candidates = new[]
             {
-                Path.Combine(start, "Resources", "Portraits", "portrait-layers.json"),
-                Path.Combine(start, "Pulsar4X.Client", "Resources", "Portraits", "portrait-layers.json"),
+                Path.Combine(start, "Resources", "Portraits"),
+                Path.Combine(start, "Pulsar4X.Client", "Resources", "Portraits"),
             };
-            foreach (var path in candidates)
+            foreach (var dir in candidates)
             {
-                if (File.Exists(path))
-                    return path;
+                if (File.Exists(Path.Combine(dir, "species", "human", "species.json")))
+                    return dir;
             }
         }
         return null;

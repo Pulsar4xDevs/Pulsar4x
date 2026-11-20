@@ -189,7 +189,7 @@ public class PortraitPackTests
     }
 
     [Test]
-    public void Load_FallsBackToLegacyPortraitLayersJson_WhenThereAreNoSpeciesPacks()
+    public void Load_IgnoresLeftoverLegacyJson_WhenThereAreNoSpeciesPacks()
     {
         WriteFile(Path.Combine(_root, "portrait-layers.json"), """
             {
@@ -203,11 +203,48 @@ public class PortraitPackTests
         WritePng(Path.Combine(_root, "head", "01.png"));
 
         var catalog = PortraitCatalog.Load(_root);
-        Assert.That(catalog.ResolveSpecies("human").Id, Is.EqualTo("human"));
-        Assert.That(catalog.Layers.Select(l => l.Id), Is.EqualTo(new[] { "head" }));
-        Assert.That(catalog.FilesByFolder["head"], Is.EqualTo(new[] { "head/01.png" }));
-        var picks = PortraitPicker.Pick(catalog, 4, "civilian", Vector4.One);
-        Assert.That(picks[0].File, Is.EqualTo("head/01.png"));
+        Assert.That(catalog.ResolveSpecies("human").Layers, Is.Empty,
+            "portrait-layers.json is no longer a load path");
+        Assert.That(catalog.FilesByFolder.ContainsKey("head"), Is.False);
+    }
+
+    [Test]
+    public void Load_ShippedHumanAndKzariPacks()
+    {
+        string? dir = PortraitPickerTests.FindShippedPortraitsDir();
+        Assert.That(dir, Is.Not.Null, "the shipped Portraits folder should be findable");
+        var catalog = PortraitCatalog.Load(dir!);
+        Assert.That(catalog.Packs.Select(p => p.Id), Is.EquivalentTo(new[] { "human", "kzari" }));
+
+        var human = catalog.ResolveSpecies("human");
+        Assert.That(human.Name, Is.EqualTo("Human"));
+        Assert.That(human.Layers.Select(l => l.Id), Does.Contain("nose"));
+        Assert.That(human.Layers.Select(l => l.Id), Does.Contain("mouth"));
+        Assert.That(human.Layers.Select(l => l.Id), Does.Contain("hair"));
+        Assert.That(human.PaletteOrder, Is.EqualTo(new[] { "skin", "hair", "eye", "uniform" }));
+        Assert.That(human.Layers.Single(l => l.Id == "background").Shared, Is.True);
+        Assert.That(human.FilesByFolder["background"][0], Does.StartWith("shared/"));
+        Assert.That(human.HeadAnchors.ContainsKey("species/human/head/07.png"), Is.True);
+        Assert.That(human.HeadAnchors["species/human/head/07.png"]["eyes"], Is.EqualTo(new Vector2(0, -8)));
+
+        var kzari = catalog.ResolveSpecies("kzari");
+        Assert.That(kzari.Name, Is.EqualTo("Kzari"));
+        Assert.That(kzari.Layers.Select(l => l.Id), Does.Not.Contain("nose"));
+        Assert.That(kzari.Layers.Select(l => l.Id), Does.Not.Contain("mouth"));
+        Assert.That(kzari.Layers.Select(l => l.Id), Does.Not.Contain("hair"));
+        Assert.That(kzari.Layers.Select(l => l.Id), Does.Contain("mandibles"));
+        Assert.That(kzari.Layers.Select(l => l.Id), Does.Contain("crest"));
+        Assert.That(kzari.PaletteOrder, Is.EqualTo(new[] { "chitin", "crest", "eye", "uniform" }));
+        Assert.That(kzari.Palettes.ContainsKey("chitin"), Is.True);
+        Assert.That(kzari.Layers.Single(l => l.Id == "mandibles").Anchor, Is.EqualTo("mouth"));
+        Assert.That(kzari.Layers.Single(l => l.Id == "crest").Anchor, Is.EqualTo("hairline"));
+        Assert.That(kzari.Layers.Single(l => l.Id == "crest-back").Anchor, Is.EqualTo("hairline"));
+
+        Assert.That(() => PortraitPicker.Pick(catalog, 7, "captain", Vector4.One, "human"), Throws.Nothing);
+        Assert.That(() => PortraitPicker.Pick(catalog, 7, "captain", Vector4.One, "kzari"), Throws.Nothing);
+        var kzariPick = PortraitPicker.Pick(catalog, 7, "captain", Vector4.One, "kzari");
+        Assert.That(kzariPick.Count, Is.EqualTo(kzari.Layers.Count));
+        Assert.That(catalog.ResolveSpecies("unknown-pack").Id, Is.EqualTo("human"));
     }
 
     void WriteHumanPack(bool includeSharedBackground = false)

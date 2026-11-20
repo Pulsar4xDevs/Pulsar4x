@@ -30,6 +30,8 @@ public sealed class PortraitSpeciesPack
     public string License { get; }
     public IReadOnlyList<PortraitLayerSpec> Layers { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Vector4>> Palettes { get; }
+    /// <summary>Palette names in species.json key order.</summary>
+    public IReadOnlyList<string> PaletteOrder { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<string>> FilesByFolder { get; }
     /// <summary>Head PNG path (relative to Portraits/) → anchor name → offset in 256-px template pixels.</summary>
     public IReadOnlyDictionary<string, IReadOnlyDictionary<string, Vector2>> HeadAnchors { get; }
@@ -43,7 +45,8 @@ public sealed class PortraitSpeciesPack
         IReadOnlyDictionary<string, IReadOnlyDictionary<string, Vector2>>? headAnchors = null,
         string? author = null,
         string? version = null,
-        string? license = null)
+        string? license = null,
+        IReadOnlyList<string>? paletteOrder = null)
     {
         Id = id;
         Name = string.IsNullOrWhiteSpace(name) ? id : name;
@@ -52,6 +55,9 @@ public sealed class PortraitSpeciesPack
         License = license ?? "";
         Layers = layers ?? Array.Empty<PortraitLayerSpec>();
         Palettes = palettes ?? new Dictionary<string, IReadOnlyList<Vector4>>();
+        PaletteOrder = paletteOrder is { Count: > 0 }
+            ? paletteOrder
+            : Palettes.Keys.ToList();
         FilesByFolder = filesByFolder ?? new Dictionary<string, IReadOnlyList<string>>();
         HeadAnchors = headAnchors ?? new Dictionary<string, IReadOnlyDictionary<string, Vector2>>();
     }
@@ -69,6 +75,7 @@ public sealed class PortraitCatalog
     public IReadOnlyList<PortraitSpeciesPack> Packs { get; }
     public IReadOnlyList<PortraitLayerSpec> Layers => _primary.Layers;
     public IReadOnlyDictionary<string, IReadOnlyList<Vector4>> Palettes => _primary.Palettes;
+    public IReadOnlyList<string> PaletteOrder => _primary.PaletteOrder;
     public IReadOnlyDictionary<string, IReadOnlyList<string>> FilesByFolder => _primary.FilesByFolder;
     public IReadOnlyList<string> Roles { get; }
     public string DirectoryPath => _directory ?? "";
@@ -132,11 +139,12 @@ public sealed class PortraitCatalog
             "Human",
             parsed.Layers,
             parsed.Palettes,
-            filesByFolder);
+            filesByFolder,
+            paletteOrder: parsed.PaletteOrder);
         return new PortraitCatalog(new[] { pack }, parsed.Roles, directory: null);
     }
 
-    /// <summary>Scan <c>species/*/species.json</c>, or fall back to legacy <c>portrait-layers.json</c>.</summary>
+    /// <summary>Scan <c>species/*/species.json</c>. Broken packs are skipped quietly.</summary>
     public static PortraitCatalog Load(string directory)
     {
         if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
@@ -152,13 +160,6 @@ public sealed class PortraitCatalog
                 if (pack != null && packs.All(p => !string.Equals(p.Id, pack.Id, StringComparison.OrdinalIgnoreCase)))
                     packs.Add(pack);
             }
-        }
-
-        if (packs.Count == 0)
-        {
-            var legacy = TryLoadLegacy(directory);
-            if (legacy != null)
-                packs.Add(legacy);
         }
 
         return new PortraitCatalog(packs, KnownRoles, directory);
@@ -255,58 +256,8 @@ public sealed class PortraitCatalog
                 anchors,
                 parsed.Author,
                 parsed.Version,
-                parsed.License);
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    static PortraitSpeciesPack? TryLoadLegacy(string directory)
-    {
-        try
-        {
-            string jsonPath = Path.Combine(directory, "portrait-layers.json");
-            if (!File.Exists(jsonPath))
-                return null;
-            var parsed = ParseDocument(File.ReadAllText(jsonPath));
-            var files = new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase);
-            var anchors = new Dictionary<string, IReadOnlyDictionary<string, Vector2>>(StringComparer.OrdinalIgnoreCase);
-            var layers = new List<PortraitLayerSpec>(parsed.Layers.Count);
-            foreach (var layer in parsed.Layers)
-            {
-                string? anchor = layer.Anchor ?? PortraitAnchors.DefaultAnchor(layer.Id);
-                layers.Add(layer with { PathPrefix = "", Anchor = anchor });
-                if (!files.ContainsKey(layer.Folder))
-                {
-                    string abs = Path.Combine(directory, layer.Folder);
-                    if (Directory.Exists(abs))
-                    {
-                        files[layer.Folder] = ListPngs(abs, "", layer.Folder);
-                        if (string.Equals(layer.Folder, "head", StringComparison.OrdinalIgnoreCase))
-                            LoadSidecars(abs, "", layer.Folder, anchors);
-                    }
-                }
-            }
-
-            // Also scan remaining subfolders so a legacy tree still lists every PNG.
-            foreach (var folder in Directory.GetDirectories(directory))
-            {
-                string name = Path.GetFileName(folder);
-                if (name is "species" or "shared")
-                    continue;
-                if (!files.ContainsKey(name))
-                    files[name] = ListPngs(folder, "", name);
-            }
-
-            return new PortraitSpeciesPack(
-                "human",
-                "Human",
-                layers,
-                parsed.Palettes,
-                files,
-                anchors);
+                parsed.License,
+                parsed.PaletteOrder);
         }
         catch
         {
@@ -362,6 +313,7 @@ public sealed class PortraitCatalog
         public IReadOnlyDictionary<string, IReadOnlyList<Vector4>> Palettes =
             new Dictionary<string, IReadOnlyList<Vector4>>();
         public IReadOnlyList<string> Roles = Array.Empty<string>();
+        public IReadOnlyList<string> PaletteOrder = Array.Empty<string>();
     }
 
     static ParsedDocument ParseDocument(string json)
@@ -414,6 +366,7 @@ public sealed class PortraitCatalog
             }
         }
         result.Palettes = palettes;
+        result.PaletteOrder = palettes.Keys.ToList();
 
         var roles = new List<string>();
         if (root["roles"] is JArray roleArr)
