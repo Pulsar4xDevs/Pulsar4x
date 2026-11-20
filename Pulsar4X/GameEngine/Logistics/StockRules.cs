@@ -60,15 +60,60 @@ public static class StockRules
             db = new ColonyStockRulesDB();
             colony.SetDataBlob(db);
         }
+        bool hadMax = db.Rules.TryGetValue(cargoId, out var old) && old.Max != null;
         db.Rules[cargoId] = new StockRule { CargoId = cargoId, Min = min, Max = max };
+        // A dropped Max no longer sells the surplus: its auto-priced row goes too (the next market pass re-adds one if due).
+        if (hadMax && max == null)
+            WithdrawAutoRow(colony, cargoId);
         return null;
     }
 
-    /// <summary>Removes the item's rule. A missing rule is fine.</summary>
-    public static void Clear(Entity colony, string cargoId)
+    /// <summary>
+    /// Removes the item's rule. Its auto-priced market row and listing are withdrawn, and the jobs
+    /// <see cref="QueueTowardMin"/> queued for it are cancelled while not started (<see cref="NotStarted"/>).
+    /// A missing rule is fine. Returns the number of jobs cancelled.
+    /// </summary>
+    public static int Clear(Entity colony, string cargoId)
     {
         if (colony.TryGetDataBlob<ColonyStockRulesDB>(out var db))
             db.Rules.Remove(cargoId);
+        WithdrawAutoRow(colony, cargoId);
+        return CancelMinJobs(colony, cargoId);
+    }
+
+    /// <summary>Drops the item's auto-priced market row and its listing. The player's own priced row stays.</summary>
+    static void WithdrawAutoRow(Entity colony, string cargoId)
+    {
+        if (!colony.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy)
+            || !policy.Rows.TryGetValue(cargoId, out var row) || !row.AutoPriced)
+            return;
+        policy.Rows.Remove(cargoId);
+        MarketBook.RemoveListing(colony, cargoId);
+    }
+
+    /// <summary>True for a job with nothing built, spent or consumed yet: cancelling it loses nothing.</summary>
+    internal static bool NotStarted(IndustryJob job)
+        => job.NumberCompleted == 0
+           && job.ProductionPointsLeft >= job.ProductionPointsCost
+           && job.ResourcesRequiredRemaining.Values.Sum() >= (job.ResourcesCosts?.Values.Sum() ?? 0)
+           && job.EnergyUsed <= 0;
+
+    /// <summary>Cancels this colony's not-started jobs queued for the item's Min rule. Feeder jobs are left: other jobs may count on them.</summary>
+    static int CancelMinJobs(Entity colony, string cargoId)
+    {
+        if (!colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
+            return 0;
+        int cancelled = 0;
+        foreach (var (lineId, line) in industry.ProductionLines)
+        {
+            foreach (var job in line.Jobs.Where(j => j.StockRuleCargoId == cargoId && NotStarted(j)).ToList())
+            {
+                IndustryTools.CancelExsistingJob(colony, lineId, job.JobID);
+                ShipLogBook.NoteIndustryChange(colony, $"Cancelled {job.Name} x{job.NumberOrdered}: its warehouse minimum was cleared");
+                cancelled++;
+            }
+        }
+        return cancelled;
     }
 
     /// <summary>
@@ -98,7 +143,7 @@ public static class StockRules
             if (toMake <= 0)
                 continue;
             long perBatch = IndustryTools.OutputPerItem(design);
-            var job = new IndustryJob(design);
+            var job = new IndustryJob(design) { StockRuleCargoId = rule.CargoId };
             job.InitialiseJob((ushort)Math.Min((toMake + perBatch - 1) / perBatch, ushort.MaxValue), false);
             if (!IndustryTools.SetJobToFastest(industry, job))
                 continue;

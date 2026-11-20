@@ -1,5 +1,8 @@
+using System;
 using Pulsar4X.Colonies;
+using Pulsar4X.Components;
 using Pulsar4X.Engine;
+using Pulsar4X.Industry;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Logistics;
@@ -96,11 +99,44 @@ public static class MarketBook
             book.Listings.Remove(cargoId);
     }
 
+    /// <summary>
+    /// Units of the item the entity holds for trade. A component design counts both storage forms
+    /// (<see cref="CargoMath.GetUnitsStoredByDesign"/>: the design stack and loose instances), less instances a refit
+    /// job has claimed (<see cref="ShipRefitJob.Reserved"/>), which are never sellable.
+    /// </summary>
     public static long Stock(Entity entity, ICargoable cargo)
     {
         if (cargo == null || !entity.TryGetDataBlob<CargoStorageDB>(out var storage))
             return 0;
-        return storage.GetUnitsStored(cargo, includeEscro: false);
+        long units = storage.GetUnitsStoredByDesign(cargo, includeEscro: false);
+        if (cargo is ComponentDesign design)
+        {
+            foreach (var (instance, count) in CargoMath.InstancesOf(storage, design))
+                if (ShipRefitJob.Reserved(entity, instance.ID))
+                    units -= count;
+        }
+        return Math.Max(0, units);
+    }
+
+    /// <summary>
+    /// Removes up to <paramref name="units"/> of the item as <see cref="Stock"/> counts it: a component design from its
+    /// stack first, then loose instances no refit has claimed (lowest id first). Returns the number removed.
+    /// </summary>
+    internal static long Take(Entity entity, CargoStorageDB storage, ICargoable cargo, long units)
+    {
+        if (units <= 0)
+            return 0;
+        long removed = storage.RemoveCargoByUnit(cargo, units);
+        if (cargo is not ComponentDesign design)
+            return removed;
+        foreach (var (instance, count) in CargoMath.InstancesOf(storage, design))
+        {
+            if (removed >= units)
+                break;
+            if (!ShipRefitJob.Reserved(entity, instance.ID))
+                removed += storage.RemoveCargoByUnit(instance, Math.Min(count, units - removed));
+        }
+        return removed;
     }
 
     public static long Sellable(Entity entity, MarketListing listing, ICargoable cargo)

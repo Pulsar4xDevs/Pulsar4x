@@ -99,6 +99,7 @@ namespace Pulsar4X.Industry
             {
                 job.Auto = RepeatJob;
                 job.NumberOrdered = NumberOrderd;
+                job.StockRuleCargoId = null; // the player's job now: clearing the rule leaves it
 
                 // A new quantity at or below what is already built would leave the batch never finishing (the count only
                 // ever meets the quantity exactly), so a repeat job would stop building for good. The batch is done

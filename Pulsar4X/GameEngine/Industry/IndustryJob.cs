@@ -86,6 +86,13 @@ namespace Pulsar4X.Industry
 
         public Entity? InstallOn { get; set; } = null;
 
+        /// <summary>
+        /// The warehouse rule (cargo id) this job was queued for by <see cref="Pulsar4X.Logistics.StockRules.QueueTowardMin"/>.
+        /// Clearing that rule cancels the job while it has not started. Null for every other job, and once the player edits it.
+        /// </summary>
+        [JsonProperty]
+        public string? StockRuleCargoId { get; internal set; }
+
         /// <summary>Set on a shipyard refit job: the ship and the parts it moves. Null on every other job.</summary>
         public ShipRefitJob? Refit { get; set; }
 

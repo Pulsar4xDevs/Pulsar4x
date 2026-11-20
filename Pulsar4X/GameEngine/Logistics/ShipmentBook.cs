@@ -212,7 +212,8 @@ public static class ShipmentBook
                 reason = item.Name + " does not fit a ship's hold.";
                 return false;
             }
-            if (db.GetUnitsStored(item, false) < units)
+            // A design counts its loose unclaimed instances too (MarketBook.Stock), as the market lists them.
+            if ((item is ComponentDesign ? MarketBook.Stock(source, item) : db.GetUnitsStored(item, false)) < units)
             {
                 reason = "Not enough " + item.Name + " in stock.";
                 return false;
@@ -254,7 +255,7 @@ public static class ShipmentBook
         }
 
         foreach (var (item, units) in lines)
-            db.RemoveCargoByUnit(item, units);
+            MarketBook.Take(source, db, item, units);
         foreach (var shipment in order)
         {
             var store = db.TypeStores[shipment.CargoTypeID];

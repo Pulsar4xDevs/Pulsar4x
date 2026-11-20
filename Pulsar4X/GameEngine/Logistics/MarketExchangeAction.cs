@@ -258,7 +258,7 @@ public class MarketExchangeAction : EntityAction
             return;
         }
 
-        long removed = sourceStore.RemoveCargoByUnit(sourceGood, quantity);
+        long removed = MarketBook.Take(source, sourceStore, sourceGood, quantity);
         long added = destStore.AddCargoByUnit(destGood, removed);
         if (added < removed)
             sourceStore.AddCargoByUnit(sourceGood, removed - added);
