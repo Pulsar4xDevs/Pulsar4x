@@ -62,6 +62,12 @@ public static class DevToolWindows
             DevToolPlacement.SettingsList));
 
         state.RegisterDevTool(new DevToolRegistration(
+            "tech-tree-visualiser", "Show Tech Tree Visualiser",
+            () => TechTreeVisualizerWindow.GetInstance().ToggleActive(),
+            () => TechTreeVisualizerWindow.GetInstance().GetActive(),
+            DevToolPlacement.SettingsList));
+
+        state.RegisterDevTool(new DevToolRegistration(
             "performance-window", "Show Pulsar Performance Window",
             () => PerformanceWindow.GetInstance().ToggleActive(),
             () => PerformanceWindow.GetInstance().GetActive(),
