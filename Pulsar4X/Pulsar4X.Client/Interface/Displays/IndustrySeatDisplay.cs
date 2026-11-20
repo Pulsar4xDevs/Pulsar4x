@@ -28,8 +28,6 @@ public static class IndustrySeatDisplay
         ref string? refusal)
     {
         TakePendingRefusal(ref refusal);
-        PortraitRenderer.For(uiState).Draw(PortraitIdentity.IndustryHead(view), PortraitRenderer.SmallSize);
-        ImGui.SameLine();
         ImGui.TextUnformatted("Industry head: " + IndustrySeatUi.HolderText(view.IndustryHeadId, view.IndustryHeadName));
 
         var candidates = IndustrySeatUi.Candidates(
@@ -105,9 +103,14 @@ public static class IndustrySeatDisplay
             person => person.Name);
     }
 
-    public static void DrawProduction(IndustryView industry)
+    public static void DrawProduction(IndustryView industry, GlobalUIState uiState)
     {
-        ImGui.TextUnformatted("Industry head: " + IndustrySeatUi.HolderText(industry.IndustryHeadId, industry.IndustryHeadName));
+        PortraitRenderer.For(uiState).Draw(PortraitIdentity.IndustryHead(industry), PortraitRenderer.SmallSize);
+        ImGui.SameLine();
+        ImGui.BeginGroup();
+        ImGui.TextUnformatted(IndustrySeatUi.HolderText(industry.IndustryHeadId, industry.IndustryHeadName));
+        ImGui.TextUnformatted("Industry head");
+        ImGui.EndGroup();
     }
 
     static void Submit(GlobalUIState uiState, GameCommand command)

@@ -76,13 +76,15 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            IndustrySeatDisplay.DrawProduction(industry);
+            IndustrySeatDisplay.DrawProduction(industry, uiState);
 
             _missingInputsPins.Prune(entityId, industry);
-            var pinnedJobs = _missingInputsPins.PinnedJobs(entityId, industry);
+            var pinnedJobs = MissingInputsUi.Enabled
+                ? _missingInputsPins.PinnedJobs(entityId, industry)
+                : Array.Empty<IndustryJobView>();
 
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            float footerHeight = pinnedJobs.Count > 0
+            float footerHeight = MissingInputsUi.Enabled && pinnedJobs.Count > 0
                 ? MissingInputsPanel.ReservedHeight(pinnedJobs, windowContentSize.Y)
                 : 0f;
             float gap = footerHeight > 0f ? ImGui.GetStyle().ItemSpacing.Y : 0f;
@@ -115,7 +117,7 @@ namespace Pulsar4X.Client
                 ImGui.EndChild();
             }
 
-            if (pinnedJobs.Count > 0)
+            if (MissingInputsUi.Enabled && pinnedJobs.Count > 0)
             {
                 MissingInputsPanel.Draw(
                     entityId, industry, pinnedJobs, _missingInputsPins, uiState,
@@ -282,20 +284,20 @@ namespace Pulsar4X.Client
                     var job = line.Jobs[jobIndex];
 
                     ImGui.TableNextColumn();
-                    bool pinned = _missingInputsPins.Contains(entityId, job.JobId);
+                    bool pinned = MissingInputsUi.Enabled && _missingInputsPins.Contains(entityId, job.JobId);
                     if (pinned)
                         ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
                     ImGui.Text(RefitJobDisplay.Name(job));
                     if (pinned)
                         ImGui.PopStyleColor();
                     if (ImGui.IsItemClicked())
-                        _missingInputsPins.Toggle(entityId, job.JobId);
+                        ToggleMissingInputsPin(entityId, job.JobId);
                     bool nameHovered = ImGui.IsItemHovered();
 
                     ImGui.TableNextColumn();
                     ImGui.Text(RefitJobDisplay.Batch(job));
                     if (ImGui.IsItemClicked())
-                        _missingInputsPins.Toggle(entityId, job.JobId);
+                        ToggleMissingInputsPin(entityId, job.JobId);
 
                     if (job.Repeat)
                     {
@@ -321,7 +323,7 @@ namespace Pulsar4X.Client
                     if (stalled || !job.IsIdle)
                         ImGui.PopStyleColor();
                     if (ImGui.IsItemClicked())
-                        _missingInputsPins.Toggle(entityId, job.JobId);
+                        ToggleMissingInputsPin(entityId, job.JobId);
                     bool statusHovered = ImGui.IsItemHovered();
                     if (job.IsIdle && StockOrderUi.StockSummary(job) is { Length: > 0 } stock)
                     {
@@ -405,6 +407,12 @@ namespace Pulsar4X.Client
                 ImGui.EndTable();
                 StockOrderDisplay.DrawRefusal(ref _stockOrderRefusal);
             }
+        }
+
+        void ToggleMissingInputsPin(int colonyId, string jobId)
+        {
+            if (MissingInputsUi.Enabled)
+                _missingInputsPins.Toggle(colonyId, jobId);
         }
 
         private void ActionButtons(int entityId, ProductionLineView line, string jobId, int jobIndex, GlobalUIState uiState)

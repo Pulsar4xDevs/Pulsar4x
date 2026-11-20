@@ -25,6 +25,8 @@ public static class MissingInputsPanel
     /// <summary>Height to reserve under the production columns, based on the pinned rows.</summary>
     public static float ReservedHeight(IReadOnlyList<IndustryJobView> pinnedJobs, float availableHeight)
     {
+        if (!MissingInputsUi.Enabled)
+            return 0f;
         float line = ImGui.GetTextLineHeightWithSpacing();
         int rows = 0;
         foreach (var job in pinnedJobs)
@@ -43,6 +45,8 @@ public static class MissingInputsPanel
         ref string? refusal,
         float height)
     {
+        if (!MissingInputsUi.Enabled)
+            return;
         TakePendingRefusal(ref refusal);
         if (ImGui.BeginChild("MissingInputsPanel", new System.Numerics.Vector2(0, height), ImGuiChildFlags.Borders))
         {
