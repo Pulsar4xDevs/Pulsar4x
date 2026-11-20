@@ -4,6 +4,7 @@ using System.Linq;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Client.Host;
 using Pulsar4X.Modding;
+using Pulsar4X.Technology;
 
 namespace Pulsar4X.Client;
 
@@ -65,6 +66,26 @@ public static class TechTreeData
 
         store = GameLifecycle.LoadModStore(enabled, ModsState.AvailableMods.Select(m => m.Path));
         return (From(store), "enabled mods");
+    }
+
+    /// <summary>
+    /// Evaluates a tech CostFormula the same way <see cref="Tech.TechCostFormula"/> does:
+    /// NCalc with the parameter Level. Returns null when the formula cannot be evaluated.
+    /// </summary>
+    public static long? EvaluateCost(string formula, int formulaLevel)
+    {
+        if (string.IsNullOrWhiteSpace(formula))
+            return null;
+        try
+        {
+            var tech = new Tech { CostFormula = formula, Level = formulaLevel };
+            int value = tech.TechCostFormula();
+            return value < 0 ? 0 : value;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     static IReadOnlyList<TechTreeUnlock> Flatten(Dictionary<int, List<string>>? unlocks)
