@@ -7,6 +7,13 @@ Rules for this file:
 - New plans go in `plans/` as `kebab-case.md`, with a `Status:` line, and get a row in the table below. Reference notes go in `design/`.
 - Do not build anything marked "do not build until asked".
 
+## Principles
+
+These apply to the whole game, not to any one plan. Every plan follows them.
+
+- **Seeded randomness.** Every random element anywhere in the game uses pseudo-random numbers seeded from the game's seed, never true random, so the same seed always produces the same game.
+- **Micro to macro.** Pulsar4X is built around a ladder from micro management to macro direction. The player starts by managing individual details by hand (listings, jobs, buildings). As they seat administrators and other agents, they step up a level, until they direct the faction as a whole. This ladder is a core design principle of the game.
+
 ## 1. Work queue (in order)
 
 Take the first unfinished item unless told otherwise. Delete an item when it is done.
@@ -35,6 +42,11 @@ Take the first unfinished item unless told otherwise. Delete an item when it is 
 | [Movement: Lambert and porkchop](plans/movement-lambert-porkchop.md) | Built, **playing**. UI not play-tested. Delete once played. Lambert solver, transfer-window scan, and the NavWindow porkchop. A game restart is needed (`TransferWindow`, `MoveOption.Window`, `NavMode.Porkchop`). |
 | [Movement: interplanetary Newtonian](plans/movement-interplanetary-newtonian.md) | Built, tests pass. UI not play-tested. Delete once played. Earth to Mars with no warp: escape, cruise, one mid-course, capture. A game restart is needed (`SoiTransferAction` phases, `TransferFromWindowCommand`). |
 | [Orders window: plan on click](plans/orders-window-plan-on-click.md) | Built, not played (2026-11-04). A click plans one target; Execute sends it, with mode, timing, and a porkchop. The per-row preview is gone. Jump check and the bootstrap warp-brake test are in. Phobos transfer flights still complete when the departure burn finishes and the arrival burn is dropped. Do not mark done until that arrival is played. |
+| [Civilian administrators](plans/civilian-administrators.md) | Plan of plans. Personality, bids, and construction stay "do not build until asked" until a sub-plan says go. |
+| [Civilian recruitment](plans/civilian-recruitment.md) | Built (PR #500). Leftovers: pool tuning, real wage, AI lab-hire test. |
+| [Civilian industry](plans/civilian-industry.md) | Not started. Do not build until asked. Needs recruitment. |
+| [Civilian market](plans/civilian-market.md) | Not started. Do not build until asked. Needs recruitment and industry. |
+| [Civilian construction](plans/civilian-construction.md) | Not started. Do not build until asked. Needs recruitment, industry, and market. |
 | [Ceres: consignment](plans/ceres-consignment.md) | Not started. Do not build until asked. |
 | [Stations](plans/stations.md) | Not started. Do not build until asked. Ship refit, its prerequisite, is built. |
 | [Industry attribute split](plans/industry-attribute-split.md) | Open note, not a plan. Whether `IndustryAtb` splits into three classes is undecided. |

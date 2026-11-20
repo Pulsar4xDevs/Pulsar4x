@@ -1,6 +1,6 @@
 # Civilian recruitment: where administrators and lab technicians come from
 
-Status: plan, not started. Written 2026-11-04 for Grok Build. Do not build a slice until Jon says go.
+Status: built (PR #500, 2026-11-05). Written 2026-11-04 for Grok Build. Leftovers: tuning the pool numbers, a real wage (placeholder 100), and a dedicated AI lab-technician hire test.
 
 Jon flagged this as one of the big open questions (open question 9) in [civilian-administrators.md](civilian-administrators.md): where administrators and research lab technicians come from, how they are recruited, and how often the player gets to choose them. The placeholder there, "the starting factory makes them as it does today", is not enough. This plan covers the time before a civilian academy exists, and how a later academy fits on top.
 
@@ -113,4 +113,4 @@ Out of this plan: migration, a civilian academy, payroll, promotion of civilians
 
 ## Status (2026-11-05)
 
-All five slices are implemented and uncommitted on `civilian-administrators-plan`. Tests are in `Pulsar4X.Tests/CivilianRecruitmentTests.cs` (25 passing). Still open: tuning the numbers, a real wage (it is a placeholder of 100 for now), and the AI's lab-technician hire, which has no dedicated test yet.
+All five slices are implemented and merged in [PR #500](https://github.com/Pulsar4xDevs/Pulsar4x/pull/500). Tests are in `Pulsar4X.Tests/CivilianRecruitmentTests.cs` (25 passing). Still open: tuning the numbers, a real wage (it is a placeholder of 100 for now), and the AI's lab-technician hire, which has no dedicated test yet.
