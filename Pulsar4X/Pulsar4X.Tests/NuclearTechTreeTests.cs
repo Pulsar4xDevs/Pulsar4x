@@ -66,10 +66,20 @@ public class NuclearTechTreeTests
     }
 
     [Test]
-    public void TheIonDrive_IsNotUnderTheNuclearBranch()
+    public void TheIonDrive_SitsUnderElectricThrusters_NotUnderTheNuclearBranch()
     {
         var store = Store();
-        Assert.That(Parents(store, "tech-ion-engine"), Is.EqualTo(new[] { "tech-conventional-engine" }));
+        var thrusters = store.Techs["tech-electric-thrusters"];
+        Assert.That(thrusters.Name, Is.EqualTo("Electric Thrusters"));
+        Assert.That(thrusters.MaxLevel, Is.EqualTo(1));
+        Assert.That(thrusters.Category, Is.EqualTo("tech-category-power-propulsion"));
+        Assert.That(thrusters.CostFormula, Is.EqualTo("(1 + [Level]) * 2000"));
+        Assert.That(store.Techs.Keys, Has.None.Contain("plasma"), "no plasma thrusters yet");
+        Assert.That(Parents(store, "tech-ion-engine"), Is.EqualTo(new[] { "tech-electric-thrusters" }));
+        Assert.That(Parents(store, "tech-electric-thrusters"), Is.EqualTo(new[] { "tech-conductors" }));
+        Assert.That(Chain(store, "tech-ion-engine").Take(4),
+            Is.EqualTo(new[] { "tech-ion-engine", "tech-electric-thrusters", "tech-conductors", Chain(store, "tech-conductors")[1] }));
+        Assert.That(store.Techs["tech-conventional-engine"].Unlocks.Values.SelectMany(l => l), Does.Not.Contain("tech-ion-engine"));
         Assert.That(Chain(store, "tech-ion-engine"), Has.None.StartsWith("tech-nuclear-"));
         Assert.That(Chain(store, "tech-ion-engine"), Has.None.EqualTo("tech-early-nuclear-power"));
         Assert.That(store.Techs["tech-nuclear-pulse-engine"].Unlocks.Values.SelectMany(l => l), Is.Empty);
@@ -86,7 +96,7 @@ public class NuclearTechTreeTests
                 if (reached.Add(id))
                     queue.Enqueue(id);
         foreach (var id in new[] { "tech-nuclear-theory", "tech-early-nuclear-power", "tech-nuclear-engines", "tech-nuclear-solid-engine",
-                     "tech-nuclear-pulse-engine", "tech-ion-engine", "tech-fission-power-plant", "tech-early-warp-drive" })
+                     "tech-nuclear-pulse-engine", "tech-electric-thrusters", "tech-ion-engine", "tech-fission-power-plant", "tech-early-warp-drive" })
             Assert.That(reached, Does.Contain(id), id);
     }
 }

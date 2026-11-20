@@ -116,7 +116,29 @@
       "MaxLevel": 10,
       "DataFormula": "1 * [Level]",
       "Category": "tech-category-power-propulsion",
-      "CostFormula": "(1 + [Level]) * 500"
+      "CostFormula": "(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "tech-electric-thrusters"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-electric-thrusters",
+      "Name": "Electric Thrusters",
+      "Description": "Driving propellant with electricity instead of heat: high-voltage power handling, grids and ion optics. Opens the Ion Drive. Needs Conductors.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 2000",
+      "Unlocks": {
+        "1": [
+          "tech-ion-engine"
+        ]
+      }
     }
   },
   {
@@ -293,8 +315,7 @@
           "tech-conventional-engine-max-size",
           "tech-conventional-engine-min-size",
           "tech-conventional-engine-exhaust-velocity",
-          "tech-conventional-engine-fuel-consumption",
-          "tech-ion-engine"
+          "tech-conventional-engine-fuel-consumption"
         ]
       }
     }
