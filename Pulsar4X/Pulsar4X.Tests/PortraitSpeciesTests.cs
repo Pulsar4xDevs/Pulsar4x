@@ -101,14 +101,19 @@ public class PortraitSpeciesTests : ApiTestBase
     {
         var species = JArray.Parse(File.ReadAllText("Data/scenarios/warp-tech-start/species.json"));
         Assert.That(species, Is.Not.Empty);
+        var expected = new Dictionary<string, string> { ["species-human"] = "human", ["species-xenos"] = "kzari" };
         foreach (var entry in species)
-            Assert.That((string?)entry["Payload"]!["PortraitPack"], Is.EqualTo("human"), (string?)entry["Payload"]!["UniqueID"]);
+        {
+            var id = (string)entry["Payload"]!["UniqueID"]!;
+            Assert.That((string?)entry["Payload"]!["PortraitPack"], Is.EqualTo(expected[id]), id);
+        }
 
         var store = new ModDataStore();
         var loader = new ModLoader();
         loader.LoadModManifest("Data/basemod/modInfo.json", store);
         loader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", store);
-        Assert.That(store.Species.Values.Select(s => s.PortraitPack), Has.All.EqualTo("human"));
+        Assert.That(store.Species["species-human"].PortraitPack, Is.EqualTo("human"));
+        Assert.That(store.Species["species-xenos"].PortraitPack, Is.EqualTo("kzari"));
     }
 
     // ----- the projection -----

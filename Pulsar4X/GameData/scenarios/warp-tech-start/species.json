@@ -30,7 +30,7 @@
       "UniqueID": "species-xenos",
       "Name": "Xenos",
       "Playable": false,
-      "PortraitPack": "human",
+      "PortraitPack": "kzari",
       "BreathableGasSymbol": "Xe",
       "Gravity": {
         "Ideal": 9.8,
