@@ -1347,25 +1347,16 @@ namespace Pulsar4X.Client
                 .OrderBy(commander => commander.Name, StringComparer.Ordinal)
                 .ToList();
             int current = ship.CommanderId ?? -1;
-            ResultModal.GetInstance().DisplayCustomButtons(
+            string post = string.IsNullOrEmpty(ship.Name) ? "Captain" : "Captain of " + ship.Name;
+            PersonAssignmentWindow.GetInstance().Present(
                 "Assign Captain",
+                post,
+                () => navy,
+                current,
+                selected => SubmitFleetCommand(new AssignCaptainCommand(shipId, selected)),
+                () => SubmitFleetCommand(new AssignCaptainCommand(shipId, -1)),
                 () => captainChooserShipId = null,
-                close =>
-                {
-                    int selected = DisplayHelpers.PeopleChooser(
-                        _uiState,
-                        navy,
-                        current,
-                        "captain_" + shipId,
-                        close,
-                        OfficerRow,
-                        320f);
-                    if (selected != current)
-                    {
-                        SubmitFleetCommand(new AssignCaptainCommand(shipId, selected));
-                        close();
-                    }
-                });
+                OfficerRow);
         }
 
         private static string OfficerRow(CommanderSnapshot person)

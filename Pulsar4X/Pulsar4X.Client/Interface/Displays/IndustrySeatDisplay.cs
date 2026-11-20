@@ -94,28 +94,15 @@ public static class IndustrySeatDisplay
         var candidates = IndustrySeatUi.Candidates(
             galaxy.Commanders,
             IndustrySeatUi.CityHallIds(IndustrySeatUi.ColonyViews(galaxy)));
-        ResultModal.GetInstance().DisplayCustomButtons(
-            "Seat industry head",
+        PersonAssignmentWindow.GetInstance().Present(
+            "Seat Industry Head",
+            "Industry head",
+            () => candidates,
+            view.IndustryHeadId,
+            selected => Submit(uiState, new SeatIndustryHeadCommand(colonyId, selected)),
+            () => Submit(uiState, new UnseatIndustryHeadCommand(colonyId)),
             () => _chooserColonyId = null,
-            close =>
-            {
-                if (candidates.Count == 0)
-                    ImGui.TextDisabled("No unassigned civilians. A city-hall chair holder cannot take this seat.");
-
-                int selected = DisplayHelpers.PeopleChooser(
-                    uiState,
-                    candidates,
-                    -1,
-                    "industry-head_" + colonyId,
-                    close,
-                    person => person.Name,
-                    320f);
-                if (selected >= 0)
-                {
-                    Submit(uiState, new SeatIndustryHeadCommand(colonyId, selected));
-                    close();
-                }
-            });
+            person => person.Name);
     }
 
     public static void DrawProduction(IndustryView industry)

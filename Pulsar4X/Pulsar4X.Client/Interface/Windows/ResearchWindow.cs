@@ -221,34 +221,17 @@ namespace Pulsar4X.Client
 
                 if(_showAssignmentModal > 0 && _showAssignmentModal == lab.Id)
                 {
-                    ResultModal.GetInstance().DisplayCustomButtons(
+                    int currentScientistId = researcher.ScientistId ?? -1;
+                    PersonAssignmentWindow.GetInstance().Present(
                         "Assign Scientist",
-                        () => _showAssignmentModal = -1, // onClose
-                        (closeModal) => // Custom render with close action
-                        {
-                            int currentScientistId = researcher.ScientistId ?? -1;
-                            int selectedId = DisplayHelpers.PeopleChooser(
-                                _uiState,
-                                research.Scientists,
-                                currentScientistId,
-                                $"lab_{lab.Id}",
-                                closeModal); // Pass close action as cancel
-
-                            if (selectedId != currentScientistId)
-                            {
-                                if (selectedId == -1)
-                                {
-                                    // Unassign the scientist, the player selected "None"
-                                    SubmitCommand(new UnassignScientistCommand(lab.Id, currentScientistId));
-                                }
-                                else if (selectedId > 0)
-                                {
-                                    // Assign the new scientist
-                                    SubmitCommand(new AssignScientistCommand(lab.Id, selectedId));
-                                }
-                                closeModal();
-                            }
-                        });
+                        string.IsNullOrEmpty(researcher.DesignName) ? "Research lab" : researcher.DesignName,
+                        () => research.Scientists,
+                        currentScientistId,
+                        selectedId => SubmitCommand(new AssignScientistCommand(lab.Id, selectedId)),
+                        currentScientistId >= 0
+                            ? () => SubmitCommand(new UnassignScientistCommand(lab.Id, currentScientistId))
+                            : null,
+                        () => _showAssignmentModal = -1);
                 }
 
                 ImGui.TableNextColumn();

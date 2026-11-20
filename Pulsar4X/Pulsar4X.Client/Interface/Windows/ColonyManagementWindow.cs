@@ -862,31 +862,22 @@ namespace Pulsar4X.Client
                 .OrderBy(commander => commander.Name, StringComparer.Ordinal)
                 .ToList();
             int current = view.AdministratorId;
-            ResultModal.GetInstance().DisplayCustomButtons(
+            PersonAssignmentWindow.GetInstance().Present(
                 "Assign Administrator",
+                "City-hall chair",
+                () => civilians,
+                current,
+                selected => _uiState.GameClient?.SubmitCommandAsync(new AssignAdministratorCommand(colonyId, selected)),
+                () => _uiState.GameClient?.SubmitCommandAsync(new AssignAdministratorCommand(colonyId, -1)),
                 () => _administratorChooserColonyId = null,
-                close =>
+                CivilianRow,
+                () =>
                 {
-                    int selected = DisplayHelpers.PeopleChooser(
-                        _uiState,
-                        civilians,
-                        current,
-                        "admin_" + colonyId,
-                        close,
-                        CivilianRow,
-                        320f);
-                    if (selected != current)
-                    {
-                        _uiState.GameClient?.SubmitCommandAsync(new AssignAdministratorCommand(colonyId, selected));
-                        close();
-                        return;
-                    }
-
                     var candidates = colony.GetView<RecruitmentView>()?.FactionCandidates;
                     if (candidates == null)
                         return;
                     ImGui.Separator();
-                    ImGui.Text("Or hire a candidate:");
+                    ImGui.TextUnformatted("Or hire a candidate:");
                     if (candidates.Count == 0)
                         ImGui.TextDisabled("No candidates anywhere right now.");
                     foreach (var candidate in candidates)
@@ -897,11 +888,10 @@ namespace Pulsar4X.Client
                         {
                             _uiState.GameClient?.SubmitCommandAsync(new HireCandidateCommand(
                                 candidate.ColonyId, candidate.Id, HireRole.Administrator, colonyId));
-                            close();
-                            return;
+                            PersonAssignmentWindow.GetInstance().Dismiss();
                         }
                         ImGui.SameLine();
-                        ImGui.Text(candidate.Name + ", " + candidate.Location + ", wage " + CandidateWageText(candidate));
+                        ImGui.TextUnformatted(candidate.Name + ", " + candidate.Location + ", wage " + CandidateWageText(candidate));
                     }
                 });
         }
