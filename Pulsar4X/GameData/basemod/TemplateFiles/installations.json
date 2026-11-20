@@ -1047,7 +1047,7 @@
         },
         {
           "Name": "Cargo Transfer Rate",
-          "DescriptionFormula": "'How much cargo can be transfered per second in kg.'",
+          "DescriptionFormula": "'How much cargo can be transferred per second in kg.'",
           "GuiHint": "GuiSelectionMaxMin",
           "DataDict": {},
           "MaxFormula": "25",

@@ -5,7 +5,7 @@
       "UniqueID": "laser-weapon",
       "Name": "EMaser Weapon",
       "Formulas": {
-        "Description": "ElectroMagnetic Amplifed by Stimulated Emission of Radiation Weapon",
+        "Description": "ElectroMagnetic Amplified by Stimulated Emission of Radiation Weapon",
         "Mass": "PropertyValue('Power Input') / 1000 + PropertyValue('Chamber Volume') + PropertyValue('Radiator Volume')",
         "Volume": "PropertyValue('Power Input') / 1000 + PropertyValue('Chamber Volume')",
         "HTK": "0.5",
@@ -120,7 +120,7 @@
           "PropertyFormula": "1000000"
         },
         {
-          "Name": "Emissitivity",
+          "Name": "Emissivity",
           "Units": "%",
           "DescriptionFormula": "'How emissive radiators are (tech)'",
           "GuiHint": "GuiTextDisplay",
@@ -155,11 +155,11 @@
           "PropertyFormula": "PropertyValue('Radiator Volume') / PropertyValue('Radiator Thickness')"
         },
         {
-          "Name": "Operating Temprature",
+          "Name": "Operating Temperature",
           "Units": "K",
           "DescriptionFormula": "'What temp the laser operates at'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "Pow( PropertyValue('Thermal Output') / (PropertyValue('Emissitivity') * PropertyValue('Radiator area') * 0.00000005670374419), 1/4 )"
+          "PropertyFormula": "Pow( PropertyValue('Thermal Output') / (PropertyValue('Emissivity') * PropertyValue('Radiator area') * 0.00000005670374419), 1/4 )"
         },
         {
           "Name": "Input Light",
@@ -208,7 +208,7 @@
           "Units": "M",
           "DescriptionFormula": "'Width of beam at focal length (debug)'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": " PropertyValue('Operating Temprature') * PropertyValue('Operating Temprature') * PropertyValue('Focal Length') * 0.000000001 * PropertyValue('Target Wavelength') * ( 1 / PropertyValue('Lens Diameter') ) "
+          "PropertyFormula": " PropertyValue('Operating Temperature') * PropertyValue('Operating Temperature') * PropertyValue('Focal Length') * 0.000000001 * PropertyValue('Target Wavelength') * ( 1 / PropertyValue('Lens Diameter') ) "
         },
         {
           "Name": "genericWpnAtbArgs",
@@ -304,7 +304,7 @@
           "PropertyFormula": "TechData('tech-capacitors') * PropertyValue('Max Calibre') * PropertyValue('Max Length')"
         },
         {
-          "Name": "Power Efficency",
+          "Name": "Power Efficiency",
           "Units": "unknown",
           "GuiHint": "None",
           "PropertyFormula": "45 + TechData('tech-conductors')"

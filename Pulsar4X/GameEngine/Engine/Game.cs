@@ -337,6 +337,9 @@ namespace Pulsar4X.Engine
             // A seat left pointing at a dead or foreign person (from before a commander's death cleared it) is emptied.
             GameEngine.People.IndustrySeat.AfterLoad(loadedGame);
 
+            // A save from before a tech id was renamed: the old ids in its tech trees and research queues become the new ones.
+            Pulsar4X.Technology.TechIdMigration.AfterLoad(loadedGame);
+
             // A save from before portraits has no seeds: each person gets the one derived from their id.
             Pulsar4X.People.Portraits.AfterLoad(loadedGame);
 

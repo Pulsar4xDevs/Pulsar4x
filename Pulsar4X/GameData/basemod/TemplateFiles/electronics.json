@@ -97,7 +97,7 @@
         {
           "Name": "Resolution",
           "Units": "MegaPixel",
-          "DescriptionFormula": "'How much detail it can get from a detection. affects likelyhood of component detection etc. '",
+          "DescriptionFormula": "'How much detail it can get from a detection. affects likelihood of component detection etc. '",
           "GuiHint": "GuiSelectionMaxMin",
           "MaxFormula": "1000",
           "MinFormula": "0.1",
@@ -289,7 +289,7 @@
       "UniqueID": "gravitational-surveyor",
       "Name": "Gravitational Surveyor",
       "Formulas": {
-        "Description": "Surveys gravatational anomalies",
+        "Description": "Surveys gravitational anomalies",
         "Mass": "PropertyValue('Mass')",
         "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "0.5",

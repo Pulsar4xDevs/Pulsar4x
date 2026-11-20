@@ -107,7 +107,7 @@ public class MultiFactionEarthTests
             var extras = playerInfo.Data.LockedTechs.Keys.Except(info.Data.LockedTechs.Keys).ToList();
             Assert.That(extras, Has.None.Contain("alcubierre"), name);
             Assert.That(extras, Has.None.Contain("engine"), name);
-            Assert.That(extras, Has.None.Contain("jumpoint"), name);
+            Assert.That(extras, Has.None.Contain("jumppoint"), name);
             Assert.That(info.Data.LockedTechs.Keys, Is.SupersetOf(playerInfo.Data.LockedTechs.Keys.Except(extras)), name);
         }
         if (scenario == EarlyTech)

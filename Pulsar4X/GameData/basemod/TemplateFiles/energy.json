@@ -423,9 +423,9 @@
           "PropertyFormula": "2000"
         },
         {
-          "Name": "Output vs Efficency",
+          "Name": "Output vs Efficiency",
           "Units": "percent",
-          "DescriptionFormula": "'Percent of mass taken up by the generator vs the core, larger generator is more efficent but less output'",
+          "DescriptionFormula": "'Percent of mass taken up by the generator vs the core, larger generator is more efficient but less output'",
           "GuiHint": "GuiSelectionMaxMinInt",
           "MaxFormula": "70",
           "MinFormula": "30",
@@ -437,7 +437,7 @@
           "Units": "kg",
           "DescriptionFormula": "'Mass of the Core including fuel and shielding'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "[Mass] * PropertyValue('Output vs Efficency') * 0.01"
+          "PropertyFormula": "[Mass] * PropertyValue('Output vs Efficiency') * 0.01"
         },
         {
           "Name": "GennyMass",
@@ -485,7 +485,7 @@
         {
           "Name": "GeneratorOutput",
           "Units": "KW",
-          "DescriptionFormula": "'Electricy output of the generator'",
+          "DescriptionFormula": "'Electricity output of the generator'",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "PropertyValue('CoreOutput') * PropertyValue('Generator Efficiency')"
         },
@@ -519,7 +519,7 @@
       "Name": "Solar Array",
       "UniqueID": "solarArray",
       "Formulas": {
-        "Description": "'Generates power from sunlight, effiency tuned to specific wavelengths'",
+        "Description": "'Generates power from sunlight, efficiency tuned to specific wavelengths'",
         "Mass": "PropertyValue('Area') * TechData('tech-panel-density')",
         "Volume": "[Mass] / 2000",
         "HTK": "[Mass] * 0.5",

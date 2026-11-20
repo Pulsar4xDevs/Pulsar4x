@@ -54,7 +54,7 @@ public class ComponentUpgradeHelperTests
         Assert.That(ComponentUpgradeHelper.ClassifyStat("Fuel"), Is.EqualTo(StatDirection.Neutral));
         Assert.That(ComponentUpgradeHelper.ClassifyStat("Radiator Thickness"), Is.EqualTo(StatDirection.Neutral));
         Assert.That(ComponentUpgradeHelper.ClassifyStat("Radiator area"), Is.EqualTo(StatDirection.Neutral));
-        Assert.That(ComponentUpgradeHelper.ClassifyStat("Operating Temprature"), Is.EqualTo(StatDirection.Neutral));
+        Assert.That(ComponentUpgradeHelper.ClassifyStat("Operating Temperature"), Is.EqualTo(StatDirection.Neutral));
         Assert.That(ComponentUpgradeHelper.ClassifyStat("Beam waist"), Is.EqualTo(StatDirection.Neutral));
         Assert.That(ComponentUpgradeHelper.ClassifyStat("Fuel Heating Value"), Is.EqualTo(StatDirection.Neutral));
         Assert.That(ComponentUpgradeHelper.ClassifyStat("Hostility"), Is.EqualTo(StatDirection.Neutral));

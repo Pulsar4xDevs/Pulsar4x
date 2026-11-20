@@ -378,7 +378,7 @@
       "UniqueID": "cargo-Shuttlebay",
       "Name": "Cargo Shuttlebay",
       "Formulas": {
-        "Description": "A shuttlebay on a ship dedicated to transfering cargo and fuel, comes with shuttle!",
+        "Description": "A shuttlebay on a ship dedicated to transferring cargo and fuel, comes with shuttle!",
         "Mass": "PropertyValue('Size') * 1.5",
         "Volume": "PropertyValue('Size')",
         "HTK": "0.5",
