@@ -72,7 +72,7 @@ public class TechTreeFoundationTests
         var gravitic = store.Techs["tech-gravitic-theory"];
         Assert.That(gravitic.Name, Is.EqualTo("Gravitic Theory"));
         Assert.That(gravitic.MaxLevel, Is.EqualTo(1));
-        Assert.That(gravitic.CostFormula, Is.EqualTo("(1 + [Level]) * 1000"));
+        Assert.That(gravitic.CostFormula, Is.EqualTo("(1 + [Level]) * 500"));
         Assert.That(gravitic.Unlocks.Values.SelectMany(l => l), Is.EquivalentTo(new[] { "tech-gravitational-surveyor", "tech-spacetime-metric-theory" }));
         foreach (var id in new[] { "tech-electrical-engineering", "tech-industry-basics", "tech-life-sciences", "tech-electromagnetic-sensors" })
         {
@@ -152,7 +152,7 @@ public class TechTreeFoundationTests
         Assert.That(Parents(store, "tech-early-warp-drive"), Is.EqualTo(new[] { ("tech-spacetime-metric-theory", 1) }),
             "warp no longer needs Reactor Power Conversion or any nuclear tech");
         Assert.That(Parents(store, "tech-spacetime-metric-theory"), Is.EqualTo(new[] { ("tech-gravitic-theory", 1) }));
-        Assert.That(store.Techs["tech-spacetime-metric-theory"].CostFormula, Is.EqualTo("(1 + [Level]) * 8000"));
+        Assert.That(store.Techs["tech-spacetime-metric-theory"].CostFormula, Is.EqualTo("(1 + [Level]) * 8500"));
         Assert.That(store.Techs["tech-spacetime-metric-theory"].MaxLevel, Is.EqualTo(1));
         Assert.That(store.Techs["tech-power-conversion"].Unlocks, Is.Empty);
         Assert.That(store.Techs["tech-early-nuclear-power"].Unlocks.Values.SelectMany(l => l), Does.Not.Contain("tech-early-warp-drive"));

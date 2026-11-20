@@ -100,7 +100,7 @@
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",
-      "CostFormula": "(1 + [Level]) * 1000",
+      "CostFormula": "(1 + [Level]) * 500",
       "Unlocks": {
         "1": [
           "tech-gravitational-surveyor",
@@ -118,7 +118,7 @@
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",
-      "CostFormula": "(1 + [Level]) * 8000",
+      "CostFormula": "(1 + [Level]) * 8500",
       "Unlocks": {
         "1": [
           "tech-early-warp-drive"
@@ -554,7 +554,7 @@
       "Category": "tech-category-construction-production",
       "MaxLevel": 1,
       "DataFormula": "[Level]",
-      "CostFormula": "2500",
+      "CostFormula": "1500",
       "Unlocks": {
         "1": [
           "tech-jumppoint-stabilization-size-reduction",
