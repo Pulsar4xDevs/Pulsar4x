@@ -168,6 +168,7 @@ public class EnergyTechTests
             Assert.That(data.Techs, Does.Not.ContainKey(id), id + " waits");
         Assert.That(data.ComponentTemplates, Does.Not.ContainKey("fission-plant"));
 
+        data.IncrementTechLevel("tech-nuclear-theory"); // Nuclear Power sits behind Nuclear Theory
         data.IncrementTechLevel("tech-early-nuclear-power");
         foreach (var id in new[] { EnergyTech.FissionPowerPlant, EnergyTech.ReactorPowerDensity, EnergyTech.PowerConversion })
             Assert.That(data.IsResearchable(id), Is.True, id);

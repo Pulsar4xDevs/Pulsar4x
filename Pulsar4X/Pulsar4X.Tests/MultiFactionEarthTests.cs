@@ -106,7 +106,9 @@ public class MultiFactionEarthTests
             // ECN high tech), but nothing in the company's niche (warp, engines, jump points).
             var extras = playerInfo.Data.LockedTechs.Keys.Except(info.Data.LockedTechs.Keys).ToList();
             Assert.That(extras, Has.None.Contain("alcubierre"), name);
-            Assert.That(extras, Has.None.Contain("engine"), name);
+            // (A bloc that starts with Nuclear Power also starts with Nuclear Theory and Nuclear Engines, and that opens the nuclear
+            // engine line for it: those are the one engine step a bloc may have that the company lacks.)
+            Assert.That(extras.Where(id => !id.StartsWith("tech-nuclear-")), Has.None.Contain("engine"), name);
             Assert.That(extras, Has.None.Contain("jumppoint"), name);
             Assert.That(info.Data.LockedTechs.Keys, Is.SupersetOf(playerInfo.Data.LockedTechs.Keys.Except(extras)), name);
         }

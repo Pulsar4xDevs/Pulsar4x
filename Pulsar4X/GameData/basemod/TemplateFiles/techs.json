@@ -294,6 +294,41 @@
           "tech-conventional-engine-min-size",
           "tech-conventional-engine-exhaust-velocity",
           "tech-conventional-engine-fuel-consumption",
+          "tech-ion-engine"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-nuclear-theory",
+      "Name": "Nuclear Theory",
+      "Description": "The physics behind fission: cross-sections, moderation and criticality. Opens Nuclear Power and Nuclear Engines.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 1000",
+      "Unlocks": {
+        "1": [
+          "tech-early-nuclear-power",
+          "tech-nuclear-engines"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-nuclear-engines",
+      "Name": "Nuclear Engines",
+      "Description": "Putting a reactor behind the nozzle. Opens the nuclear solid core and nuclear pulse engine lines. Needs Nuclear Theory.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 1500",
+      "Unlocks": {
+        "1": [
           "tech-nuclear-solid-engine"
         ]
       }
@@ -325,12 +360,7 @@
       "MaxLevel": 1,
       "DataFormula": "5",
       "Category": "tech-category-power-propulsion",
-      "CostFormula": "(1 + [Level]) * 5000",
-      "Unlocks": {
-        "1": [
-          "tech-ion-engine"
-        ]
-      }
+      "CostFormula": "(1 + [Level]) * 5000"
     }
   },
   {
@@ -525,6 +555,7 @@
           "tech-alcubierre-collapse-efficiency",
           "tech-solid-fuel",
           "tech-conventional-engine",
+          "tech-nuclear-theory",
           "tech-jumppoint-stabilization",
           "tech-jumppoint-stabilization-size-reduction",
           "tech-jumppoint-stabilization-time-reduction",
@@ -717,7 +748,7 @@
     "Payload": {
       "UniqueID": "tech-early-technology",
       "Name": "Early Technology",
-      "Description": "Starting gate for the Early Tech Start: opens the basic industrial, survey and propulsion research lines. Ships move by reaction drive only; nuclear power must be researched, and warp and jump-point technology after that.",
+      "Description": "Starting gate for the Early Tech Start: opens the basic industrial, survey and propulsion research lines. Ships move by reaction drive only; nuclear theory must be researched first, then nuclear power, and warp and jump-point technology after that.",
       "Category": "tech-category-missiles-kinetic-weapons",
       "MaxLevel": 1,
       "DataFormula": "1",
@@ -743,7 +774,7 @@
           "tech-infra-gravity-max-extension",
           "tech-infra-pressure-range",
           "tech-infra-pressure-max-extension",
-          "tech-early-nuclear-power",
+          "tech-nuclear-theory",
           "tech-thermal-efficiency",
           "tech-grid-distribution",
           "tech-industrial-energy-efficiency",
@@ -760,7 +791,7 @@
     "Payload": {
       "UniqueID": "tech-early-nuclear-power",
       "Name": "Nuclear Power",
-      "Description": "Fission reactors, steam turbine reactors and RTGs. Leads on to directed energy and warp research.",
+      "Description": "Fission reactors, steam turbine reactors and RTGs. Needs Nuclear Theory. Leads on to directed energy and warp research.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",

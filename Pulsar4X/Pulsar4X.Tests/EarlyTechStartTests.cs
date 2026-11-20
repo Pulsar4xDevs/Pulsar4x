@@ -96,7 +96,8 @@ public class EarlyTechStartTests
         foreach (var id in new[]
         {
             "tech-early-technology", "tech-early-nuclear-power",
-            "tech-early-directed-energy", "tech-early-warp-drive"
+            "tech-early-directed-energy", "tech-early-warp-drive",
+            "tech-nuclear-theory", "tech-nuclear-engines"
         })
             Assert.That(store.Techs, Does.ContainKey(id), id);
     }
@@ -376,7 +377,8 @@ public class EarlyTechStartTests
         }
 
         Assert.That(data.Techs["tech-early-technology"].Level, Is.EqualTo(1));
-        Assert.That(data.IsResearchable("tech-early-nuclear-power"), Is.True);
+        Assert.That(data.IsResearchable("tech-nuclear-theory"), Is.True);
+        Assert.That(data.Techs.ContainsKey("tech-early-nuclear-power"), Is.False, "Nuclear Power waits for Nuclear Theory");
         Assert.That(data.Techs.ContainsKey("tech-early-warp-drive"), Is.False);
         Assert.That(data.Techs.ContainsKey("tech-early-directed-energy"), Is.False);
         Assert.That(data.IsResearchable("tech-geo-surveyor"), Is.True);
@@ -619,6 +621,7 @@ public class EarlyTechStartTests
         var (_, faction) = StartGameLikeTheMenu(EarlyTech);
         var data = faction.GetDataBlob<FactionInfoDB>().Data;
 
+        data.IncrementTechLevel("tech-nuclear-theory"); // Nuclear Power sits behind Nuclear Theory
         data.IncrementTechLevel("tech-early-nuclear-power");
 
         Assert.That(data.ComponentTemplates.ContainsKey("steam-turbine-reactor"), Is.True);
@@ -645,6 +648,7 @@ public class EarlyTechStartTests
         Assert.That(data.CargoGoods.GetAny("ntp"), Is.Null);
         Assert.That(data.ComponentTemplates.ContainsKey("conventional-engine"), Is.True);
 
+        data.IncrementTechLevel("tech-nuclear-theory"); // Nuclear Power sits behind Nuclear Theory
         data.IncrementTechLevel("tech-early-nuclear-power");
 
         Assert.That(data.ComponentTemplates.ContainsKey("scntr-engine"), Is.True);
@@ -664,6 +668,7 @@ public class EarlyTechStartTests
         Assert.That(data.CargoGoods.GetAny("fissile-fuels"), Is.Null,
             "nuclear fuel is not available before nuclear research");
 
+        data.IncrementTechLevel("tech-nuclear-theory"); // Nuclear Power sits behind Nuclear Theory
         data.IncrementTechLevel("tech-early-nuclear-power");
 
         Assert.DoesNotThrow(() => new ComponentDesigner(data.ComponentTemplates[templateId], data,
