@@ -659,6 +659,29 @@ namespace Pulsar4X.Industry
         }
 
         /// <summary>
+        /// <see cref="QueuedOutput"/> for every faction design the colony's lines have a job for. Designs with none are left out.
+        /// </summary>
+        internal static Dictionary<string, long> QueuedSupply(Entity colony, FactionInfoDB info)
+        {
+            var supply = new Dictionary<string, long>();
+            if (!colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
+                return supply;
+            foreach (var line in industry.ProductionLines.Values)
+            {
+                foreach (var job in line.Jobs)
+                {
+                    if (job.Refit != null || job.Recycle != null || supply.ContainsKey(job.ItemGuid)
+                        || !info.IndustryDesigns.TryGetValue(job.ItemGuid, out var design) || design == null)
+                        continue;
+                    long units = QueuedOutput(colony, design);
+                    if (units > 0)
+                        supply[job.ItemGuid] = units;
+                }
+            }
+            return supply;
+        }
+
+        /// <summary>
         /// The industry head's work for refits: every part the colony's waiting refit jobs still want (no stored part to
         /// claim) is queued on the fastest line that builds it, less what jobs already queued on the colony will make,
         /// so it never queues twice. Feeders are chained like <see cref="AutoAddSubJobs"/>. Does nothing without a

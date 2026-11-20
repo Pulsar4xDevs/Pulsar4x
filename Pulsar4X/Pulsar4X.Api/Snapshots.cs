@@ -1402,6 +1402,12 @@ public sealed record IndustryView(IReadOnlyList<ProductionLineView> ProductionLi
 
     /// <summary>Owner only. Component and installation designs in the warehouse that could be recycled (<c>RecycleComponentCommand</c>).</summary>
     public IReadOnlyList<RecycleCandidateView> RecycleItems { get; init; } = Array.Empty<RecycleCandidateView>();
+
+    /// <summary>
+    /// Owner only. Item units, by design id, that the jobs already queued on this colony's lines will still make
+    /// (the engine's queued supply, as used when the industry head queues refit parts). Designs with none are absent.
+    /// </summary>
+    public IReadOnlyDictionary<string, long> QueuedOutput { get; init; } = new Dictionary<string, long>();
 }
 
 /// <summary>

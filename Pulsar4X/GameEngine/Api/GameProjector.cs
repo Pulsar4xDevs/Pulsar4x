@@ -2195,6 +2195,7 @@ namespace Pulsar4X.Engine.Api
             {
                 RecycleShips = owner ? RecycleShipCandidates(entity, factionInfo) : Array.Empty<RecycleCandidateView>(),
                 RecycleItems = owner ? RecycleItemCandidates(entity, factionInfo) : Array.Empty<RecycleCandidateView>(),
+                QueuedOutput = owner ? IndustryTools.QueuedSupply(entity, factionInfo) : new Dictionary<string, long>(),
                 Pads = pads,
                 IndustryHeadId = headId,
                 IndustryHeadName = headName,

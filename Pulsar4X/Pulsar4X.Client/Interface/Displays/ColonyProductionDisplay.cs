@@ -810,7 +810,8 @@ namespace Pulsar4X.Client
                 // Missing parts do not block the refit: the job is queued and waits until a factory produces them.
                 ImGui.Text("Not in the warehouse yet (the refit will wait)");
                 // A shipyard line builds only ships and refits, so parts go to the colony's fastest line that makes them.
-                var buildable = new List<(RefitMissingPartView Part, string LineId)>();
+                // Jobs already queued on the colony count as supply, so the button queues only what is still short.
+                var buildable = new List<(RefitMissingPartView Part, string LineId, int Batches)>();
                 foreach (var missing in diff.Missing)
                 {
                     var maker = industry.ProductionLines
@@ -819,8 +820,13 @@ namespace Pulsar4X.Client
                         .FirstOrDefault();
                     if (maker != null)
                     {
-                        buildable.Add((missing, maker.Id));
-                        ImGui.BulletText(missing.Name + "  x" + missing.Count + "  (" + maker.Name + ")");
+                        industry.QueuedOutput.TryGetValue(missing.DesignId, out var queued);
+                        int output = maker.Constructibles.First(item => item.DesignId == missing.DesignId).OutputAmount;
+                        int batches = RefitDesignDiff.BatchesToQueue(missing.Count, queued, output);
+                        if (batches > 0)
+                            buildable.Add((missing, maker.Id, batches));
+                        ImGui.BulletText(missing.Name + "  x" + missing.Count + "  (" + maker.Name + ")"
+                            + (queued > 0 ? "  " + queued + " already queued" : ""));
                     }
                     else
                         ImGui.BulletText(missing.Name + "  x" + missing.Count + "  no line here can produce it");
@@ -829,10 +835,10 @@ namespace Pulsar4X.Client
                     ImGui.BeginDisabled();
                 if (ImGui.Button("Queue production of missing parts"))
                 {
-                    foreach (var (missing, makerLineId) in buildable)
+                    foreach (var (missing, makerLineId, batches) in buildable)
                     {
                         uiState.GameClient?.SubmitCommandAsync(new QueueIndustryJobCommand(
-                            entityId, makerLineId, missing.DesignId, missing.Count, false, false));
+                            entityId, makerLineId, missing.DesignId, batches, false, false));
                     }
                 }
                 if (buildable.Count == 0)
