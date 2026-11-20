@@ -4,7 +4,7 @@
     "Payload": {
       "UniqueID": "tech-administration-level",
       "Name": "Administration Level",
-      "Description": "Allow access to improved designs for administrative systems",
+      "Description": "Allow access to improved designs for administrative systems. Needs Industrial Base.",
       "Category": "tech-category-bureaucracy",
       "MaxLevel": 5,
       "DataFormula": "[Level] + 1",

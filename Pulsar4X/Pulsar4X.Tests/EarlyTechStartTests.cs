@@ -633,8 +633,14 @@ public class EarlyTechStartTests
         Assert.That(data.ComponentTemplates.ContainsKey("steam-turbine-reactor"), Is.True);
         // The generic 50 kW/kg reactor is retired from new games.
         Assert.That(data.ComponentTemplates.ContainsKey("reactor"), Is.False);
-        Assert.That(data.IsResearchable("tech-early-warp-drive"), Is.True);
         Assert.That(data.IsResearchable("tech-early-directed-energy"), Is.True);
+        // Warp sits behind Reactor Power Conversion level 2, not Nuclear Power itself.
+        Assert.That(data.IsResearchable("tech-power-conversion"), Is.True);
+        Assert.That(data.IsResearchable("tech-early-warp-drive"), Is.False);
+        data.IncrementTechLevel("tech-power-conversion");
+        Assert.That(data.IsResearchable("tech-early-warp-drive"), Is.False);
+        data.IncrementTechLevel("tech-power-conversion");
+        Assert.That(data.IsResearchable("tech-early-warp-drive"), Is.True);
 
         data.IncrementTechLevel("tech-early-warp-drive");
         Assert.That(data.ComponentTemplates.ContainsKey("alcubierre-warp-drive"), Is.True);

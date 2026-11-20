@@ -2,9 +2,101 @@
   {
     "Type": "Tech",
     "Payload": {
+      "UniqueID": "tech-electrical-engineering",
+      "Name": "Electrical Engineering",
+      "Description": "Generation, storage and distribution of electricity. Opens the battery, capacitor, conductor, fuel cell, grid, solar panel and thermal plant techs.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "tech-battery-capacity",
+          "tech-capacitors",
+          "tech-conductors",
+          "tech-fuel-cells",
+          "tech-grid-distribution",
+          "tech-panel-efficiency",
+          "tech-panel-bandwidth",
+          "tech-panel-density",
+          "tech-thermal-efficiency"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-industry-basics",
+      "Name": "Industrial Base",
+      "Description": "Mines, factories, shipyards and the people to run them. Opens the mining, factory, shipyard, construction automation, industrial energy, academy and administration techs.",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "tech-mining-production",
+          "tech-factory-max-size",
+          "tech-shipyard-slip-max-size",
+          "tech-construction-automation",
+          "tech-industrial-energy-efficiency",
+          "tech-academy-larger-classes",
+          "tech-academy-better-instruction",
+          "tech-academy-candidate-search",
+          "tech-administration-level"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-life-sciences",
+      "Name": "Life Sciences",
+      "Description": "Biology, medicine and habitat engineering. Opens the closed-loop life support and the six habitat range and extension techs.",
+      "Category": "tech-category-biology-genetics",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "tech-life-support-efficiency",
+          "tech-infra-gravity-range",
+          "tech-infra-gravity-min-extension",
+          "tech-infra-gravity-max-extension",
+          "tech-infra-pressure-range",
+          "tech-infra-pressure-max-extension"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-electromagnetic-sensors",
+      "Name": "Electromagnetic Sensors",
+      "Description": "Detecting and measuring the electromagnetic spectrum. Opens the antenna techs and the Geological Surveyor; Antenna Sensitivity level 2 leads on to the Gravitational Surveyor and jump point work.",
+      "Category": "tech-category-sensors",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "tech-antenna-sensitivity",
+          "tech-antenna-efficiency",
+          "tech-antenna-bandwidth",
+          "tech-geo-surveyor"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
       "UniqueID": "tech-life-support-efficiency",
       "Name": "Closed-Loop Life Support",
-      "Description": "Better air and water recycling, heat recovery and lighting. Multiplies a ship's life support per crew aboard (1 kW at level 0) and the hostile-world term of a sealed colony's life support: x1 at level 0, x0.85 a level, to about x0.27 at level 8. Applies at once to every ship and colony.",
+      "Description": "Better air and water recycling, heat recovery and lighting. Multiplies a ship's life support per crew aboard (1 kW at level 0) and the hostile-world term of a sealed colony's life support: x1 at level 0, x0.85 a level, to about x0.27 at level 8. Applies at once to every ship and colony. Needs Life Sciences.",
       "Category": "tech-category-biology-genetics",
       "MaxLevel": 8,
       "DataFormula": "Pow(0.85, [Level])",
@@ -16,7 +108,7 @@
     "Payload": {
       "UniqueID": "tech-infra-gravity-range",
       "Name": "Habitat Gravity Tolerance",
-      "Description": "Widens the infrastructure window on the prefab and the site. It does not move the prefab track. Level 0 is 1.962 m/s² wide. Level 3 is about 6.7 m/s², enough to cover Earth and Mars in one window. Level 6 is about 11.4 m/s², enough to cover Luna through Earth.",
+      "Description": "Widens the infrastructure window on the prefab and the site. It does not move the prefab track. Level 0 is 1.962 m/s² wide. Level 3 is about 6.7 m/s², enough to cover Earth and Mars in one window. Level 6 is about 11.4 m/s², enough to cover Luna through Earth. Needs Life Sciences.",
       "Category": "tech-category-biology-genetics",
       "MaxLevel": 6,
       "DataFormula": "0.1 + [Level] * 0.08",
@@ -28,7 +120,7 @@
     "Payload": {
       "UniqueID": "tech-infra-gravity-min-extension",
       "Name": "Low-Gravity Habitat Engineering",
-      "Description": "Opens the prefab gravity track down to 0 m/s² so the window can slide toward low-gravity bodies. It does not widen the window. Level 1 reaches 0 m/s².",
+      "Description": "Opens the prefab gravity track down to 0 m/s² so the window can slide toward low-gravity bodies. It does not widen the window. Level 1 reaches 0 m/s². Needs Life Sciences.",
       "Category": "tech-category-biology-genetics",
       "MaxLevel": 1,
       "DataFormula": "[Level]",
@@ -40,7 +132,7 @@
     "Payload": {
       "UniqueID": "tech-infra-gravity-max-extension",
       "Name": "High-Gravity Habitat Engineering",
-      "Description": "Opens track above the prefab window so that window can slide toward heavy worlds. It does not widen the window. The five levels reach about 100 m/s².",
+      "Description": "Opens track above the prefab window so that window can slide toward heavy worlds. It does not widen the window. The five levels reach about 100 m/s². Needs Life Sciences.",
       "Category": "tech-category-biology-genetics",
       "MaxLevel": 5,
       "DataFormula": "[Level] * [Level] * 0.36",
@@ -52,7 +144,7 @@
     "Payload": {
       "UniqueID": "tech-infra-pressure-range",
       "Name": "Habitat Pressure Tolerance",
-      "Description": "Widens the pressure window on the prefab and the site. It does not move the prefab track. Level 0 is 0.20 atm wide. Level 3 is 0.50 atm wide.",
+      "Description": "Widens the pressure window on the prefab and the site. It does not move the prefab track. Level 0 is 0.20 atm wide. Level 3 is 0.50 atm wide. Needs Life Sciences.",
       "Category": "tech-category-biology-genetics",
       "MaxLevel": 3,
       "DataFormula": "0.1 + [Level] * 0.05",
@@ -64,7 +156,7 @@
     "Payload": {
       "UniqueID": "tech-infra-pressure-max-extension",
       "Name": "Dense-Atmosphere Habitat Engineering",
-      "Description": "Opens the ceiling of the prefab track. It does not widen the window. The ceiling is capped at 10 atm, so a runaway-greenhouse atmosphere stays out of reach.",
+      "Description": "Opens the ceiling of the prefab track. It does not widen the window. The ceiling is capped at 10 atm, so a runaway-greenhouse atmosphere stays out of reach. Needs Life Sciences.",
       "Category": "tech-category-biology-genetics",
       "MaxLevel": 5,
       "DataFormula": "[Level] * [Level] * 0.4",
@@ -76,11 +168,16 @@
     "Payload": {
       "UniqueID": "tech-mining-production",
       "Name": "Mining Production Efficiency",
-      "Description": "Multiplies the kilograms per day of each mine and robo-miner. Level 0 is the installation's own rate. Each level adds 1.5 times that rate. Accessibility still scales each deposit: half at 0.5, one tenth at 0.1. The installations apply this same 1 + level * 1.5 expression.",
+      "Description": "Multiplies the kilograms per day of each mine and robo-miner. Level 0 is the installation's own rate. Each level adds 1.5 times that rate. Accessibility still scales each deposit: half at 0.5, one tenth at 0.1. The installations apply this same 1 + level * 1.5 expression. Needs Industrial Base.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 11,
       "DataFormula": "1 + [Level] * 1.5",
-      "CostFormula": "(1 + [Level]) * 100"
+      "CostFormula": "(1 + [Level]) * 100",
+      "Unlocks": {
+        "3": [
+          "tech-asteroid-mining"
+        ]
+      }
     }
   },
   {
@@ -88,7 +185,7 @@
     "Payload": {
       "UniqueID": "tech-capacitors",
       "Name": "Capacitors",
-      "Description": "",
+      "Description": "Higher-energy capacitors. Raises the charge energy of the Missile Launcher (weapons work is deferred, so nothing else reads it yet).",
       "MaxLevel": 10,
       "DataFormula": "1 + [Level] * 0.25 ",
       "Category": "tech-category-power-propulsion",
@@ -100,7 +197,7 @@
     "Payload": {
       "UniqueID": "tech-battery-capacity",
       "Name": "Advanced Battery Technology",
-      "Description": "Utilizes advanced materials and manufacturing techniques to exponentially increase battery energy density, reaching a threefold increase at its peak.",
+      "Description": "Advanced materials and manufacturing raise battery energy density, up to threefold at the peak. Feeds the Battery Bank and the Grid Battery. Needs Electrical Engineering.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 10,
       "DataFormula": "1 + ([Level] / 5.0)",
@@ -112,7 +209,7 @@
     "Payload": {
       "UniqueID": "tech-conductors",
       "Name": "Conductors",
-      "Description": "",
+      "Description": "Better conductors and thermoelectrics. Raises the RTG's thermoelectric conversion by 0.5 points a level (6% at level 0) and adds to the Missile Launcher's power efficiency. Needs Electrical Engineering. Level 1 opens Electric Thrusters.",
       "MaxLevel": 10,
       "DataFormula": "1 * [Level]",
       "Category": "tech-category-power-propulsion",
@@ -146,7 +243,7 @@
     "Payload": {
       "UniqueID": "tech-alcubierre-miniaturization",
       "Name": "Alcubierre Miniaturization",
-      "Description": "Research into shrinking a drive to fit smaller form factors",
+      "Description": "Shrinks the Alcubierre Warp Drive to fit smaller form factors (its minimum mass). Needs Alcubierre Bubble Creation Cost level 3.",
       "MaxLevel": 10,
       "DataFormula": "250 - [Level] * 20 ",
       "Category": "tech-category-power-propulsion",
@@ -158,11 +255,16 @@
     "Payload": {
       "UniqueID": "tech-alcubierre-bubble-creation-cost",
       "Name": "Alcubierre Bubble Creation Cost",
-      "Description": "By finding better ways to manipulate the warp bubble, we can make the drive more efficient",
+      "Description": "Better ways to shape the warp bubble cut the energy the Alcubierre Warp Drive needs to create it. Needs Alcubierre Warp Drive.",
       "MaxLevel": 10,
       "DataFormula": "1.0 - [Level] * 0.05",
       "Category": "tech-category-power-propulsion",
-      "CostFormula": "500 + [Level] * 500"
+      "CostFormula": "500 + [Level] * 500",
+      "Unlocks": {
+        "3": [
+          "tech-alcubierre-miniaturization"
+        ]
+      }
     }
   },
   {
@@ -170,11 +272,17 @@
     "Payload": {
       "UniqueID": "tech-alcubierre-sustain-cost",
       "Name": "Alcubierre Sustain Cost",
-      "Description": "By finding better ways to manipulate the warp bubble, we can make the drive more efficient",
+      "Description": "Better ways to hold the warp bubble cut the power the Alcubierre Warp Drive draws to sustain it. Needs Alcubierre Warp Drive. Level 4 opens Alcubierre Bleed and Gravitational Coupling.",
       "MaxLevel": 10,
       "DataFormula": "1.0 - [Level] * 0.05 ",
       "Category": "tech-category-power-propulsion",
-      "CostFormula": "500 + [Level] * 500"
+      "CostFormula": "500 + [Level] * 500",
+      "Unlocks": {
+        "4": [
+          "tech-alcubierre-bleed",
+          "tech-alcubierre-gravitational-coupling"
+        ]
+      }
     }
   },
   {
@@ -182,11 +290,16 @@
     "Payload": {
       "UniqueID": "tech-alcubierre-gravitational-coupling",
       "Name": "Alcubierre Gravitational Coupling",
-      "Description": "A lower coupling eases the reactor draw of an uphill warp",
+      "Description": "A lower coupling eases the reactor draw of an uphill warp with the Alcubierre Warp Drive. Needs Alcubierre Sustain Cost level 4. Level 3 opens Alcubierre Collapse Efficiency.",
       "MaxLevel": 10,
       "DataFormula": "1 - [Level] * 0.08",
       "Category": "tech-category-power-propulsion",
-      "CostFormula": "500 + [Level] * 500"
+      "CostFormula": "500 + [Level] * 500",
+      "Unlocks": {
+        "3": [
+          "tech-alcubierre-collapse-efficiency"
+        ]
+      }
     }
   },
   {
@@ -194,7 +307,7 @@
     "Payload": {
       "UniqueID": "tech-alcubierre-bleed",
       "Name": "Alcubierre Bleed",
-      "Description": "How much of drive speed a downhill warp may keep",
+      "Description": "How much of its drive speed the Alcubierre Warp Drive may keep on a downhill warp. Needs Alcubierre Sustain Cost level 4.",
       "MaxLevel": 10,
       "DataFormula": "0.5 + [Level] * 0.05",
       "Category": "tech-category-power-propulsion",
@@ -206,7 +319,7 @@
     "Payload": {
       "UniqueID": "tech-alcubierre-collapse-efficiency",
       "Name": "Alcubierre Collapse Efficiency",
-      "Description": "We can recover some of the energy put into creating the bubble when we collapse it in a controlled manner",
+      "Description": "Recovers some of the energy put into creating the bubble when the Alcubierre Warp Drive collapses it in a controlled manner. Needs Alcubierre Gravitational Coupling level 3.",
       "MaxLevel": 15,
       "DataFormula": "0.0 + [Level] * 0.05 ",
       "Category": "tech-category-power-propulsion",
@@ -218,7 +331,7 @@
     "Payload": {
       "UniqueID": "tech-conventional-engine-max-power",
       "Name": "Rocket Engine Maximum Power",
-      "Description": "Research to increase the upper limits of conventional rocket power",
+      "Description": "Raises the upper end of the engine power range. In this build only the Alcubierre Warp Drive's Efficiency vs Power slider reads it. Needs Chemical Rocketry.",
       "MaxLevel": 7,
       "DataFormula": "1 + ([Level] * 1.5)",
       "Category": "tech-category-power-propulsion",
@@ -230,7 +343,7 @@
     "Payload": {
       "UniqueID": "tech-conventional-engine-min-power",
       "Name": "Rocket Engine Minimum Power",
-      "Description": "Research to find the lower limits of conventional rocket power",
+      "Description": "Lowers the bottom of the engine power range. In this build only the Alcubierre Warp Drive's Efficiency vs Power slider reads it. Needs Chemical Rocketry.",
       "MaxLevel": 7,
       "DataFormula": "0.9 - [Level] * 0.1",
       "Category": "tech-category-power-propulsion",
@@ -242,7 +355,7 @@
     "Payload": {
       "UniqueID": "tech-solid-fuel",
       "Name": "Solid Fuel",
-      "Description": "",
+      "Description": "Solid propellant grains. Nothing reads this yet; it is parked for solid-rocket ordnance.",
       "MaxLevel": 10,
       "DataFormula": "1 + [Level] * 0.1",
       "Category": "tech-category-power-propulsion",
@@ -254,7 +367,7 @@
     "Payload": {
       "UniqueID": "tech-conventional-engine-max-size",
       "Name": "Rocket Engine Maximum Size",
-      "Description": "Research into better cooling allows larger engine sizes",
+      "Description": "Better cooling allows larger engines. Raises the maximum size of the Conventional Engine and the Nuclear Solid Core Engine. Needs Chemical Rocketry.",
       "MaxLevel": 20,
       "DataFormula": "8400 + [Level] * 100",
       "Category": "tech-category-power-propulsion",
@@ -266,7 +379,7 @@
     "Payload": {
       "UniqueID": "tech-conventional-engine-min-size",
       "Name": "Rocket Engine Minimum Size",
-      "Description": "Research into miniaturization allows smaller engine sizes",
+      "Description": "Miniaturization allows smaller engines. Lowers the minimum size of the Conventional Engine and the Nuclear Solid Core Engine. Needs Chemical Rocketry.",
       "MaxLevel": 10,
       "DataFormula": "100 - [Level] * 5",
       "Category": "tech-category-power-propulsion",
@@ -278,7 +391,7 @@
     "Payload": {
       "UniqueID": "tech-conventional-engine-exhaust-velocity",
       "Name": "Rocket Engine Exhaust Velocity",
-      "Description": "Research into higher exhaust velocities for engines, making them more efficient",
+      "Description": "Higher exhaust velocities make the Conventional Engine more efficient. Needs Chemical Rocketry.",
       "MaxLevel": 10,
       "DataFormula": "[Level] * 100",
       "Category": "tech-category-power-propulsion",
@@ -290,7 +403,7 @@
     "Payload": {
       "UniqueID": "tech-conventional-engine-fuel-consumption",
       "Name": "Rocket Engine Fuel Consumption",
-      "Description": "Research into better plumbing and pump layouts allows better fuel efficiency",
+      "Description": "Better plumbing and pump layouts improve the Conventional Engine's fuel efficiency (and the SRB's). Needs Chemical Rocketry.",
       "MaxLevel": 20,
       "DataFormula": "1 - [Level] * 0.01",
       "Category": "tech-category-power-propulsion",
@@ -301,8 +414,8 @@
     "Type": "Tech",
     "Payload": {
       "UniqueID": "tech-conventional-engine",
-      "Name": "Conventional Engine Technology",
-      "Description": "",
+      "Name": "Chemical Rocketry",
+      "Description": "Burning propellant in a nozzle. Opens the rocket engine tuning techs (exhaust velocity, fuel consumption, size and power) and Solid Fuel. Improves the Conventional Engine.",
       "ID": "35608fe6-0d65-4a5f-b452-78a3e5e6ce2c",
       "MaxLevel": 1,
       "DataFormula": "0.2",
@@ -315,7 +428,8 @@
           "tech-conventional-engine-max-size",
           "tech-conventional-engine-min-size",
           "tech-conventional-engine-exhaust-velocity",
-          "tech-conventional-engine-fuel-consumption"
+          "tech-conventional-engine-fuel-consumption",
+          "tech-solid-fuel"
         ]
       }
     }
@@ -343,7 +457,7 @@
     "Payload": {
       "UniqueID": "tech-nuclear-engines",
       "Name": "Nuclear Engines",
-      "Description": "Putting a reactor behind the nozzle. Opens the nuclear solid core and nuclear pulse engine lines. Needs Nuclear Theory.",
+      "Description": "Putting a reactor behind the nozzle. Opens the nuclear solid core engine line, which leads on to the nuclear pulse engine. Needs Nuclear Theory.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",
@@ -360,13 +474,13 @@
     "Payload": {
       "UniqueID": "tech-nuclear-solid-engine",
       "Name": "Nuclear Solid Core Engine Technology",
-      "Description": "",
+      "Description": "Better fuel and core temperatures for the nuclear thermal rocket: raises the Nuclear Solid Core Engine's exhaust velocity by 250 m/s a level. Needs Nuclear Engines. Level 3 opens the Nuclear Pulse Engine.",
       "MaxLevel": 5,
       "DataFormula": "5",
       "Category": "tech-category-power-propulsion",
       "CostFormula": "(1 + [Level]) * 2500",
       "Unlocks": {
-        "1": [
+        "3": [
           "tech-nuclear-pulse-engine"
         ]
       }
@@ -377,7 +491,7 @@
     "Payload": {
       "UniqueID": "tech-nuclear-pulse-engine",
       "Name": "Nuclear Pulse Engine Technology",
-      "Description": "",
+      "Description": "Nuclear pulse propulsion. There is no pulse drive component yet, so this has no effect for now. Needs Nuclear Solid Core Engine Technology level 3.",
       "MaxLevel": 1,
       "DataFormula": "5",
       "Category": "tech-category-power-propulsion",
@@ -389,11 +503,11 @@
     "Payload": {
       "UniqueID": "tech-ion-engine",
       "Name": "Ion Drive Technology",
-      "Description": "",
+      "Description": "Ion propulsion: very high exhaust velocity at low thrust. There is no ion thruster component yet, so this has no effect for now. Needs Electric Thrusters.",
       "MaxLevel": 1,
       "DataFormula": "1000",
       "Category": "tech-category-power-propulsion",
-      "CostFormula": "(1 + [Level]) * 10000"
+      "CostFormula": "(1 + [Level]) * 4000"
     }
   },
   {
@@ -401,11 +515,17 @@
     "Payload": {
       "UniqueID": "tech-jumppoint-stabilization",
       "Name": "JumpPoint Stabilization",
-      "Description": "A ship equipped with this module can Stabilise a JumpPoint",
+      "Description": "A ship equipped with a stabiliser module could stabilise a jump point. The module is not in the game yet, so this has no effect for now. Needs Gravitational Surveyor.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 1,
       "DataFormula": "[Level]",
-      "CostFormula": "2500"
+      "CostFormula": "2500",
+      "Unlocks": {
+        "1": [
+          "tech-jumppoint-stabilization-size-reduction",
+          "tech-jumppoint-stabilization-time-reduction"
+        ]
+      }
     }
   },
   {
@@ -413,7 +533,7 @@
     "Payload": {
       "UniqueID": "tech-jumppoint-stabilization-size-reduction",
       "Name": "JumpPoint Size Reduction",
-      "Description": "Reduces the size of a component required for Jump Point Stabilisation",
+      "Description": "Reduces the size of the component required for jump point stabilisation. No stabiliser module exists yet, so this has no effect for now. Needs JumpPoint Stabilization.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 10,
       "DataFormula": "100 - [Level] * 5",
@@ -425,7 +545,7 @@
     "Payload": {
       "UniqueID": "tech-jumppoint-stabilization-time-reduction",
       "Name": "JumpPoint Time Reduction",
-      "Description": "Reduces the time it takes to stabilise a Jump Point",
+      "Description": "Reduces the time it takes to stabilise a jump point. No stabiliser module exists yet, so this has no effect for now. Needs JumpPoint Stabilization.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 10,
       "DataFormula": "[Level]",
@@ -527,11 +647,16 @@
     "Payload": {
       "UniqueID": "tech-antenna-sensitivity",
       "Name": "Antenna Sensitivity",
-      "Description": "Improvements to antennas to increase the ability to pick up smaller signals from background noise",
-      "Category": "tech-category-missiles-kinetic-weapons",
+      "Description": "Better antennas pick up smaller signals from background noise. Feeds the Passive Sensor. Needs Electromagnetic Sensors. Level 2 opens the Gravitational Surveyor.",
+      "Category": "tech-category-sensors",
       "MaxLevel": 9,
       "DataFormula": "0.01 - [Level] * 0.001",
-      "CostFormula": "(1 + [Level]) * 500"
+      "CostFormula": "(1 + [Level]) * 500",
+      "Unlocks": {
+        "2": [
+          "tech-gravitational-surveyor"
+        ]
+      }
     }
   },
   {
@@ -539,8 +664,8 @@
     "Payload": {
       "UniqueID": "tech-antenna-efficiency",
       "Name": "Antenna Efficiency",
-      "Description": "Improvements to antennas increase the effective area of a sensor, allowing for greater sensitivity for a smaller size",
-      "Category": "tech-category-missiles-kinetic-weapons",
+      "Description": "Better antennas raise the effective area of a sensor, giving more sensitivity for a smaller size. Feeds the Passive Sensor. Needs Electromagnetic Sensors.",
+      "Category": "tech-category-sensors",
       "MaxLevel": 25,
       "DataFormula": "0.75 + [Level] * 0.1",
       "CostFormula": "(1 + [Level]) * 500"
@@ -551,8 +676,8 @@
     "Payload": {
       "UniqueID": "tech-antenna-bandwidth",
       "Name": "Antenna Bandwidth",
-      "Description": "Improvements to antennas increase the max bandwidth of an antenna",
-      "Category": "tech-category-missiles-kinetic-weapons",
+      "Description": "Better antennas raise the maximum bandwidth of an antenna. Feeds the Passive Sensor. Needs Electromagnetic Sensors.",
+      "Category": "tech-category-sensors",
       "MaxLevel": 95,
       "DataFormula": "500 + [Level] * 100",
       "CostFormula": "(1 + [Level]) * 500"
@@ -563,11 +688,11 @@
     "Payload": {
       "UniqueID": "tech-factory-max-size",
       "Name": "Factory Maximum Size",
-      "Description": "Research into the logistics and design of larger factories",
+      "Description": "Research into the logistics and design of larger factories. Raises the maximum size of the Factory and the Factory Site. Needs Industrial Base.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 10,
       "DataFormula": "(1 + [Level]) * 1000",
-      "CostFormula":"(1 + [Level]) * 2500"
+      "CostFormula": "(1 + [Level]) * 2500"
     }
   },
   {
@@ -575,11 +700,11 @@
     "Payload": {
       "UniqueID": "tech-shipyard-slip-max-size",
       "Name": "Shipyard Slip Maximum Size",
-      "Description": "Research into the logistics and design of larger slips for shipyards",
+      "Description": "Research into the logistics and design of larger slips. Raises the maximum size of the Shipyard. Needs Industrial Base.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 100,
       "DataFormula": "(1 + [Level]) * 5000",
-      "CostFormula":"(1 + [Level]) * 500"
+      "CostFormula": "(1 + [Level]) * 500"
     }
   },
   {
@@ -587,7 +712,7 @@
     "Payload": {
       "UniqueID": "tech-academy-larger-classes",
       "Name": "Larger Academy Classes",
-      "Description": "A naval academy can take a larger class",
+      "Description": "A naval academy can take a larger class Needs Industrial Base.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 3,
       "DataFormula": "[Level] * 4",
@@ -599,7 +724,7 @@
     "Payload": {
       "UniqueID": "tech-academy-better-instruction",
       "Name": "Better Academy Instruction",
-      "Description": "Graduates and command courses leave with a higher experience cap",
+      "Description": "Graduates and command courses leave with a higher experience cap Needs Industrial Base.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 3,
       "DataFormula": "[Level] * 12",
@@ -611,7 +736,7 @@
     "Payload": {
       "UniqueID": "tech-academy-candidate-search",
       "Name": "Academy Candidate Search",
-      "Description": "A class can be drawn from a smaller colony",
+      "Description": "A class can be drawn from a smaller colony Needs Industrial Base.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 4,
       "DataFormula": "[Level]",
@@ -623,11 +748,11 @@
     "Payload": {
       "UniqueID": "tech-geo-surveyor",
       "Name": "Geological Surveyor",
-      "Description": "Research into geological surveys of system bodies",
+      "Description": "Geological surveys of system bodies. Unlocks the Geological Surveyor. Needs Electromagnetic Sensors.",
       "Category": "tech-category-designs",
       "MaxLevel": 1,
       "DataFormula": "(1 + [Level]) * 5000",
-      "CostFormula":"(1 + [Level]) * 500",
+      "CostFormula": "(1 + [Level]) * 500",
       "Unlocks": {
         "1": [
           "geo-surveyor"
@@ -640,11 +765,11 @@
     "Payload": {
       "UniqueID": "tech-asteroid-mining",
       "Name": "Asteroid Mining",
-      "Description": "Research into mining asteroids from a ship",
+      "Description": "Mining asteroids from a ship. Unlocks the Asteroid Miner. Needs Mining Production Efficiency level 3.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 1,
       "DataFormula": "(1 + [Level]) * 5000",
-      "CostFormula":"(1 + [Level]) * 500",
+      "CostFormula": "(1 + [Level]) * 500",
       "Unlocks": {
         "1": [
           "asteroid-miner"
@@ -657,14 +782,15 @@
     "Payload": {
       "UniqueID": "tech-gravitational-surveyor",
       "Name": "Gravitational Surveyor",
-      "Description": "Research into surveying gravitational anomalies",
+      "Description": "Surveying gravitational anomalies to find jump points. Unlocks the Gravitational Surveyor. Needs Antenna Sensitivity level 2.",
       "Category": "tech-category-designs",
       "MaxLevel": 1,
       "DataFormula": "(1 + [Level]) * 5000",
-      "CostFormula":"(1 + [Level]) * 500",
+      "CostFormula": "(1 + [Level]) * 500",
       "Unlocks": {
         "1": [
-          "gravitational-surveyor"
+          "gravitational-surveyor",
+          "tech-jumppoint-stabilization"
         ]
       }
     }
@@ -674,7 +800,7 @@
     "Payload": {
       "UniqueID": "tech-panel-efficiency",
       "Name": "Solar Panel Efficiency",
-      "Description": "Improves the base absorption efficiency of solar panels",
+      "Description": "Improves the base absorption efficiency of solar panels. Feeds the Solar Array and the Solar Farm. Needs Electrical Engineering.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 25,
       "DataFormula": "12.0 + [Level] * 3.0",
@@ -686,7 +812,7 @@
     "Payload": {
       "UniqueID": "tech-panel-bandwidth",
       "Name": "Solar Panel Bandwidth",
-      "Description": "Increases the maximum tunable bandwidth for solar panels",
+      "Description": "Increases the maximum tunable bandwidth of solar panels. Feeds the Solar Array and the Solar Farm. Needs Electrical Engineering.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 10,
       "DataFormula": "200 + [Level] * 100",
@@ -698,7 +824,7 @@
     "Payload": {
       "UniqueID": "tech-panel-density",
       "Name": "Solar Panel Density",
-      "Description": "Reduces the mass per square meter of solar panels",
+      "Description": "Reduces the mass per square metre of solar panels. Feeds the Solar Array and the Solar Farm. Needs Electrical Engineering.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 10,
       "DataFormula": "0.2 - [Level] * 0.01",
@@ -710,7 +836,7 @@
     "Payload": {
       "UniqueID": "tech-early-nuclear-power",
       "Name": "Nuclear Power",
-      "Description": "Fission reactors, steam turbine reactors and RTGs. Needs Nuclear Theory. Leads on to directed energy and warp research.",
+      "Description": "Fission reactors, steam turbine reactors and RTGs. Needs Nuclear Theory. Leads on to directed energy and to Reactor Power Conversion, which leads on to warp research.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",
@@ -723,7 +849,6 @@
           "scntr-engine",
           "ntp",
           "tech-early-directed-energy",
-          "tech-early-warp-drive",
           "tech-fission-power-plant",
           "tech-reactor-power-density",
           "tech-power-conversion"
@@ -755,7 +880,7 @@
     "Payload": {
       "UniqueID": "tech-early-warp-drive",
       "Name": "Alcubierre Warp Drive",
-      "Description": "Warp drives, jump point survey and stabilisation, and the research lines that improve them. Nothing in this line is known at the start.",
+      "Description": "The Alcubierre Warp Drive and the research lines that improve it: bubble creation and sustain costs, then gravitational coupling, bleed, miniaturization and collapse efficiency. Needs Reactor Power Conversion level 2.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",
@@ -763,16 +888,8 @@
       "Unlocks": {
         "1": [
           "alcubierre-warp-drive",
-          "tech-alcubierre-miniaturization",
           "tech-alcubierre-bubble-creation-cost",
-          "tech-alcubierre-sustain-cost",
-          "tech-alcubierre-gravitational-coupling",
-          "tech-alcubierre-bleed",
-          "tech-alcubierre-collapse-efficiency",
-          "tech-gravitational-surveyor",
-          "tech-jumppoint-stabilization",
-          "tech-jumppoint-stabilization-size-reduction",
-          "tech-jumppoint-stabilization-time-reduction"
+          "tech-alcubierre-sustain-cost"
         ]
       }
     }
@@ -782,7 +899,7 @@
     "Payload": {
       "UniqueID": "tech-thermal-efficiency",
       "Name": "Thermal Plant Efficiency",
-      "Description": "Better boilers, turbines and heat recovery. The share of fuel heat a thermal plant, methalox turbine or fission plant turns into electricity: 33% at level 0, +3 points a level. Simple-cycle plants stop at 45% (fission plants always do); Combined Cycle lifts the cap to 60%. New plant designs pick up the level; built plants keep the efficiency they were designed with.",
+      "Description": "Better boilers, turbines and heat recovery. The share of fuel heat a thermal plant, methalox turbine or fission plant turns into electricity: 33% at level 0, +3 points a level. Simple-cycle plants stop at 45% (fission plants always do); Combined Cycle lifts the cap to 60%. New plant designs pick up the level; built plants keep the efficiency they were designed with. Needs Electrical Engineering.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 9,
       "DataFormula": "0.33 + [Level] * 0.03",
@@ -844,7 +961,12 @@
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 10,
       "DataFormula": "0.30 + [Level] * 0.015",
-      "CostFormula": "(1 + [Level]) * 1000"
+      "CostFormula": "(1 + [Level]) * 1000",
+      "Unlocks": {
+        "2": [
+          "tech-early-warp-drive"
+        ]
+      }
     }
   },
   {
@@ -852,7 +974,7 @@
     "Payload": {
       "UniqueID": "tech-grid-distribution",
       "Name": "Grid Distribution",
-      "Description": "Better transformers and lines. The share of generated power a colony grid delivers: 92% at level 0, +0.75 points a level, to 98%. Applies to every colony at once.",
+      "Description": "Better transformers and lines. The share of generated power a colony grid delivers: 92% at level 0, +0.75 points a level, to 98%. Applies to every colony at once. Needs Electrical Engineering.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 8,
       "DataFormula": "0.92 + [Level] * 0.0075",
@@ -864,7 +986,7 @@
     "Payload": {
       "UniqueID": "tech-industrial-energy-efficiency",
       "Name": "Industrial Energy Efficiency",
-      "Description": "Efficient motors, furnaces and heat recovery. Multiplies the build energy every industry point spends (refining, fabrication and assembly): x1 at level 0, -5% a level, to x0.6. Applies to running jobs at once; a design's listed build energy stays the level 0 figure.",
+      "Description": "Efficient motors, furnaces and heat recovery. Multiplies the build energy every industry point spends (refining, fabrication and assembly): x1 at level 0, -5% a level, to x0.6. Applies to running jobs at once; a design's listed build energy stays the level 0 figure. Needs Industrial Base.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 8,
       "DataFormula": "1 - [Level] * 0.05",
@@ -876,11 +998,16 @@
     "Payload": {
       "UniqueID": "tech-construction-automation",
       "Name": "Construction Automation",
-      "Description": "Assembly robots, powered tools and machine-guided fitting. Multiplies the crew a ship's construction bay needs: x1 at level 0, x0.85 a level, to about x0.27 at level 8. Applies to bays designed after the research; existing designs keep their crew.",
+      "Description": "Assembly robots, powered tools and machine-guided fitting. Multiplies the crew a ship's construction bay needs: x1 at level 0, x0.85 a level, to about x0.27 at level 8. Applies to bays designed after the research; existing designs keep their crew. Needs Industrial Base.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 8,
       "DataFormula": "Pow(0.85, [Level])",
-      "CostFormula": "(1 + [Level]) * 1000"
+      "CostFormula": "(1 + [Level]) * 1000",
+      "Unlocks": {
+        "2": [
+          "tech-construction-bay"
+        ]
+      }
     }
   },
   {
@@ -888,7 +1015,7 @@
     "Payload": {
       "UniqueID": "tech-construction-bay",
       "Name": "Construction Bay",
-      "Description": "A crew-served module for a colony ship that can install buildings on a new world. Unlocks the Construction Bay.",
+      "Description": "A crew-served module for a colony ship that can install buildings on a new world. Unlocks the Construction Bay. Needs Construction Automation level 2.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 1,
       "DataFormula": "1",
@@ -905,7 +1032,7 @@
     "Payload": {
       "UniqueID": "tech-fuel-cells",
       "Name": "Fuel Cells",
-      "Description": "Hydrogen and methane fuel cells: non-nuclear ship power from tank propellant. Unlocks the fuel cell generator (about 60 W/kg, half a kilogram of propellant per kWh).",
+      "Description": "Hydrogen and methane fuel cells: non-nuclear ship power from tank propellant. Unlocks the fuel cell generator (about 60 W/kg, half a kilogram of propellant per kWh). Needs Electrical Engineering.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",
