@@ -78,7 +78,7 @@ public class NuclearTechTreeTests
         Assert.That(Parents(store, "tech-ion-engine"), Is.EqualTo(new[] { "tech-electric-thrusters" }));
         Assert.That(Parents(store, "tech-electric-thrusters"), Is.EqualTo(new[] { "tech-conductors" }));
         Assert.That(Chain(store, "tech-ion-engine"),
-            Is.EqualTo(new[] { "tech-ion-engine", "tech-electric-thrusters", "tech-conductors" }), "Conductors is a root");
+            Is.EqualTo(new[] { "tech-ion-engine", "tech-electric-thrusters", "tech-conductors", "tech-electrical-engineering" }));
         Assert.That(store.Techs["tech-conventional-engine"].Unlocks.Values.SelectMany(l => l), Does.Not.Contain("tech-ion-engine"));
         Assert.That(Chain(store, "tech-ion-engine"), Has.None.StartsWith("tech-nuclear-"));
         Assert.That(Chain(store, "tech-ion-engine"), Has.None.EqualTo("tech-early-nuclear-power"));
