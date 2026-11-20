@@ -136,6 +136,27 @@ public class RefitPartsTests
     }
 
     [Test]
+    public void TheMissingPartsButton_SubtractsWhatQueuedJobsWillMake()
+    {
+        var s = Scene(seatHead: false);
+        var maker = s.Industry.ProductionLines.First(l => !IndustryTools.IsShipyardLine(l.Value) && IndustryTools.LineAccepts(l.Value, s.Part)).Key;
+        var byHand = new CommandTranslator(s.Game).Translate(s.Faction, s.Yard,
+            new QueueIndustryJobCommand(s.Yard.Id, maker, s.Part.UniqueID, 2, false, false));
+        Assert.That(byHand.Accepted, Is.True, byHand.RejectionReason);
+
+        var view = new GameProjector(s.Game).ProjectEntity(s.Yard, s.Faction.Id).GetView<IndustryView>()!;
+        long perBatch = IndustryTools.OutputPerItem(s.Part);
+        Assert.That(view.QueuedOutput[s.Part.UniqueID], Is.EqualTo(IndustryTools.QueuedOutput(s.Yard, s.Part)));
+        Assert.That(view.QueuedOutput[s.Part.UniqueID], Is.EqualTo(2 * perBatch));
+        int output = view.ProductionLines.Single(l => l.Id == maker).Constructibles.Single(c => c.DesignId == s.Part.UniqueID).OutputAmount;
+
+        Assert.That(RefitDesignDiff.BatchesToQueue((int)(2 * perBatch), view.QueuedOutput[s.Part.UniqueID], output), Is.EqualTo(0), "covered");
+        Assert.That(RefitDesignDiff.BatchesToQueue((int)(2 * perBatch) + 1, view.QueuedOutput[s.Part.UniqueID], output), Is.EqualTo(1), "one more batch");
+        Assert.That(RefitDesignDiff.BatchesToQueue(3, 0, 0), Is.EqualTo(3), "nothing queued queues the full count");
+        Assert.That(RefitDesignDiff.BatchesToQueue(5, 1, 2), Is.EqualTo(2), "rounded up to whole batches");
+    }
+
+    [Test]
     public void AGameWithAQueuedRefit_SavesAndLoads_WithTheRefitsParts()
     {
         var s = Scene(seatHead: false);

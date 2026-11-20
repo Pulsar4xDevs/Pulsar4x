@@ -29,6 +29,10 @@ namespace Pulsar4X.Industry
                 return false;
             if (design is ShipRefitDesign)
                 return IsShipyardLine(line);
+            if (design is RecycleDesign)
+                // A ship is taken apart in a slip, anything else on a factory line that builds its type.
+                return line.IndustryTypeRates.ContainsKey(design.IndustryTypeID)
+                    && IsShipyardLine(line) == (design.IndustryTypeID == ShipAssemblyIndustryType);
             if (!line.IndustryTypeRates.ContainsKey(design.IndustryTypeID))
                 return false;
             if (IsShipyardLine(line) && design is not ShipDesign)
@@ -231,6 +235,11 @@ namespace Pulsar4X.Industry
                     if (batchJob.Refit != null)
                     {
                         AdvanceRefit(industryEntity, stockpile, prodLine, batchJob, ref refitPool);
+                        continue;
+                    }
+                    if (batchJob.Recycle != null)
+                    {
+                        Recycling.Advance(industryEntity, stockpile, prodLine, batchJob, industryPointsRemaining);
                         continue;
                     }
 
@@ -648,6 +657,29 @@ namespace Pulsar4X.Industry
                 }
             }
             return units;
+        }
+
+        /// <summary>
+        /// <see cref="QueuedOutput"/> for every faction design the colony's lines have a job for. Designs with none are left out.
+        /// </summary>
+        internal static Dictionary<string, long> QueuedSupply(Entity colony, FactionInfoDB info)
+        {
+            var supply = new Dictionary<string, long>();
+            if (!colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
+                return supply;
+            foreach (var line in industry.ProductionLines.Values)
+            {
+                foreach (var job in line.Jobs)
+                {
+                    if (job.Refit != null || job.Recycle != null || supply.ContainsKey(job.ItemGuid)
+                        || !info.IndustryDesigns.TryGetValue(job.ItemGuid, out var design) || design == null)
+                        continue;
+                    long units = QueuedOutput(colony, design);
+                    if (units > 0)
+                        supply[job.ItemGuid] = units;
+                }
+            }
+            return supply;
         }
 
         /// <summary>

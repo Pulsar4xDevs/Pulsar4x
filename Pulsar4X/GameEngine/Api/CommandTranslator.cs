@@ -146,6 +146,8 @@ namespace Pulsar4X.Engine.Api
                 [typeof(EditIndustryJobCommand)] = TranslateEditIndustryJob,
                 [typeof(AddToConstructionQueueCommand)] = TranslateAddToConstructionQueue,
                 [typeof(QueueShipRefitCommand)] = TranslateQueueShipRefit,
+                [typeof(RecycleShipCommand)] = TranslateRecycleShip,
+                [typeof(RecycleComponentCommand)] = TranslateRecycleComponent,
                 [typeof(UpgradeFacilityCommand)] = TranslateUpgradeFacility,
                 [typeof(MoveConstructionJobCommand)] = TranslateMoveConstructionJob,
                 [typeof(RemoveConstructionJobCommand)] = TranslateRemoveConstructionJob,
@@ -163,6 +165,11 @@ namespace Pulsar4X.Engine.Api
                 && commanded.HasDataBlob<ShipInfoDB>()
                 && ShipRefitJob.TryFind(commanded, out _, out _))
                 return CommandResult.Reject(ShipRefitJob.InRefit);
+            // Nor does a ship queued for scrapping (cancel the job to free it).
+            if (command is not UninstallComponentCommand
+                && commanded.HasDataBlob<ShipInfoDB>()
+                && Recycling.TryFindShip(commanded, out _, out _))
+                return CommandResult.Reject(Recycling.QueuedForRecycling);
 
             if (!_translators.TryGetValue(command.GetType(), out var translate))
                 return CommandResult.Reject($"Unsupported command: {command.GetType().Name}");
@@ -2779,6 +2786,8 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject($"Job {edit.JobId} not found.");
             if (job.Refit != null)
                 return CommandResult.Reject("A refit job cannot be edited.");
+            if (job.Recycle != null)
+                return CommandResult.Reject("A recycle job cannot be edited.");
             if (edit.StockBelow is long level)
             {
                 var design = IndustryTools.StockDesign(commanded, job);
@@ -2842,6 +2851,33 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject(ShipRefitJob.UnknownDesign);
             return Dispatch(QueueShipRefitOrder.Create(
                 commanded, refit.ProductionLineId, ship, remove, mount, targetDesignId, wanted));
+        }
+
+        private CommandResult TranslateRecycleShip(Entity faction, Entity commanded, GameCommand command)
+        {
+            var recycle = (RecycleShipCommand)command;
+            if (!TryResolveShip(commanded, recycle.ShipEntityId, out var ship))
+                return CommandResult.Reject(Recycling.OutOfRange);
+            string? lineId = string.IsNullOrEmpty(recycle.ProductionLineId) ? Recycling.ShipyardLine(commanded) : recycle.ProductionLineId;
+            if (lineId == null)
+                return CommandResult.Reject(Recycling.NoShipyard);
+            if (Recycling.ShipRejection(commanded, lineId, ship) is { } reason)
+                return CommandResult.Reject(reason);
+            return Dispatch(Pulsar4X.Industry.Orders.RecycleOrder.CreateShip(commanded, lineId, ship));
+        }
+
+        private CommandResult TranslateRecycleComponent(Entity faction, Entity commanded, GameCommand command)
+        {
+            var recycle = (RecycleComponentCommand)command;
+            var design = Recycling.ComponentDesignOf(commanded, recycle.DesignId ?? "");
+            if (design == null)
+                return CommandResult.Reject(Recycling.UnknownDesign);
+            string? lineId = string.IsNullOrEmpty(recycle.ProductionLineId) ? Recycling.LineFor(commanded, design) : recycle.ProductionLineId;
+            if (lineId == null)
+                return CommandResult.Reject(Recycling.NotThisLine);
+            if (Recycling.ComponentRejection(commanded, lineId, design.UniqueID, recycle.Quantity) is { } reason)
+                return CommandResult.Reject(reason);
+            return Dispatch(Pulsar4X.Industry.Orders.RecycleOrder.CreateComponent(commanded, lineId, design.UniqueID, (ushort)recycle.Quantity));
         }
 
         static bool TryResolveShip(Entity yard, int shipId, out Entity ship)

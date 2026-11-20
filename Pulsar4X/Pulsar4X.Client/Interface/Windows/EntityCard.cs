@@ -979,6 +979,21 @@ namespace Pulsar4X.Client
                     ImGui.SetTooltip(RefitJobDisplay.PartsText(info));
                 }
             }
+            else if (RecycleUi.FindShipLock(_entity.Id, _uiState.GameClient?.Galaxy) is { } recycling)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.TextUnformatted("Recycling");
+                ImGui.PopStyleColor();
+                ImGui.SameLine();
+                ImGui.TextUnformatted(recycling.YardName + "  " + recycling.JobName);
+                if (ImGui.IsItemHovered())
+                {
+                    var tip = RecycleUi.ReturnsText(recycling.Returns);
+                    if (!string.IsNullOrEmpty(recycling.WaitReason))
+                        tip = tip + "\n" + RecycleUi.WaitReasonText(recycling.WaitReason);
+                    ImGui.SetTooltip(tip);
+                }
+            }
 
             if (_entity.Relation == OwnerRelation.Owned)
             {

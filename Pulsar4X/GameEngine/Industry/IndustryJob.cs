@@ -96,6 +96,9 @@ namespace Pulsar4X.Industry
         /// <summary>Set on a shipyard refit job: the ship and the parts it moves. Null on every other job.</summary>
         public ShipRefitJob? Refit { get; set; }
 
+        /// <summary>Set on a recycle job: what it takes apart and what each item returns. Null on every other job.</summary>
+        public RecycleJob? Recycle { get; set; }
+
         /// <summary>Why a refit job waits (ship out of range, part missing, no room), else empty. Set each daily pass.</summary>
         public string WaitReason { get; internal set; } = "";
 
@@ -106,6 +109,10 @@ namespace Pulsar4X.Industry
             job.NumberOrdered = 1;
             return job;
         }
+
+        /// <summary>A recycle as a normal industry job: the line's points of the item's type, no resources in.</summary>
+        internal static IndustryJob ForRecycle(RecycleJob recycle, RecycleDesign design)
+            => new IndustryJob(design) { Recycle = recycle };
 
         public override void InitialiseJob(ushort numberOrderd, bool auto)
         {

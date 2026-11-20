@@ -109,7 +109,9 @@ public static class StockOrderUi
 
     /// <summary>Idle jobs must not use the stalled (missing-resources) colour.</summary>
     public static bool IsStalled(IndustryJobView job)
-        => !job.IsIdle && (job.MissingResources || job.Refit is { WaitReason.Length: > 0 });
+        => !job.IsIdle && (job.MissingResources
+            || job.Refit is { WaitReason.Length: > 0 }
+            || job.Recycle is { WaitReason.Length: > 0 });
 
     public static string StatusText(IndustryJobView job)
         => job.IsIdle ? "Idle" : job.Status;

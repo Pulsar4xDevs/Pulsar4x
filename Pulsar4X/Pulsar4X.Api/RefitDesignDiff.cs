@@ -70,6 +70,20 @@ public static class RefitDesignDiff
         return new RefitDesignDiffResult(remove, mount, missing);
     }
 
+    /// <summary>
+    /// Batches to queue for a missing part: the missing count less what queued jobs will already make
+    /// (<see cref="IndustryView.QueuedOutput"/>), in batches of <paramref name="outputAmount"/> (0 counts as 1),
+    /// rounded up. 0 when queued jobs cover it. Same rule as the industry head's refit-part queueing.
+    /// </summary>
+    public static int BatchesToQueue(int missing, long queuedUnits, int outputAmount)
+    {
+        long toMake = missing - Math.Max(0, queuedUnits);
+        if (toMake <= 0)
+            return 0;
+        long perBatch = Math.Max(1, outputAmount);
+        return (int)Math.Min((toMake + perBatch - 1) / perBatch, ushort.MaxValue);
+    }
+
     static Dictionary<string, List<RefitPartView>> Group(IReadOnlyList<RefitPartView> parts)
     {
         var grouped = new Dictionary<string, List<RefitPartView>>();

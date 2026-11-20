@@ -174,6 +174,30 @@ namespace Pulsar4X.Storage
         /// unit is kept anyway and the store runs a volume deficit until stock leaves. Returns 0 only when this
         /// entity has no store of that type at all.
         /// </summary>
+        /// <summary>
+        /// <see cref="AddCargoByUnitUnbounded(CargoStorageDB, ICargoable)"/> for many units: what fits goes in normally, the
+        /// rest is kept over capacity. Returns 0 only when this entity has no store of that type.
+        /// </summary>
+        internal static long AddCargoByUnitUnbounded(this CargoStorageDB db, ICargoable cargoItem, long units)
+        {
+            if (units <= 0)
+                return 0;
+            long added = db.AddCargoByUnit(cargoItem, units);
+            long rest = units - added;
+            if (rest <= 0 || !db.TypeStores.TryGetValue(cargoItem.CargoTypeID, out var store))
+                return added;
+            if (store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
+                store.CurrentStoreInUnits[cargoItem.ID] += rest;
+            else
+            {
+                store.CurrentStoreInUnits.Add(cargoItem.ID, rest);
+                store.Cargoables.Add(cargoItem.ID, cargoItem);
+            }
+            store.FreeVolume -= cargoItem.VolumePerUnit * rest;
+            db.TotalStoredMass += cargoItem.MassPerUnit * rest;
+            return units;
+        }
+
         internal static long AddCargoByUnitUnbounded(this CargoStorageDB db, ICargoable cargoItem)
         {
             if (db.AddCargoByUnit(cargoItem, 1) >= 1)
