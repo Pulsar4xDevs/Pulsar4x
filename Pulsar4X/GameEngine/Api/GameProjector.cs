@@ -1029,13 +1029,13 @@ namespace Pulsar4X.Engine.Api
             };
 
         // The seated captain of a ship: the captain's seed, and the role "captain" whatever their track. (0, "") when the chair is empty.
-        private static (int seed, string role) ShipCaptainPortrait(Entity ship, int commanderId)
+        // A captain id that points at an entity that is gone is an empty chair: (0, "", "").
+        private static (int seed, string role, string species) ShipCaptainPortrait(Entity ship, int commanderId)
         {
-            if (commanderId < 0)
-                return (0, "");
-            if (ship.Manager != null && ship.Manager.TryGetGlobalEntityById(commanderId, out var captain))
-                return (Pulsar4X.People.Portraits.SeedOf(captain), PortraitRoles.Captain);
-            return (Pulsar4X.People.Portraits.FromId(commanderId), PortraitRoles.Captain);
+            if (commanderId < 0 || ship.Manager == null || !ship.Manager.TryGetGlobalEntityById(commanderId, out var captain))
+                return (0, "", "");
+            return (Pulsar4X.People.Portraits.SeedOf(captain), PortraitRoles.Captain,
+                Pulsar4X.People.Portraits.PackFor(captain, ship.FactionOwnerID));
         }
 
         private static ShipView ToShipView(ShipInfoDB shipInfo, Entity ship, int factionId)
@@ -1105,6 +1105,7 @@ namespace Pulsar4X.Engine.Api
                 CrewByComponent = crewRows,
                 CommanderPortraitSeed = captainPortrait.seed,
                 CommanderPortraitRole = captainPortrait.role,
+                CommanderPortraitSpecies = captainPortrait.species,
                 CrewBerths = splitNow.Automated && ShipCrew.Tracked(ship) ? 0 : ShipCrew.Berths(parts),
                 BerthsByComponent = berthRows,
                 OfficerSlots = ShipCrew.OfficerSlots(parts),
@@ -1161,16 +1162,15 @@ namespace Pulsar4X.Engine.Api
             };
         }
 
-        // A seated person's portrait seed and role for a view. (0, "") when the post is empty (id below 0). The role is the post's
-        // (the caller passes it), because the post is what the person is doing here. A person who cannot be found still gets the
-        // id-derived seed, so a view never shows seed 0 for someone who is there.
-        private static (int seed, string role) Portrait(EntityManager? manager, int personId, string role)
+        // A seated person's portrait seed, role and species pack for a view. (0, "", "") when the post is empty (id below 0) or its id
+        // points at an entity that no longer exists: a dangling post has nobody to draw. The role is the post's (the caller passes it),
+        // because the post is what the person is doing here. The pack comes from the person's species, else the owning faction's
+        // primary species (the colony's owner when the person has none), else "human".
+        private static (int seed, string role, string species) Portrait(EntityManager? manager, int personId, string role, int fallbackFactionId = -1)
         {
-            if (personId < 0)
-                return (0, "");
-            if (manager != null && manager.TryGetGlobalEntityById(personId, out var person))
-                return (Pulsar4X.People.Portraits.SeedOf(person), role);
-            return (Pulsar4X.People.Portraits.FromId(personId), role);
+            if (personId < 0 || manager == null || !manager.TryGetGlobalEntityById(personId, out var person))
+                return (0, "", "");
+            return (Pulsar4X.People.Portraits.SeedOf(person), role, Pulsar4X.People.Portraits.PackFor(person, fallbackFactionId));
         }
 
         // The colony's seated industry head, for the owning faction only. (-1, null) when empty.
@@ -1207,7 +1207,7 @@ namespace Pulsar4X.Engine.Api
             int? planetId = c.PlanetEntity.IsValid ? c.PlanetEntity.Id : null;
             int administratorId = -1;
             string? administratorName = null;
-            var administratorPortrait = (seed: 0, role: "");
+            var administratorPortrait = (seed: 0, role: "", species: "");
             bool hasAdministrativePost = false;
             // The chair is the first seat at colony level or wider. A ship bridge does not count.
             if (colony.FactionOwnerID == factionId
@@ -1221,7 +1221,7 @@ namespace Pulsar4X.Engine.Api
                     if (seat.CommanderID >= 0)
                     {
                         administratorId = seat.CommanderID;
-                        administratorPortrait = Portrait(colony.Manager, seat.CommanderID, PortraitRoles.Administrator);
+                        administratorPortrait = Portrait(colony.Manager, seat.CommanderID, PortraitRoles.Administrator, colony.FactionOwnerID);
                         administratorName = "Unknown";
                         if (colony.Manager != null
                             && colony.Manager.TryGetGlobalEntityById(seat.CommanderID, out var person))
@@ -1252,15 +1252,17 @@ namespace Pulsar4X.Engine.Api
             }
 
             var (industryHeadId, industryHeadName) = IndustryHead(colony, factionId);
-            var headPortrait = Portrait(colony.Manager, industryHeadId, PortraitRoles.IndustryHead);
+            var headPortrait = Portrait(colony.Manager, industryHeadId, PortraitRoles.IndustryHead, colony.FactionOwnerID);
             return new ColonyView(population, planetId)
             {
                 IndustryHeadId = industryHeadId,
                 IndustryHeadName = industryHeadName,
                 IndustryHeadPortraitSeed = headPortrait.seed,
                 IndustryHeadPortraitRole = headPortrait.role,
+                IndustryHeadPortraitSpecies = headPortrait.species,
                 AdministratorPortraitSeed = administratorPortrait.seed,
                 AdministratorPortraitRole = administratorPortrait.role,
+                AdministratorPortraitSpecies = administratorPortrait.species,
                 SpeciesPopulations = species,
                 CrewPool = crewPool,
                 CrewPoolBySpecies = crewRows,
@@ -1874,6 +1876,7 @@ namespace Pulsar4X.Engine.Api
                         WagePerMonth = (int)game.Settings.CrewWagePerDay * Pulsar4X.Factions.FactionSpending.DaysInMonth(colony.StarSysDateTime),
                         PortraitSeed = Pulsar4X.People.Portraits.SeedOf(candidate),
                         PortraitRole = PortraitRoles.Candidate,
+                        PortraitSpecies = Pulsar4X.People.Portraits.PackFor(game.GlobalManager, candidate.SpeciesId, faction.Id),
                     };
                 all.Add(view);
                 if (at.Id == colony.Id)
@@ -2181,7 +2184,7 @@ namespace Pulsar4X.Engine.Api
             }
 
             var (headId, headName) = IndustryHead(entity, factionId);
-            var headPortrait = Portrait(entity.Manager, headId, PortraitRoles.IndustryHead);
+            var headPortrait = Portrait(entity.Manager, headId, PortraitRoles.IndustryHead, entity.FactionOwnerID);
             return new IndustryView(lines)
             {
                 Pads = pads,
@@ -2189,6 +2192,7 @@ namespace Pulsar4X.Engine.Api
                 IndustryHeadName = headName,
                 IndustryHeadPortraitSeed = headPortrait.seed,
                 IndustryHeadPortraitRole = headPortrait.role,
+                IndustryHeadPortraitSpecies = headPortrait.species,
             };
         }
 
@@ -2517,12 +2521,13 @@ namespace Pulsar4X.Engine.Api
                 locationName = location.GetName(factionId);
 
             string? scientistName = null;
-            var scientistPortrait = (seed: 0, role: "");
+            var scientistPortrait = (seed: 0, role: "", species: "");
             if (r.ScientistId >= 0 && lab.Manager != null
                 && lab.Manager.TryGetGlobalEntityById(r.ScientistId, out var scientist))
             {
                 scientistName = scientist.GetName(factionId);
-                scientistPortrait = (Pulsar4X.People.Portraits.SeedOf(scientist), Pulsar4X.People.Portraits.RoleOf(scientist));
+                scientistPortrait = (Pulsar4X.People.Portraits.SeedOf(scientist), Pulsar4X.People.Portraits.RoleOf(scientist),
+                    Pulsar4X.People.Portraits.PackFor(scientist, lab.FactionOwnerID));
             }
 
             return new ResearcherView(
@@ -2540,6 +2545,7 @@ namespace Pulsar4X.Engine.Api
             {
                 ScientistPortraitSeed = scientistPortrait.seed,
                 ScientistPortraitRole = scientistPortrait.role,
+                ScientistPortraitSpecies = scientistPortrait.species,
                 DaysInMonth = Pulsar4X.Factions.FactionSpending.DaysInMonth(lab.StarSysDateTime),
                 CostPerMonth = r.CostPerDay.GetValue() * Pulsar4X.Factions.FactionSpending.DaysInMonth(lab.StarSysDateTime),
                 NextPayday = Pulsar4X.Factions.FactionSpending.NextPayday(lab.StarSysDateTime),
@@ -2728,6 +2734,7 @@ namespace Pulsar4X.Engine.Api
                 RankedOn = commanderDB.RankedOn,
                 AssignmentName = assignment,
                 PortraitSeed = Pulsar4X.People.Portraits.SeedOf(commander.Id, commanderDB.PortraitSeed),
+                PortraitSpecies = Pulsar4X.People.Portraits.PackFor(commander, factionId),
                 // Commanding a ship makes them its captain, whatever their track; otherwise the post decides.
                 PortraitRole = shipCommands != null && shipCommands.ContainsKey(commander.Id)
                     ? PortraitRoles.Captain
@@ -2912,6 +2919,7 @@ namespace Pulsar4X.Engine.Api
                 }
             }
 
+            var flagshipCaptain = flagship != null ? ShipCaptainPortrait(flagship, commanderId ?? -1) : (seed: 0, role: "", species: "");
             return new FleetSnapshot
             {
                 Id = fleet.Id,
@@ -2920,8 +2928,9 @@ namespace Pulsar4X.Engine.Api
                 FlagshipName = flagship?.GetName(factionId),
                 CommanderName = commander,
                 CommanderId = commanderId,
-                CommanderPortraitSeed = flagship != null ? ShipCaptainPortrait(flagship, commanderId ?? -1).seed : 0,
-                CommanderPortraitRole = flagship != null ? ShipCaptainPortrait(flagship, commanderId ?? -1).role : "",
+                CommanderPortraitSeed = flagshipCaptain.seed,
+                CommanderPortraitRole = flagshipCaptain.role,
+                CommanderPortraitSpecies = flagshipCaptain.species,
                 SystemId = system?.ID,
                 SystemName = system?.NameDB.GetName(factionId),
                 OrbitingEntityId = orbiting?.Id,
@@ -3035,6 +3044,7 @@ namespace Pulsar4X.Engine.Api
             {
                 CommanderPortraitSeed = captainPortrait.seed,
                 CommanderPortraitRole = captainPortrait.role,
+                CommanderPortraitSpecies = captainPortrait.species,
                 Goal = ProjectGoals(ship),
                 Orders = ProjectOrders(ship),
                 CanGeoSurvey = ship.HasGeoSurveyAbility(),

@@ -5,6 +5,7 @@
       "UniqueID": "species-human",
       "Name": "Human",
       "Playable": true,
+      "PortraitPack": "human",
       "BreathableGasSymbol": "O2",
       "Gravity": {
         "Ideal": 9.8,
@@ -29,6 +30,7 @@
       "UniqueID": "species-xenos",
       "Name": "Xenos",
       "Playable": false,
+      "PortraitPack": "human",
       "BreathableGasSymbol": "Xe",
       "Gravity": {
         "Ideal": 9.8,

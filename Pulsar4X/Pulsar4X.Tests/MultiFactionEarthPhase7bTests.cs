@@ -318,7 +318,10 @@ public class MultiFactionEarthPhase7bTests
         var earth = Colonies().First(c => c.FactionOwnerID == _player.Id && c.HasDataBlob<NavalAcademyDB>());
         var design = info.ShipDesigns["default-ship-design-starship"];
         var ship = ShipFactory.CreateShip(design, _player, earth.GetDataBlob<ColonyInfoDB>().PlanetEntity, "Portrait Starship");
-        _player.GetDataBlob<Pulsar4X.Fleets.FleetDB>().AddChild(ship); // as the shipyards do
+        var fleetEntity = Pulsar4X.Fleets.FleetFactory.Create(ship.Manager, _player.Id, "Portrait Fleet");
+        fleetEntity.GetDataBlob<Pulsar4X.Fleets.FleetDB>().SetParent(_player);
+        fleetEntity.GetDataBlob<Pulsar4X.Fleets.FleetDB>().AddChild(ship);
+        fleetEntity.GetDataBlob<Pulsar4X.Fleets.FleetDB>().FlagShipID = ship.Id;
         // A civilian in the captain's chair is still a captain while they command: the post decides.
         var captain = Pulsar4X.People.CommanderFactory.Create(_game.GlobalManager, _player.Id,
             new Pulsar4X.People.CommanderDB("Cap", 1, Pulsar4X.DataStructures.CommanderTypes.Civilian));
@@ -335,9 +338,24 @@ public class MultiFactionEarthPhase7bTests
         var snapshot = unattached.Concat(fleets.SelectMany(f => f.Ships)).Single(s => s.Id == ship.Id);
         Assert.That((snapshot.CommanderPortraitSeed, snapshot.CommanderPortraitRole), Is.EqualTo((seed, "captain")));
 
+        // Species pack: the captain has no species of their own, so it is the faction's primary species' pack.
+        Assert.That(view.CommanderPortraitSpecies, Is.EqualTo("human"));
+        Assert.That(roster.PortraitSpecies, Is.EqualTo("human"));
+        Assert.That(snapshot.CommanderPortraitSpecies, Is.EqualTo("human"));
+        var fleetOfShip = fleets.Single(f => f.Id == fleetEntity.Id);
+        Assert.That((fleetOfShip.CommanderPortraitSeed, fleetOfShip.CommanderPortraitRole, fleetOfShip.CommanderPortraitSpecies),
+            Is.EqualTo((seed, "captain", "human")));
+
+        // A captain id that points at nothing is an empty chair on every view, not an id-derived face.
+        ship.GetDataBlob<ShipInfoDB>().CommanderID = 765_432;
+        var dangling = projector.ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
+        var danglingFleet = projector.ProjectFleetHierarchy(_player.Id).Fleets.Single(f => f.Id == fleetEntity.Id);
+        Assert.That((danglingFleet.CommanderPortraitSeed, danglingFleet.CommanderPortraitRole, danglingFleet.CommanderPortraitSpecies), Is.EqualTo((0, "", "")));
+        Assert.That((dangling.CommanderPortraitSeed, dangling.CommanderPortraitRole, dangling.CommanderPortraitSpecies), Is.EqualTo((0, "", "")));
+
         ship.GetDataBlob<ShipInfoDB>().CommanderID = -1;
         var empty = projector.ProjectEntity(ship, _player.Id).GetView<ShipView>()!;
-        Assert.That((empty.CommanderPortraitSeed, empty.CommanderPortraitRole), Is.EqualTo((0, "")));
+        Assert.That((empty.CommanderPortraitSeed, empty.CommanderPortraitRole, empty.CommanderPortraitSpecies), Is.EqualTo((0, "", "")));
         Assert.That(projector.ProjectCommanders(_player.Id)!.Single(c => c.Id == captain.Id).PortraitRole, Is.EqualTo("civilian"),
             "no longer commanding");
     }
