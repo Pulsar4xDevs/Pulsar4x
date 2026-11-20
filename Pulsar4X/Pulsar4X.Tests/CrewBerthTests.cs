@@ -207,7 +207,8 @@ public class CrewBerthTests
         else
         {
             Assert.That(stock["Newton Tug"], Is.EqualTo((2, 2, 2)));
-            Assert.That(stock["Starship"], Is.EqualTo((3, 3, 2)));
+            // Mk0 geo surveyor (crew 4) plus four extra bunks: 7 crew, 7 bunks, still 2 officer slots.
+            Assert.That(stock["Starship"], Is.EqualTo((7, 7, 2)));
         }
     }
 

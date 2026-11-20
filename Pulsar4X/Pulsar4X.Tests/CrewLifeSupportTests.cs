@@ -221,8 +221,23 @@ public class CrewLifeSupportTests
         Assert.That(ColonyPowerProcessor.LifeSupport(earth, earthInfo).kW, Is.EqualTo(earthResidents * 0.01).Within(1e-6),
             "garden worlds stay at 0.01 kW per person");
 
-        var early = Start(EarlyTech).player.GetDataBlob<FactionInfoDB>().Data;
-        Assert.That(early.Techs.ContainsKey(CrewTech.LifeSupportEfficiency), Is.True, "the early-tech start has it too");
+        // Closed-Loop Life Support is a researchable efficiency tech (Pow(0.85, level)), not a ship part.
+        // The early-tech company starts with nothing researched and only the foundations researchable, so it
+        // stays locked behind Life Sciences. Factor 1 (the no-research default) still runs life support.
+        var (earlyGame, earlyPlayer) = Start(EarlyTech);
+        var early = earlyPlayer.GetDataBlob<FactionInfoDB>().Data;
+        Assert.That(early.Techs.ContainsKey(CrewTech.LifeSupportEfficiency), Is.False,
+            "early-tech keeps it locked until Life Sciences is researched");
+        Assert.That(CrewTech.LifeSupportFactor(early), Is.EqualTo(1));
+        var starship = ShipOfDesign(earlyGame, earlyPlayer, "early-ship-design-starship");
+        int earlyAboard = ShipCrew.Aboard(starship);
+        Assert.That(earlyAboard, Is.GreaterThanOrEqualTo(7), "the Mk0 Starship's part crew plus any seated captain");
+        Assert.That(ShipCrew.KWPerCrew(starship), Is.EqualTo(1));
+        Assert.That(ShipCrew.LifeSupport(starship), Is.EqualTo(earlyAboard * 1.0).Within(1e-9));
+        var earlyPower = starship.GetDataBlob<EnergyGenAbilityDB>();
+        Assert.That(earlyPower.TotalOutputMax, Is.GreaterThan(earlyPower.Demand),
+            "solar covers must-run life support for the new crew of 7");
+        Assert.That(starship.GetDataBlob<ShipCrewDB>().LifeSupportFailing, Is.False);
     }
 
     [Test]

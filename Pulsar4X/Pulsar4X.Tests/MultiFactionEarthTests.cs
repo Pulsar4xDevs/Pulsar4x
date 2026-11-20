@@ -108,7 +108,11 @@ public class MultiFactionEarthTests
             Assert.That(extras, Has.None.Contain("alcubierre"), name);
             // (A bloc that starts with Nuclear Power also starts with Nuclear Theory and Nuclear Engines, and that opens the nuclear
             // engine line for it: those are the one engine step a bloc may have that the company lacks.)
-            Assert.That(extras.Where(id => !id.StartsWith("tech-nuclear-")), Has.None.Contain("engine"), name);
+            // Chemical Rocketry is tech-conventional-engine; a bloc that has it in StartingItems opens the
+            // tech-conventional-engine-* follow-ons. The early-tech company only has that foundation researchable,
+            // so those ids would otherwise trip the "engine" substring. They are not a company-niche engine tech.
+            Assert.That(extras.Where(id => !id.StartsWith("tech-nuclear-") && !id.StartsWith("tech-conventional-engine")),
+                Has.None.Contain("engine"), name);
             Assert.That(extras, Has.None.Contain("jumppoint"), name);
             Assert.That(info.Data.LockedTechs.Keys, Is.SupersetOf(playerInfo.Data.LockedTechs.Keys.Except(extras)), name);
         }
