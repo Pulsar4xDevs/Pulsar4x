@@ -56,7 +56,7 @@ public static class MissingInputsPanel
             foreach (var job in pinnedJobs)
             {
                 ImGui.PushID(job.JobId);
-                ImGui.TextUnformatted(RefitJobDisplay.Name(job));
+                ImGui.TextUnformatted(RecycleUi.Name(job));
                 ImGui.SameLine();
                 if (ImGui.Button("Unpin"))
                     pins.Unpin(colonyId, job.JobId);

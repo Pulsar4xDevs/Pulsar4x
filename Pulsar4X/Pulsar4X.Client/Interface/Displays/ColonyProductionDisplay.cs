@@ -35,6 +35,7 @@ namespace Pulsar4X.Client
         private string _newJobStockBelowText = "";
         private readonly Dictionary<string, string> _stockBelowEdits = new();
         private string? _stockOrderRefusal;
+        private string? _recycleRefusal;
 
         internal ColonyProductionDisplay() { }
 
@@ -77,6 +78,9 @@ namespace Pulsar4X.Client
             }
 
             IndustrySeatDisplay.DrawProduction(entityId, industry, galaxy, uiState, ref industrySeatRefusal);
+
+            if (RecycleDisplay.HasRows(industry))
+                RecycleDisplay.Draw(entityId, industry, uiState, ref _recycleRefusal);
 
             _missingInputsPins.Prune(entityId, industry);
             var pinnedJobs = MissingInputsUi.Enabled
@@ -287,7 +291,7 @@ namespace Pulsar4X.Client
                     bool pinned = MissingInputsUi.Enabled && _missingInputsPins.Contains(entityId, job.JobId);
                     if (pinned)
                         ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                    ImGui.Text(RefitJobDisplay.Name(job));
+                    ImGui.TextUnformatted(RecycleUi.Name(job));
                     if (pinned)
                         ImGui.PopStyleColor();
                     if (ImGui.IsItemClicked())
@@ -316,6 +320,8 @@ namespace Pulsar4X.Client
                         ImGui.TextUnformatted(StockOrderUi.StatusText(job));
                     else if (job.Refit is { WaitReason.Length: > 0 } stalledRefit)
                         ImGui.TextUnformatted(RefitJobDisplay.WaitReasonText(stalledRefit.WaitReason));
+                    else if (job.Recycle is { WaitReason.Length: > 0 } stalledRecycle)
+                        ImGui.TextUnformatted(RecycleUi.WaitReasonText(stalledRecycle.WaitReason));
                     else if (job.Status == "Processing")
                         ImGui.Text("Processing (" + job.PercentComplete.ToString("0.#") + "%%)");
                     else
@@ -359,6 +365,14 @@ namespace Pulsar4X.Client
                         ImGui.BeginTooltip();
                         ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
                         ImGui.TextUnformatted(RefitJobDisplay.Tooltip(job));
+                        ImGui.PopTextWrapPos();
+                        ImGui.EndTooltip();
+                    }
+                    else if (job.IsRecycle && (nameHovered || statusHovered))
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
+                        ImGui.TextUnformatted(RecycleUi.Tooltip(job));
                         ImGui.PopTextWrapPos();
                         ImGui.EndTooltip();
                     }

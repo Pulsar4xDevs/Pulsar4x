@@ -19,7 +19,8 @@ public class StockOrderUiTests
         long? stockOnHand = null,
         string idleReason = "",
         string status = "Processing",
-        RefitJobInfo? refit = null)
+        RefitJobInfo? refit = null,
+        RecycleJobInfo? recycle = null)
         => new("job", "Gizmo", 0, 4, repeat, idle ? "Idle" : status, missing, 0, 10)
         {
             StockBelow = stockBelow,
@@ -27,6 +28,7 @@ public class StockOrderUiTests
             IsIdle = idle,
             IdleReason = idleReason,
             Refit = refit,
+            Recycle = recycle,
         };
 
     [Test]
@@ -147,6 +149,9 @@ public class StockOrderUiTests
 
         var stalledRefit = Job(repeat: false, refit: new RefitJobInfo(1, "Ship", "A", "B") { WaitReason = "Waiting for a part" });
         Assert.That(StockOrderUi.IsStalled(stalledRefit), Is.True);
+
+        var stalledRecycle = Job(repeat: false, recycle: new RecycleJobInfo("Ship", 1, "hull") { WaitReason = "That ship is not in transfer range." });
+        Assert.That(StockOrderUi.IsStalled(stalledRecycle), Is.True);
 
         var busy = Job(status: "Processing");
         Assert.That(StockOrderUi.IsStalled(busy), Is.False);
