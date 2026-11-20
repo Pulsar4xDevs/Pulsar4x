@@ -74,6 +74,12 @@ namespace Pulsar4X.Components
         /// <value>The design entity.</value>
         [JsonProperty]
         public ComponentDesign Design { get; internal set; }
+
+        // JSON: the parent's ComponentInstancesDB may have finished loading before this instance did (a
+        // reference cycle through a refit job); it skipped indexing it, so index it now.
+        [System.Runtime.Serialization.OnDeserialized]
+        private void Deserialized(System.Runtime.Serialization.StreamingContext context)
+            => ParentInstances?.CompleteLoadedInstance(this);
         [JsonProperty]
         public bool IsEnabled { get; internal set; }
         [JsonProperty]

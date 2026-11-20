@@ -240,8 +240,25 @@ namespace Pulsar4X.Datablobs
         {
             foreach (var item in AllComponents)
             {
+                // An instance first written somewhere else (a refit job's part list) and only referenced here
+                // can still be half read: its Design comes after ParentInstances. It indexes itself when done.
+                if (item.Value?.Design == null)
+                {
+                    _pendingIndex.Add(item.Value!);
+                    continue;
+                }
                 AddComponentInstance(item.Value);
             }
+        }
+
+        [JsonIgnore]
+        readonly HashSet<ComponentInstance> _pendingIndex = new();
+
+        /// <summary>Indexes an instance that was skipped by <see cref="Deserialized"/> because it was not read yet.</summary>
+        internal void CompleteLoadedInstance(ComponentInstance instance)
+        {
+            if (instance.Design != null && _pendingIndex.Remove(instance))
+                AddComponentInstance(instance);
         }
     }
 }

@@ -106,7 +106,7 @@ namespace Pulsar4X.Client
                     else if (_rightPaneIsRefit && selectedLine.IsShipyard)
                     {
                         DisplayHelpers.Header("New refit for: " + selectedLine.Name);
-                        RefitSection(entityId, selectedLine, uiState);
+                        RefitSection(entityId, industry, selectedLine, uiState);
                     }
                     else
                     {
@@ -662,7 +662,7 @@ namespace Pulsar4X.Client
                 ImGui.SetTooltip(selected.Reason);
         }
 
-        private void RefitSection(int entityId, ProductionLineView line, GlobalUIState uiState)
+        private void RefitSection(int entityId, IndustryView industry, ProductionLineView line, GlobalUIState uiState)
         {
             if (_refitLineId != line.Id)
             {
@@ -809,26 +809,30 @@ namespace Pulsar4X.Client
             {
                 // Missing parts do not block the refit: the job is queued and waits until a factory produces them.
                 ImGui.Text("Not in the warehouse yet (the refit will wait)");
-                var buildable = new List<RefitMissingPartView>();
+                // A shipyard line builds only ships and refits, so parts go to the colony's fastest line that makes them.
+                var buildable = new List<(RefitMissingPartView Part, string LineId)>();
                 foreach (var missing in diff.Missing)
                 {
-                    bool canBuild = line.Constructibles.Any(item => item.DesignId == missing.DesignId);
-                    if (canBuild)
+                    var maker = industry.ProductionLines
+                        .Where(l => !l.IsShipyard && l.Constructibles.Any(item => item.DesignId == missing.DesignId))
+                        .OrderByDescending(l => l.CurrentRatePerDay)
+                        .FirstOrDefault();
+                    if (maker != null)
                     {
-                        buildable.Add(missing);
-                        ImGui.BulletText(missing.Name + "  x" + missing.Count);
+                        buildable.Add((missing, maker.Id));
+                        ImGui.BulletText(missing.Name + "  x" + missing.Count + "  (" + maker.Name + ")");
                     }
                     else
-                        ImGui.BulletText(missing.Name + "  x" + missing.Count + "  this line cannot produce it");
+                        ImGui.BulletText(missing.Name + "  x" + missing.Count + "  no line here can produce it");
                 }
                 if (buildable.Count == 0)
                     ImGui.BeginDisabled();
                 if (ImGui.Button("Queue production of missing parts"))
                 {
-                    foreach (var missing in buildable)
+                    foreach (var (missing, makerLineId) in buildable)
                     {
                         uiState.GameClient?.SubmitCommandAsync(new QueueIndustryJobCommand(
-                            entityId, line.Id, missing.DesignId, missing.Count, false, false));
+                            entityId, makerLineId, missing.DesignId, missing.Count, false, false));
                     }
                 }
                 if (buildable.Count == 0)

@@ -18,6 +18,13 @@ namespace Pulsar4X.Industry
         [JsonProperty]
         private IndustryAbilityDB.ProductionLine _productionLine;
 
+        /// <summary>
+        /// The line is the installing colony's, saved with its IndustryAbilityDB. Not written here: in a design it
+        /// dragged a live job list (and a refit's part instances) into the faction's designs, which made a
+        /// reference cycle that broke loading. Still read from older saves, which hold the line's only copy.
+        /// </summary>
+        public bool ShouldSerialize_productionLine() => false;
+
         [JsonConstructor]
         private IndustryAtb(){}
         public IndustryAtb(Dictionary<string, double> industryRates)
