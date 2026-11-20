@@ -781,7 +781,7 @@
       "Description": "Geological surveys of system bodies. Unlocks the Geological Surveyor; further levels raise its maximum survey speed. Needs Electromagnetic Sensors.",
       "Category": "tech-category-designs",
       "MaxLevel": 5,
-      "DataFormula": "Max(1, [Level])",
+      "DataFormula": "Max(0.3, [Level])",
       "CostFormula": "Pow(1 + [Level], 2) * 100",
       "Unlocks": {
         "1": [

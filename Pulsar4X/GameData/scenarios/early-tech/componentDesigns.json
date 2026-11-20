@@ -1,0 +1,13 @@
+[
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-geo-surveyor-early",
+      "Name": "Geo Surveyor Mk0",
+      "TemplateId": "geo-surveyor",
+      "Properties": [
+        { "Key": "Survey Speed", "Value": 3 }
+      ]
+    }
+  }
+]

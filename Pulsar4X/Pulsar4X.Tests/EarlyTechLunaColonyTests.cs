@@ -5,11 +5,9 @@ using Pulsar4X.Api;
 using Pulsar4X.Client;
 using Pulsar4X.Client.Host;
 using Pulsar4X.Colonies;
-using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Api;
-using Pulsar4X.Engine.Factories;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
@@ -23,8 +21,7 @@ using Pulsar4X.Ships;
 namespace Pulsar4X.Tests;
 
 /// <summary>
-/// Headless walk of early-tech: research Geological Surveyor, survey Luna, found a colony there.
-/// Does not change engine or data; workarounds are test scaffolding only and are named in the log.
+/// Headless walk of a blank early-tech start: the starting Starship surveys Luna at Mk0 speed 3, then founds a colony.
 /// </summary>
 [TestFixture]
 [NonParallelizable]
@@ -32,10 +29,7 @@ public class EarlyTechLunaColonyTests
 {
     const string BaseMod = "Pulsar4x";
     const string EarlyTech = "Pulsar4x.Scenario.EarlyTech";
-    const string GeoSurveyorTech = "tech-geo-surveyor";
-    const string EmSensorsTech = "tech-electromagnetic-sensors";
-    const string GeoTemplate = "geo-surveyor";
-    const string GeoDesignId = "default-design-geo-surveyor";
+    const string GeoDesignId = "default-design-geo-surveyor-early";
 
     [Test, Timeout(180000)]
     public void EarlyTech_SurveyThenColony_OnLuna()
@@ -51,39 +45,13 @@ public class EarlyTechLunaColonyTests
         var ship = sol.GetAllEntitiesWithDataBlob<ShipInfoDB>()
             .Single(s => s.GetDataBlob<NameDB>().GetName(faction.Id) == "Starship I");
 
-        // Research to Geological Surveyor L1. Foundations start unresearched; Electromagnetic
-        // Sensors must be completed first or the geo tech stays locked (techs.json Unlocks).
-        Assert.That(data.IsResearchable(EmSensorsTech), Is.True, EmSensorsTech);
-        data.IncrementTechLevel(EmSensorsTech);
-        Assert.That(data.IsResearchable(GeoSurveyorTech), Is.True,
-            "tech-geo-surveyor should open after Electromagnetic Sensors (techs.json, EM Unlocks).");
-        data.IncrementTechLevel(GeoSurveyorTech);
-        Assert.That(data.Techs[GeoSurveyorTech].Level, Is.EqualTo(1));
-        Assert.That(data.ComponentTemplates.ContainsKey(GeoTemplate), Is.True,
-            "Expected geo-surveyor template to unlock at tech L1 (techs.json Unlocks of tech-geo-surveyor).");
-
-        // Use the existing Mk1 blueprint if the start did not already instantiate it
-        // (early-tech ComponentDesigns does not list it).
-        if (!info.ComponentDesigns.ContainsKey(GeoDesignId))
-        {
-            Assert.That(game.StartingGameData.ComponentDesigns.ContainsKey(GeoDesignId), Is.True,
-                "default-design-geo-surveyor is in warp-tech-start/designs/componentDesigns.json, reused by early-tech.");
-            ComponentDesigner.StartResearched = true;
-            try
-            {
-                ComponentDesignFromJson.Create(faction, data, game.StartingGameData.ComponentDesigns[GeoDesignId]);
-            }
-            finally
-            {
-                ComponentDesigner.StartResearched = false;
-            }
-        }
+        // Blank start: the template is in StartingItems and the Mk0 is already on the Starship.
+        // Geological Surveyor tech stays locked behind Electromagnetic Sensors.
+        Assert.That(data.ComponentTemplates.ContainsKey("geo-surveyor"), Is.True);
+        Assert.That(data.Techs.ContainsKey("tech-geo-surveyor"), Is.False);
         Assert.That(info.ComponentDesigns.ContainsKey(GeoDesignId), Is.True, GeoDesignId);
-        // Scaffolding: mount the Mk1 on the starting Starship. The early-tech ship does not
-        // carry a surveyor, and the template is not in StartingItems, so this is a test-only fit.
-        ship.AddComponent(new ComponentInstance(info.ComponentDesigns[GeoDesignId]));
-        Assert.That(ship.HasDataBlob<GeoSurveyAbilityDB>(), Is.True,
-            "AddComponent should install GeoSurveyAtb (GeoSurveyAtb.OnComponentInstallation).");
+        Assert.That(ship.HasDataBlob<GeoSurveyAbilityDB>(), Is.True, "Starship should already mount the Mk0 surveyor");
+        Assert.That(ship.GetDataBlob<GeoSurveyAbilityDB>().Speed, Is.EqualTo(3u));
 
         var survey = translator.Translate(faction, ship, new GeoSurveyCommand(ship.Id, luna.Id));
         if (!survey.Accepted)
@@ -98,9 +66,9 @@ public class EarlyTechLunaColonyTests
         }
         Assert.That(survey.Accepted, Is.True, "GeoSurveyCommand failed: " + survey.RejectionReason);
 
-        // Mk1 Survey Speed is 1; Luna is 250 points; ticks are daily (GeoSurveyOrder.Execute).
-        // Leave headroom for travel from Earth and a late first survey tick.
-        const int maxDays = 400;
+        // Mk0 Survey Speed is 3; Luna is 250 points; ticks are daily (GeoSurveyOrder.Execute) so
+        // about 84 survey days, plus travel from Earth.
+        const int maxDays = 200;
         var start = game.TimePulse.GameGlobalDateTime;
         while (!luna.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(faction.Id)
                && game.TimePulse.GameGlobalDateTime < start + TimeSpan.FromDays(maxDays))
