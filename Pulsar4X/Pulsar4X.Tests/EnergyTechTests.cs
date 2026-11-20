@@ -161,6 +161,8 @@ public class EnergyTechTests
         var (_, faction) = StartGameLikeTheMenu(EarlyTech);
         var data = faction.GetDataBlob<FactionInfoDB>().Data;
 
+        data.IncrementTechLevel("tech-electrical-engineering");
+        data.IncrementTechLevel("tech-industry-basics");
         foreach (var id in new[] { EnergyTech.ThermalEfficiency, EnergyTech.GridDistribution,
                      EnergyTech.IndustrialEnergyEfficiency, EnergyTech.FuelCells })
             Assert.That(data.IsResearchable(id), Is.True, id);

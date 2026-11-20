@@ -381,14 +381,20 @@ public class EarlyTechStartTests
         }
 
         Assert.That(data.Techs.ContainsKey("tech-early-technology"), Is.False, "no gate node");
-        Assert.That(data.Techs["tech-conventional-engine"].Level, Is.EqualTo(1), "researched at the start");
-        Assert.That(data.IsResearchable("tech-mining-production"), Is.True, "open at the start, not researched");
-        Assert.That(data.Techs["tech-mining-production"].Level, Is.EqualTo(0));
-        Assert.That(data.IsResearchable("tech-nuclear-theory"), Is.True);
+        foreach (var id in new[]
+                 {
+                     "tech-conventional-engine", "tech-electrical-engineering", "tech-industry-basics",
+                     "tech-life-sciences", "tech-electromagnetic-sensors", "tech-nuclear-theory", "tech-gravitic-theory"
+                 })
+        {
+            Assert.That(data.IsResearchable(id), Is.True, id);
+            Assert.That(data.Techs[id].Level, Is.EqualTo(0), id);
+        }
+        Assert.That(data.Techs.ContainsKey("tech-mining-production"), Is.False, "Mining Production waits for Industrial Base");
+        Assert.That(data.Techs.ContainsKey("tech-geo-surveyor"), Is.False, "Geological Surveyor waits for Electromagnetic Sensors");
         Assert.That(data.Techs.ContainsKey("tech-early-nuclear-power"), Is.False, "Nuclear Power waits for Nuclear Theory");
         Assert.That(data.Techs.ContainsKey("tech-early-warp-drive"), Is.False);
         Assert.That(data.Techs.ContainsKey("tech-early-directed-energy"), Is.False);
-        Assert.That(data.IsResearchable("tech-geo-surveyor"), Is.True);
     }
 
     [Test]
@@ -401,6 +407,11 @@ public class EarlyTechStartTests
         Assert.That(data.ComponentTemplates.ContainsKey("ship-construction"), Is.False);
         Assert.That(data.LockedComponentTemplates.ContainsKey("ship-construction"), Is.True);
         Assert.That(info.ComponentDesigns.ContainsKey("default-design-ship-construction"), Is.False);
+        Assert.That(data.Techs.ContainsKey("tech-construction-bay"), Is.False, "Construction Bay waits for Industrial Base and Construction Automation");
+
+        data.IncrementTechLevel("tech-industry-basics");
+        data.IncrementTechLevel("tech-construction-automation");
+        data.IncrementTechLevel("tech-construction-automation");
         Assert.That(data.IsResearchable("tech-construction-bay"), Is.True);
         Assert.That(data.Techs["tech-construction-bay"].Level, Is.EqualTo(0));
 
@@ -753,6 +764,7 @@ public class EarlyTechStartTests
         var data = faction.GetDataBlob<FactionInfoDB>().Data;
         var tech = faction.GetDataBlob<FactionTechDB>();
 
+        data.IncrementTechLevel("tech-life-sciences");
         Assert.That(data.Techs["tech-infra-gravity-min-extension"].Level, Is.EqualTo(0));
         Assert.That(data.Techs.ContainsKey("tech-infra-pressure-min-extension"), Is.False);
 
@@ -788,6 +800,7 @@ public class EarlyTechStartTests
         var data = info.Data;
         var techDb = faction.GetDataBlob<FactionTechDB>();
 
+        data.IncrementTechLevel("tech-life-sciences");
         var gravityTech = data.Techs["tech-infra-gravity-min-extension"];
         Assert.That(gravityTech.MaxLevel, Is.EqualTo(1));
         Assert.That(gravityTech.Level, Is.EqualTo(0));

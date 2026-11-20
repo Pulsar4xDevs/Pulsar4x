@@ -261,7 +261,7 @@
           "DescriptionFormula": "'Each point in speed provides one survey point per hour'",
           "GuiHint": "GuiSelectionMaxMinInt",
           "DataDict": {},
-          "MaxFormula": "10",
+          "MaxFormula": "10 * TechData('tech-geo-surveyor')",
           "MinFormula": "1",
           "StepFormula": "1",
           "PropertyFormula": "1"

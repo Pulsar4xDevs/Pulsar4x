@@ -206,22 +206,32 @@ public class TechTreeFoundationTests
         foreach (var t in store.Techs.Values)
             Assert.That(t.Description, Is.Not.Empty, t.UniqueID);
 
-        var researched = new[] { "tech-electrical-engineering", "tech-life-sciences", "tech-electromagnetic-sensors" };
-        foreach (var (scenario, colony, industryBaseResearched) in new[]
+        var foundations = new[]
+        {
+            "tech-conventional-engine", "tech-electrical-engineering", "tech-industry-basics",
+            "tech-life-sciences", "tech-electromagnetic-sensors", "tech-nuclear-theory", "tech-gravitic-theory"
+        };
+        var researchedOnWarp = new[] { "tech-electrical-engineering", "tech-life-sciences", "tech-electromagnetic-sensors", "tech-conventional-engine" };
+        foreach (var (scenario, colony, warpStart) in new[]
                  { ("warp-tech-start", "colony-earth", true), ("early-tech", "colony-early-earth", false) })
         {
             var colonies = JArray.Parse(System.IO.File.ReadAllText($"Data/scenarios/{scenario}/colonies.json")).Select(c => c["Payload"] ?? c);
             var payload = colonies.Single(c => (string?)c["UniqueID"] == colony);
             var items = payload["StartingItems"]!.Select(t => (string?)t).ToList();
             var open = payload["StartingResearchable"]!.Select(t => (string?)t).ToList();
-            Assert.That(items, Is.SupersetOf(researched), scenario);
-            Assert.That(items, Does.Contain("tech-conventional-engine"), scenario);
-            // The early start keeps the academy techs shut, so its Industrial Base is open rather than researched.
-            Assert.That(items.Contains("tech-industry-basics"), Is.EqualTo(industryBaseResearched), scenario);
-            Assert.That(open.Contains("tech-industry-basics"), Is.EqualTo(!industryBaseResearched), scenario);
-            // Gravitic Theory: researched with the surveyor in the warp start, only open in the early start.
-            Assert.That(items.Contains("tech-gravitic-theory"), Is.EqualTo(industryBaseResearched), scenario);
-            Assert.That(open.Contains("tech-gravitic-theory"), Is.EqualTo(!industryBaseResearched), scenario);
+            if (warpStart)
+            {
+                Assert.That(items, Is.SupersetOf(researchedOnWarp), scenario);
+                Assert.That(items, Does.Contain("tech-industry-basics"), scenario);
+                Assert.That(items, Does.Contain("tech-gravitic-theory"), scenario);
+                Assert.That(open, Does.Not.Contain("tech-industry-basics"), scenario);
+                Assert.That(open, Does.Not.Contain("tech-gravitic-theory"), scenario);
+            }
+            else
+            {
+                Assert.That(items.Where(id => id != null && id.StartsWith("tech-")), Is.Empty, scenario);
+                Assert.That(open, Is.EquivalentTo(foundations), scenario);
+            }
             Assert.That(open.Contains("tech-spacetime-metric-theory"), Is.False, scenario);
         }
     }

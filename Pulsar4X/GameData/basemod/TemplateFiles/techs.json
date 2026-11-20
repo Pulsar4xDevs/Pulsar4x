@@ -778,11 +778,11 @@
     "Payload": {
       "UniqueID": "tech-geo-surveyor",
       "Name": "Geological Surveyor",
-      "Description": "Geological surveys of system bodies. Unlocks the Geological Surveyor. Needs Electromagnetic Sensors.",
+      "Description": "Geological surveys of system bodies. Unlocks the Geological Surveyor; further levels raise its maximum survey speed. Needs Electromagnetic Sensors.",
       "Category": "tech-category-designs",
-      "MaxLevel": 1,
-      "DataFormula": "(1 + [Level]) * 5000",
-      "CostFormula": "(1 + [Level]) * 500",
+      "MaxLevel": 5,
+      "DataFormula": "Max(1, [Level])",
+      "CostFormula": "Pow(1 + [Level], 2) * 100",
       "Unlocks": {
         "1": [
           "geo-surveyor"

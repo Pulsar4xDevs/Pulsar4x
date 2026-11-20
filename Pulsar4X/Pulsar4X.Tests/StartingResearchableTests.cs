@@ -26,12 +26,32 @@ public class StartingResearchableTests
         Assert.That(created, Is.Not.Null);
         var data = created!.Value.faction.GetDataBlob<FactionInfoDB>().Data;
 
-        Assert.That(data.Techs["tech-conventional-engine"].Level, Is.EqualTo(1), "a StartingItems tech is researched");
-        foreach (var open in new[] { "tech-mining-production", "tech-nuclear-theory", "tech-conductors" })
+        var foundations = new[]
         {
-            Assert.That(data.IsResearchable(open), Is.True, open + " is open");
-            Assert.That(data.Techs[open].Level, Is.EqualTo(0), open + " is not researched");
-            Assert.That(data.Techs[open].ResearchCost, Is.GreaterThan(0), open);
+            "tech-conventional-engine", "tech-electrical-engineering", "tech-industry-basics",
+            "tech-life-sciences", "tech-electromagnetic-sensors", "tech-nuclear-theory", "tech-gravitic-theory"
+        };
+        if (scenario == "Pulsar4x.Scenario.EarlyTech")
+        {
+            foreach (var id in foundations)
+            {
+                Assert.That(data.IsResearchable(id), Is.True, id + " is open");
+                Assert.That(data.Techs[id].Level, Is.EqualTo(0), id + " is not researched");
+                Assert.That(data.Techs[id].ResearchCost, Is.GreaterThan(0), id);
+            }
+            Assert.That(data.Techs.ContainsKey("tech-mining-production"), Is.False, "Mining Production waits for Industrial Base");
+            Assert.That(data.Techs.ContainsKey("tech-conductors"), Is.False, "Conductors waits for Electrical Engineering");
+            Assert.That(data.Techs.ContainsKey("tech-geo-surveyor"), Is.False, "Geological Surveyor waits for Electromagnetic Sensors");
+        }
+        else
+        {
+            Assert.That(data.Techs["tech-conventional-engine"].Level, Is.EqualTo(1), "a StartingItems tech is researched");
+            foreach (var open in new[] { "tech-mining-production", "tech-nuclear-theory", "tech-conductors" })
+            {
+                Assert.That(data.IsResearchable(open), Is.True, open + " is open");
+                Assert.That(data.Techs[open].Level, Is.EqualTo(0), open + " is not researched");
+                Assert.That(data.Techs[open].ResearchCost, Is.GreaterThan(0), open);
+            }
         }
         Assert.That(data.Techs.Keys.Concat(data.LockedTechs.Keys), Has.None.EqualTo("tech-modern-technology").And.None.EqualTo("tech-early-technology"));
         // What was only reachable through a deeper tech is still shut.
