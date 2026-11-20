@@ -215,6 +215,7 @@
         "fuel-storage",
         "battery-storage",
         "passive-sensor",
+        "geo-surveyor",
         "battery-bank",
         "conventional-engine",
         "refining",
@@ -328,7 +329,8 @@
         "default-design-logistics-office-site",
         "default-design-infrastructure-site",
         "default-design-warehouse-prefab",
-        "default-design-naval-academy"
+        "default-design-naval-academy",
+        "default-design-geo-surveyor-early"
       ],
       "ShipDesigns": [
         "early-ship-design-starship",

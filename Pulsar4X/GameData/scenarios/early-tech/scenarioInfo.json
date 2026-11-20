@@ -14,6 +14,7 @@
   "DataFiles": [
     "colonies.json",
     "ships.json",
+    "componentDesigns.json",
     "npc-company-kits.json"
   ],
   "DefaultStart": {
