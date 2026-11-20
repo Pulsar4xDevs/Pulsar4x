@@ -81,9 +81,10 @@ public static class WarehouseTabDisplay
     {
         ImGui.PushID(row.CargoId);
         ImGui.TextUnformatted(row.Name);
-        ImGui.SameLine();
+        ImGui.SameLine(300);
         ImGui.TextUnformatted(WarehouseStockUi.StockQueuedText(row.Stock, row.Queued));
-
+        ImGui.SameLine(550);
+        
         int ceiling = WarehouseStockUi.SliderCeiling(row.Stock, row.Queued, row.Min, row.Max);
         long? min = row.Min;
         long? max = row.Max;
