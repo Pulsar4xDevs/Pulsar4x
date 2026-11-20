@@ -169,7 +169,10 @@ namespace Pulsar4X.Client
             ImGui.PushID(entity.Id);
             DrawToolbar(entity, market, ui, uiState, listed);
             if (market.CanEdit && entity.Kind == BodyKind.Colony)
+            {
+                DrawAutoPricingBanner(entity);
                 DrawSupplyStatus(entity);
+            }
 
             // Narrow (the entity card, or a small window): the goods list sits above the detail at full width.
             if (compact || ImGui.GetContentRegionAvail().X < 600f)
@@ -256,6 +259,19 @@ namespace Pulsar4X.Client
             ImGui.SameLine();
             if (ImGui.Button("Stockpile"))
                 uiState.GameClient?.SubmitCommandAsync(new SupplyLocalCommand(entity.Id, SupplyMode.Stockpile));
+        }
+
+        static void DrawAutoPricingBanner(EntitySnapshot entity)
+        {
+            var cargo = entity.GetView<CargoStorageView>();
+            bool managed = cargo != null
+                ? cargo.MarketSeatFilled
+                : MarketSeatUi.IsSeated(entity.GetView<ColonyView>()?.MarketHeadId ?? -1);
+            if (WarehouseStockUi.AutoPricingHint(managed) is not { } hint)
+                return;
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.TextUnformatted(hint);
+            ImGui.PopStyleColor();
         }
 
         static void DrawSupplyStatus(EntitySnapshot entity)

@@ -232,6 +232,7 @@ namespace Pulsar4X.Tests
                 ForeignEntities.ColonyTabs.Summary
                 | ForeignEntities.ColonyTabs.Production
                 | ForeignEntities.ColonyTabs.Construction
+                | ForeignEntities.ColonyTabs.Warehouse
                 | ForeignEntities.ColonyTabs.Market
                 | ForeignEntities.ColonyTabs.Shipping
                 | ForeignEntities.ColonyTabs.Log
@@ -282,6 +283,7 @@ namespace Pulsar4X.Tests
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Power));
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Workforce));
             Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Staffing));
+            Assert.IsFalse(ForeignEntities.ColonyTabsFor(foreignFull).HasFlag(ForeignEntities.ColonyTabs.Warehouse));
 
             Assert.AreEqual(foreignTabs, ForeignEntities.ColonyTabsFor(Colony(8, OwnerRelation.Neutral, 8, 6, "Luna Concord")));
             Assert.AreEqual(foreignTabs, ForeignEntities.ColonyTabsFor(Colony(9, OwnerRelation.Hostile, 3, 3, "Raid Camp")));

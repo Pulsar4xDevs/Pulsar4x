@@ -28,6 +28,8 @@ namespace Pulsar4X.Client
         // The colony whose administrator chair the assign modal is editing.
         private int? _administratorChooserColonyId = null;
         private string? _industrySeatRefusal;
+        private string? _marketSeatRefusal;
+        private string? _warehouseRefusal;
 
         internal static ColonyManagementWindow GetInstance()
         {
@@ -125,6 +127,7 @@ namespace Pulsar4X.Client
 
                     DisplayAdministratorChooser(galaxy);
                     IndustrySeatDisplay.DrawChooser(galaxy, _uiState, ref _industrySeatRefusal);
+                    MarketSeatDisplay.DrawChooser(galaxy, _uiState, ref _marketSeatRefusal);
             
                 }
             }
@@ -236,12 +239,32 @@ namespace Pulsar4X.Client
                     _constructionDisplay.Display(selectedColony.Id, selectedColony.GetView<ConstructionView>(), _uiState);
                     ImGui.EndTabItem();
                 }
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Warehouse) && ImGui.BeginTabItem("Warehouse"))
+                {
+                    if (ImGui.BeginChild("ColonyWarehouseTab"))
+                    {
+                        WarehouseTabDisplay.Display(
+                            selectedColony.Id,
+                            selectedColony.GetView<CargoStorageView>(),
+                            selectedColony.GetView<MarketView>()?.Addable,
+                            _uiState,
+                            ref _warehouseRefusal);
+                    }
+                    ImGui.EndChild();
+                    ImGui.EndTabItem();
+                }
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Market) && ImGui.BeginTabItem("Market"))
                 {
                     var marketView = selectedColony.GetView<MarketView>();
                     float bottomReserve = 0f;
                     if (ForeignEntities.IsReadOnly(selectedColony))
                         bottomReserve = MarketBarsDisplay.BottomReserve(marketView, selectedSystem);
+                    if (selectedColony.GetView<ColonyView>() is { } marketColony
+                        && _uiState.GameClient?.Galaxy is { } marketGalaxy)
+                    {
+                        MarketSeatDisplay.DrawMarket(
+                            selectedColony.Id, marketColony, marketGalaxy, _uiState, ref _marketSeatRefusal);
+                    }
                     MarketTabDisplay.Display(
                         selectedColony,
                         marketView,
@@ -910,10 +933,17 @@ namespace Pulsar4X.Client
                 if (colonyView != null)
                 {
                     if (ImGui.CollapsingHeader("Industry", ImGuiTreeNodeFlags.DefaultOpen)
-                        && _uiState.GameClient?.Galaxy is { } galaxy)
+                        && _uiState.GameClient?.Galaxy is { } industryGalaxy)
                     {
                         IndustrySeatDisplay.DrawStaffing(
-                            colony.Id, colonyView, galaxy, _uiState, ref _industrySeatRefusal);
+                            colony.Id, colonyView, industryGalaxy, _uiState, ref _industrySeatRefusal);
+                    }
+
+                    if (ImGui.CollapsingHeader("Market", ImGuiTreeNodeFlags.DefaultOpen)
+                        && _uiState.GameClient?.Galaxy is { } marketGalaxy)
+                    {
+                        MarketSeatDisplay.DrawStaffing(
+                            colony.Id, colonyView, marketGalaxy, _uiState, ref _marketSeatRefusal);
                     }
 
                     if (ImGui.CollapsingHeader("Crew pool", ImGuiTreeNodeFlags.DefaultOpen))

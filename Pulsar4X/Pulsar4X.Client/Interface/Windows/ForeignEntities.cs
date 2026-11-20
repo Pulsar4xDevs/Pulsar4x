@@ -176,10 +176,11 @@ namespace Pulsar4X.Client
             Power = 512,
             Workforce = 1024,
             Staffing = 2048,
+            Warehouse = 4096,
         }
 
         /// <summary>
-        /// Owned: Summary|Production|Construction|Market|Shipping|Log|Staffing, plus Mining when ColonyMiningView is present,
+        /// Owned: Summary|Production|Construction|Warehouse|Market|Shipping|Log|Staffing, plus Mining when ColonyMiningView is present,
         /// Power when ColonyPowerView is present, Workforce when WorkforceView is present.
         /// Staffing is always present for an owned colony, even with no naval academy or recruitment view.
         /// NavalAcademy and Recruitment remain in the enum but are no longer set; those sections live on the Staffing tab.
@@ -191,7 +192,7 @@ namespace Pulsar4X.Client
                 return ColonyTabs.Summary | ColonyTabs.Market | ColonyTabs.Shipping;
 
             var tabs = ColonyTabs.Summary | ColonyTabs.Production | ColonyTabs.Construction
-                | ColonyTabs.Market | ColonyTabs.Shipping | ColonyTabs.Log | ColonyTabs.Staffing;
+                | ColonyTabs.Warehouse | ColonyTabs.Market | ColonyTabs.Shipping | ColonyTabs.Log | ColonyTabs.Staffing;
             if (colony.HasView<ColonyMiningView>())
                 tabs |= ColonyTabs.Mining;
             if (colony.HasView<ColonyPowerView>())
